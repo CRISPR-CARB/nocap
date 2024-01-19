@@ -11,6 +11,11 @@ recursive-include docs/source *.py
 recursive-include docs/source *.rst
 recursive-include docs/source *.png
 
+recursive-include notebooks *.csv
+recursive-include notebooks *.dag
+recursive-include notebooks *.ipynb
+recursive-include notebooks *.py
+
 global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store *.gpickle
 
 include README.md LICENSE
