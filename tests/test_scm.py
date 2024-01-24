@@ -60,7 +60,8 @@ def test_with_empty_input():
 
 def test_with_complex_graph_structure():
     """Test conversion of daggity to dot format with a complex graph structure."""
-    daggity_string = "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> D; D -> A; E -> F; G; }"
+    daggity_string = (
+        "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> D; D -> A; E -> F; G; }"
+    )
     expected_dot = 'digraph { observed="no", A -> B; B -> C; C -> D; D -> A; E -> F; G; }'
     assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
-
