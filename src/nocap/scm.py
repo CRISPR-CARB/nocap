@@ -23,4 +23,5 @@ def dagitty_to_dot(daggity_string: str) -> str:
     graph = re.sub(
         r'bb="[\d.,]+";?', "", graph
     )  # Remove bb line with four numbers and optional trailing semicolon
+    graph = re.sub(r"\s+", " ", graph).strip()  # Trim all extra spaces
     return graph
