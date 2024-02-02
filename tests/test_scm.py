@@ -74,6 +74,7 @@ def test_read_dag_file_success():
     actual = read_dag_file(fpath)
     assert expected == actual
 
+
 def test_read_dag_file_IOerror():
     """Test reading in a .dag file with an invalid file path."""
     fpath = "./tests/non_existant_graph.dag"

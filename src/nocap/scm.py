@@ -1,14 +1,14 @@
 """Structural causal models."""
-import re
 import os
-import pydot
+import re
+
 import networkx as nx
+import pydot
 import sympy as sy
 from networkx.drawing.nx_pydot import from_pydot
-
-
 from y0.dsl import Variable
 from y0.graph import NxMixedGraph
+
 
 def dagitty_to_dot(daggity_string: str) -> str:
     """Convert from dagitty format to DOT format.
@@ -35,7 +35,7 @@ def dagitty_to_dot(daggity_string: str) -> str:
     return graph
 
 
-def read_dag_file(file_path:str) -> str | None:
+def read_dag_file(file_path: str) -> str | None:
     """Reads the contents of a .dag file and returns it as a multiline string."""
     try:
         with open(file_path, "r") as file:
@@ -43,8 +43,9 @@ def read_dag_file(file_path:str) -> str | None:
     except IOError as e:
         print(f"Error reading file: {e}")
         return None
-    
-def dagitty_to_mixed_graph(dagitty_input:str, str_var_name:bool=False) -> NxMixedGraph:
+
+
+def dagitty_to_mixed_graph(dagitty_input: str, str_var_name: bool = False) -> NxMixedGraph:
     """Converts a string in dagitty (.dag) to NxMixedGraph."""
 
     # Check if the input is a file path
@@ -131,25 +132,25 @@ def generate_LSCM_from_mixed_graph(G: NxMixedGraph) -> dict[sy.Symbol, sy.Expr]:
     return equations
 
 
-def get_symbols_from_bi_edges(G:NxMixedGraph) -> dict[tuple[Variable, Variable], sy.Symbol]:
+def get_symbols_from_bi_edges(G: NxMixedGraph) -> dict[tuple[Variable, Variable], sy.Symbol]:
     """Gets symbols from bidirectional edges in graph."""
     symbol_dict = {}
     for u, v in G.undirected.edges():
-        u, v = sorted([str(u), str(v)]) 
+        u, v = sorted([str(u), str(v)])
         symbol_dict[(u, v)] = sy.Symbol(f"gamma_{u}_<->{v}")
     return symbol_dict
 
     # return {(u,v):sy.Symbol(f'gamma_{u}_<->{v}') if str(u)>str(v) else sy.Symbol(f'gamma_{u}_<->{v}') for u,v in G.undirected.edges()}
 
 
-def get_symbols_from_di_edges(G:NxMixedGraph) -> dict[tuple[Variable, Variable], sy.Symbol]:
+def get_symbols_from_di_edges(G: NxMixedGraph) -> dict[tuple[Variable, Variable], sy.Symbol]:
     """Gets symbols from directional edges in graph."""
     # for u,v in G.directed.edges():
     #     sy.Symbol(f"beta_{u.name}_->{v.name}")
     return {(u, v): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in G.directed.edges()}
 
 
-def get_symbols_from_nodes(G:NxMixedGraph) -> dict[Variable, sy.Symbol]:
+def get_symbols_from_nodes(G: NxMixedGraph) -> dict[Variable, sy.Symbol]:
     """Gets symbols from nodes in graph."""
     return {node: sy.Symbol(f"epsilon_{node.name}") for node in G.nodes()}
 
