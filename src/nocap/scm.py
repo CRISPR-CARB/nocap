@@ -147,22 +147,22 @@ def get_symbols_from_di_edges(G: NxMixedGraph) -> dict[tuple[Variable, Variable]
     """Gets symbols from directional edges in graph."""
     # for u,v in G.directed.edges():
     #     sy.Symbol(f"beta_{u.name}_->{v.name}")
-    return {(u, v): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in G.directed.edges()}
+    return {(str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in G.directed.edges()}
 
 
 def get_symbols_from_nodes(G: NxMixedGraph) -> dict[Variable, sy.Symbol]:
     """Gets symbols from nodes in graph."""
-    return {node: sy.Symbol(f"epsilon_{node.name}") for node in G.nodes()}
+    return {str(node): sy.Symbol(f"epsilon_{node.name}") for node in G.nodes()}
 
 
 def evaluate_LSCM(
     LSCM: dict[sy.Symbol, sy.Expr], params: dict[sy.Symbol, float]
-) -> dict[sy.Symbol, sy.core.numbers.Rational]:
+) -> dict[sy.Symbol, sy.core.numbers.Float]:
     """Given an LSCM, assign values to the parameters (i.e. beta, epsilon, gamma terms), and return variable assignments dictionary."""
     # solve set of simulateous linear equations in sympy
     eqns = [sy.Eq(lhs.subs(params), rhs.subs(params)) for lhs, rhs in LSCM.items()]
-    print(eqns)
-    return sy.solve(eqns, list(LSCM))
+    #print(eqns)
+    return sy.solve(eqns, list(LSCM), rational=False)
 
 
 # todo: LSCM to graph

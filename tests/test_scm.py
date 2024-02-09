@@ -18,6 +18,7 @@ import networkx as nx
 from y0.graph import NxMixedGraph
 import sympy as sy
 import numpy as np
+import y0
 
 # TODO: use fixtures!
 
@@ -96,8 +97,8 @@ def test_read_dag_file_success():
 def test_read_dag_file_IOerror():
     """Test reading in a .dag file with an invalid file path."""
     fpath = "./tests/non_existant_graph.dag"
-    expected = None
-    actual = read_dag_file(fpath)
+    expected = None   # should return None w/ file IO error
+    actual = read_dag_file(fpath) 
     assert expected == actual
 
 # TODO: update test to use fixture
@@ -190,6 +191,7 @@ def test_get_symbols_from_bi_edges():
         ('A', 'B'): sy.Symbol('gamma_A_<->B'),
     }
     actual_symbols = get_symbols_from_bi_edges(G)
+    print(type(list(actual_symbols.keys())[0][0]))
     assert actual_symbols == expected_symbols
     
 
@@ -205,6 +207,7 @@ def test_get_symbols_from_di_edges():
         ("B", "C"): sy.Symbol("beta_B_->C"),
     }
     actual_symbols = get_symbols_from_di_edges(G)
+    print(type(list(actual_symbols.keys())[0][0]))
     assert actual_symbols == expected_symbols
 
 
@@ -242,14 +245,15 @@ def test_evaluate_LSCM():
     param_dict = {**epsilon_values, **beta_values, **gamma_values}
 
     expected_symbols = {
-        'A': sy.core.numbers.Rational(2.0),
-        'B': sy.core.numbers.Rational(4.0),
-        'C': sy.core.numbers.Rational(5.0),
+        sy.Symbol('A'): sy.core.numbers.Float(2.0),
+        sy.Symbol('B'): sy.core.numbers.Float(4.0),
+        sy.Symbol('C'): sy.core.numbers.Float(5.0),
     }
     actual_symbols = evaluate_LSCM(LSCM_dict, param_dict)
-    print(actual_symbols)
-    assert actual_symbols == expected_symbols
-
+    # Use a numerical tolerance for comparison
+    tolerance = 1e-9
+    for key in expected_symbols.keys():
+        assert abs(float(actual_symbols[key]) - float(expected_symbols[key])) < tolerance, f"Values for {key} are not equal within tolerance."
 
 def test_convert_to_latex():
     """Test that LSCM is correctly converted into latex."""
@@ -276,11 +280,17 @@ def test_convert_to_eqn_array_latex():
 
 def test_generate_synthetic_data_from_LSCM():
     """"""
-    # given a set of parameters, evaluate LSCM (with noise)
+    ### Use y0 function
+    # input LSCM and parameter values
+    # evaluate lscm
+    # compare expected to actual
     raise NotImplementedError
 
 
 def test_regress_LSCM():
     """"""
-    # single door criterion
+    ### Use y0 function
+    # input LSCM and synthetic data
+    # regress using single door criterion (from y0)
+    # compare parameter estimates to ground truth
     raise NotImplementedError
