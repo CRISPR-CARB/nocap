@@ -32,5 +32,7 @@ __all__ = [
     "get_symbols_from_nodes",
     "evaluate_LSCM",
     "convert_to_latex",
-    "convert_to_eqn_array_latex" "generate_synthetic_data_from_LSCM" "regress_LSCM",
+    "convert_to_eqn_array_latex",
+    "generate_synthetic_data_from_LSCM",
+    "regress_LSCM",
 ]

@@ -10,7 +10,7 @@ from y0.dsl import Variable
 from y0.graph import NxMixedGraph
 
 
-def dagitty_to_dot(daggity_string: str) -> str:
+def dagitty_to_dot(daggity_string: str | None) -> str:
     """Convert from dagitty format to DOT format.
 
     Modified from dowhy: https://www.pywhy.org/dowhy/v0.11.1/_modules/dowhy/utils/graph_operations.html#daggity_to_dot
@@ -19,35 +19,37 @@ def dagitty_to_dot(daggity_string: str) -> str:
     :param daggity_string: Output graph from Daggity site
     :returns: DOT string
     """
-    graph = re.sub(r"\n", "; ", daggity_string)
-    graph = re.sub(r"^dag ", "digraph ", graph)
-    graph = re.sub("{;", "{", graph)
-    graph = re.sub("};", "}", graph)
-    graph = re.sub("outcome,*,", "", graph)
-    graph = re.sub("adjusted,*", "", graph)
-    graph = re.sub("exposure,*", "", graph)
-    graph = re.sub("latent,*", 'observed="no",', graph)
-    graph = re.sub(",]", "]", graph)
-    graph = re.sub(
-        r'bb="[\d.,]+";?', "", graph
-    )  # Remove bb line with four numbers and optional trailing semicolon
-    graph = re.sub(r"\s+", " ", graph).strip()  # Trim all extra spaces
-    return graph
+    if type(daggity_string) == str:
+        graph = re.sub(r"\n", "; ", daggity_string)
+        graph = re.sub(r"^dag ", "digraph ", graph)
+        graph = re.sub("{;", "{", graph)
+        graph = re.sub("};", "}", graph)
+        graph = re.sub("outcome,*,", "", graph)
+        graph = re.sub("adjusted,*", "", graph)
+        graph = re.sub("exposure,*", "", graph)
+        graph = re.sub("latent,*", 'observed="no",', graph)
+        graph = re.sub(",]", "]", graph)
+        graph = re.sub(
+            r'bb="[\d.,]+";?', "", graph
+        )  # Remove bb line with four numbers and optional trailing semicolon
+        graph = re.sub(r"\s+", " ", graph).strip()  # Trim all extra spaces
+        return graph
+    else:
+        raise ValueError("Input was not a string.")
 
 
 def read_dag_file(file_path: str) -> str | None:
-    """Reads the contents of a .dag file and returns it as a multiline string."""
+    """Read the contents of a .dag file and returns it as a multiline string."""
     try:
         with open(file_path, "r") as file:
             return file.read()
-    except IOError as e:
-        print(f"Error reading file: {e}")
+    except IOError:
+        # print(f"Error reading file: {e}")
         return None
 
 
 def dagitty_to_mixed_graph(dagitty_input: str, str_var_name: bool = False) -> NxMixedGraph:
-    """Converts a string in dagitty (.dag) to NxMixedGraph."""
-
+    """Convert a string in dagitty (.dag) to NxMixedGraph."""
     # Check if the input is a file path
     if os.path.isfile(dagitty_input):
         dagitty_graph_str = read_dag_file(dagitty_input)
@@ -66,13 +68,12 @@ def dagitty_to_mixed_graph(dagitty_input: str, str_var_name: bool = False) -> Nx
         mixed_graph = NxMixedGraph.from_str_edges(
             directed=[(u, v) for u, v, d in nx_graph.edges]
         )  # convert from str to variable
-    assert isinstance(mixed_graph, NxMixedGraph)
+    assert isinstance(mixed_graph, NxMixedGraph)  # noqa: S101
     return mixed_graph
 
 
 def dagitty_to_digraph(dagitty_input: str) -> nx.DiGraph:
-    """Converts a string in dagitty (.dag) to NX DiGraph."""
-
+    """Convert a string in dagitty (.dag) to NX DiGraph."""
     # Check if the input is a file path
     if os.path.isfile(dagitty_input):
         dagitty_graph_str = read_dag_file(dagitty_input)
@@ -83,19 +84,19 @@ def dagitty_to_digraph(dagitty_input: str) -> nx.DiGraph:
     dot_graph_string = dagitty_to_dot(dagitty_graph_str)
     dot_graph = pydot.graph_from_dot_data(dot_graph_string)[0]
     nx_graph = from_pydot(dot_graph)
-    assert isinstance(nx_graph, nx.DiGraph)
+    assert isinstance(nx_graph, nx.DiGraph)  # noqa: S101
     return nx_graph
 
 
-def generate_LSCM_from_DAG(G: nx.DiGraph) -> dict[sy.Symbol, sy.Expr]:
-    """Generates a linear structural causal model from a directed acycle graph (networkx DAG)."""
-    assert nx.is_directed_acyclic_graph(G), "Not a DAG"  # check input DAG
+def generate_LSCM_from_DAG(graph: nx.DiGraph) -> dict[sy.Symbol, sy.Expr]:  # noqa: N802
+    """Generate a linear structural causal model from a directed acycle graph (networkx DAG)."""
+    assert nx.is_directed_acyclic_graph(graph), "Not a DAG"  # noqa: S101 # check input DAG
     equations = {}
-    sorted_nodes = list(nx.topological_sort(G))
+    sorted_nodes = list(nx.topological_sort(graph))
     for node in sorted_nodes:
         node_sym = sy.Symbol(node)
         expression_terms = []
-        parents = list(G.predecessors(node))
+        parents = list(graph.predecessors(node))
         for parent in parents:
             beta_sym = sy.Symbol(f"beta_{parent}_->{node}")
             parent_sym = sy.Symbol(f"{parent}")
@@ -107,15 +108,15 @@ def generate_LSCM_from_DAG(G: nx.DiGraph) -> dict[sy.Symbol, sy.Expr]:
     return equations
 
 
-def generate_LSCM_from_mixed_graph(G: NxMixedGraph) -> dict[sy.Symbol, sy.Expr]:
-    """Generates a linear structural causal model from a mixed directed and bidirected graph (y0 NxMixedGraph)."""
-    assert nx.is_directed_acyclic_graph(G.directed), "Not a DAG"  # check input DAG
+def generate_LSCM_from_mixed_graph(graph: NxMixedGraph) -> dict[sy.Symbol, sy.Expr]:  # noqa: N802
+    """Generate a linear structural causal model from a mixed directed and bidirected graph (y0 NxMixedGraph)."""
+    assert nx.is_directed_acyclic_graph(graph.directed), "Not a DAG"  # noqa: S101 # check input DAG
     equations = {}
-    sorted_nodes = list(nx.topological_sort(G.directed))
+    sorted_nodes = list(nx.topological_sort(graph.directed))
     for node in sorted_nodes:
         node_sym = sy.Symbol(node.name)
         expression_terms = []
-        parents = list(G.directed.predecessors(node))
+        parents = list(graph.directed.predecessors(node))
         for parent in parents:
             beta_sym = sy.Symbol(f"beta_{parent.name}_->{node.name}")
             parent_sym = sy.Symbol(f"{parent.name}")
@@ -123,7 +124,7 @@ def generate_LSCM_from_mixed_graph(G: NxMixedGraph) -> dict[sy.Symbol, sy.Expr]:
         epsilon_sym = sy.Symbol(f"epsilon_{node.name}")
         expression_terms.append(epsilon_sym)
         # get bidirected edges
-        for u, v in G.undirected.edges(node):
+        for u, v in graph.undirected.edges(node):
             u, v = sorted([u, v])
             temp_gamma_sym = sy.Symbol(f"gamma_{u}_<->{v}")
             expression_terms.append(temp_gamma_sym)
@@ -132,36 +133,36 @@ def generate_LSCM_from_mixed_graph(G: NxMixedGraph) -> dict[sy.Symbol, sy.Expr]:
     return equations
 
 
-def get_symbols_from_bi_edges(G: NxMixedGraph) -> dict[tuple[Variable, Variable], sy.Symbol]:
-    """Gets symbols from bidirectional edges in graph."""
+def get_symbols_from_bi_edges(graph: NxMixedGraph) -> dict[tuple[Variable, Variable], sy.Symbol]:
+    """Get symbols from bidirectional edges in graph."""
     symbol_dict = {}
-    for u, v in G.undirected.edges():
+    for u, v in graph.undirected.edges():
         u, v = sorted([str(u), str(v)])
         symbol_dict[(u, v)] = sy.Symbol(f"gamma_{u}_<->{v}")
     return symbol_dict
 
-    # return {(u,v):sy.Symbol(f'gamma_{u}_<->{v}') if str(u)>str(v) else sy.Symbol(f'gamma_{u}_<->{v}') for u,v in G.undirected.edges()}
 
-
-def get_symbols_from_di_edges(G: NxMixedGraph) -> dict[tuple[Variable, Variable], sy.Symbol]:
-    """Gets symbols from directional edges in graph."""
+def get_symbols_from_di_edges(graph: NxMixedGraph) -> dict[tuple[Variable, Variable], sy.Symbol]:
+    """Get symbols from directional edges in graph."""
     # for u,v in G.directed.edges():
     #     sy.Symbol(f"beta_{u.name}_->{v.name}")
-    return {(str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in G.directed.edges()}
+    return {
+        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in graph.directed.edges()
+    }
 
 
-def get_symbols_from_nodes(G: NxMixedGraph) -> dict[Variable, sy.Symbol]:
-    """Gets symbols from nodes in graph."""
-    return {str(node): sy.Symbol(f"epsilon_{node.name}") for node in G.nodes()}
+def get_symbols_from_nodes(graph: NxMixedGraph) -> dict[Variable, sy.Symbol]:
+    """Get symbols from nodes in graph."""
+    return {str(node): sy.Symbol(f"epsilon_{node.name}") for node in graph.nodes()}
 
 
-def evaluate_LSCM(
+def evaluate_LSCM(  # noqa: N802
     LSCM: dict[sy.Symbol, sy.Expr], params: dict[sy.Symbol, float]
 ) -> dict[sy.Symbol, sy.core.numbers.Float]:
-    """Given an LSCM, assign values to the parameters (i.e. beta, epsilon, gamma terms), and return variable assignments dictionary."""
+    """Given an LSCM, assign values to the parameters (i.e. beta, epsilon, gamma terms),
+    and return variable assignments dictionary."""
     # solve set of simulateous linear equations in sympy
     eqns = [sy.Eq(lhs.subs(params), rhs.subs(params)) for lhs, rhs in LSCM.items()]
-    #print(eqns)
     return sy.solve(eqns, list(LSCM), rational=False)
 
 
@@ -169,7 +170,7 @@ def evaluate_LSCM(
 
 
 def convert_to_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
-    """Converts equations into latex equations."""
+    """Convert equations into latex equations."""
     latex_equations = []
     for lhs, rhs in equations_dict.items():
         equation_latex = r"$$" + sy.latex(lhs) + " = " + sy.latex(rhs) + r"$$"
@@ -179,7 +180,7 @@ def convert_to_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
 
 
 def convert_to_eqn_array_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
-    """Converts equations into latex equation array."""
+    """Convert equations into latex equation array."""
     latex_equations = []
     for lhs, rhs in equations_dict.items():
         equation_latex = sy.latex(lhs) + " &=& " + sy.latex(rhs)
@@ -189,10 +190,10 @@ def convert_to_eqn_array_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
 
 
 def generate_synthetic_data_from_LSCM():
-    """"""
+    """Generate data given an LSCM, parameter values, and number of samples."""
     raise NotImplementedError
 
 
 def regress_LSCM():
-    """"""
+    """Regress on LSCM model using data and the single door criteria."""
     raise NotImplementedError
