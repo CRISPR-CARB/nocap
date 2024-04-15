@@ -1,137 +1,137 @@
-#/Users/geor228/miniconda3/envs/NOCAP_env/lib/python3.11/site-packages/ipykernel_launcher.py --f=/Users/geor228/Library/Jupyter/runtime/kernel-v2-60713PMQuhIWKt5bQ.json
-# GMT Sat Apr 13 04:37:57 2024
+#/Users/geor228/miniconda3/envs/NOCAP_env/lib/python3.11/site-packages/ipykernel_launcher.py --f=/Users/geor228/Library/Jupyter/runtime/kernel-v2-1276VqXX3sE7sYXR.json
+# GMT Mon Apr 15 20:03:13 2024
 # 
-PhoP FadL GadE GadW MgrR PhoP RstA YdeO
-SoxS Fur MarA MarR MicF Rob SoxS
-FliZ CsgD FlhC FlhD GadE MlrA
-FabR FabA FabB
-Fis Crp CspA DnaA FadA FadB Fis GadX GlnG Hns HupA HupB MarA MarR
-MatA FlhC FlhD FliA FliZ MatA
-OmrB CsgD FlhC FlhD OmpR
-BtsR CsgD PdhR
-RcsB CsgD FlhC FlhD GadX GadY LeuO RcsA RpoE RprA YdeO
-FadB
-SgrS AdiY
-ArrS GadE
-MqsA CsgD MqsA RpoS
-RcdA CsgD RcdA
-ArcA AceA AceB AceK ArcA ArcZ ArgR FadA FadB FadD FadE FadH FadI FadJ FadL Fnr GadE GadX GcvB LldR MicF RpoS RstA
-FlhC AceB FliA FliZ IclR
 MlrA CsgD
-Lrp AceB ArgR DeaD FadI FadL FliA GadW GadY LeuO LrhA Lrp MicF Nac QseB RpoN SlyA SoxS StpA
-RcsA CsgD FlhC FlhD RcsA
-Rob FadA FadB FadD FadL MarA MarR MicF Rob
-MarA MarA MarR MicF Rob
-HipA HipA HipB
-DsrA Hns Lrp RpoS
-SoxR SoxR SoxS
-ArgP ArgP DnaA
-CytR CytR RpoH
-PtrR AcrR
-Hns AdiY BglJ BolA CsgD CspA EvgA FlhC FlhD FliA FliZ GadE GadW GadX HdfR Hns LeuO Lrp MicF RcsA RcsB StpA YdeO YjjQ
-CyaR RpoS
-FadL
-IhfA AceA AceB AceK CsgD Fis FlhC FlhD FliA FliZ Fnr HipA HipB IhfA IhfB MicF OmpR RpoE RpoH UspA
-NsrR FliA FliZ IhfA Lrp RybB
 LeuO BglJ DsrA LeuO YjjQ
-RpoE AsflhD CyaR FadM MatA MicA RpoD RpoE RpoH RpoN RutR RybB
-HupA MicF
-TorR GadE GadX RpoS TorR
-GadY GadW GadX
-SdiA GadW GadY
-AccD AccA AccD
-FadI
-HipB FadH HipA HipB
-FabG
-FabB
-AsflhD FlhD
-RstA CsgD
-FlhD AceB FliA FliZ IclR
-FadE
-AccA AccA AccD
-FadM
-RprA CsgD RpoS
-McaS CsgD FlhC FlhD
-GadW GadE GadW GadX GadY
-FliA FliA FliZ
-FabD
-ArcZ FlhC FlhD RpoS
-RseX IhfB
-FnrS MarA
-PhoB ArgP Cra GadW GadX PhoB
-FadD
-RydC CsgD
-RybB CsgD FadL
-ZraR FliA GadW RpoH ZraR
-GcvA GcvA GcvB
-BolA CsgD
-GadE GadE GadW GadX Lrp RcsA
-CspA Hns
-UspA
-ArgR ArgR Lrp McaS StpA
-GadX GadE GadW GadX GadY Hns RpoS
-YdeO GadE GadW YdeO
-GlnG GlnG Nac RpoE
-RpsA Fis RpsA
-IclR AceA AceB AceK IclR
-LldR FadE FadL GadW GadY LldR
-HdfR FlhC FlhD
-FadR AccA AccB AccC AccD FabA FabB FabD FabG FabH FabI FadA FadB FadD FadE FadH FadI FadJ FadL FadM FadR IclR UspA
-StpA LeuO StpA
-GlaR GadW GadX GcvA PdhR YdeO YjjQ ZraR
-CsgD CsgD FliA FliZ
-Crp AceA AceB AceK Crp CsgD CyaR CytR DksA FadD FadH FadL Fis FlhC FlhD Fur GadE GadX GlnG HupA HupB MarA MarR McaS OmpR OxyR PdhR RpoE RpoH RpoS ZraR
-MarR MarA MarR
-FadJ
-QseB DnaA FlhC FlhD QseB
-CsrA RpoE SdiA
-HupB MicF
-BasR CsgD QseB
-LexA LexA RpoD
-YjjQ FlhC FlhD
-RpoH Cra PhoP RpoD YdeO
-RutR GadW GadX RutR
-AccB AccB AccC
-FabH
-FabA
-CpxR CpxR CsgD CspA CyaR FadE FadI MarA MarR MatA RpoE RpoH RprA
-OxyR Fur OxyR OxyS
-EvgA EvgA GadE YdeO
-AccC
-MicF CpxR Lrp
-DnaA DnaA RpoH
-OmrA CsgD FlhC FlhD OmpR
-RpoS ArrS BolA CpxR CsgD CsrA CyaR EvgA FadL GadE GadW GadX GadY HdfR IhfA IhfB MicF MlrA OxyR PdhR RpoE RpoH SgrS
-MicA PhoP
-DeaD SdiA
-FabI
-RpoD AccA AccB AccC AccD AceA AceB AceK AcrR ArcA ArgR ArrS BglJ BolA CpxR Crp CsgD CspA CsrA CyaR CytR DeaD DksA DnaA DsrA EvgA FabA FabB FabD FabG FabH FadA FadB FadD FadI FadJ FadR Fis FlhC FlhD FliA FliZ Fnr FnrS Fur GadE GadX GcvA GcvB GlnG HipA HipB Hns HupB IhfB LeuO LexA LldR Lrp MarA MarR MgrR MicF MlrA MqsA OmpR OxyR OxyS PdhR PhoB QseB RcsA RcsB RpoD RpoE RpoH RpoN RpoS RpsA RutR RydC RyhB SdiA SgrR SgrS SoxR SoxS StpA SutR TorR UspA YdeO YjjQ
-AceA
 OxyS FlhC FlhD RpoS
-AceK
-AlpA PhoB
-OmpR AcrR BolA CsgD FadE FadL FlhC FlhD MicF OmrA OmrB PdhR Rob
-Fur FlhC FlhD Fnr Fur GlnG Nac RpoS RyhB SoxR SoxS
-LrhA FlhC FlhD LeuO LrhA
-RyhB Fur MarA
-C0293 FadR
-SgrR SgrR SgrS
+RcdA CsgD RcdA
 AcrR AcrR FlhC FlhD MarA MarR MicF SoxR SoxS
-AceB
-DksA CsrA DksA DsrA FabD FabG FabH FadR Fis IhfA IhfB RpoD RpoE RpoS RpsA RybB SgrR SgrS
-FadA
+DeaD SdiA
+AlpA PhoB
+SgrR SgrR SgrS
+NsrR FliA FliZ IhfA Lrp RybB
+AccC
+FadD
+OmpR AcrR BolA CsgD FadE FadL FlhC FlhD MicF OmrA OmrB PdhR Rob
+GadY GadW GadX
+SoxR SoxR SoxS
+GadX GadE GadW GadX GadY Hns RpoS
+RybB CsgD FadL
+MqsA CsgD MqsA RpoS
 SutR FliA FliZ SutR
-RpoN FadL FlhC FlhD GlnG Nac RpoE RpoH ZraR
-Fnr ArcA Fnr FnrS GadW GadX Nac PdhR SoxR SoxS
-FadH
-Cra AceA AceB AceK Crp CsgD MarA MarR PdhR SgrS
-GlrR RpoE
 SlyA LeuO SlyA
-AdiY GadX
-PdhR FadE FadH FadL FadM PdhR
-YdiP CspA
+FabH
+FadM
+ArcZ FlhC FlhD RpoS
+HdfR FlhC FlhD
+StpA LeuO StpA
+RcsB CsgD FlhC FlhD GadX GadY LeuO RcsA RpoE RprA YdeO
+RprA CsgD RpoS
+AccA AccA AccD
+FabG
+C0293 FadR
+AceB
+CpxR CpxR CsgD CspA CyaR FadE FadI MarA MarR MatA RpoE RpoH RprA
+ArgR ArgR Lrp McaS StpA
+AceK
+TorR GadE GadX RpoS TorR
 BglJ LeuO
+SdiA GadW GadY
 MgrR SoxS
-IhfB AceA AceB AceK CsgD Fis FlhC FlhD FliA FliZ Fnr HipA HipB IhfA IhfB MicF OmpR RpoE RpoH UspA
+FabI
+BasR CsgD QseB
+RpoE AsflhD CyaR FadM MatA MicA RpoD RpoE RpoH RpoN RutR RybB
+DksA CsrA DksA DsrA FabD FabG FabH FadR Fis IhfA IhfB RpoD RpoE RpoS RpsA RybB SgrR SgrS
+Rob FadA FadB FadD FadL MarA MarR MicF Rob
+FadB
+PdhR FadE FadH FadL FadM PdhR
+MicF CpxR Lrp
+RpoS ArrS BolA CpxR CsgD CsrA CyaR EvgA FadL GadE GadW GadX GadY HdfR IhfA IhfB MicF MlrA OxyR PdhR RpoE RpoH SgrS
+HupB MicF
+AsflhD FlhD
+DnaA DnaA RpoH
+FabA
+FadI
+MatA FlhC FlhD FliA FliZ MatA
+RpoN FadL FlhC FlhD GlnG Nac RpoE RpoH ZraR
+RyhB Fur MarA
+YjjQ FlhC FlhD
+AccD AccA AccD
+PtrR AcrR
+EvgA EvgA GadE YdeO
+GcvA GcvA GcvB
+Hns AdiY BglJ BolA CsgD CspA EvgA FlhC FlhD FliA FliZ GadE GadW GadX HdfR Hns LeuO Lrp MicF RcsA RcsB StpA YdeO YjjQ
+FnrS MarA
+LexA LexA RpoD
+QseB DnaA FlhC FlhD QseB
+MarR MarA MarR
+Crp AceA AceB AceK Crp CsgD CyaR CytR DksA FadD FadH FadL Fis FlhC FlhD Fur GadE GadX GlnG HupA HupB MarA MarR McaS OmpR OxyR PdhR RpoE RpoH RpoS ZraR
+LrhA FlhC FlhD LeuO LrhA
+RpoD AccA AccB AccC AccD AceA AceB AceK AcrR ArcA ArgR ArrS BglJ BolA CpxR Crp CsgD CspA CsrA CyaR CytR DeaD DksA DnaA DsrA EvgA FabA FabB FabD FabG FabH FadA FadB FadD FadI FadJ FadR Fis FlhC FlhD FliA FliZ Fnr FnrS Fur GadE GadX GcvA GcvB GlnG HipA HipB Hns HupB IhfB LeuO LexA LldR Lrp MarA MarR MgrR MicF MlrA MqsA OmpR OxyR OxyS PdhR PhoB QseB RcsA RcsB RpoD RpoE RpoH RpoN RpoS RpsA RutR RydC RyhB SdiA SgrR SgrS SoxR SoxS StpA SutR TorR UspA YdeO YjjQ
+PhoP FadL GadE GadW MgrR PhoP RstA YdeO
 GcvB CsgD Lrp OxyR PhoP
+FadH
+AceA
+FabR FabA FabB
+OxyR Fur OxyR OxyS
+ArrS GadE
+GadE GadE GadW GadX Lrp RcsA
+McaS CsgD FlhC FlhD
+FabD
+OmrA CsgD FlhC FlhD OmpR
+IclR AceA AceB AceK IclR
+FabB
+Fur FlhC FlhD Fnr Fur GlnG Nac RpoS RyhB SoxR SoxS
+RcsA CsgD FlhC FlhD RcsA
+FadA
+CyaR RpoS
+RpoH Cra PhoP RpoD YdeO
+ArgP ArgP DnaA
+GlaR GadW GadX GcvA PdhR YdeO YjjQ ZraR
+IhfA AceA AceB AceK CsgD Fis FlhC FlhD FliA FliZ Fnr HipA HipB IhfA IhfB MicF OmpR RpoE RpoH UspA
+FadL
+BolA CsgD
+SoxS Fur MarA MarR MicF Rob SoxS
+PhoB ArgP Cra GadW GadX PhoB
 Nac AceB DnaA EvgA GadE GadX HupA LeuO Lrp MarR Nac OmpR PhoB RcsA SdiA UspA YdiP
+FlhD AceB FliA FliZ IclR
+FadR AccA AccB AccC AccD FabA FabB FabD FabG FabH FabI FadA FadB FadD FadE FadH FadI FadJ FadL FadM FadR IclR UspA
+RpsA Fis RpsA
+RydC CsgD
+UspA
+Fis Crp CspA DnaA FadA FadB Fis GadX GlnG Hns HupA HupB MarA MarR
+GadW GadE GadW GadX GadY
+AdiY GadX
+Lrp AceB ArgR DeaD FadI FadL FliA GadW GadY LeuO LrhA Lrp MicF Nac QseB RpoN SlyA SoxS StpA
+Fnr ArcA Fnr FnrS GadW GadX Nac PdhR SoxR SoxS
+DsrA Hns Lrp RpoS
+FliA FliA FliZ
+CytR CytR RpoH
+FliZ CsgD FlhC FlhD GadE MlrA
+RutR GadW GadX RutR
+RstA CsgD
+BtsR CsgD PdhR
+HupA MicF
+FadJ
+MicA PhoP
+CspA Hns
+HipA HipA HipB
+ArcA AceA AceB AceK ArcA ArcZ ArgR FadA FadB FadD FadE FadH FadI FadJ FadL Fnr GadE GadX GcvB LldR MicF RpoS RstA
+SgrS AdiY
+LldR FadE FadL GadW GadY LldR
+OmrB CsgD FlhC FlhD OmpR
+ZraR FliA GadW RpoH ZraR
+Cra AceA AceB AceK Crp CsgD MarA MarR PdhR SgrS
+YdiP CspA
+FadE
+HipB FadH HipA HipB
+RseX IhfB
+CsgD CsgD FliA FliZ
+IhfB AceA AceB AceK CsgD Fis FlhC FlhD FliA FliZ Fnr HipA HipB IhfA IhfB MicF OmpR RpoE RpoH UspA
+GlrR RpoE
+MarA MarA MarR MicF Rob
+CsrA RpoE SdiA
+YdeO GadE GadW YdeO
+AccB AccB AccC
+FlhC AceB FliA FliZ IclR
+GlnG GlnG Nac RpoE

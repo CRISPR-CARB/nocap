@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
-  <meta lastmodifieddate="2024-04-12">
+  <meta lastmodifieddate="2024-04-15">
     <creator>NetworkX 3.1</creator>
   </meta>
   <graph defaultedgetype="directed" mode="static" name="">
@@ -8,2637 +8,2637 @@
       <attribute id="0" title="polarity" type="string" />
     </attributes>
     <nodes>
-      <node id="PhoP" label="PhoP" />
-      <node id="SoxS" label="SoxS" />
-      <node id="FliZ" label="FliZ" />
-      <node id="Fis" label="Fis" />
-      <node id="OmrB" label="OmrB" />
-      <node id="MatA" label="MatA" />
-      <node id="BtsR" label="BtsR" />
-      <node id="RcsB" label="RcsB" />
-      <node id="SgrS" label="SgrS" />
-      <node id="ArrS" label="ArrS" />
-      <node id="MqsA" label="MqsA" />
-      <node id="RcdA" label="RcdA" />
-      <node id="ArcA" label="ArcA" />
-      <node id="FlhC" label="FlhC" />
       <node id="MlrA" label="MlrA" />
-      <node id="Lrp" label="Lrp" />
-      <node id="RcsA" label="RcsA" />
-      <node id="Rob" label="Rob" />
-      <node id="MarA" label="MarA" />
-      <node id="DsrA" label="DsrA" />
-      <node id="LacA" label="LacA" />
-      <node id="SoxR" label="SoxR" />
-      <node id="ArgP" label="ArgP" />
-      <node id="CytR" label="CytR" />
-      <node id="LacZ" label="LacZ" />
-      <node id="PtrR" label="PtrR" />
-      <node id="Hns" label="Hns" />
-      <node id="CyaR" label="CyaR" />
-      <node id="IhfA" label="IhfA" />
-      <node id="NsrR" label="NsrR" />
       <node id="LeuO" label="LeuO" />
-      <node id="RpoE" label="RpoE" />
-      <node id="HupA" label="HupA" />
+      <node id="OxyS" label="OxyS" />
+      <node id="RcdA" label="RcdA" />
+      <node id="AcrR" label="AcrR" />
+      <node id="DeaD" label="DeaD" />
+      <node id="AlpA" label="AlpA" />
+      <node id="SgrR" label="SgrR" />
+      <node id="NsrR" label="NsrR" />
+      <node id="OmpR" label="OmpR" />
       <node id="GadY" label="GadY" />
-      <node id="TorR" label="TorR" />
-      <node id="SdiA" label="SdiA" />
-      <node id="AsflhD" label="AsflhD" />
-      <node id="RstA" label="RstA" />
-      <node id="FlhD" label="FlhD" />
-      <node id="LacY" label="LacY" />
-      <node id="RprA" label="RprA" />
-      <node id="McaS" label="McaS" />
-      <node id="GadW" label="GadW" />
-      <node id="FliA" label="FliA" />
-      <node id="ArcZ" label="ArcZ" />
-      <node id="RseX" label="RseX" />
-      <node id="FnrS" label="FnrS" />
-      <node id="PhoB" label="PhoB" />
-      <node id="RydC" label="RydC" />
-      <node id="RybB" label="RybB" />
-      <node id="ZraR" label="ZraR" />
-      <node id="GcvA" label="GcvA" />
-      <node id="BolA" label="BolA" />
-      <node id="GadE" label="GadE" />
-      <node id="CspA" label="CspA" />
-      <node id="ArgR" label="ArgR" />
+      <node id="SoxR" label="SoxR" />
       <node id="GadX" label="GadX" />
-      <node id="YdeO" label="YdeO" />
-      <node id="GlnG" label="GlnG" />
-      <node id="RpsA" label="RpsA" />
-      <node id="LldR" label="LldR" />
+      <node id="RybB" label="RybB" />
+      <node id="MqsA" label="MqsA" />
+      <node id="SutR" label="SutR" />
+      <node id="SlyA" label="SlyA" />
+      <node id="ArcZ" label="ArcZ" />
       <node id="HdfR" label="HdfR" />
       <node id="StpA" label="StpA" />
-      <node id="GlaR" label="GlaR" />
-      <node id="CsgD" label="CsgD" />
-      <node id="Crp" label="Crp" />
-      <node id="MarR" label="MarR" />
-      <node id="QseB" label="QseB" />
-      <node id="CsrA" label="CsrA" />
-      <node id="HupB" label="HupB" />
-      <node id="BasR" label="BasR" />
-      <node id="LexA" label="LexA" />
-      <node id="YjjQ" label="YjjQ" />
-      <node id="RpoH" label="RpoH" />
-      <node id="RutR" label="RutR" />
+      <node id="RcsB" label="RcsB" />
+      <node id="RprA" label="RprA" />
       <node id="CpxR" label="CpxR" />
-      <node id="OxyR" label="OxyR" />
-      <node id="EvgA" label="EvgA" />
-      <node id="MicF" label="MicF" />
-      <node id="DnaA" label="DnaA" />
-      <node id="OmrA" label="OmrA" />
-      <node id="RpoS" label="RpoS" />
-      <node id="MicA" label="MicA" />
-      <node id="DeaD" label="DeaD" />
-      <node id="RpoD" label="RpoD" />
-      <node id="OxyS" label="OxyS" />
-      <node id="AlpA" label="AlpA" />
-      <node id="OmpR" label="OmpR" />
-      <node id="Fur" label="Fur" />
-      <node id="LrhA" label="LrhA" />
-      <node id="LacI" label="LacI" />
-      <node id="RyhB" label="RyhB" />
-      <node id="SgrR" label="SgrR" />
-      <node id="AcrR" label="AcrR" />
-      <node id="DksA" label="DksA" />
-      <node id="SutR" label="SutR" />
-      <node id="RpoN" label="RpoN" />
-      <node id="Fnr" label="Fnr" />
-      <node id="Cra" label="Cra" />
-      <node id="GlrR" label="GlrR" />
-      <node id="SlyA" label="SlyA" />
-      <node id="AdiY" label="AdiY" />
-      <node id="YdiP" label="YdiP" />
+      <node id="ArgR" label="ArgR" />
+      <node id="TorR" label="TorR" />
       <node id="BglJ" label="BglJ" />
+      <node id="SdiA" label="SdiA" />
+      <node id="LacY" label="LacY" />
       <node id="MgrR" label="MgrR" />
-      <node id="IhfB" label="IhfB" />
+      <node id="BasR" label="BasR" />
+      <node id="RpoE" label="RpoE" />
+      <node id="DksA" label="DksA" />
+      <node id="Rob" label="Rob" />
+      <node id="MicF" label="MicF" />
+      <node id="RpoS" label="RpoS" />
+      <node id="HupB" label="HupB" />
+      <node id="AsflhD" label="AsflhD" />
+      <node id="DnaA" label="DnaA" />
+      <node id="MatA" label="MatA" />
+      <node id="RpoN" label="RpoN" />
+      <node id="RyhB" label="RyhB" />
+      <node id="YjjQ" label="YjjQ" />
+      <node id="PtrR" label="PtrR" />
+      <node id="EvgA" label="EvgA" />
+      <node id="GcvA" label="GcvA" />
+      <node id="Hns" label="Hns" />
+      <node id="FnrS" label="FnrS" />
+      <node id="LexA" label="LexA" />
+      <node id="QseB" label="QseB" />
+      <node id="MarR" label="MarR" />
+      <node id="Crp" label="Crp" />
+      <node id="LrhA" label="LrhA" />
+      <node id="RpoD" label="RpoD" />
+      <node id="PhoP" label="PhoP" />
+      <node id="LacZ" label="LacZ" />
       <node id="GcvB" label="GcvB" />
+      <node id="OxyR" label="OxyR" />
+      <node id="ArrS" label="ArrS" />
+      <node id="GadE" label="GadE" />
+      <node id="McaS" label="McaS" />
+      <node id="OmrA" label="OmrA" />
+      <node id="LacI" label="LacI" />
+      <node id="Fur" label="Fur" />
+      <node id="RcsA" label="RcsA" />
+      <node id="CyaR" label="CyaR" />
+      <node id="RpoH" label="RpoH" />
+      <node id="ArgP" label="ArgP" />
+      <node id="GlaR" label="GlaR" />
+      <node id="IhfA" label="IhfA" />
+      <node id="BolA" label="BolA" />
+      <node id="SoxS" label="SoxS" />
+      <node id="PhoB" label="PhoB" />
       <node id="Nac" label="Nac" />
+      <node id="FlhD" label="FlhD" />
+      <node id="RpsA" label="RpsA" />
+      <node id="RydC" label="RydC" />
+      <node id="Fis" label="Fis" />
+      <node id="GadW" label="GadW" />
+      <node id="AdiY" label="AdiY" />
+      <node id="Lrp" label="Lrp" />
+      <node id="Fnr" label="Fnr" />
+      <node id="DsrA" label="DsrA" />
+      <node id="FliA" label="FliA" />
+      <node id="CytR" label="CytR" />
+      <node id="FliZ" label="FliZ" />
+      <node id="LacA" label="LacA" />
+      <node id="RutR" label="RutR" />
+      <node id="RstA" label="RstA" />
+      <node id="BtsR" label="BtsR" />
+      <node id="HupA" label="HupA" />
+      <node id="MicA" label="MicA" />
+      <node id="CspA" label="CspA" />
+      <node id="ArcA" label="ArcA" />
+      <node id="SgrS" label="SgrS" />
+      <node id="LldR" label="LldR" />
+      <node id="OmrB" label="OmrB" />
+      <node id="ZraR" label="ZraR" />
+      <node id="Cra" label="Cra" />
+      <node id="YdiP" label="YdiP" />
+      <node id="RseX" label="RseX" />
+      <node id="CsgD" label="CsgD" />
+      <node id="IhfB" label="IhfB" />
+      <node id="GlrR" label="GlrR" />
+      <node id="MarA" label="MarA" />
+      <node id="CsrA" label="CsrA" />
+      <node id="YdeO" label="YdeO" />
+      <node id="FlhC" label="FlhC" />
+      <node id="GlnG" label="GlnG" />
     </nodes>
     <edges>
-      <edge source="PhoP" target="GadE" id="0">
+      <edge source="MlrA" target="CsgD" id="0">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="PhoP" target="GadW" id="1">
+      <edge source="LeuO" target="BglJ" id="1">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="PhoP" target="MgrR" id="2">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="PhoP" target="PhoP" id="3">
-        <attvalues>
-          <attvalue for="0" value="+/-" />
-        </attvalues>
-      </edge>
-      <edge source="PhoP" target="RstA" id="4">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="PhoP" target="YdeO" id="5">
+      <edge source="LeuO" target="DsrA" id="2">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="SoxS" target="Fur" id="6">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="SoxS" target="MarA" id="7">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="SoxS" target="MarR" id="8">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="SoxS" target="MicF" id="9">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="SoxS" target="Rob" id="10">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="SoxS" target="SoxS" id="11">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="FliZ" target="CsgD" id="12">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="FliZ" target="FlhC" id="13">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="FliZ" target="FlhD" id="14">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="FliZ" target="GadE" id="15">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="FliZ" target="MlrA" id="16">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="Crp" id="17">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="CspA" id="18">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="DnaA" id="19">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="Fis" id="20">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="GadX" id="21">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="GlnG" id="22">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="Hns" id="23">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="HupA" id="24">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="HupB" id="25">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="MarA" id="26">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Fis" target="MarR" id="27">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OmrB" target="CsgD" id="28">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmrB" target="FlhC" id="29">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmrB" target="FlhD" id="30">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmrB" target="OmpR" id="31">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="MatA" target="FlhC" id="32">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="MatA" target="FlhD" id="33">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="MatA" target="FliA" id="34">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="MatA" target="FliZ" id="35">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="MatA" target="MatA" id="36">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="BtsR" target="CsgD" id="37">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RcsB" target="CsgD" id="38">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RcsB" target="FlhC" id="39">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RcsB" target="FlhD" id="40">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RcsB" target="GadX" id="41">
+      <edge source="LeuO" target="LeuO" id="3">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="RcsB" target="GadY" id="42">
+      <edge source="LeuO" target="YjjQ" id="4">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RcsB" target="LeuO" id="43">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RcsB" target="RcsA" id="44">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RcsB" target="RpoE" id="45">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RcsB" target="RprA" id="46">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RcsB" target="YdeO" id="47">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="SgrS" target="AdiY" id="48">
+      <edge source="OxyS" target="FlhC" id="5">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="ArrS" target="GadE" id="49">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="MqsA" target="CsgD" id="50">
+      <edge source="OxyS" target="FlhD" id="6">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="MqsA" target="MqsA" id="51">
+      <edge source="OxyS" target="RpoS" id="7">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="MqsA" target="RpoS" id="52">
+      <edge source="RcdA" target="CsgD" id="8">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RcdA" target="RcdA" id="9">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="AcrR" target="AcrR" id="10">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RcdA" target="CsgD" id="53">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RcdA" target="RcdA" id="54">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArcA" target="ArcA" id="55">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArcA" target="ArcZ" id="56">
+      <edge source="AcrR" target="FlhC" id="11">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="ArcA" target="ArgR" id="57">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArcA" target="Fnr" id="58">
+      <edge source="AcrR" target="FlhD" id="12">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="ArcA" target="GadE" id="59">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArcA" target="GadX" id="60">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArcA" target="GcvB" id="61">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArcA" target="LldR" id="62">
+      <edge source="AcrR" target="MarA" id="13">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="ArcA" target="MicF" id="63">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArcA" target="RpoS" id="64">
+      <edge source="AcrR" target="MarR" id="14">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="ArcA" target="RstA" id="65">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="FlhC" target="FliA" id="66">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="FlhC" target="FliZ" id="67">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="MlrA" target="CsgD" id="68">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Lrp" target="ArgR" id="69">
-        <attvalues>
-          <attvalue for="0" value="+/-" />
-        </attvalues>
-      </edge>
-      <edge source="Lrp" target="DeaD" id="70">
+      <edge source="AcrR" target="MicF" id="15">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="FliA" id="71">
+      <edge source="AcrR" target="SoxR" id="16">
         <attvalues>
-          <attvalue for="0" value="+/-" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="GadW" id="72">
+      <edge source="AcrR" target="SoxS" id="17">
         <attvalues>
-          <attvalue for="0" value="+/-" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="GadY" id="73">
+      <edge source="DeaD" target="SdiA" id="18">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="LeuO" id="74">
+      <edge source="AlpA" target="PhoB" id="19">
         <attvalues>
-          <attvalue for="0" value="+/-" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="LrhA" id="75">
+      <edge source="SgrR" target="SgrR" id="20">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="SgrR" target="SgrS" id="21">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="Lrp" id="76">
+      <edge source="NsrR" target="FliA" id="22">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="MicF" id="77">
+      <edge source="NsrR" target="FliZ" id="23">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="Nac" id="78">
+      <edge source="NsrR" target="IhfA" id="24">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="NsrR" target="Lrp" id="25">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="NsrR" target="RybB" id="26">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OmpR" target="AcrR" id="27">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="QseB" id="79">
+      <edge source="OmpR" target="BolA" id="28">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="RpoN" id="80">
+      <edge source="OmpR" target="CsgD" id="29">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="OmpR" target="FlhC" id="30">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="SlyA" id="81">
+      <edge source="OmpR" target="FlhD" id="31">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OmpR" target="MicF" id="32">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="OmpR" target="OmrA" id="33">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="OmpR" target="OmrB" id="34">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="OmpR" target="Rob" id="35">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadY" target="GadW" id="36">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadY" target="GadX" id="37">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SoxR" target="SoxR" id="38">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="SoxR" target="SoxS" id="39">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadX" target="GadE" id="40">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadX" target="GadW" id="41">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="SoxS" id="82">
+      <edge source="GadX" target="GadX" id="42">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Lrp" target="StpA" id="83">
+      <edge source="GadX" target="GadY" id="43">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RcsA" target="CsgD" id="84">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RcsA" target="FlhC" id="85">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RcsA" target="FlhD" id="86">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RcsA" target="RcsA" id="87">
+      <edge source="GadX" target="Hns" id="44">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Rob" target="MarA" id="88">
+      <edge source="GadX" target="RpoS" id="45">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Rob" target="MarR" id="89">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Rob" target="MicF" id="90">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Rob" target="Rob" id="91">
+      <edge source="RybB" target="CsgD" id="46">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="MarA" target="LacA" id="92">
+      <edge source="MqsA" target="CsgD" id="47">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="MarA" target="LacY" id="93">
+      <edge source="MqsA" target="MqsA" id="48">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="MarA" target="LacZ" id="94">
+      <edge source="MqsA" target="RpoS" id="49">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="MarA" target="MarA" id="95">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="MarA" target="MarR" id="96">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="MarA" target="MicF" id="97">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="MarA" target="Rob" id="98">
+      <edge source="SutR" target="FliA" id="50">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="DsrA" target="Hns" id="99">
+      <edge source="SutR" target="FliZ" id="51">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="DsrA" target="Lrp" id="100">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DsrA" target="RpoS" id="101">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="SoxR" target="SoxR" id="102">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="SoxR" target="SoxS" id="103">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArgP" target="ArgP" id="104">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="ArgP" target="DnaA" id="105">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CytR" target="CytR" id="106">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CytR" target="RpoH" id="107">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="PtrR" target="AcrR" id="108">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="AdiY" id="109">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="BglJ" id="110">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="BolA" id="111">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="CsgD" id="112">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="CspA" id="113">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="EvgA" id="114">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="FlhC" id="115">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="FlhD" id="116">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="FliA" id="117">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="FliZ" id="118">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="GadE" id="119">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="GadW" id="120">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="GadX" id="121">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="HdfR" id="122">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="Hns" id="123">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="LacA" id="124">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="LacY" id="125">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="LacZ" id="126">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="LeuO" id="127">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="Lrp" id="128">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="MicF" id="129">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="RcsA" id="130">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="RcsB" id="131">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="StpA" id="132">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="YdeO" id="133">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Hns" target="YjjQ" id="134">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CyaR" target="RpoS" id="135">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="CsgD" id="136">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="Fis" id="137">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="FlhC" id="138">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="FlhD" id="139">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="FliA" id="140">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="FliZ" id="141">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="Fnr" id="142">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="IhfA" id="143">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="IhfB" id="144">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="MicF" id="145">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="OmpR" id="146">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="RpoE" id="147">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="IhfA" target="RpoH" id="148">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="NsrR" target="FliA" id="149">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="NsrR" target="FliZ" id="150">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="NsrR" target="IhfA" id="151">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="NsrR" target="Lrp" id="152">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="NsrR" target="RybB" id="153">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="LeuO" target="BglJ" id="154">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="LeuO" target="DsrA" id="155">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="LeuO" target="LeuO" id="156">
+      <edge source="SutR" target="SutR" id="52">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="LeuO" target="YjjQ" id="157">
+      <edge source="SlyA" target="LeuO" id="53">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="AsflhD" id="158">
+      <edge source="SlyA" target="SlyA" id="54">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="CyaR" id="159">
+      <edge source="ArcZ" target="FlhC" id="55">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="ArcZ" target="FlhD" id="56">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="ArcZ" target="RpoS" id="57">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="MatA" id="160">
+      <edge source="HdfR" target="FlhC" id="58">
         <attvalues>
-          <attvalue for="0" value="+" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="MicA" id="161">
+      <edge source="HdfR" target="FlhD" id="59">
         <attvalues>
-          <attvalue for="0" value="+" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="RpoD" id="162">
+      <edge source="StpA" target="LeuO" id="60">
         <attvalues>
-          <attvalue for="0" value="+" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="RpoE" id="163">
+      <edge source="StpA" target="StpA" id="61">
         <attvalues>
-          <attvalue for="0" value="+" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="RpoH" id="164">
+      <edge source="RcsB" target="CsgD" id="62">
         <attvalues>
-          <attvalue for="0" value="+" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="RpoN" id="165">
+      <edge source="RcsB" target="FlhC" id="63">
         <attvalues>
-          <attvalue for="0" value="+" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="RutR" id="166">
+      <edge source="RcsB" target="FlhD" id="64">
         <attvalues>
-          <attvalue for="0" value="+" />
+          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RpoE" target="RybB" id="167">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="HupA" target="MicF" id="168">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadY" target="GadW" id="169">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadY" target="GadX" id="170">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="TorR" target="GadE" id="171">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="TorR" target="GadX" id="172">
+      <edge source="RcsB" target="GadX" id="65">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="TorR" target="RpoS" id="173">
+      <edge source="RcsB" target="GadY" id="66">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="TorR" target="TorR" id="174">
+      <edge source="RcsB" target="LeuO" id="67">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RcsB" target="RcsA" id="68">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RcsB" target="RpoE" id="69">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RcsB" target="RprA" id="70">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RcsB" target="YdeO" id="71">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RprA" target="CsgD" id="72">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="SdiA" target="GadW" id="175">
+      <edge source="RprA" target="RpoS" id="73">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="SdiA" target="GadY" id="176">
+      <edge source="CpxR" target="CpxR" id="74">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="AsflhD" target="FlhD" id="177">
+      <edge source="CpxR" target="CsgD" id="75">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RstA" target="CsgD" id="178">
+      <edge source="CpxR" target="CspA" id="76">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="CpxR" target="CyaR" id="77">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FlhD" target="FliA" id="179">
+      <edge source="CpxR" target="MarA" id="78">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FlhD" target="FliZ" id="180">
+      <edge source="CpxR" target="MarR" id="79">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RprA" target="CsgD" id="181">
+      <edge source="CpxR" target="MatA" id="80">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="RprA" target="RpoS" id="182">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="McaS" target="CsgD" id="183">
+      <edge source="CpxR" target="RpoE" id="81">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="McaS" target="FlhC" id="184">
+      <edge source="CpxR" target="RpoH" id="82">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="McaS" target="FlhD" id="185">
+      <edge source="CpxR" target="RprA" id="83">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="GadW" target="GadE" id="186">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadW" target="GadW" id="187">
+      <edge source="ArgR" target="ArgR" id="84">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="GadW" target="GadX" id="188">
-        <attvalues>
-          <attvalue for="0" value="+/-" />
-        </attvalues>
-      </edge>
-      <edge source="GadW" target="GadY" id="189">
+      <edge source="ArgR" target="Lrp" id="85">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FliA" target="FliA" id="190">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="FliA" target="FliZ" id="191">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArcZ" target="FlhC" id="192">
+      <edge source="ArgR" target="McaS" id="86">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="ArcZ" target="FlhD" id="193">
+      <edge source="ArgR" target="StpA" id="87">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="ArcZ" target="RpoS" id="194">
+      <edge source="TorR" target="GadE" id="88">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RseX" target="IhfB" id="195">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="FnrS" target="MarA" id="196">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="PhoB" target="ArgP" id="197">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="PhoB" target="Cra" id="198">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="PhoB" target="GadW" id="199">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="PhoB" target="GadX" id="200">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="PhoB" target="PhoB" id="201">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RydC" target="CsgD" id="202">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RybB" target="CsgD" id="203">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="ZraR" target="FliA" id="204">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ZraR" target="GadW" id="205">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ZraR" target="RpoH" id="206">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ZraR" target="ZraR" id="207">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GcvA" target="GcvA" id="208">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="GcvA" target="GcvB" id="209">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="BolA" target="CsgD" id="210">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadE" target="GadE" id="211">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadE" target="GadW" id="212">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadE" target="GadX" id="213">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadE" target="Lrp" id="214">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadE" target="RcsA" id="215">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CspA" target="Hns" id="216">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="ArgR" target="ArgR" id="217">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="ArgR" target="Lrp" id="218">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="ArgR" target="McaS" id="219">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="ArgR" target="StpA" id="220">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="GadX" target="GadE" id="221">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadX" target="GadW" id="222">
+      <edge source="TorR" target="GadX" id="89">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="GadX" target="GadX" id="223">
+      <edge source="TorR" target="RpoS" id="90">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="GadX" target="GadY" id="224">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadX" target="Hns" id="225">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GadX" target="RpoS" id="226">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="YdeO" target="GadE" id="227">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="YdeO" target="GadW" id="228">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="YdeO" target="YdeO" id="229">
+      <edge source="TorR" target="TorR" id="91">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="GlnG" target="GlnG" id="230">
+      <edge source="BglJ" target="LeuO" id="92">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SdiA" target="GadW" id="93">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SdiA" target="GadY" id="94">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="MgrR" target="SoxS" id="95">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="BasR" target="CsgD" id="96">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="BasR" target="QseB" id="97">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="AsflhD" id="98">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="CyaR" id="99">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="MatA" id="100">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="MicA" id="101">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="RpoD" id="102">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="RpoE" id="103">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="RpoH" id="104">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="RpoN" id="105">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="RutR" id="106">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoE" target="RybB" id="107">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="CsrA" id="108">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="DksA" id="109">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="DsrA" id="110">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="Fis" id="111">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="IhfA" id="112">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="IhfB" id="113">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="RpoD" id="114">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="RpoE" id="115">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="RpoS" id="116">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="RpsA" id="117">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="RybB" id="118">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="SgrR" id="119">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="DksA" target="SgrS" id="120">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Rob" target="MarA" id="121">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Rob" target="MarR" id="122">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Rob" target="MicF" id="123">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Rob" target="Rob" id="124">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="MicF" target="CpxR" id="125">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="MicF" target="Lrp" id="126">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="ArrS" id="127">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="BolA" id="128">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="CpxR" id="129">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="CsgD" id="130">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="CsrA" id="131">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="CyaR" id="132">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="EvgA" id="133">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="GadE" id="134">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="GadW" id="135">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="GadX" id="136">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="GadY" id="137">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="HdfR" id="138">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="IhfA" id="139">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="IhfB" id="140">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="MicF" id="141">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="MlrA" id="142">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="OxyR" id="143">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="RpoE" id="144">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="RpoH" id="145">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoS" target="SgrS" id="146">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="HupB" target="MicF" id="147">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="AsflhD" target="FlhD" id="148">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DnaA" target="DnaA" id="149">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="GlnG" target="Nac" id="231">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="GlnG" target="RpoE" id="232">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpsA" target="Fis" id="233">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpsA" target="RpsA" id="234">
+      <edge source="DnaA" target="RpoH" id="150">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="LldR" target="GadW" id="235">
+      <edge source="MatA" target="FlhC" id="151">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="MatA" target="FlhD" id="152">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="MatA" target="FliA" id="153">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="MatA" target="FliZ" id="154">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="MatA" target="MatA" id="155">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="LldR" target="GadY" id="236">
+      <edge source="RpoN" target="FlhC" id="156">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="LldR" target="LldR" id="237">
+      <edge source="RpoN" target="FlhD" id="157">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoN" target="GlnG" id="158">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoN" target="Nac" id="159">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoN" target="RpoE" id="160">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoN" target="RpoH" id="161">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoN" target="ZraR" id="162">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RyhB" target="Fur" id="163">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RyhB" target="MarA" id="164">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="YjjQ" target="FlhC" id="165">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="YjjQ" target="FlhD" id="166">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="PtrR" target="AcrR" id="167">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="EvgA" target="EvgA" id="168">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="EvgA" target="GadE" id="169">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="EvgA" target="YdeO" id="170">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GcvA" target="GcvA" id="171">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="GcvA" target="GcvB" id="172">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="AdiY" id="173">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="BglJ" id="174">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="BolA" id="175">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="CsgD" id="176">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="CspA" id="177">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="EvgA" id="178">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="FlhC" id="179">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="FlhD" id="180">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="FliA" id="181">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="FliZ" id="182">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="GadE" id="183">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="GadW" id="184">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="GadX" id="185">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="HdfR" id="186">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="Hns" id="187">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="LacA" id="188">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="LacY" id="189">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="LacZ" id="190">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="LeuO" id="191">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="Lrp" id="192">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="MicF" id="193">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="RcsA" id="194">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="RcsB" id="195">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="StpA" id="196">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="YdeO" id="197">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Hns" target="YjjQ" id="198">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="FnrS" target="MarA" id="199">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LexA" target="LexA" id="200">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LexA" target="RpoD" id="201">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="QseB" target="DnaA" id="202">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="QseB" target="FlhC" id="203">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="QseB" target="FlhD" id="204">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="QseB" target="QseB" id="205">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="MarR" target="MarA" id="206">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="MarR" target="MarR" id="207">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Crp" target="Crp" id="208">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="HdfR" target="FlhC" id="238">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="HdfR" target="FlhD" id="239">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="StpA" target="LeuO" id="240">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="StpA" target="StpA" id="241">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="GlaR" target="GadW" id="242">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="GlaR" target="GadX" id="243">
+      <edge source="Crp" target="CsgD" id="209">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="GlaR" target="GcvA" id="244">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="GlaR" target="YdeO" id="245">
+      <edge source="Crp" target="CyaR" id="210">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="GlaR" target="YjjQ" id="246">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="GlaR" target="ZraR" id="247">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CsgD" target="CsgD" id="248">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CsgD" target="FliA" id="249">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CsgD" target="FliZ" id="250">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="Crp" id="251">
+      <edge source="Crp" target="CytR" id="211">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="CsgD" id="252">
+      <edge source="Crp" target="DksA" id="212">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="CyaR" id="253">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="CytR" id="254">
+      <edge source="Crp" target="Fis" id="213">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="DksA" id="255">
+      <edge source="Crp" target="FlhC" id="214">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="Fis" id="256">
-        <attvalues>
-          <attvalue for="0" value="+/-" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="FlhC" id="257">
+      <edge source="Crp" target="FlhD" id="215">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="FlhD" id="258">
+      <edge source="Crp" target="Fur" id="216">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="Fur" id="259">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="GadE" id="260">
+      <edge source="Crp" target="GadE" id="217">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="GadX" id="261">
+      <edge source="Crp" target="GadX" id="218">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="GlnG" id="262">
+      <edge source="Crp" target="GlnG" id="219">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="HupA" id="263">
+      <edge source="Crp" target="HupA" id="220">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="HupB" id="264">
+      <edge source="Crp" target="HupB" id="221">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="LacA" id="265">
-        <attvalues>
-          <attvalue for="0" value="+/-" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="LacI" id="266">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="LacY" id="267">
+      <edge source="Crp" target="LacA" id="222">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="LacZ" id="268">
+      <edge source="Crp" target="LacI" id="223">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Crp" target="LacY" id="224">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="MarA" id="269">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="MarR" id="270">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="McaS" id="271">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="OmpR" id="272">
+      <edge source="Crp" target="LacZ" id="225">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="OxyR" id="273">
+      <edge source="Crp" target="MarA" id="226">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="RpoE" id="274">
+      <edge source="Crp" target="MarR" id="227">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Crp" target="RpoH" id="275">
-        <attvalues>
-          <attvalue for="0" value="+/-" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="RpoS" id="276">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Crp" target="ZraR" id="277">
+      <edge source="Crp" target="McaS" id="228">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="MarR" target="MarA" id="278">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="MarR" target="MarR" id="279">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="QseB" target="DnaA" id="280">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="QseB" target="FlhC" id="281">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="QseB" target="FlhD" id="282">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="QseB" target="QseB" id="283">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CsrA" target="RpoE" id="284">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CsrA" target="SdiA" id="285">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="HupB" target="MicF" id="286">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="BasR" target="CsgD" id="287">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="BasR" target="QseB" id="288">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="LexA" target="LexA" id="289">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="LexA" target="RpoD" id="290">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="YjjQ" target="FlhC" id="291">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="YjjQ" target="FlhD" id="292">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RpoH" target="Cra" id="293">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoH" target="PhoP" id="294">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoH" target="RpoD" id="295">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoH" target="YdeO" id="296">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RutR" target="GadW" id="297">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RutR" target="GadX" id="298">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RutR" target="RutR" id="299">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="CpxR" id="300">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="CsgD" id="301">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="CspA" id="302">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="CyaR" id="303">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="MarA" id="304">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="MarR" id="305">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="MatA" id="306">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="RpoE" id="307">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="RpoH" id="308">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="CpxR" target="RprA" id="309">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OxyR" target="Fur" id="310">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OxyR" target="OxyR" id="311">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OxyR" target="OxyS" id="312">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="EvgA" target="EvgA" id="313">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="EvgA" target="GadE" id="314">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="EvgA" target="YdeO" id="315">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="MicF" target="CpxR" id="316">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="MicF" target="Lrp" id="317">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DnaA" target="DnaA" id="318">
+      <edge source="Crp" target="OmpR" id="229">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="DnaA" target="RpoH" id="319">
+      <edge source="Crp" target="OxyR" id="230">
         <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmrA" target="CsgD" id="320">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmrA" target="FlhC" id="321">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmrA" target="FlhD" id="322">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmrA" target="OmpR" id="323">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="ArrS" id="324">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="BolA" id="325">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="CpxR" id="326">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="CsgD" id="327">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="CsrA" id="328">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="CyaR" id="329">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="EvgA" id="330">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="GadE" id="331">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="GadW" id="332">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="GadX" id="333">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="GadY" id="334">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="HdfR" id="335">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="IhfA" id="336">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="IhfB" id="337">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="MicF" id="338">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="MlrA" id="339">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="OxyR" id="340">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="RpoE" id="341">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="RpoH" id="342">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoS" target="SgrS" id="343">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="MicA" target="PhoP" id="344">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DeaD" target="SdiA" id="345">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="AcrR" id="346">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="ArcA" id="347">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="ArgR" id="348">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="ArrS" id="349">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="BglJ" id="350">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="BolA" id="351">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="CpxR" id="352">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="Crp" id="353">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="CsgD" id="354">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="CspA" id="355">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="CsrA" id="356">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="CyaR" id="357">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="CytR" id="358">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="DeaD" id="359">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="DksA" id="360">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="DnaA" id="361">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="DsrA" id="362">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="EvgA" id="363">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="Fis" id="364">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="FlhC" id="365">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="FlhD" id="366">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="FliA" id="367">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="FliZ" id="368">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="Fnr" id="369">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="FnrS" id="370">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="Fur" id="371">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="GadE" id="372">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="GadX" id="373">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="GcvA" id="374">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="GcvB" id="375">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="GlnG" id="376">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="Hns" id="377">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="HupB" id="378">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="IhfB" id="379">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="LacA" id="380">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="LacI" id="381">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="LacY" id="382">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="LacZ" id="383">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="LeuO" id="384">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="LexA" id="385">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="LldR" id="386">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="Lrp" id="387">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="MarA" id="388">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="MarR" id="389">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="MgrR" id="390">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="MicF" id="391">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="MlrA" id="392">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="MqsA" id="393">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="OmpR" id="394">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="OxyR" id="395">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="OxyS" id="396">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="PhoB" id="397">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="QseB" id="398">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RcsA" id="399">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RcsB" id="400">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RpoD" id="401">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RpoE" id="402">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RpoH" id="403">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RpoN" id="404">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RpoS" id="405">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RpsA" id="406">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RutR" id="407">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RydC" id="408">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="RyhB" id="409">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="SdiA" id="410">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="SgrR" id="411">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="SgrS" id="412">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="SoxR" id="413">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="SoxS" id="414">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="StpA" id="415">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="SutR" id="416">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="TorR" id="417">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="YdeO" id="418">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="RpoD" target="YjjQ" id="419">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OxyS" target="FlhC" id="420">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OxyS" target="FlhD" id="421">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OxyS" target="RpoS" id="422">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AlpA" target="PhoB" id="423">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="AcrR" id="424">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="BolA" id="425">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="CsgD" id="426">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="FlhC" id="427">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="FlhD" id="428">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="MicF" id="429">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="OmrA" id="430">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="OmrB" id="431">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="OmpR" target="Rob" id="432">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="FlhC" id="433">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="FlhD" id="434">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="Fnr" id="435">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="Fur" id="436">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="GlnG" id="437">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="Nac" id="438">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="RpoS" id="439">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="RyhB" id="440">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="SoxR" id="441">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Fur" target="SoxS" id="442">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="LrhA" target="FlhC" id="443">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="LrhA" target="FlhD" id="444">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="LrhA" target="LeuO" id="445">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="LrhA" target="LrhA" id="446">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="LacI" target="LacA" id="447">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="LacI" target="LacY" id="448">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="LacI" target="LacZ" id="449">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RyhB" target="Fur" id="450">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="RyhB" target="MarA" id="451">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="SgrR" target="SgrR" id="452">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="SgrR" target="SgrS" id="453">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="AcrR" target="AcrR" id="454">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AcrR" target="FlhC" id="455">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AcrR" target="FlhD" id="456">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AcrR" target="MarA" id="457">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AcrR" target="MarR" id="458">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AcrR" target="MicF" id="459">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AcrR" target="SoxR" id="460">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AcrR" target="SoxS" id="461">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="CsrA" id="462">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="DksA" id="463">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="DsrA" id="464">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="Fis" id="465">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="IhfA" id="466">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="IhfB" id="467">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="RpoD" id="468">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="RpoE" id="469">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="RpoS" id="470">
-        <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="DksA" target="RpsA" id="471">
+      <edge source="Crp" target="RpoE" id="231">
         <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="RybB" id="472">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="SgrR" id="473">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="DksA" target="SgrS" id="474">
-        <attvalues>
           <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="SutR" target="FliA" id="475">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="SutR" target="FliZ" id="476">
-        <attvalues>
-          <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="SutR" target="SutR" id="477">
+      <edge source="Crp" target="RpoH" id="232">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="RpoN" target="FlhC" id="478">
+      <edge source="Crp" target="RpoS" id="233">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Crp" target="ZraR" id="234">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoN" target="FlhD" id="479">
+      <edge source="LrhA" target="FlhC" id="235">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LrhA" target="FlhD" id="236">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LrhA" target="LeuO" id="237">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoN" target="GlnG" id="480">
+      <edge source="LrhA" target="LrhA" id="238">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoN" target="Nac" id="481">
+      <edge source="RpoD" target="AcrR" id="239">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoN" target="RpoE" id="482">
+      <edge source="RpoD" target="ArcA" id="240">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoN" target="RpoH" id="483">
+      <edge source="RpoD" target="ArgR" id="241">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="RpoN" target="ZraR" id="484">
+      <edge source="RpoD" target="ArrS" id="242">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Fnr" target="ArcA" id="485">
+      <edge source="RpoD" target="BglJ" id="243">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="BolA" id="244">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="CpxR" id="245">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="Crp" id="246">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="CsgD" id="247">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="CspA" id="248">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="CsrA" id="249">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="CyaR" id="250">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="CytR" id="251">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="DeaD" id="252">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="DksA" id="253">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="DnaA" id="254">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="DsrA" id="255">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="EvgA" id="256">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="Fis" id="257">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="FlhC" id="258">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="FlhD" id="259">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="FliA" id="260">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="FliZ" id="261">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="Fnr" id="262">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="FnrS" id="263">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="Fur" id="264">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="GadE" id="265">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="GadX" id="266">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="GcvA" id="267">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="GcvB" id="268">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="GlnG" id="269">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="Hns" id="270">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="HupB" id="271">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="IhfB" id="272">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="LacA" id="273">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="LacI" id="274">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="LacY" id="275">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="LacZ" id="276">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="LeuO" id="277">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="LexA" id="278">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="LldR" id="279">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="Lrp" id="280">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="MarA" id="281">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="MarR" id="282">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="MgrR" id="283">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="MicF" id="284">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="MlrA" id="285">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="MqsA" id="286">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="OmpR" id="287">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="OxyR" id="288">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="OxyS" id="289">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="PhoB" id="290">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="QseB" id="291">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RcsA" id="292">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RcsB" id="293">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RpoD" id="294">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RpoE" id="295">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RpoH" id="296">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RpoN" id="297">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RpoS" id="298">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RpsA" id="299">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RutR" id="300">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RydC" id="301">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="RyhB" id="302">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="SdiA" id="303">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="SgrR" id="304">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="SgrS" id="305">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="SoxR" id="306">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="SoxS" id="307">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="StpA" id="308">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="SutR" id="309">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="TorR" id="310">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="YdeO" id="311">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoD" target="YjjQ" id="312">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="PhoP" target="GadE" id="313">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="PhoP" target="GadW" id="314">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="PhoP" target="MgrR" id="315">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="PhoP" target="PhoP" id="316">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Fnr" target="Fnr" id="486">
+      <edge source="PhoP" target="RstA" id="317">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="PhoP" target="YdeO" id="318">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="GcvB" target="CsgD" id="319">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="GcvB" target="Lrp" id="320">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="GcvB" target="OxyR" id="321">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GcvB" target="PhoP" id="322">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OxyR" target="Fur" id="323">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="OxyR" target="OxyR" id="324">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OxyR" target="OxyS" id="325">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ArrS" target="GadE" id="326">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadE" target="GadE" id="327">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadE" target="GadW" id="328">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadE" target="GadX" id="329">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadE" target="Lrp" id="330">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadE" target="RcsA" id="331">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="McaS" target="CsgD" id="332">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="McaS" target="FlhC" id="333">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="McaS" target="FlhD" id="334">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="OmrA" target="CsgD" id="335">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OmrA" target="FlhC" id="336">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OmrA" target="FlhD" id="337">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OmrA" target="OmpR" id="338">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LacI" target="LacA" id="339">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LacI" target="LacY" id="340">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LacI" target="LacZ" id="341">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="FlhC" id="342">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="FlhD" id="343">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="Fnr" id="344">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="Fur" id="345">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="GlnG" id="346">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="Nac" id="347">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="RpoS" id="348">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="RyhB" id="349">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="SoxR" id="350">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fur" target="SoxS" id="351">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RcsA" target="CsgD" id="352">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RcsA" target="FlhC" id="353">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RcsA" target="FlhD" id="354">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RcsA" target="RcsA" id="355">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="CyaR" target="RpoS" id="356">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RpoH" target="Cra" id="357">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoH" target="PhoP" id="358">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoH" target="RpoD" id="359">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpoH" target="YdeO" id="360">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ArgP" target="ArgP" id="361">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="ArgP" target="DnaA" id="362">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GlaR" target="GadW" id="363">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="GlaR" target="GadX" id="364">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GlaR" target="GcvA" id="365">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="GlaR" target="YdeO" id="366">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GlaR" target="YjjQ" id="367">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="GlaR" target="ZraR" id="368">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="CsgD" id="369">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="Fis" id="370">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="FlhC" id="371">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="FlhD" id="372">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="FliA" id="373">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="FliZ" id="374">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="Fnr" id="375">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="IhfA" id="376">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="IhfB" id="377">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="MicF" id="378">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="OmpR" id="379">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="RpoE" id="380">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="IhfA" target="RpoH" id="381">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="BolA" target="CsgD" id="382">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SoxS" target="Fur" id="383">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SoxS" target="MarA" id="384">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SoxS" target="MarR" id="385">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SoxS" target="MicF" id="386">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SoxS" target="Rob" id="387">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="SoxS" target="SoxS" id="388">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="PhoB" target="ArgP" id="389">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="PhoB" target="Cra" id="390">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="PhoB" target="GadW" id="391">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="PhoB" target="GadX" id="392">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="PhoB" target="PhoB" id="393">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="DnaA" id="394">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="EvgA" id="395">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="GadE" id="396">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="GadX" id="397">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="HupA" id="398">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="LeuO" id="399">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="Lrp" id="400">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="MarR" id="401">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="Nac" id="402">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="OmpR" id="403">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="PhoB" id="404">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="RcsA" id="405">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="SdiA" id="406">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Nac" target="YdiP" id="407">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="FlhD" target="FliA" id="408">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="FlhD" target="FliZ" id="409">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpsA" target="Fis" id="410">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RpsA" target="RpsA" id="411">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RydC" target="CsgD" id="412">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="Crp" id="413">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="CspA" id="414">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="DnaA" id="415">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="Fis" id="416">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="GadX" id="417">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="GlnG" id="418">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="Hns" id="419">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="HupA" id="420">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="HupB" id="421">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="MarA" id="422">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Fis" target="MarR" id="423">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadW" target="GadE" id="424">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GadW" target="GadW" id="425">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="GadW" target="GadX" id="426">
         <attvalues>
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="Fnr" target="FnrS" id="487">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Fnr" target="GadW" id="488">
+      <edge source="GadW" target="GadY" id="427">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Fnr" target="GadX" id="489">
+      <edge source="AdiY" target="GadX" id="428">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="ArgR" id="429">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="DeaD" id="430">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Fnr" target="Nac" id="490">
+      <edge source="Lrp" target="FliA" id="431">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="GadW" id="432">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="GadY" id="433">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="LeuO" id="434">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="LrhA" id="435">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="Lrp" id="436">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Fnr" target="SoxR" id="491">
+      <edge source="Lrp" target="MicF" id="437">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Fnr" target="SoxS" id="492">
+      <edge source="Lrp" target="Nac" id="438">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="QseB" id="439">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Cra" target="Crp" id="493">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Cra" target="CsgD" id="494">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="Cra" target="MarA" id="495">
+      <edge source="Lrp" target="RpoN" id="440">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Cra" target="MarR" id="496">
+      <edge source="Lrp" target="SlyA" id="441">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="SoxS" id="442">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Lrp" target="StpA" id="443">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Fnr" target="ArcA" id="444">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="Fnr" target="Fnr" id="445">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="Fnr" target="FnrS" id="446">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Fnr" target="GadW" id="447">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Cra" target="SgrS" id="497">
+      <edge source="Fnr" target="GadX" id="448">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="GlrR" target="RpoE" id="498">
+      <edge source="Fnr" target="Nac" id="449">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fnr" target="SoxR" id="450">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Fnr" target="SoxS" id="451">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DsrA" target="Hns" id="452">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DsrA" target="Lrp" id="453">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="DsrA" target="RpoS" id="454">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="SlyA" target="LeuO" id="499">
+      <edge source="FliA" target="FliA" id="455">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="SlyA" target="SlyA" id="500">
+      <edge source="FliA" target="FliZ" id="456">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="AdiY" target="GadX" id="501">
+      <edge source="CytR" target="CytR" id="457">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="CytR" target="RpoH" id="458">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="FliZ" target="CsgD" id="459">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="FliZ" target="FlhC" id="460">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="FliZ" target="FlhD" id="461">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="FliZ" target="GadE" id="462">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="FliZ" target="MlrA" id="463">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RutR" target="GadW" id="464">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RutR" target="GadX" id="465">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RutR" target="RutR" id="466">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="RstA" target="CsgD" id="467">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="BtsR" target="CsgD" id="468">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="HupA" target="MicF" id="469">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="YdiP" target="CspA" id="502">
+      <edge source="MicA" target="PhoP" id="470">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="CspA" target="Hns" id="471">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="BglJ" target="LeuO" id="503">
+      <edge source="ArcA" target="ArcA" id="472">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="MgrR" target="SoxS" id="504">
+      <edge source="ArcA" target="ArcZ" id="473">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="ArgR" id="474">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="Fnr" id="475">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="GadE" id="476">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="GadX" id="477">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="GcvB" id="478">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="LldR" id="479">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="MicF" id="480">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="RpoS" id="481">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="ArcA" target="RstA" id="482">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="SgrS" target="AdiY" id="483">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LldR" target="GadW" id="484">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="LldR" target="GadY" id="485">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="LldR" target="LldR" id="486">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="OmrB" target="CsgD" id="487">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OmrB" target="FlhC" id="488">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OmrB" target="FlhD" id="489">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="OmrB" target="OmpR" id="490">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="ZraR" target="FliA" id="491">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ZraR" target="GadW" id="492">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ZraR" target="RpoH" id="493">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="ZraR" target="ZraR" id="494">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Cra" target="Crp" id="495">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Cra" target="CsgD" id="496">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="Cra" target="MarA" id="497">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Cra" target="MarR" id="498">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="Cra" target="SgrS" id="499">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="YdiP" target="CspA" id="500">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="RseX" target="IhfB" id="501">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="CsgD" target="CsgD" id="502">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="CsgD" target="FliA" id="503">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="CsgD" target="FliZ" id="504">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
@@ -2708,94 +2708,94 @@
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="GcvB" target="CsgD" id="518">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="GcvB" target="Lrp" id="519">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="GcvB" target="OxyR" id="520">
+      <edge source="GlrR" target="RpoE" id="518">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="GcvB" target="PhoP" id="521">
+      <edge source="MarA" target="LacA" id="519">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="DnaA" id="522">
+      <edge source="MarA" target="LacY" id="520">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="EvgA" id="523">
+      <edge source="MarA" target="LacZ" id="521">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="GadE" id="524">
+      <edge source="MarA" target="MarA" id="522">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="GadX" id="525">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Nac" target="HupA" id="526">
+      <edge source="MarA" target="MarR" id="523">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="LeuO" id="527">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Nac" target="Lrp" id="528">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="Nac" target="MarR" id="529">
+      <edge source="MarA" target="MicF" id="524">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="Nac" id="530">
+      <edge source="MarA" target="Rob" id="525">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="OmpR" id="531">
+      <edge source="CsrA" target="RpoE" id="526">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="PhoB" id="532">
+      <edge source="CsrA" target="SdiA" id="527">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="RcsA" id="533">
+      <edge source="YdeO" target="GadE" id="528">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="YdeO" target="GadW" id="529">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="YdeO" target="YdeO" id="530">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="SdiA" id="534">
+      <edge source="FlhC" target="FliA" id="531">
         <attvalues>
-          <attvalue for="0" value="-" />
+          <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="Nac" target="YdiP" id="535">
+      <edge source="FlhC" target="FliZ" id="532">
         <attvalues>
-          <attvalue for="0" value="-" />
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GlnG" target="GlnG" id="533">
+        <attvalues>
+          <attvalue for="0" value="+/-" />
+        </attvalues>
+      </edge>
+      <edge source="GlnG" target="Nac" id="534">
+        <attvalues>
+          <attvalue for="0" value="+" />
+        </attvalues>
+      </edge>
+      <edge source="GlnG" target="RpoE" id="535">
+        <attvalues>
+          <attvalue for="0" value="+" />
         </attvalues>
       </edge>
     </edges>

@@ -1,0 +1,7 @@
+#/Users/geor228/miniconda3/envs/NOCAP_env/lib/python3.11/site-packages/ipykernel_launcher.py --f=/Users/geor228/Library/Jupyter/runtime/kernel-v2-1276VqXX3sE7sYXR.json
+# GMT Mon Apr 15 20:04:45 2024
+# 
+LacA
+LacZ
+LacI LacA LacY LacZ
+LacY

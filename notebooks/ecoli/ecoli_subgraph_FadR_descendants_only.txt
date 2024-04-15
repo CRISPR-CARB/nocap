@@ -1,0 +1,28 @@
+#/Users/geor228/miniconda3/envs/NOCAP_env/lib/python3.11/site-packages/ipykernel_launcher.py --f=/Users/geor228/Library/Jupyter/runtime/kernel-v2-1276VqXX3sE7sYXR.json
+# GMT Mon Apr 15 20:04:45 2024
+# 
+FabI
+FadH
+AceA
+FabD
+FadJ
+IclR AceA AceB AceK IclR
+FadB
+FabB
+AccC
+FadD
+FadA
+FabA
+FadI
+FabH
+FadM
+FadL
+AccA AccA AccD
+FabG
+AccD AccA AccD
+FadR AccA AccB AccC AccD FabA FabB FabD FabG FabH FabI FadA FadB FadD FadE FadH FadI FadJ FadL FadM FadR IclR UspA
+UspA
+FadE
+AceB
+AceK
+AccB AccB AccC

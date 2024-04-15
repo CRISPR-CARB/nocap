@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2024-04-15">
+    <creator>NetworkX 3.1</creator>
+  </meta>
+  <graph defaultedgetype="directed" mode="static" name="">
+    <attributes mode="static" class="edge">
+      <attribute id="0" title="polarity" type="string" />
+    </attributes>
+    <nodes>
+      <node id="LacA" label="LacA" />
+      <node id="LacZ" label="LacZ" />
+      <node id="LacI" label="LacI" />
+      <node id="LacY" label="LacY" />
+    </nodes>
+    <edges>
+      <edge source="LacI" target="LacA" id="0">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LacI" target="LacY" id="1">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+      <edge source="LacI" target="LacZ" id="2">
+        <attvalues>
+          <attvalue for="0" value="-" />
+        </attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>

@@ -1,121 +1,121 @@
-#/Users/geor228/miniconda3/envs/NOCAP_env/lib/python3.11/site-packages/ipykernel_launcher.py --f=/Users/geor228/Library/Jupyter/runtime/kernel-v2-60713PMQuhIWKt5bQ.json
-# GMT Sat Apr 13 04:37:57 2024
+#/Users/geor228/miniconda3/envs/NOCAP_env/lib/python3.11/site-packages/ipykernel_launcher.py --f=/Users/geor228/Library/Jupyter/runtime/kernel-v2-1276VqXX3sE7sYXR.json
+# GMT Mon Apr 15 20:03:13 2024
 # 
-PhoP GadE GadW MgrR PhoP RstA YdeO
-SoxS Fur MarA MarR MicF Rob SoxS
-FliZ CsgD FlhC FlhD GadE MlrA
-Fis Crp CspA DnaA Fis GadX GlnG Hns HupA HupB MarA MarR
-MatA FlhC FlhD FliA FliZ MatA
-OmrB CsgD FlhC FlhD OmpR
-BtsR CsgD
-RcsB CsgD FlhC FlhD GadX GadY LeuO RcsA RpoE RprA YdeO
-SgrS AdiY
-ArrS GadE
-MqsA CsgD MqsA RpoS
-RcdA CsgD RcdA
-AroM
-ArcA ArcA ArcZ ArgR Fnr GadE GadX GcvB LldR MicF RpoS RstA
-FolA
-FlhC FliA FliZ
 MlrA CsgD
-Lrp ArgR AroG DeaD FliA GadW GadY LeuO LrhA Lrp MicF Mtr Nac QseB RpoN SlyA SoxS StpA TyrP TyrR
-RcsA CsgD FlhC FlhD RcsA
-Rob MarA MarR MicF Rob
-MarA MarA MarR MicF Rob
-DsrA Hns Lrp RpoS
-SoxR AroF SoxR SoxS TyrA
-ArgP ArgP DnaA
-CytR CytR RpoH
-PtrR AcrR
-Hns AdiY BglJ BolA CsgD CspA EvgA FlhC FlhD FliA FliZ GadE GadW GadX HdfR Hns LeuO Lrp MicF RcsA RcsB StpA YdeO YjjQ
-CyaR RpoS
-IhfA CsgD Fis FlhC FlhD FliA FliZ Fnr FolA IhfA IhfB MicF Mtr OmpR RpoE RpoH TyrP
-NsrR FliA FliZ IhfA Lrp RybB
+TyrB
 LeuO BglJ DsrA LeuO YjjQ
-RpoE AsflhD CyaR MatA MicA RpoD RpoE RpoH RpoN RutR RybB
-HupA MicF Mtr TyrP
-TorR GadE GadX RpoS TorR
+OxyS FlhC FlhD RpoS
+RcdA CsgD RcdA
+AcrR AcrR FlhC FlhD MarA MarR MicF SoxR SoxS
+DeaD SdiA
+AlpA PhoB
+SgrR SgrR SgrS
+NsrR FliA FliZ IhfA Lrp RybB
+OmpR AcrR BolA CsgD FlhC FlhD MicF OmrA OmrB Rob
 GadY GadW GadX
-SdiA GadW GadY
-AsflhD FlhD
-RstA CsgD
-AroP
-FlhD FliA FliZ
-TyrR AroF AroG AroL AroM AroP FolA Mtr TyrA TyrB TyrP TyrR YaiA
-RprA CsgD RpoS
-McaS CsgD FlhC FlhD
-GadW GadE GadW GadX GadY
-FliA FliA FliZ
-Mtr
-ArcZ FlhC FlhD RpoS
-RseX IhfB
-FnrS MarA
-PhoB ArgP Cra GadW GadX PhoB
-YaiA
-RydC CsgD
-AroL
-ZraR FliA GadW RpoH ZraR
-RybB CsgD
-GcvA GcvA GcvB
-BolA CsgD
-TrpR AroL AroM Mtr TrpR YaiA
-GadE GadE GadW GadX Lrp RcsA
-IhfB CsgD Fis FlhC FlhD FliA FliZ Fnr FolA IhfA IhfB MicF Mtr OmpR RpoE RpoH TyrP
-CspA Hns
-ArgR ArgR AroP Lrp McaS StpA
+SoxR AroF SoxR SoxS TyrA
 GadX GadE GadW GadX GadY Hns RpoS
-YdeO GadE GadW YdeO
-GlnG GlnG Nac RpoE
-RpsA Fis RpsA
-LldR GadW GadY LldR
+RybB CsgD
+MqsA CsgD MqsA RpoS
+SutR FliA FliZ SutR
+TrpR AroL AroM Mtr TrpR YaiA
+SlyA LeuO SlyA
+ArcZ FlhC FlhD RpoS
 HdfR FlhC FlhD
 StpA LeuO StpA
-GlaR AroP GadW GadX GcvA YdeO YjjQ ZraR
-CsgD CsgD FliA FliZ
-Crp Crp CsgD CyaR CytR DksA Fis FlhC FlhD Fur GadE GadX GlnG HupA HupB MarA MarR McaS OmpR OxyR RpoE RpoH RpoS ZraR
-MarR MarA MarR
-QseB DnaA FlhC FlhD QseB
-CsrA RpoE SdiA
-HupB MicF Mtr TyrP
-BasR CsgD QseB
-LexA LexA RpoD
-YjjQ FlhC FlhD
-RpoH Cra PhoP RpoD TyrR YdeO
-RutR GadW GadX RutR
+RcsB CsgD FlhC FlhD GadX GadY LeuO RcsA RpoE RprA YdeO
+RprA CsgD RpoS
 CpxR AroG CpxR CsgD CspA CyaR MarA MarR MatA RpoE RpoH RprA
-OxyR Fur OxyR OxyS
-EvgA EvgA GadE YdeO
-MicF CpxR Lrp
-TyrA
-DnaA DnaA RpoH
-OmrA CsgD FlhC FlhD OmpR
-RpoS ArrS BolA CpxR CsgD CsrA CyaR EvgA GadE GadW GadX GadY HdfR IhfA IhfB MicF MlrA OxyR RpoE RpoH SgrS
-MicA PhoP
-DeaD SdiA
+ArgR ArgR AroP Lrp McaS StpA
+TorR GadE GadX RpoS TorR
 PgrR TyrR
-RpoD AcrR ArcA ArgR AroF AroG AroL AroM AroP ArrS BglJ BolA CpxR Crp CsgD CspA CsrA CyaR CytR DeaD DksA DnaA DsrA EvgA Fis FlhC FlhD FliA FliZ Fnr FnrS FolA Fur GadE GadX GcvA GcvB GlnG Hns HupB IhfB LeuO LexA LldR Lrp MarA MarR MgrR MicF MlrA MqsA Mtr OmpR OxyR OxyS PhoB QseB RcsA RcsB RpoD RpoE RpoH RpoN RpoS RpsA RutR RydC RyhB SdiA SgrR SgrS SoxR SoxS StpA SutR TorR TrpR TyrA TyrB TyrP TyrR YaiA YdeO YjjQ
-AroG
-OxyS FlhC FlhD RpoS
-AlpA PhoB
-OmpR AcrR BolA CsgD FlhC FlhD MicF OmrA OmrB Rob
-Fur FlhC FlhD Fnr Fur GlnG Nac RpoS RyhB SoxR SoxS
-LrhA FlhC FlhD LeuO LrhA
-RyhB Fur MarA
-SgrR SgrR SgrS
-AcrR AcrR FlhC FlhD MarA MarR MicF SoxR SoxS
-DksA CsrA DksA DsrA Fis IhfA IhfB RpoD RpoE RpoS RpsA RybB SgrR SgrS
-SutR FliA FliZ SutR
-RpoN FlhC FlhD GlnG Nac RpoE RpoH ZraR
-Fnr ArcA AroP Fnr FnrS GadW GadX Nac SoxR SoxS
-Cra AroP Crp CsgD MarA MarR SgrS
-TyrP
-GlrR RpoE
-SlyA LeuO SlyA
-AdiY GadX
-YdiP CspA
 BglJ LeuO
+SdiA GadW GadY
 MgrR SoxS
+Mtr
+BasR CsgD QseB
+RpoE AsflhD CyaR MatA MicA RpoD RpoE RpoH RpoN RutR RybB
+DksA CsrA DksA DsrA Fis IhfA IhfB RpoD RpoE RpoS RpsA RybB SgrR SgrS
+AroG
+AroL
+Rob MarA MarR MicF Rob
+TyrR AroF AroG AroL AroM AroP FolA Mtr TyrA TyrB TyrP TyrR YaiA
+MicF CpxR Lrp
+RpoS ArrS BolA CpxR CsgD CsrA CyaR EvgA GadE GadW GadX GadY HdfR IhfA IhfB MicF MlrA OxyR RpoE RpoH SgrS
+HupB MicF Mtr TyrP
+AsflhD FlhD
+DnaA DnaA RpoH
+MatA FlhC FlhD FliA FliZ MatA
+RpoN FlhC FlhD GlnG Nac RpoE RpoH ZraR
+RyhB Fur MarA
+YjjQ FlhC FlhD
+PtrR AcrR
+EvgA EvgA GadE YdeO
+GcvA GcvA GcvB
+Hns AdiY BglJ BolA CsgD CspA EvgA FlhC FlhD FliA FliZ GadE GadW GadX HdfR Hns LeuO Lrp MicF RcsA RcsB StpA YdeO YjjQ
+FnrS MarA
+LexA LexA RpoD
+QseB DnaA FlhC FlhD QseB
+MarR MarA MarR
+Crp Crp CsgD CyaR CytR DksA Fis FlhC FlhD Fur GadE GadX GlnG HupA HupB MarA MarR McaS OmpR OxyR RpoE RpoH RpoS ZraR
+LrhA FlhC FlhD LeuO LrhA
 AroF
+AroM
+RpoD AcrR ArcA ArgR AroF AroG AroL AroM AroP ArrS BglJ BolA CpxR Crp CsgD CspA CsrA CyaR CytR DeaD DksA DnaA DsrA EvgA Fis FlhC FlhD FliA FliZ Fnr FnrS FolA Fur GadE GadX GcvA GcvB GlnG Hns HupB IhfB LeuO LexA LldR Lrp MarA MarR MgrR MicF MlrA MqsA Mtr OmpR OxyR OxyS PhoB QseB RcsA RcsB RpoD RpoE RpoH RpoN RpoS RpsA RutR RydC RyhB SdiA SgrR SgrS SoxR SoxS StpA SutR TorR TrpR TyrA TyrB TyrP TyrR YaiA YdeO YjjQ
+PhoP GadE GadW MgrR PhoP RstA YdeO
+AroP
 GcvB AroP CsgD Lrp OxyR PhoP
-TyrB
+OxyR Fur OxyR OxyS
+ArrS GadE
+GadE GadE GadW GadX Lrp RcsA
+McaS CsgD FlhC FlhD
+TyrA
+OmrA CsgD FlhC FlhD OmpR
+Fur FlhC FlhD Fnr Fur GlnG Nac RpoS RyhB SoxR SoxS
+RcsA CsgD FlhC FlhD RcsA
+CyaR RpoS
+RpoH Cra PhoP RpoD TyrR YdeO
+ArgP ArgP DnaA
+FolA
+GlaR AroP GadW GadX GcvA YdeO YjjQ ZraR
+IhfA CsgD Fis FlhC FlhD FliA FliZ Fnr FolA IhfA IhfB MicF Mtr OmpR RpoE RpoH TyrP
+BolA CsgD
+SoxS Fur MarA MarR MicF Rob SoxS
+PhoB ArgP Cra GadW GadX PhoB
 Nac AroF DnaA EvgA GadE GadX HupA LeuO Lrp MarR Nac OmpR PhoB RcsA SdiA YdiP
+FlhD FliA FliZ
+RpsA Fis RpsA
+RydC CsgD
+Fis Crp CspA DnaA Fis GadX GlnG Hns HupA HupB MarA MarR
+GadW GadE GadW GadX GadY
+AdiY GadX
+Lrp ArgR AroG DeaD FliA GadW GadY LeuO LrhA Lrp MicF Mtr Nac QseB RpoN SlyA SoxS StpA TyrP TyrR
+Fnr ArcA AroP Fnr FnrS GadW GadX Nac SoxR SoxS
+DsrA Hns Lrp RpoS
+FliA FliA FliZ
+CytR CytR RpoH
+FliZ CsgD FlhC FlhD GadE MlrA
+RutR GadW GadX RutR
+RstA CsgD
+BtsR CsgD
+HupA MicF Mtr TyrP
+MicA PhoP
+CspA Hns
+ArcA ArcA ArcZ ArgR Fnr GadE GadX GcvB LldR MicF RpoS RstA
+SgrS AdiY
+LldR GadW GadY LldR
+OmrB CsgD FlhC FlhD OmpR
+ZraR FliA GadW RpoH ZraR
+Cra AroP Crp CsgD MarA MarR SgrS
+YdiP CspA
+YaiA
+RseX IhfB
+CsgD CsgD FliA FliZ
+TyrP
+IhfB CsgD Fis FlhC FlhD FliA FliZ Fnr FolA IhfA IhfB MicF Mtr OmpR RpoE RpoH TyrP
+GlrR RpoE
+MarA MarA MarR MicF Rob
+CsrA RpoE SdiA
+YdeO GadE GadW YdeO
+FlhC FliA FliZ
+GlnG GlnG Nac RpoE
