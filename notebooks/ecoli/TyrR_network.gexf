@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
-  <meta lastmodifieddate="2024-04-15">
-    <creator>NetworkX 3.1</creator>
+  <meta lastmodifieddate="2024-05-02">
+    <creator>NetworkX 3.3</creator>
   </meta>
   <graph defaultedgetype="directed" mode="static" name="">
     <attributes mode="static" class="edge">
@@ -9,17 +9,17 @@
     </attributes>
     <nodes>
       <node id="TyrR" label="TyrR" />
-      <node id="TyrB" label="TyrB" />
-      <node id="AroP" label="AroP" />
       <node id="Mtr" label="Mtr" />
+      <node id="FolA" label="FolA" />
+      <node id="AroM" label="AroM" />
+      <node id="AroG" label="AroG" />
+      <node id="AroP" label="AroP" />
+      <node id="YaiA" label="YaiA" />
+      <node id="AroL" label="AroL" />
       <node id="TyrP" label="TyrP" />
       <node id="AroF" label="AroF" />
-      <node id="AroG" label="AroG" />
-      <node id="AroM" label="AroM" />
-      <node id="YaiA" label="YaiA" />
+      <node id="TyrB" label="TyrB" />
       <node id="TyrA" label="TyrA" />
-      <node id="AroL" label="AroL" />
-      <node id="FolA" label="FolA" />
     </nodes>
     <edges>
       <edge source="TyrR" target="AroF" id="0">
@@ -72,12 +72,7 @@
           <attvalue for="0" value="+/-" />
         </attvalues>
       </edge>
-      <edge source="TyrR" target="TyrR" id="10">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="TyrR" target="YaiA" id="11">
+      <edge source="TyrR" target="YaiA" id="10">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>

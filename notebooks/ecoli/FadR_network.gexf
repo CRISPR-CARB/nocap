@@ -1,38 +1,38 @@
 <?xml version='1.0' encoding='utf-8'?>
 <gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
-  <meta lastmodifieddate="2024-04-15">
-    <creator>NetworkX 3.1</creator>
+  <meta lastmodifieddate="2024-05-02">
+    <creator>NetworkX 3.3</creator>
   </meta>
   <graph defaultedgetype="directed" mode="static" name="">
     <attributes mode="static" class="edge">
       <attribute id="0" title="polarity" type="string" />
     </attributes>
     <nodes>
-      <node id="FabI" label="FabI" />
-      <node id="FadH" label="FadH" />
-      <node id="AceA" label="AceA" />
-      <node id="FabD" label="FabD" />
-      <node id="FadJ" label="FadJ" />
-      <node id="IclR" label="IclR" />
-      <node id="FadB" label="FadB" />
-      <node id="FabB" label="FabB" />
-      <node id="AccC" label="AccC" />
-      <node id="FadD" label="FadD" />
-      <node id="FadA" label="FadA" />
-      <node id="FabA" label="FabA" />
-      <node id="FadI" label="FadI" />
-      <node id="FabH" label="FabH" />
-      <node id="FadM" label="FadM" />
-      <node id="FadL" label="FadL" />
-      <node id="AccA" label="AccA" />
       <node id="FabG" label="FabG" />
       <node id="AccD" label="AccD" />
-      <node id="FadR" label="FadR" />
-      <node id="UspA" label="UspA" />
-      <node id="FadE" label="FadE" />
-      <node id="AceB" label="AceB" />
+      <node id="FabH" label="FabH" />
+      <node id="FadA" label="FadA" />
+      <node id="FadD" label="FadD" />
+      <node id="IclR" label="IclR" />
+      <node id="AceA" label="AceA" />
+      <node id="FadI" label="FadI" />
       <node id="AceK" label="AceK" />
+      <node id="FabD" label="FabD" />
+      <node id="AceB" label="AceB" />
+      <node id="AccA" label="AccA" />
+      <node id="AccC" label="AccC" />
+      <node id="FadH" label="FadH" />
+      <node id="FadM" label="FadM" />
       <node id="AccB" label="AccB" />
+      <node id="UspA" label="UspA" />
+      <node id="FabI" label="FabI" />
+      <node id="FabA" label="FabA" />
+      <node id="FabB" label="FabB" />
+      <node id="FadR" label="FadR" />
+      <node id="FadE" label="FadE" />
+      <node id="FadB" label="FadB" />
+      <node id="FadJ" label="FadJ" />
+      <node id="FadL" label="FadL" />
     </nodes>
     <edges>
       <edge source="IclR" target="AceA" id="0">
@@ -50,147 +50,117 @@
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="IclR" target="IclR" id="3">
+      <edge source="AccA" target="AccD" id="3">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="AccA" target="AccA" id="4">
+      <edge source="AccB" target="AccC" id="4">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="AccA" target="AccD" id="5">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AccD" target="AccA" id="6">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AccD" target="AccD" id="7">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="FadR" target="AccA" id="8">
+      <edge source="FadR" target="AccA" id="5">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="AccB" id="9">
+      <edge source="FadR" target="AccB" id="6">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="AccC" id="10">
+      <edge source="FadR" target="AccC" id="7">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="AccD" id="11">
+      <edge source="FadR" target="AccD" id="8">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FabA" id="12">
+      <edge source="FadR" target="FabA" id="9">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FabB" id="13">
+      <edge source="FadR" target="FabB" id="10">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FabD" id="14">
+      <edge source="FadR" target="FabD" id="11">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FabG" id="15">
+      <edge source="FadR" target="FabG" id="12">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FabH" id="16">
+      <edge source="FadR" target="FabH" id="13">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FabI" id="17">
+      <edge source="FadR" target="FabI" id="14">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadA" id="18">
+      <edge source="FadR" target="FadA" id="15">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadB" id="19">
+      <edge source="FadR" target="FadB" id="16">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadD" id="20">
+      <edge source="FadR" target="FadD" id="17">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadE" id="21">
+      <edge source="FadR" target="FadE" id="18">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadH" id="22">
+      <edge source="FadR" target="FadH" id="19">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadI" id="23">
+      <edge source="FadR" target="FadI" id="20">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadJ" id="24">
+      <edge source="FadR" target="FadJ" id="21">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadL" id="25">
+      <edge source="FadR" target="FadL" id="22">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadM" id="26">
+      <edge source="FadR" target="FadM" id="23">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="FadR" id="27">
+      <edge source="FadR" target="IclR" id="24">
         <attvalues>
           <attvalue for="0" value="+" />
         </attvalues>
       </edge>
-      <edge source="FadR" target="IclR" id="28">
-        <attvalues>
-          <attvalue for="0" value="+" />
-        </attvalues>
-      </edge>
-      <edge source="FadR" target="UspA" id="29">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AccB" target="AccB" id="30">
-        <attvalues>
-          <attvalue for="0" value="-" />
-        </attvalues>
-      </edge>
-      <edge source="AccB" target="AccC" id="31">
+      <edge source="FadR" target="UspA" id="25">
         <attvalues>
           <attvalue for="0" value="-" />
         </attvalues>

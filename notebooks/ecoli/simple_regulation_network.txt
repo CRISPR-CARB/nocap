@@ -1,0 +1,7 @@
+# simple regulation network for testing
+geneA*
+  +geneA* +geneB* +geneC*
+geneB*
+  -geneB* -geneC*
+geneC*
+  +/-geneD*
