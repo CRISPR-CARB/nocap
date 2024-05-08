@@ -2,267 +2,267 @@ graph [
   directed 1
   node [
     id 0
-    label "evgA"
-  ]
-  node [
-    id 1
-    label "sdiA"
-  ]
-  node [
-    id 2
-    label "fur"
-  ]
-  node [
-    id 3
-    label "cpxR"
-  ]
-  node [
-    id 4
-    label "phoB"
-  ]
-  node [
-    id 5
-    label "leuO"
-  ]
-  node [
-    id 6
-    label "torR"
-  ]
-  node [
-    id 7
-    label "hupB"
-  ]
-  node [
-    id 8
-    label "ihfA"
-  ]
-  node [
-    id 9
-    label "csrA"
-  ]
-  node [
-    id 10
-    label "fliA"
-  ]
-  node [
-    id 11
-    label "acrR"
-  ]
-  node [
-    id 12
-    label "hns"
-  ]
-  node [
-    id 13
-    label "tyrR"
-  ]
-  node [
-    id 14
-    label "matA"
-  ]
-  node [
-    id 15
-    label "tyrB"
-  ]
-  node [
-    id 16
-    label "oxyR"
-  ]
-  node [
-    id 17
-    label "gadX"
-  ]
-  node [
-    id 18
-    label "ptrR"
-  ]
-  node [
-    id 19
-    label "stpA"
-  ]
-  node [
-    id 20
-    label "flhD"
-  ]
-  node [
-    id 21
-    label "gadE"
-  ]
-  node [
-    id 22
-    label "aroP"
-  ]
-  node [
-    id 23
-    label "dnaA"
-  ]
-  node [
-    id 24
-    label "bolA"
-  ]
-  node [
-    id 25
-    label "btsR"
-  ]
-  node [
-    id 26
-    label "hdfR"
-  ]
-  node [
-    id 27
-    label "rpsA"
-  ]
-  node [
-    id 28
-    label "cra"
-  ]
-  node [
-    id 29
-    label "csgD"
-  ]
-  node [
-    id 30
-    label "glrR"
-  ]
-  node [
-    id 31
-    label "fnr"
-  ]
-  node [
-    id 32
-    label "bglJ"
-  ]
-  node [
-    id 33
-    label "cspA"
-  ]
-  node [
-    id 34
-    label "rcdA"
-  ]
-  node [
-    id 35
-    label "basR"
-  ]
-  node [
-    id 36
-    label "tyrP"
-  ]
-  node [
-    id 37
-    label "argP"
-  ]
-  node [
-    id 38
-    label "glnG"
-  ]
-  node [
-    id 39
     label "aroF"
   ]
   node [
-    id 40
-    label "nac"
-  ]
-  node [
-    id 41
-    label "fis"
-  ]
-  node [
-    id 42
-    label "fliZ"
-  ]
-  node [
-    id 43
-    label "aroL"
-  ]
-  node [
-    id 44
+    id 1
     label "folA"
   ]
   node [
-    id 45
-    label "ompR"
-  ]
-  node [
-    id 46
-    label "qseB"
-  ]
-  node [
-    id 47
-    label "lrhA"
-  ]
-  node [
-    id 48
+    id 2
     label "yaiA"
   ]
   node [
-    id 49
-    label "arcA"
+    id 3
+    label "ompR"
   ]
   node [
-    id 50
-    label "adiY"
+    id 4
+    label "slyA"
   ]
   node [
-    id 51
-    label "rpoS"
+    id 5
+    label "sdiA"
   ]
   node [
-    id 52
-    label "glaR"
+    id 6
+    label "zraR"
   ]
   node [
-    id 53
-    label "yjjQ"
+    id 7
+    label "phoP"
   ]
   node [
-    id 54
-    label "aroM"
+    id 8
+    label "fur"
   ]
   node [
-    id 55
-    label "cytR"
+    id 9
+    label "bglJ"
   ]
   node [
-    id 56
-    label "rpoH"
-  ]
-  node [
-    id 57
-    label "rpoE"
-  ]
-  node [
-    id 58
-    label "rcsB"
-  ]
-  node [
-    id 59
-    label "hupA"
-  ]
-  node [
-    id 60
+    id 10
     label "lldR"
   ]
   node [
-    id 61
+    id 11
+    label "rutR"
+  ]
+  node [
+    id 12
+    label "sutR"
+  ]
+  node [
+    id 13
+    label "rpoH"
+  ]
+  node [
+    id 14
+    label "hdfR"
+  ]
+  node [
+    id 15
+    label "torR"
+  ]
+  node [
+    id 16
     label "mqsA"
   ]
   node [
-    id 62
-    label "alpA"
+    id 17
+    label "rpoN"
   ]
   node [
-    id 63
-    label "tyrA"
+    id 18
+    label "gadE"
   ]
   node [
-    id 64
+    id 19
+    label "aroG"
+  ]
+  node [
+    id 20
+    label "matA"
+  ]
+  node [
+    id 21
+    label "cspA"
+  ]
+  node [
+    id 22
+    label "nac"
+  ]
+  node [
+    id 23
+    label "rcsB"
+  ]
+  node [
+    id 24
+    label "rstA"
+  ]
+  node [
+    id 25
+    label "rpoS"
+  ]
+  node [
+    id 26
+    label "nsrR"
+  ]
+  node [
+    id 27
+    label "mlrA"
+  ]
+  node [
+    id 28
+    label "flhD"
+  ]
+  node [
+    id 29
+    label "leuO"
+  ]
+  node [
+    id 30
+    label "cytR"
+  ]
+  node [
+    id 31
+    label "qseB"
+  ]
+  node [
+    id 32
+    label "rpoD"
+  ]
+  node [
+    id 33
+    label "oxyR"
+  ]
+  node [
+    id 34
+    label "dksA"
+  ]
+  node [
+    id 35
+    label "cpxR"
+  ]
+  node [
+    id 36
+    label "evgA"
+  ]
+  node [
+    id 37
+    label "tyrR"
+  ]
+  node [
+    id 38
+    label "tyrP"
+  ]
+  node [
+    id 39
+    label "phoB"
+  ]
+  node [
+    id 40
+    label "dnaA"
+  ]
+  node [
+    id 41
+    label "hupB"
+  ]
+  node [
+    id 42
+    label "trpR"
+  ]
+  node [
+    id 43
     label "mtr"
   ]
   node [
+    id 44
+    label "glaR"
+  ]
+  node [
+    id 45
+    label "arcA"
+  ]
+  node [
+    id 46
+    label "cra"
+  ]
+  node [
+    id 47
+    label "rpoE"
+  ]
+  node [
+    id 48
+    label "csrA"
+  ]
+  node [
+    id 49
+    label "basR"
+  ]
+  node [
+    id 50
+    label "gadX"
+  ]
+  node [
+    id 51
+    label "argP"
+  ]
+  node [
+    id 52
+    label "fnr"
+  ]
+  node [
+    id 53
+    label "hns"
+  ]
+  node [
+    id 54
+    label "fliZ"
+  ]
+  node [
+    id 55
+    label "aroL"
+  ]
+  node [
+    id 56
+    label "tyrB"
+  ]
+  node [
+    id 57
+    label "argR"
+  ]
+  node [
+    id 58
+    label "ihfA"
+  ]
+  node [
+    id 59
+    label "lrp"
+  ]
+  node [
+    id 60
+    label "yjjQ"
+  ]
+  node [
+    id 61
+    label "bolA"
+  ]
+  node [
+    id 62
+    label "fliA"
+  ]
+  node [
+    id 63
+    label "rcsA"
+  ]
+  node [
+    id 64
+    label "ydiP"
+  ]
+  node [
     id 65
-    label "mlrA"
+    label "acrR"
   ]
   node [
     id 66
@@ -270,552 +270,502 @@ graph [
   ]
   node [
     id 67
-    label "ydiP"
+    label "rpsA"
   ]
   node [
     id 68
-    label "dksA"
+    label "csgD"
   ]
   node [
     id 69
-    label "rpoD"
-  ]
-  node [
-    id 70
-    label "ihfB"
-  ]
-  node [
-    id 71
-    label "rutR"
-  ]
-  node [
-    id 72
-    label "lexA"
-  ]
-  node [
-    id 73
-    label "gadW"
-  ]
-  node [
-    id 74
-    label "soxR"
-  ]
-  node [
-    id 75
-    label "phoP"
-  ]
-  node [
-    id 76
-    label "rcsA"
-  ]
-  node [
-    id 77
-    label "ydeO"
-  ]
-  node [
-    id 78
-    label "pgrR"
-  ]
-  node [
-    id 79
-    label "lrp"
-  ]
-  node [
-    id 80
-    label "aroG"
-  ]
-  node [
-    id 81
-    label "rstA"
-  ]
-  node [
-    id 82
-    label "zraR"
-  ]
-  node [
-    id 83
-    label "rpoN"
-  ]
-  node [
-    id 84
-    label "slyA"
-  ]
-  node [
-    id 85
-    label "argR"
-  ]
-  node [
-    id 86
-    label "nsrR"
-  ]
-  node [
-    id 87
-    label "flhC"
-  ]
-  node [
-    id 88
-    label "trpR"
-  ]
-  node [
-    id 89
-    label "sutR"
-  ]
-  node [
-    id 90
     label "soxS"
   ]
   node [
-    id 91
+    id 70
+    label "glnG"
+  ]
+  node [
+    id 71
+    label "hupA"
+  ]
+  node [
+    id 72
+    label "tyrA"
+  ]
+  node [
+    id 73
+    label "lexA"
+  ]
+  node [
+    id 74
+    label "lrhA"
+  ]
+  node [
+    id 75
+    label "stpA"
+  ]
+  node [
+    id 76
+    label "soxR"
+  ]
+  node [
+    id 77
+    label "glrR"
+  ]
+  node [
+    id 78
+    label "aroP"
+  ]
+  node [
+    id 79
+    label "gadW"
+  ]
+  node [
+    id 80
+    label "pgrR"
+  ]
+  node [
+    id 81
+    label "btsR"
+  ]
+  node [
+    id 82
     label "deaD"
   ]
-  edge [
-    source 0
-    target 21
-    polarity "+"
+  node [
+    id 83
+    label "flhC"
+  ]
+  node [
+    id 84
+    label "aroM"
+  ]
+  node [
+    id 85
+    label "alpA"
+  ]
+  node [
+    id 86
+    label "ydeO"
+  ]
+  node [
+    id 87
+    label "fis"
+  ]
+  node [
+    id 88
+    label "rcdA"
+  ]
+  node [
+    id 89
+    label "ihfB"
+  ]
+  node [
+    id 90
+    label "adiY"
+  ]
+  node [
+    id 91
+    label "ptrR"
   ]
   edge [
-    source 0
-    target 77
-    polarity "+"
-  ]
-  edge [
-    source 1
-    target 73
-    polarity "+"
-  ]
-  edge [
-    source 2
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 2
-    target 20
+    source 3
+    target 83
     polarity "-"
   ]
   edge [
     source 3
-    target 80
-    polarity "+"
-  ]
-  edge [
-    source 3
-    target 29
-    polarity "-"
-  ]
-  edge [
-    source 3
-    target 33
-    polarity "+"
-  ]
-  edge [
-    source 3
-    target 14
-    polarity "-"
-  ]
-  edge [
-    source 4
-    target 37
-    polarity "+"
-  ]
-  edge [
-    source 4
     target 28
     polarity "-"
   ]
   edge [
     source 4
-    target 73
-    polarity "+"
-  ]
-  edge [
-    source 4
-    target 17
+    target 29
     polarity "+"
   ]
   edge [
     source 5
-    target 53
+    target 79
     polarity "+"
   ]
   edge [
     source 6
-    target 21
+    target 62
     polarity "+"
   ]
   edge [
     source 6
-    target 17
-    polarity "+/-"
+    target 79
+    polarity "+"
   ]
   edge [
     source 6
-    target 51
+    target 13
     polarity "+"
   ]
   edge [
     source 7
-    target 64
-    polarity "-"
+    target 18
+    polarity "+"
   ]
   edge [
     source 7
-    target 36
-    polarity "-"
-  ]
-  edge [
-    source 8
-    target 29
+    target 79
     polarity "+"
   ]
   edge [
-    source 8
-    target 41
+    source 7
+    target 24
     polarity "+"
   ]
   edge [
-    source 8
-    target 87
+    source 7
+    target 86
     polarity "-"
   ]
   edge [
     source 8
-    target 20
+    target 83
     polarity "-"
   ]
   edge [
     source 8
-    target 10
-    polarity "-"
-  ]
-  edge [
-    source 8
-    target 42
-    polarity "-"
-  ]
-  edge [
-    source 8
-    target 44
-    polarity "+"
-  ]
-  edge [
-    source 8
-    target 64
-    polarity "-"
-  ]
-  edge [
-    source 8
-    target 45
-    polarity "-"
-  ]
-  edge [
-    source 8
-    target 56
-    polarity "+"
-  ]
-  edge [
-    source 8
-    target 36
+    target 28
     polarity "-"
   ]
   edge [
     source 9
-    target 1
-    polarity "-"
+    target 29
+    polarity "+"
   ]
   edge [
     source 10
-    target 42
+    target 79
     polarity "+"
   ]
   edge [
     source 11
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 11
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 11
-    target 74
-    polarity "-"
-  ]
-  edge [
-    source 11
-    target 90
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 32
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 24
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 29
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 33
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 0
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 87
-    polarity "+"
-  ]
-  edge [
-    source 12
-    target 20
-    polarity "+"
-  ]
-  edge [
-    source 12
-    target 10
-    polarity "+"
-  ]
-  edge [
-    source 12
-    target 42
-    polarity "+"
-  ]
-  edge [
-    source 12
-    target 21
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 73
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 17
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 26
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 5
-    polarity "-"
-  ]
-  edge [
-    source 12
     target 79
     polarity "-"
   ]
   edge [
-    source 12
-    target 76
+    source 11
+    target 50
     polarity "-"
   ]
   edge [
     source 12
-    target 58
+    target 62
     polarity "-"
   ]
   edge [
     source 12
-    target 19
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 77
-    polarity "-"
-  ]
-  edge [
-    source 12
-    target 53
-    polarity "-"
-  ]
-  edge [
-    source 13
-    target 39
-    polarity "-"
-  ]
-  edge [
-    source 13
-    target 80
-    polarity "-"
-  ]
-  edge [
-    source 13
-    target 43
-    polarity "-"
-  ]
-  edge [
-    source 13
     target 54
     polarity "-"
   ]
   edge [
     source 13
-    target 22
-    polarity "-"
-  ]
-  edge [
-    source 13
-    target 44
+    target 37
     polarity "+"
   ]
   edge [
-    source 13
-    target 64
+    source 14
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 14
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 15
+    target 18
     polarity "+"
   ]
   edge [
-    source 13
-    target 63
-    polarity "-"
-  ]
-  edge [
-    source 13
-    target 15
-    polarity "-"
-  ]
-  edge [
-    source 13
-    target 36
+    source 15
+    target 50
     polarity "+/-"
   ]
   edge [
-    source 13
-    target 48
-    polarity "-"
+    source 15
+    target 25
+    polarity "+"
   ]
   edge [
-    source 14
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 14
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 14
-    target 10
-    polarity "-"
-  ]
-  edge [
-    source 14
-    target 42
+    source 16
+    target 68
     polarity "-"
   ]
   edge [
     source 16
-    target 2
-    polarity "+"
-  ]
-  edge [
-    source 17
-    target 21
-    polarity "+"
-  ]
-  edge [
-    source 17
-    target 73
-    polarity "+/-"
-  ]
-  edge [
-    source 18
-    target 11
+    target 25
     polarity "-"
   ]
   edge [
-    source 19
+    source 17
+    target 83
+    polarity "+"
+  ]
+  edge [
+    source 17
+    target 28
+    polarity "+"
+  ]
+  edge [
+    source 17
+    target 70
+    polarity "+"
+  ]
+  edge [
+    source 17
+    target 22
+    polarity "+"
+  ]
+  edge [
+    source 17
+    target 47
+    polarity "+"
+  ]
+  edge [
+    source 17
+    target 13
+    polarity "+"
+  ]
+  edge [
+    source 17
+    target 6
+    polarity "+"
+  ]
+  edge [
+    source 18
+    target 79
+    polarity "+"
+  ]
+  edge [
+    source 18
+    target 50
+    polarity "+"
+  ]
+  edge [
+    source 20
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 20
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 20
+    target 62
+    polarity "-"
+  ]
+  edge [
+    source 20
+    target 54
+    polarity "-"
+  ]
+  edge [
+    source 22
+    target 0
+    polarity "-"
+  ]
+  edge [
+    source 22
+    target 50
+    polarity "-"
+  ]
+  edge [
+    source 22
+    target 71
+    polarity "+"
+  ]
+  edge [
+    source 22
+    target 29
+    polarity "-"
+  ]
+  edge [
+    source 22
+    target 3
+    polarity "-"
+  ]
+  edge [
+    source 22
+    target 63
+    polarity "-"
+  ]
+  edge [
+    source 22
     target 5
     polarity "-"
   ]
   edge [
-    source 21
-    target 76
+    source 22
+    target 64
+    polarity "-"
+  ]
+  edge [
+    source 23
+    target 68
+    polarity "-"
+  ]
+  edge [
+    source 23
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 23
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 23
+    target 50
+    polarity "+/-"
+  ]
+  edge [
+    source 23
+    target 29
     polarity "+"
   ]
   edge [
     source 23
-    target 56
-    polarity "-"
+    target 63
+    polarity "+"
+  ]
+  edge [
+    source 23
+    target 47
+    polarity "+"
+  ]
+  edge [
+    source 23
+    target 86
+    polarity "+"
   ]
   edge [
     source 24
-    target 29
+    target 68
+    polarity "-"
+  ]
+  edge [
+    source 25
+    target 61
     polarity "+"
   ]
   edge [
     source 25
-    target 29
+    target 35
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 48
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 36
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 18
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 79
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 50
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 14
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 58
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 89
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 27
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 33
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 47
+    polarity "+"
+  ]
+  edge [
+    source 25
+    target 13
+    polarity "+"
+  ]
+  edge [
+    source 26
+    target 62
     polarity "-"
   ]
   edge [
     source 26
-    target 87
+    target 54
     polarity "-"
   ]
   edge [
     source 26
-    target 20
+    target 58
+    polarity "-"
+  ]
+  edge [
+    source 26
+    target 59
     polarity "-"
   ]
   edge [
     source 27
-    target 41
+    target 68
     polarity "+"
   ]
   edge [
     source 28
-    target 22
+    target 62
     polarity "+"
   ]
   edge [
-    source 28
-    target 66
-    polarity "+"
-  ]
-  edge [
-    source 28
-    target 29
+    source 29
+    target 60
     polarity "+"
   ]
   edge [
     source 30
-    target 57
-    polarity "+"
-  ]
-  edge [
-    source 31
-    target 22
-    polarity "+"
-  ]
-  edge [
-    source 31
-    target 73
-    polarity "-"
-  ]
-  edge [
-    source 31
-    target 17
+    target 13
     polarity "-"
   ]
   edge [
@@ -825,13 +775,258 @@ graph [
   ]
   edge [
     source 31
-    target 74
-    polarity "-"
+    target 83
+    polarity "+"
   ]
   edge [
     source 31
-    target 90
-    polarity "-"
+    target 28
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 65
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 45
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 57
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 0
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 19
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 55
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 84
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 78
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 9
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 61
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 35
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 21
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 48
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 30
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 82
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 40
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 36
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 87
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 83
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 28
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 62
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 54
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 52
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 1
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 8
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 18
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 50
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 70
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 53
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 41
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 89
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 29
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 10
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 59
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 27
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 16
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 43
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 3
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 33
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 31
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 63
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 23
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 47
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 13
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 17
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 25
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 67
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 11
+    polarity "+"
   ]
   edge [
     source 32
@@ -839,1243 +1034,1058 @@ graph [
     polarity "+"
   ]
   edge [
-    source 34
-    target 29
-    polarity "+"
-  ]
-  edge [
-    source 35
-    target 29
-    polarity "+"
-  ]
-  edge [
-    source 35
-    target 46
-    polarity "+"
-  ]
-  edge [
-    source 37
-    target 23
-    polarity "+"
-  ]
-  edge [
-    source 38
-    target 40
-    polarity "+"
-  ]
-  edge [
-    source 38
-    target 57
-    polarity "+"
-  ]
-  edge [
-    source 40
-    target 39
-    polarity "-"
-  ]
-  edge [
-    source 40
-    target 23
-    polarity "-"
-  ]
-  edge [
-    source 40
-    target 0
-    polarity "-"
-  ]
-  edge [
-    source 40
-    target 21
-    polarity "+"
-  ]
-  edge [
-    source 40
-    target 17
-    polarity "-"
-  ]
-  edge [
-    source 40
-    target 59
-    polarity "+"
-  ]
-  edge [
-    source 40
-    target 5
-    polarity "-"
-  ]
-  edge [
-    source 40
-    target 45
-    polarity "-"
-  ]
-  edge [
-    source 40
-    target 4
-    polarity "-"
-  ]
-  edge [
-    source 40
+    source 32
     target 76
-    polarity "-"
-  ]
-  edge [
-    source 40
-    target 1
-    polarity "-"
-  ]
-  edge [
-    source 40
-    target 67
-    polarity "-"
-  ]
-  edge [
-    source 41
-    target 66
-    polarity "-"
-  ]
-  edge [
-    source 41
-    target 33
     polarity "+"
   ]
   edge [
-    source 41
-    target 23
-    polarity "-"
-  ]
-  edge [
-    source 41
-    target 17
-    polarity "-"
-  ]
-  edge [
-    source 41
-    target 59
+    source 32
+    target 69
     polarity "+"
   ]
   edge [
-    source 41
-    target 7
-    polarity "-"
-  ]
-  edge [
-    source 42
-    target 29
-    polarity "-"
-  ]
-  edge [
-    source 42
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 42
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 42
-    target 21
-    polarity "-"
-  ]
-  edge [
-    source 42
-    target 65
-    polarity "-"
-  ]
-  edge [
-    source 45
-    target 11
-    polarity "+"
-  ]
-  edge [
-    source 45
-    target 24
-    polarity "-"
-  ]
-  edge [
-    source 45
-    target 29
-    polarity "+"
-  ]
-  edge [
-    source 45
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 45
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 46
-    target 23
-    polarity "-"
-  ]
-  edge [
-    source 46
-    target 87
-    polarity "+"
-  ]
-  edge [
-    source 46
-    target 20
-    polarity "+"
-  ]
-  edge [
-    source 47
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 47
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 47
-    target 5
-    polarity "+"
-  ]
-  edge [
-    source 49
-    target 85
-    polarity "+"
-  ]
-  edge [
-    source 49
-    target 31
-    polarity "-"
-  ]
-  edge [
-    source 49
-    target 21
-    polarity "+"
-  ]
-  edge [
-    source 49
-    target 17
-    polarity "+"
-  ]
-  edge [
-    source 49
-    target 60
-    polarity "-"
-  ]
-  edge [
-    source 49
-    target 51
-    polarity "-"
-  ]
-  edge [
-    source 49
-    target 81
-    polarity "+"
-  ]
-  edge [
-    source 50
-    target 17
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 24
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 3
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 29
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 9
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 0
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 21
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 73
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 17
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 26
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 8
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 70
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 65
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 16
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 57
-    polarity "+"
-  ]
-  edge [
-    source 51
-    target 56
-    polarity "+"
-  ]
-  edge [
-    source 52
-    target 22
-    polarity "-"
-  ]
-  edge [
-    source 52
-    target 73
-    polarity "-"
-  ]
-  edge [
-    source 52
-    target 17
-    polarity "+"
-  ]
-  edge [
-    source 52
-    target 77
-    polarity "+"
-  ]
-  edge [
-    source 52
-    target 53
-    polarity "-"
-  ]
-  edge [
-    source 52
-    target 82
-    polarity "-"
-  ]
-  edge [
-    source 53
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 53
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 55
-    target 56
-    polarity "-"
-  ]
-  edge [
-    source 56
+    source 32
     target 75
     polarity "+"
   ]
   edge [
-    source 56
-    target 13
-    polarity "+"
-  ]
-  edge [
-    source 56
-    target 77
-    polarity "+"
-  ]
-  edge [
-    source 57
-    target 14
-    polarity "+"
-  ]
-  edge [
-    source 57
-    target 56
-    polarity "+"
-  ]
-  edge [
-    source 57
-    target 71
-    polarity "+"
-  ]
-  edge [
-    source 58
-    target 29
-    polarity "-"
-  ]
-  edge [
-    source 58
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 58
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 58
-    target 17
-    polarity "+/-"
-  ]
-  edge [
-    source 58
-    target 5
-    polarity "+"
-  ]
-  edge [
-    source 58
-    target 76
-    polarity "+"
-  ]
-  edge [
-    source 58
-    target 57
-    polarity "+"
-  ]
-  edge [
-    source 58
-    target 77
-    polarity "+"
-  ]
-  edge [
-    source 59
-    target 64
-    polarity "-"
-  ]
-  edge [
-    source 59
-    target 36
-    polarity "-"
-  ]
-  edge [
-    source 60
-    target 73
-    polarity "+"
-  ]
-  edge [
-    source 61
-    target 29
-    polarity "-"
-  ]
-  edge [
-    source 61
-    target 51
-    polarity "-"
-  ]
-  edge [
-    source 62
-    target 4
-    polarity "-"
-  ]
-  edge [
-    source 65
-    target 29
-    polarity "+"
-  ]
-  edge [
-    source 66
-    target 29
-    polarity "+"
-  ]
-  edge [
-    source 66
-    target 55
-    polarity "+/-"
-  ]
-  edge [
-    source 66
-    target 87
-    polarity "+"
-  ]
-  edge [
-    source 66
-    target 20
-    polarity "+"
-  ]
-  edge [
-    source 66
-    target 2
-    polarity "+"
-  ]
-  edge [
-    source 66
-    target 21
-    polarity "-"
-  ]
-  edge [
-    source 66
-    target 59
-    polarity "+"
-  ]
-  edge [
-    source 66
-    target 7
-    polarity "+"
-  ]
-  edge [
-    source 66
-    target 45
-    polarity "+/-"
-  ]
-  edge [
-    source 66
-    target 16
-    polarity "+"
-  ]
-  edge [
-    source 66
-    target 56
-    polarity "+/-"
-  ]
-  edge [
-    source 66
-    target 82
-    polarity "+"
-  ]
-  edge [
-    source 67
-    target 33
-    polarity "+"
-  ]
-  edge [
-    source 68
-    target 9
-    polarity "+"
-  ]
-  edge [
-    source 68
-    target 41
-    polarity "-"
-  ]
-  edge [
-    source 68
-    target 8
-    polarity "-"
-  ]
-  edge [
-    source 68
-    target 70
-    polarity "-"
-  ]
-  edge [
-    source 68
-    target 69
-    polarity "-"
-  ]
-  edge [
-    source 68
-    target 57
-    polarity "+"
-  ]
-  edge [
-    source 68
-    target 51
-    polarity "+"
-  ]
-  edge [
-    source 68
-    target 27
-    polarity "-"
-  ]
-  edge [
-    source 69
-    target 11
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 39
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 80
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 43
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 54
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 22
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 32
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 24
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 3
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 66
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 29
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 33
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 9
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 55
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 91
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 23
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 0
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 41
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 87
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 20
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 10
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 42
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 31
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 44
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 2
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 21
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 17
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 38
-    polarity "+"
-  ]
-  edge [
-    source 69
+    source 32
     target 12
     polarity "+"
   ]
   edge [
-    source 69
-    target 7
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 70
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 5
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 60
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 79
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 65
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 61
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 64
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 45
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 16
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 4
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 46
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 76
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 58
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 57
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 56
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 83
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 51
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 27
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 71
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 1
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 74
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 90
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 19
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 89
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 6
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 88
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 63
-    polarity "+"
-  ]
-  edge [
-    source 69
+    source 32
     target 15
     polarity "+"
   ]
   edge [
-    source 69
-    target 36
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 13
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 48
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 77
-    polarity "+"
-  ]
-  edge [
-    source 69
-    target 53
-    polarity "+"
-  ]
-  edge [
-    source 70
-    target 29
-    polarity "+"
-  ]
-  edge [
-    source 70
-    target 41
-    polarity "+"
-  ]
-  edge [
-    source 70
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 70
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 70
-    target 10
-    polarity "-"
-  ]
-  edge [
-    source 70
+    source 32
     target 42
-    polarity "-"
-  ]
-  edge [
-    source 70
-    target 44
     polarity "+"
   ]
   edge [
-    source 70
-    target 8
-    polarity "-"
+    source 32
+    target 72
+    polarity "+"
   ]
   edge [
-    source 70
-    target 64
-    polarity "-"
-  ]
-  edge [
-    source 70
-    target 45
-    polarity "-"
-  ]
-  edge [
-    source 70
+    source 32
     target 56
     polarity "+"
   ]
   edge [
-    source 70
-    target 36
-    polarity "-"
-  ]
-  edge [
-    source 71
-    target 73
-    polarity "-"
-  ]
-  edge [
-    source 71
-    target 17
-    polarity "-"
-  ]
-  edge [
-    source 72
-    target 69
-    polarity "-"
-  ]
-  edge [
-    source 73
-    target 21
-    polarity "+"
-  ]
-  edge [
-    source 74
-    target 39
-    polarity "+"
-  ]
-  edge [
-    source 74
-    target 90
-    polarity "+"
-  ]
-  edge [
-    source 74
-    target 63
-    polarity "+"
-  ]
-  edge [
-    source 75
-    target 21
-    polarity "+"
-  ]
-  edge [
-    source 75
-    target 73
-    polarity "+"
-  ]
-  edge [
-    source 75
-    target 81
-    polarity "+"
-  ]
-  edge [
-    source 75
-    target 77
-    polarity "-"
-  ]
-  edge [
-    source 76
-    target 29
-    polarity "-"
-  ]
-  edge [
-    source 76
-    target 87
-    polarity "-"
-  ]
-  edge [
-    source 76
-    target 20
-    polarity "-"
-  ]
-  edge [
-    source 77
-    target 21
-    polarity "+"
-  ]
-  edge [
-    source 77
-    target 73
-    polarity "+"
-  ]
-  edge [
-    source 78
-    target 13
-    polarity "-"
-  ]
-  edge [
-    source 79
-    target 80
-    polarity "+/-"
-  ]
-  edge [
-    source 79
-    target 91
-    polarity "-"
-  ]
-  edge [
-    source 79
-    target 10
-    polarity "+/-"
-  ]
-  edge [
-    source 79
-    target 73
-    polarity "+/-"
-  ]
-  edge [
-    source 79
-    target 5
-    polarity "+/-"
-  ]
-  edge [
-    source 79
-    target 47
-    polarity "+"
-  ]
-  edge [
-    source 79
-    target 64
-    polarity "-"
-  ]
-  edge [
-    source 79
-    target 40
-    polarity "+"
-  ]
-  edge [
-    source 79
-    target 46
-    polarity "-"
-  ]
-  edge [
-    source 79
-    target 83
-    polarity "-"
-  ]
-  edge [
-    source 79
-    target 84
-    polarity "+/-"
-  ]
-  edge [
-    source 79
-    target 90
-    polarity "+"
-  ]
-  edge [
-    source 79
-    target 19
-    polarity "+"
-  ]
-  edge [
-    source 79
-    target 36
-    polarity "+/-"
-  ]
-  edge [
-    source 79
-    target 13
-    polarity "+/-"
-  ]
-  edge [
-    source 81
-    target 29
-    polarity "-"
-  ]
-  edge [
-    source 82
-    target 10
-    polarity "+"
-  ]
-  edge [
-    source 82
-    target 73
-    polarity "+"
-  ]
-  edge [
-    source 82
-    target 56
-    polarity "+"
-  ]
-  edge [
-    source 83
-    target 87
-    polarity "+"
-  ]
-  edge [
-    source 83
-    target 20
-    polarity "+"
-  ]
-  edge [
-    source 83
+    source 32
     target 38
     polarity "+"
   ]
   edge [
-    source 83
-    target 40
+    source 32
+    target 37
     polarity "+"
   ]
   edge [
-    source 83
-    target 57
-    polarity "+"
-  ]
-  edge [
-    source 83
-    target 56
-    polarity "+"
-  ]
-  edge [
-    source 83
-    target 82
-    polarity "+"
-  ]
-  edge [
-    source 84
-    target 5
-    polarity "+"
-  ]
-  edge [
-    source 85
-    target 22
-    polarity "+"
-  ]
-  edge [
-    source 85
-    target 79
-    polarity "-"
-  ]
-  edge [
-    source 85
-    target 19
-    polarity "-"
-  ]
-  edge [
-    source 86
-    target 10
-    polarity "-"
-  ]
-  edge [
-    source 86
-    target 42
-    polarity "-"
-  ]
-  edge [
-    source 86
-    target 8
-    polarity "-"
-  ]
-  edge [
-    source 86
-    target 79
-    polarity "-"
-  ]
-  edge [
-    source 88
-    target 43
-    polarity "-"
-  ]
-  edge [
-    source 88
-    target 54
-    polarity "-"
-  ]
-  edge [
-    source 88
-    target 64
-    polarity "-"
-  ]
-  edge [
-    source 88
-    target 48
-    polarity "-"
-  ]
-  edge [
-    source 89
-    target 10
-    polarity "-"
-  ]
-  edge [
-    source 89
-    target 42
-    polarity "-"
-  ]
-  edge [
-    source 90
+    source 32
     target 2
     polarity "+"
   ]
   edge [
-    source 91
+    source 32
+    target 86
+    polarity "+"
+  ]
+  edge [
+    source 32
+    target 60
+    polarity "+"
+  ]
+  edge [
+    source 33
+    target 8
+    polarity "+"
+  ]
+  edge [
+    source 34
+    target 48
+    polarity "+"
+  ]
+  edge [
+    source 34
+    target 87
+    polarity "-"
+  ]
+  edge [
+    source 34
+    target 58
+    polarity "-"
+  ]
+  edge [
+    source 34
+    target 89
+    polarity "-"
+  ]
+  edge [
+    source 34
+    target 32
+    polarity "-"
+  ]
+  edge [
+    source 34
+    target 47
+    polarity "+"
+  ]
+  edge [
+    source 34
+    target 25
+    polarity "+"
+  ]
+  edge [
+    source 34
+    target 67
+    polarity "-"
+  ]
+  edge [
+    source 35
+    target 19
+    polarity "+"
+  ]
+  edge [
+    source 35
+    target 68
+    polarity "-"
+  ]
+  edge [
+    source 35
+    target 21
+    polarity "+"
+  ]
+  edge [
+    source 35
+    target 20
+    polarity "-"
+  ]
+  edge [
+    source 35
+    target 47
+    polarity "-"
+  ]
+  edge [
+    source 35
+    target 13
+    polarity "+"
+  ]
+  edge [
+    source 36
+    target 18
+    polarity "+"
+  ]
+  edge [
+    source 36
+    target 86
+    polarity "+"
+  ]
+  edge [
+    source 37
+    target 0
+    polarity "-"
+  ]
+  edge [
+    source 37
+    target 19
+    polarity "-"
+  ]
+  edge [
+    source 37
+    target 55
+    polarity "-"
+  ]
+  edge [
+    source 37
+    target 84
+    polarity "-"
+  ]
+  edge [
+    source 37
+    target 78
+    polarity "-"
+  ]
+  edge [
+    source 37
     target 1
     polarity "+"
+  ]
+  edge [
+    source 37
+    target 43
+    polarity "+"
+  ]
+  edge [
+    source 37
+    target 72
+    polarity "-"
+  ]
+  edge [
+    source 37
+    target 56
+    polarity "-"
+  ]
+  edge [
+    source 37
+    target 38
+    polarity "+/-"
+  ]
+  edge [
+    source 37
+    target 2
+    polarity "-"
+  ]
+  edge [
+    source 39
+    target 51
+    polarity "+"
+  ]
+  edge [
+    source 39
+    target 46
+    polarity "-"
+  ]
+  edge [
+    source 39
+    target 79
+    polarity "+"
+  ]
+  edge [
+    source 39
+    target 50
+    polarity "+"
+  ]
+  edge [
+    source 40
+    target 13
+    polarity "-"
+  ]
+  edge [
+    source 41
+    target 43
+    polarity "-"
+  ]
+  edge [
+    source 41
+    target 38
+    polarity "-"
+  ]
+  edge [
+    source 42
+    target 55
+    polarity "-"
+  ]
+  edge [
+    source 42
+    target 84
+    polarity "-"
+  ]
+  edge [
+    source 42
+    target 43
+    polarity "-"
+  ]
+  edge [
+    source 42
+    target 2
+    polarity "-"
+  ]
+  edge [
+    source 44
+    target 78
+    polarity "-"
+  ]
+  edge [
+    source 44
+    target 79
+    polarity "-"
+  ]
+  edge [
+    source 44
+    target 50
+    polarity "+"
+  ]
+  edge [
+    source 44
+    target 86
+    polarity "+"
+  ]
+  edge [
+    source 44
+    target 60
+    polarity "-"
+  ]
+  edge [
+    source 44
+    target 6
+    polarity "-"
+  ]
+  edge [
+    source 45
+    target 57
+    polarity "+"
+  ]
+  edge [
+    source 45
+    target 52
+    polarity "-"
+  ]
+  edge [
+    source 45
+    target 18
+    polarity "+"
+  ]
+  edge [
+    source 45
+    target 50
+    polarity "+"
+  ]
+  edge [
+    source 45
+    target 10
+    polarity "-"
+  ]
+  edge [
+    source 45
+    target 25
+    polarity "-"
+  ]
+  edge [
+    source 45
+    target 24
+    polarity "+"
+  ]
+  edge [
+    source 46
+    target 78
+    polarity "+"
+  ]
+  edge [
+    source 46
+    target 66
+    polarity "+"
+  ]
+  edge [
+    source 46
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 47
+    target 20
+    polarity "+"
+  ]
+  edge [
+    source 47
+    target 13
+    polarity "+"
+  ]
+  edge [
+    source 47
+    target 11
+    polarity "+"
+  ]
+  edge [
+    source 48
+    target 47
+    polarity "-"
+  ]
+  edge [
+    source 48
+    target 5
+    polarity "-"
+  ]
+  edge [
+    source 49
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 49
+    target 31
+    polarity "+"
+  ]
+  edge [
+    source 50
+    target 79
+    polarity "+/-"
+  ]
+  edge [
+    source 51
+    target 40
+    polarity "+"
+  ]
+  edge [
+    source 52
+    target 78
+    polarity "+"
+  ]
+  edge [
+    source 52
+    target 79
+    polarity "-"
+  ]
+  edge [
+    source 52
+    target 50
+    polarity "-"
+  ]
+  edge [
+    source 52
+    target 22
+    polarity "-"
+  ]
+  edge [
+    source 52
+    target 76
+    polarity "-"
+  ]
+  edge [
+    source 52
+    target 69
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 90
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 9
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 61
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 68
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 21
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 36
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 83
+    polarity "+"
+  ]
+  edge [
+    source 53
+    target 28
+    polarity "+"
+  ]
+  edge [
+    source 53
+    target 62
+    polarity "+"
+  ]
+  edge [
+    source 53
+    target 54
+    polarity "+"
+  ]
+  edge [
+    source 53
+    target 18
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 79
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 50
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 14
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 29
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 59
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 63
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 23
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 75
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 86
+    polarity "-"
+  ]
+  edge [
+    source 53
+    target 60
+    polarity "-"
+  ]
+  edge [
+    source 54
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 54
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 54
+    target 18
+    polarity "-"
+  ]
+  edge [
+    source 54
+    target 27
+    polarity "-"
+  ]
+  edge [
+    source 57
+    target 78
+    polarity "+"
+  ]
+  edge [
+    source 57
+    target 75
+    polarity "-"
+  ]
+  edge [
+    source 58
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 58
+    target 87
+    polarity "+"
+  ]
+  edge [
+    source 58
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 58
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 58
+    target 62
+    polarity "-"
+  ]
+  edge [
+    source 58
+    target 54
+    polarity "-"
+  ]
+  edge [
+    source 58
+    target 1
+    polarity "+"
+  ]
+  edge [
+    source 58
+    target 43
+    polarity "-"
+  ]
+  edge [
+    source 58
+    target 3
+    polarity "-"
+  ]
+  edge [
+    source 58
+    target 47
+    polarity "-"
+  ]
+  edge [
+    source 58
+    target 13
+    polarity "+"
+  ]
+  edge [
+    source 58
+    target 38
+    polarity "-"
+  ]
+  edge [
+    source 59
+    target 57
+    polarity "+/-"
+  ]
+  edge [
+    source 59
+    target 19
+    polarity "+/-"
+  ]
+  edge [
+    source 59
+    target 82
+    polarity "-"
+  ]
+  edge [
+    source 59
+    target 62
+    polarity "+/-"
+  ]
+  edge [
+    source 59
+    target 79
+    polarity "+/-"
+  ]
+  edge [
+    source 59
+    target 29
+    polarity "+/-"
+  ]
+  edge [
+    source 59
+    target 74
+    polarity "+"
+  ]
+  edge [
+    source 59
+    target 43
+    polarity "-"
+  ]
+  edge [
+    source 59
+    target 22
+    polarity "+"
+  ]
+  edge [
+    source 59
+    target 31
+    polarity "-"
+  ]
+  edge [
+    source 59
+    target 17
+    polarity "-"
+  ]
+  edge [
+    source 59
+    target 4
+    polarity "+/-"
+  ]
+  edge [
+    source 59
+    target 69
+    polarity "+"
+  ]
+  edge [
+    source 59
+    target 75
+    polarity "+"
+  ]
+  edge [
+    source 59
+    target 38
+    polarity "+/-"
+  ]
+  edge [
+    source 59
+    target 37
+    polarity "+/-"
+  ]
+  edge [
+    source 60
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 60
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 61
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 63
+    target 68
+    polarity "-"
+  ]
+  edge [
+    source 63
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 63
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 64
+    target 21
+    polarity "+"
+  ]
+  edge [
+    source 65
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 65
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 65
+    target 76
+    polarity "-"
+  ]
+  edge [
+    source 65
+    target 69
+    polarity "-"
+  ]
+  edge [
+    source 66
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 30
+    polarity "+/-"
+  ]
+  edge [
+    source 66
+    target 34
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 87
+    polarity "+/-"
+  ]
+  edge [
+    source 66
+    target 83
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 28
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 8
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 18
+    polarity "-"
+  ]
+  edge [
+    source 66
+    target 50
+    polarity "-"
+  ]
+  edge [
+    source 66
+    target 70
+    polarity "+/-"
+  ]
+  edge [
+    source 66
+    target 71
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 41
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 3
+    polarity "+/-"
+  ]
+  edge [
+    source 66
+    target 33
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 47
+    polarity "+"
+  ]
+  edge [
+    source 66
+    target 13
+    polarity "+/-"
+  ]
+  edge [
+    source 66
+    target 25
+    polarity "-"
+  ]
+  edge [
+    source 66
+    target 6
+    polarity "+"
+  ]
+  edge [
+    source 67
+    target 87
+    polarity "+"
+  ]
+  edge [
+    source 68
+    target 62
+    polarity "-"
+  ]
+  edge [
+    source 69
+    target 8
+    polarity "+"
+  ]
+  edge [
+    source 70
+    target 22
+    polarity "+"
+  ]
+  edge [
+    source 70
+    target 47
+    polarity "+"
+  ]
+  edge [
+    source 71
+    target 43
+    polarity "-"
+  ]
+  edge [
+    source 71
+    target 38
+    polarity "-"
+  ]
+  edge [
+    source 73
+    target 32
+    polarity "-"
+  ]
+  edge [
+    source 74
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 74
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 74
+    target 29
+    polarity "+"
+  ]
+  edge [
+    source 75
+    target 29
+    polarity "-"
+  ]
+  edge [
+    source 76
+    target 0
+    polarity "+"
+  ]
+  edge [
+    source 76
+    target 69
+    polarity "+"
+  ]
+  edge [
+    source 76
+    target 72
+    polarity "+"
+  ]
+  edge [
+    source 77
+    target 47
+    polarity "+"
+  ]
+  edge [
+    source 80
+    target 37
+    polarity "-"
+  ]
+  edge [
+    source 81
+    target 68
+    polarity "-"
+  ]
+  edge [
+    source 82
+    target 5
+    polarity "+"
+  ]
+  edge [
+    source 83
+    target 62
+    polarity "+"
+  ]
+  edge [
+    source 85
+    target 39
+    polarity "-"
+  ]
+  edge [
+    source 86
+    target 18
+    polarity "+"
+  ]
+  edge [
+    source 86
+    target 79
+    polarity "+"
+  ]
+  edge [
+    source 87
+    target 21
+    polarity "+"
+  ]
+  edge [
+    source 87
+    target 40
+    polarity "-"
+  ]
+  edge [
+    source 87
+    target 50
+    polarity "-"
+  ]
+  edge [
+    source 87
+    target 71
+    polarity "+"
+  ]
+  edge [
+    source 87
+    target 41
+    polarity "-"
+  ]
+  edge [
+    source 88
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 89
+    target 68
+    polarity "+"
+  ]
+  edge [
+    source 89
+    target 87
+    polarity "+"
+  ]
+  edge [
+    source 89
+    target 83
+    polarity "-"
+  ]
+  edge [
+    source 89
+    target 28
+    polarity "-"
+  ]
+  edge [
+    source 89
+    target 62
+    polarity "-"
+  ]
+  edge [
+    source 89
+    target 54
+    polarity "-"
+  ]
+  edge [
+    source 89
+    target 1
+    polarity "+"
+  ]
+  edge [
+    source 89
+    target 58
+    polarity "-"
+  ]
+  edge [
+    source 89
+    target 43
+    polarity "-"
+  ]
+  edge [
+    source 89
+    target 3
+    polarity "-"
+  ]
+  edge [
+    source 89
+    target 47
+    polarity "-"
+  ]
+  edge [
+    source 89
+    target 13
+    polarity "+"
+  ]
+  edge [
+    source 89
+    target 38
+    polarity "-"
+  ]
+  edge [
+    source 90
+    target 50
+    polarity "+"
+  ]
+  edge [
+    source 91
+    target 65
+    polarity "-"
   ]
 ]
