@@ -1,5 +1,5 @@
 import networkx as nx
-import utility
+import nocap.utility as utility
 import sympy as sy
 import numpy as np
 import pandas as pd
