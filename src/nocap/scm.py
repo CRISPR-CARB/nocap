@@ -7,6 +7,7 @@ import networkx as nx
 import pydot
 import sympy as sy
 from networkx.drawing.nx_pydot import from_pydot
+from pgmpy.models import BayesianNetwork
 from y0.dsl import Variable
 from y0.graph import NxMixedGraph
 
@@ -184,6 +185,33 @@ def convert_to_eqn_array_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
         latex_equations.append(equation_latex)
     eqn_array = r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
     return eqn_array
+
+
+def mixed_graph_to_pgmpy(graph: NxMixedGraph) -> BayesianNetwork:
+    """Convert a mixed graph to an equivalent :class:`pgmpy.BayesianNetwork`."""
+    # Get all directed edges with node names
+    edges = [(u.name, v.name) for u, v in graph.directed.edges() if u != v]
+
+    # Initialize set for latent variables
+    latents = set()
+
+    # Handle undirected edges by introducing latent variables
+    for u, v in graph.undirected.edges():
+        if u != v:  # no self loops
+            latent = f"U_{u.name}_{v.name}"
+            latents.add(latent)
+            edges.append((latent, u.name))
+            edges.append((latent, v.name))
+
+    # Initialize the BayesianNetwork with edges
+    model = BayesianNetwork(ebunch=edges, latents=latents)
+
+    # Add all original nodes to the BayesianNetwork
+    for node in graph.directed.nodes():
+        if node.name not in model.nodes():
+            model.add_node(node.name)
+
+    return model
 
 
 def generate_synthetic_data_from_lscm():

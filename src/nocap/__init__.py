@@ -16,6 +16,7 @@ from .scm import (
     get_symbols_from_bi_edges,
     get_symbols_from_di_edges,
     get_symbols_from_nodes,
+    mixed_graph_to_pgmpy,
     read_dag_file,
     regress_lscm,
 )
@@ -35,4 +36,5 @@ __all__ = [
     "get_symbols_from_nodes",
     "read_dag_file",
     "regress_lscm",
+    "mixed_graph_to_pgmpy",
 ]

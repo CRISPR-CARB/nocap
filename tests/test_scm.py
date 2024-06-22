@@ -4,6 +4,7 @@ import networkx as nx
 
 # import numpy as np
 import sympy as sy
+from pgmpy.models import BayesianNetwork
 
 # import y0
 from y0.graph import NxMixedGraph
@@ -20,6 +21,7 @@ from nocap import (
     get_symbols_from_bi_edges,
     get_symbols_from_di_edges,
     get_symbols_from_nodes,
+    mixed_graph_to_pgmpy,
     read_dag_file,
 )
 
@@ -278,6 +280,35 @@ def test_convert_to_eqn_array_latex():
     expected = r"$$ \begin{array}{rcl}A &=& \epsilon_{A}\\ B &=& A \beta_{A ->B} + \epsilon_{B}\end{array}$$"
     actual = convert_to_eqn_array_latex(lscm_dict)
     assert actual == expected  # noqa: S101
+
+
+def test_mixed_graph_to_pgmpy():
+    """Convert a mixed graph to an equivalent :class:`pgmpy.BayesianNetwork`."""
+    # Create a complex mixed graph with mixed edges, disconnected nodes, and a fully disconnected node
+    graph = NxMixedGraph()
+    graph.add_node("A")
+    graph.add_node("B")
+    graph.add_node("C")
+    graph.add_directed_edge("A", "B")
+    graph.add_directed_edge("B", "C")
+    graph.add_undirected_edge("A", "C")
+    graph.add_undirected_edge("D", "E")
+    graph.add_node("F")  # Add a fully disconnected node
+
+    # Convert to BayesianNetwork
+    bn = mixed_graph_to_pgmpy(graph)
+
+    # Check if the BayesianNetwork has the correct edges and nodes
+    assert isinstance(bn, BayesianNetwork)  # noqa: S101
+    assert set(bn.edges()) == {  # noqa: S101
+        ("A", "B"),
+        ("B", "C"),
+        ("U_A_C", "A"),
+        ("U_A_C", "C"),
+        ("U_D_E", "D"),
+        ("U_D_E", "E"),
+    }
+    assert set(bn.nodes()) == {"A", "B", "C", "U_A_C", "D", "E", "U_D_E", "F"}  # noqa: S101
 
 
 # def test_generate_synthetic_data_from_lscm():
