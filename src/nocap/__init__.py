@@ -16,10 +16,10 @@ from .scm import (
     get_symbols_from_bi_edges,
     get_symbols_from_di_edges,
     get_symbols_from_nodes,
+    intervene_on_lscm,
     mixed_graph_to_pgmpy,
     read_dag_file,
     simulate_lscm,
-    intervene_on_lscm,
 )
 
 __all__ = [
@@ -38,5 +38,5 @@ __all__ = [
     "read_dag_file",
     "mixed_graph_to_pgmpy",
     "simulate_lscm",
-    "intervene_on_lscm"
+    "intervene_on_lscm",
 ]

@@ -2,9 +2,9 @@
 
 import os
 import re
+from functools import partial
 from statistics import fmean
 
-import numpy as np
 import networkx as nx
 import pandas as pd
 import pydot
@@ -15,7 +15,6 @@ from sklearn.linear_model import LinearRegression
 from y0.dsl import Variable
 from y0.graph import NxMixedGraph
 from y0.simulation import LinearSCM
-from functools import partial
 
 
 def dagitty_to_dot(daggity_string: str | None) -> str:
@@ -220,13 +219,31 @@ def mixed_graph_to_pgmpy(graph: NxMixedGraph) -> BayesianNetwork:
     return model
 
 
+def simulate_lscm(
+    graph: NxMixedGraph,
+    node_generators: dict[Variable, partial],
+    edge_weights: dict[tuple[Variable, Variable], float],
+    n_samples: int,
+) -> pd.DataFrame:
+    """Generate N lscm samples based on node generators and edge weights."""
+    assert nx.is_directed_acyclic_graph(graph.directed)  # noqa: S101
+
+    linear_scm = LinearSCM(graph, generators=node_generators, weights=edge_weights)
+    results = {
+        trial: {variable.name: values for variable, values in linear_scm.trial().items()}
+        for trial in range(n_samples)
+    }
+    rv = pd.DataFrame(results).T
+    return rv
+
+
 def calibrate_lscm(
     graph: NxMixedGraph, data: pd.DataFrame
 ) -> dict[tuple[Variable, Variable], float]:
     """Estimate parameter values for a linear SCM using single door criterion."""
     rv = {}
 
-    assert(nx.is_directed_acyclic_graph(graph.directed)) # make sure input is a DAG
+    assert nx.is_directed_acyclic_graph(graph.directed)  # noqa: S101
 
     for source, target in graph.directed.edges():
         temp_graph = graph.copy()
@@ -268,33 +285,15 @@ def calibrate_lscm(
     return rv
 
 
-
-def simulate_lscm(
-    graph: NxMixedGraph, node_generators: dict[Variable,partial],
-    edge_weights:dict[tuple[Variable,Variable],float],  n_samples: int
-) -> pd.DataFrame:
-    """Generate N lscm samples based on node generators and edge weights."""
-
-    assert(nx.is_directed_acyclic_graph(graph.directed))
-
-    linear_scm = LinearSCM(graph, generators=node_generators, weights=edge_weights)
-    results = {
-        trial: {variable.name: values for variable, values in linear_scm.trial().items()}
-        for trial in range(n_samples)
-    }
-    rv = pd.DataFrame(results).T
-    return rv
-
-
 def intervene_on_lscm(
-        original_graph: NxMixedGraph, intervention_node: tuple[Variable,float],
-        original_node_generators: dict[Variable,partial],
-        original_edge_weights:dict[tuple[Variable,Variable],float],
+    original_graph: NxMixedGraph,
+    intervention_node: tuple[Variable, float],
+    original_node_generators: dict[Variable, partial],
+    original_edge_weights: dict[tuple[Variable, Variable], float],
 ) -> LinearSCM:
     """Intervenes on lscm graph by removing incoming edges to the intervention node."""
+    assert nx.is_directed_acyclic_graph(original_graph.directed)  # noqa: S101
 
-    assert(nx.is_directed_acyclic_graph(original_graph.directed))
-    
     # copy graph
     intervened_graph = original_graph.copy()
 
@@ -304,7 +303,9 @@ def intervene_on_lscm(
 
     # adjust node generators ()
     intervened_node_generators = original_node_generators.copy()
-    intervened_node_generators[intervention_node[0]] = lambda *args, **kwargs: intervention_node[1]  # return fixed value 
+    intervened_node_generators[intervention_node[0]] = partial(
+        lambda *args, **kwargs: intervention_node[1]
+    )  # return fixed value
 
     # update edge_weights to remove edges
     intervened_edge_weights = original_edge_weights.copy()
@@ -313,7 +314,8 @@ def intervene_on_lscm(
             del intervened_edge_weights[edge]
 
     # create lscm
-    intervened_lscm = LinearSCM(intervened_graph, generators=intervened_node_generators, weights=intervened_edge_weights)
+    intervened_lscm = LinearSCM(
+        intervened_graph, generators=intervened_node_generators, weights=intervened_edge_weights
+    )
 
     return intervened_lscm
-

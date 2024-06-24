@@ -1,17 +1,20 @@
 """Test functions for the scm module."""
 
+from functools import partial
+
 import networkx as nx
-import pandas as pd
+import numpy as np
 
 # import numpy as np
 import sympy as sy
+from numpy.random import uniform
 from pgmpy.models import BayesianNetwork
+from y0.dsl import Variable
 
 # import y0
 from y0.graph import NxMixedGraph
 
 from nocap import (
-    calibrate_lscm,
     convert_to_eqn_array_latex,
     convert_to_latex,
     dagitty_to_digraph,
@@ -25,6 +28,7 @@ from nocap import (
     get_symbols_from_nodes,
     mixed_graph_to_pgmpy,
     read_dag_file,
+    simulate_lscm,
 )
 
 # TODO: use fixtures!
@@ -313,7 +317,82 @@ def test_mixed_graph_to_pgmpy():
     assert set(bn.nodes()) == {"A", "B", "C", "U_A_C", "D", "E", "U_D_E", "F"}  # noqa: S101
 
 
+def test_simulate_lscm_abc():
+    """Tests that simulation for LSCM works as expected for a simple ABC model."""
+    # Define the simple ABC graph: A -> B, B -> C
+    directed_edges = [("A", "B"), ("B", "C")]
+    graph = NxMixedGraph.from_str_edges(directed=directed_edges)
 
+    # Set a random seed for reproducibility
+    np.random.seed(42)
+
+    # Setup node generators and edge weights with fixed ranges
+    node_generators = {
+        Variable(node.name): partial(uniform, low=2.0, high=4.0) for node in graph.directed.nodes()
+    }
+    edge_weights = {edge: uniform(low=1.0, high=2.0) for edge in graph.directed.edges()}
+
+    # Simulate data
+    n_samples = 10000
+    df = simulate_lscm(
+        graph=graph, node_generators=node_generators, edge_weights=edge_weights, n_samples=n_samples
+    )
+
+    # Compute expected summary statistics for noise
+    def _compute_noise_stats(generator, n_samples):
+        """Compute the mean and stdev."""
+        samples = [generator() for _ in range(n_samples)]
+        return np.mean(samples), np.std(samples)
+
+    mean_a, std_a = _compute_noise_stats(node_generators[Variable("A")], n_samples)
+    mean_b, std_b = _compute_noise_stats(node_generators[Variable("B")], n_samples)
+    mean_c, std_c = _compute_noise_stats(node_generators[Variable("C")], n_samples)
+
+    # Direct computation of expected summary statistics
+    expected_mean_a, expected_std_a = mean_a, std_a
+    expected_mean_b = mean_b + (edge_weights[(Variable("A"), Variable("B"))] * mean_a)
+    expected_std_b = np.sqrt(std_b**2 + (edge_weights[(Variable("A"), Variable("B"))] * std_a) ** 2)
+    expected_mean_c = mean_c + (edge_weights[(Variable("B"), Variable("C"))] * expected_mean_b)
+    expected_std_c = np.sqrt(
+        std_c**2 + (edge_weights[(Variable("B"), Variable("C"))] * expected_std_b) ** 2
+    )
+
+    # Actual summary statistics from simulated data
+    actual_mean_a, actual_std_a = df["A"].mean(), df["A"].std()
+    actual_mean_b, actual_std_b = df["B"].mean(), df["B"].std()
+    actual_mean_c, actual_std_c = df["C"].mean(), df["C"].std()
+
+    # Check the shape of the dataframe
+    assert df.shape == (  # noqa: S101
+        n_samples,
+        len(graph.directed.nodes()),
+    ), "DataFrame shape is incorrect"
+
+    # Check the column names
+    expected_columns = sorted([node.name for node in graph.directed.nodes()])
+    assert sorted(df.columns) == expected_columns, "DataFrame columns are incorrect"  # noqa: S101
+
+    # Verify summary statistics match
+    np.testing.assert_allclose(
+        actual_mean_a, expected_mean_a, rtol=0.1, err_msg="Mean mismatch for column A"
+    )
+    np.testing.assert_allclose(
+        actual_std_a, expected_std_a, rtol=0.1, err_msg="Std dev mismatch for column A"
+    )
+
+    np.testing.assert_allclose(
+        actual_mean_b, expected_mean_b, rtol=0.1, err_msg="Mean mismatch for column B"
+    )
+    np.testing.assert_allclose(
+        actual_std_b, expected_std_b, rtol=0.1, err_msg="Std dev mismatch for column B"
+    )
+
+    np.testing.assert_allclose(
+        actual_mean_c, expected_mean_c, rtol=0.1, err_msg="Mean mismatch for column C"
+    )
+    np.testing.assert_allclose(
+        actual_std_c, expected_std_c, rtol=0.1, err_msg="Std dev mismatch for column C"
+    )
 
 
 # def test_generate_synthetic_data_from_lscm():
