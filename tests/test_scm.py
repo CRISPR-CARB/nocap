@@ -15,6 +15,7 @@ from y0.dsl import Variable
 from y0.graph import NxMixedGraph
 
 from nocap import (
+    calibrate_lscm,
     convert_to_eqn_array_latex,
     convert_to_latex,
     dagitty_to_digraph,
@@ -26,6 +27,7 @@ from nocap import (
     get_symbols_from_bi_edges,
     get_symbols_from_di_edges,
     get_symbols_from_nodes,
+    intervene_on_lscm,
     mixed_graph_to_pgmpy,
     read_dag_file,
     simulate_lscm,
@@ -393,6 +395,97 @@ def test_simulate_lscm_abc():
     np.testing.assert_allclose(
         actual_std_c, expected_std_c, rtol=0.1, err_msg="Std dev mismatch for column C"
     )
+
+
+def test_calibrate_lscm_abc():
+    """Test that calibration of LSCM works as expected for a simple ABC model."""
+    # Define the simple ABC graph: A -> B, B -> C
+    directed_edges = [("A", "B"), ("B", "C")]
+    graph = NxMixedGraph.from_str_edges(directed=directed_edges)
+
+    # Known edge weights
+    manual_edge_weights = {(Variable("A"), Variable("B")): 1.5, (Variable("B"), Variable("C")): 1.2}
+
+    # Set a random seed for reproducibility
+    np.random.seed(42)
+
+    # Setup node generators and known edge weights
+    node_generators = {
+        Variable(node.name): partial(uniform, low=2.0, high=4.0) for node in graph.directed.nodes()
+    }
+    edge_weights = manual_edge_weights
+
+    # Simulate data
+    n_samples = 10000
+    df = simulate_lscm(
+        graph=graph, node_generators=node_generators, edge_weights=edge_weights, n_samples=n_samples
+    )
+
+    # Calibrate the model using the simulated data
+    calibrated_weights = calibrate_lscm(graph, df)
+
+    # Check that the calibrated weights are within a tolerance level of the actual weights
+    for edge in edge_weights:
+        actual_weight = edge_weights[edge]
+        calibrated_weight = calibrated_weights[edge]
+        np.testing.assert_allclose(
+            calibrated_weight, actual_weight, rtol=0.1, err_msg=f"Weight mismatch for edge {edge}"
+        )
+
+
+def test_intervene_on_lscm():
+    """Test the intervene_on_lscm function using a specific graph and intervention."""
+    # Define the graph
+    directed_edges = [
+        ("V1", "V2"),
+        ("V1", "V4"),
+        ("V2", "V5"),
+        ("V4", "V5"),
+        ("V4", "V6"),
+        ("V5", "V6"),
+        ("V3", "V5"),
+    ]
+    graph = NxMixedGraph.from_str_edges(directed=directed_edges)
+
+    # Define node generators and edge weights
+    node_generators = {
+        Variable(node.name): partial(uniform, low=2.0, high=4.0) for node in graph.directed.nodes()
+    }
+    edge_weights = {edge: uniform(low=1.0, high=2.0) for edge in graph.directed.edges()}
+
+    # Perform the intervention on node V4 by setting it to 10
+    intervention_node = (Variable("V4"), 10.0)
+    intervened_lscm = intervene_on_lscm(graph, intervention_node, node_generators, edge_weights)
+
+    intervened_graph = intervened_lscm.graph.directed
+    intervened_generators = intervened_lscm.generators
+    intervened_weights = intervened_lscm.weights
+
+    # Check the edges of the intervened graph
+    expected_edges = [
+        (Variable("V1"), Variable("V2")),
+        (Variable("V2"), Variable("V5")),
+        (Variable("V4"), Variable("V5")),
+        (Variable("V4"), Variable("V6")),
+        (Variable("V5"), Variable("V6")),
+        (Variable("V3"), Variable("V5")),
+    ]
+    actual_edges = list(intervened_graph.edges())
+
+    assert sorted(actual_edges) == sorted(  # noqa: S101
+        expected_edges
+    ), f"Edges mismatch: expected {expected_edges}, got {actual_edges}"
+
+    # Check that the node generator for V4 returns 10
+    assert (  # noqa: S101
+        intervened_generators[Variable("V4")]() == 10.0
+    ), "Generator for V4 should return the intervention value 10"
+
+    # Check that the edge weights do not include any incoming edge weight for V4
+    removed_edge = ("V1", "V4")
+    assert (  # noqa: S101
+        removed_edge not in intervened_weights
+    ), f"Edge {removed_edge} should have been removed from edge weights"
 
 
 # def test_generate_synthetic_data_from_lscm():
