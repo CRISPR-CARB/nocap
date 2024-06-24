@@ -5,6 +5,7 @@
 from .api import *  # noqa
 from .scm import (
     calibrate_lscm,
+    compute_average_treatment_effect,
     convert_to_eqn_array_latex,
     convert_to_latex,
     dagitty_to_digraph,
@@ -24,6 +25,7 @@ from .scm import (
 
 __all__ = [
     "calibrate_lscm",
+    "compute_average_treatment_effect",
     "convert_to_eqn_array_latex",
     "convert_to_latex",
     "dagitty_to_digraph",

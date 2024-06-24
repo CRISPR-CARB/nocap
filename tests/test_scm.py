@@ -4,6 +4,7 @@ from functools import partial
 
 import networkx as nx
 import numpy as np
+import pandas as pd
 
 # import numpy as np
 import sympy as sy
@@ -16,6 +17,7 @@ from y0.graph import NxMixedGraph
 
 from nocap import (
     calibrate_lscm,
+    compute_average_treatment_effect,
     convert_to_eqn_array_latex,
     convert_to_latex,
     dagitty_to_digraph,
@@ -486,6 +488,36 @@ def test_intervene_on_lscm():
     assert (  # noqa: S101
         removed_edge not in intervened_weights
     ), f"Edge {removed_edge} should have been removed from edge weights"
+
+
+def test_compute_average_treatment_effect():
+    """Tests the compute_average_treatment_effect function using known values."""
+    # Define variables
+    outcome_variables = [Variable("Y1"), Variable("Y2")]
+
+    # Create example DataFrames for treatments
+    data_untreated = {"Y1": [1.0, 1.2, 1.1, 1.3, 1.0], "Y2": [2.0, 2.1, 2.0, 2.1, 2.0]}
+    data_treated = {"Y1": [1.5, 1.6, 1.7, 1.8, 1.5], "Y2": [2.5, 2.4, 2.5, 2.4, 2.5]}
+
+    df_untreated = pd.DataFrame(data_untreated)
+    df_treated = pd.DataFrame(data_treated)
+
+    # Expected average treatment effects
+    expected_ate = {Variable("Y1"): 0.5, Variable("Y2"): 0.42}
+
+    # Compute the average treatment effects
+    computed_ate = compute_average_treatment_effect(df_untreated, df_treated, outcome_variables)
+
+    # Validate the computed ATE against expected values
+    for variable in outcome_variables:
+        expected_value = expected_ate[variable]
+        computed_value = computed_ate[variable]
+        np.testing.assert_almost_equal(
+            computed_value,
+            expected_value,
+            decimal=2,
+            err_msg=f"ATE mismatch for variable {variable.name}: expected {expected_value}, got {computed_value}",
+        )
 
 
 # def test_generate_synthetic_data_from_lscm():

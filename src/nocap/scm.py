@@ -319,3 +319,16 @@ def intervene_on_lscm(
     )
 
     return intervened_lscm
+
+
+def compute_average_treatment_effect(
+    treatment1: pd.DataFrame, treatment2: pd.DataFrame, outcome_variables: list[Variable]
+) -> dict[Variable, float]:
+    """Compute the average treatment effect (i.e., E[Y1-Y0])."""
+    avg_treatment_effect_dict = {}
+    for v in outcome_variables:
+        avg_untreated = treatment1.loc[:, str(v)].mean()
+        avg_treated = treatment2.loc[:, str(v)].mean()
+        avg_treatment_effect = avg_treated - avg_untreated
+        avg_treatment_effect_dict[v] = avg_treatment_effect
+    return avg_treatment_effect_dict
