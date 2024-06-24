@@ -1,6 +1,7 @@
 """Test functions for the scm module."""
 
 import networkx as nx
+import pandas as pd
 
 # import numpy as np
 import sympy as sy
@@ -10,6 +11,7 @@ from pgmpy.models import BayesianNetwork
 from y0.graph import NxMixedGraph
 
 from nocap import (
+    calibrate_lscm,
     convert_to_eqn_array_latex,
     convert_to_latex,
     dagitty_to_digraph,
@@ -309,6 +311,9 @@ def test_mixed_graph_to_pgmpy():
         ("U_D_E", "E"),
     }
     assert set(bn.nodes()) == {"A", "B", "C", "U_A_C", "D", "E", "U_D_E", "F"}  # noqa: S101
+
+
+
 
 
 # def test_generate_synthetic_data_from_lscm():
