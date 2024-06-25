@@ -6,9 +6,11 @@ from functools import partial
 from statistics import fmean
 
 import networkx as nx
+import numpy as np
 import pandas as pd
 import pydot
 import sympy as sy
+import warnings
 from networkx.drawing.nx_pydot import from_pydot
 from pgmpy.models import BayesianNetwork
 from sklearn.linear_model import LinearRegression
@@ -284,6 +286,21 @@ def calibrate_lscm(
         idx = variables.index(source.name)
         # model = LinearRegression()
         model.fit(data[variables], data[target.name])
+
+        corr_mat = data[variables].corr()
+        corr_threshold = 0.8
+        mask = np.triu(np.ones(corr_mat.shape), k=1).astype(bool)
+        high_corr_elements = (abs(corr_mat) > corr_threshold) & mask
+        num_high_corr_elements = high_corr_elements.sum().sum()
+        if num_high_corr_elements > 0:
+            warnings.warn(
+                f"Correlation matrix contains {num_high_corr_elements} off-diagonal elements "
+                f"with absolute values greater than the threshold of {corr_threshold}. "
+                f"Total number of variables: {len(variables)}.",
+                UserWarning,
+                stacklevel=2
+            )
+
         # coefficients.append(model.coef_[idx])
         # for adjustment_set in adjustment_sets:
         #     # Ensure adjustment_set is a set before performing the union operation.
