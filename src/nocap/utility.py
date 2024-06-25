@@ -1,14 +1,20 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-from causalgraphicalmodels import CausalGraphicalModel
-import sympy as sy
-import numpy as np
-import warnings
-import pandas as pd
-import re
+"""Structural causal models."""
 
-def parse_regulation_file(file_path):
-    "Parses a biocyc network regulation text file and converts it into a directed graph."
+import re
+import warnings
+from typing import Dict, List, Tuple
+
+# import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
+import sympy as sy
+
+# from causalgraphicalmodels import CausalGraphicalModel
+
+
+def parse_regulation_file(file_path: str) -> nx.DiGraph:
+    """Parse a biocyc network regulation text file and converts it into a directed graph."""
     # Regulation text file should have the following format:
     # '#' for comments.
     # All regulators have a "*" after their name.
@@ -17,7 +23,7 @@ def parse_regulation_file(file_path):
     # The regulatees are prefixed with a '+', '-', or '+/-' for polarity.
 
     # Create a directed graph to represent the network
-    G = nx.DiGraph()
+    graph = nx.DiGraph()
 
     # Open and read the file line by line
     with open(file_path, "r") as file:
@@ -37,8 +43,8 @@ def parse_regulation_file(file_path):
                 # Make first letter lowercase (expected format for genes)
                 current_regulator = current_regulator[0].lower() + current_regulator[1:]
                 # If the current regulator is not already in the graph, add it
-                if current_regulator not in G:
-                    G.add_node(current_regulator)
+                if current_regulator not in graph:
+                    graph.add_node(current_regulator)
             elif current_regulator and line.startswith("  "):
                 # Process the regulatees
                 regulatees = line.strip().split()
@@ -51,7 +57,7 @@ def parse_regulation_file(file_path):
                         polarity = regulatee[0]
                         gene = regulatee[1:]
                     else:
-                        warnings.warn(f"regulatee: {regulatee} has no polarity")
+                        warnings.warn(f"regulatee: {regulatee} has no polarity", stacklevel=2)
                         polarity = ""
                         gene = regulatee
 
@@ -61,11 +67,11 @@ def parse_regulation_file(file_path):
                     gene = gene[0].lower() + gene[1:]
 
                     # If the regulatee is not in the graph, add it
-                    if gene not in G:
-                        G.add_node(gene)
+                    if gene not in graph:
+                        graph.add_node(gene)
                     # Add an edge between the current_regulator and the regulatee with the polarity as an attribute
-                    G.add_edge(current_regulator, gene, polarity=polarity)
-    return G
+                    graph.add_edge(current_regulator, gene, polarity=polarity)
+    return graph
 
 
 # def convert_to_acyclic_graph(graph):
@@ -96,81 +102,83 @@ def parse_regulation_file(file_path):
 #     return G
 
 
-def convert_to_acyclic_graph_fancy(graph, target_node):
-    """Converts a (cyclic) directed graph into an acyclic directed graph by removing edges and disconnected nodes."""
-    G = graph.copy()
+def convert_to_acyclic_graph_fancy(graph: nx.DiGraph, target_node: str) -> nx.DiGraph:
+    """Convert a (cyclic) directed graph into an acyclic directed graph by removing edges and disconnected nodes."""
+    graph = graph.copy()
 
     # Get all descendants of the target node
-    descendants = nx.descendants(G, target_node)
+    descendants = nx.descendants(graph, target_node)
 
     # Find all edges in shortest paths from the target node to its descendants
     edges_in_paths = set()
     for descendant in descendants:
-        path = nx.shortest_path(G, target_node, descendant)
+        path = nx.shortest_path(graph, target_node, descendant)
         edges_in_path = list(zip(path, path[1:]))
         edges_in_paths.update(edges_in_path)
 
     # Remove self-loops
-    self_loops = list(nx.selfloop_edges(G))
-    G.remove_edges_from(self_loops)
+    self_loops = list(nx.selfloop_edges(graph))
+    graph.remove_edges_from(self_loops)
 
     # Remove nodes that became disconnected after removing self-loops
-    for u, v in self_loops:
-        if G.degree(u) == 0:
-            G.remove_node(u)
+    for u, _v in self_loops:
+        if graph.degree(u) == 0:
+            graph.remove_node(u)
 
     # While the graph is cyclic, find and break the cycles
-    while not nx.is_directed_acyclic_graph(G):
+    while not nx.is_directed_acyclic_graph(graph):
         try:
-            cycle_edges = nx.find_cycle(G, orientation="original")
+            cycle_edges = nx.find_cycle(graph, orientation="original")
         except nx.exception.NetworkXNoCycle:
             break  # No cycle found.
 
         # Remove an edge from the cycle that's not part of a path from the target node to a descendant
         for u, v, _ in cycle_edges:
             if (u, v) not in edges_in_paths:
-                G.remove_edge(u, v)
+                graph.remove_edge(u, v)
 
                 # Remove nodes that became disconnected after removing the edge
-                if G.degree(u) == 0:
-                    G.remove_node(u)
-                if G.degree(v) == 0:
-                    G.remove_node(v)
+                if graph.degree(u) == 0:
+                    graph.remove_node(u)
+                if graph.degree(v) == 0:
+                    graph.remove_node(v)
                 break  # Break the cycle processing loop once an edge has been removed
 
-    return G
+    return graph
 
 
-def draw_network(G):
-    """Placeholder function to draw a network."""
-    pos = nx.spring_layout(G)  # Position nodes using Fruchterman-Reingold force-directed algorithm
-    nx.draw(G, pos, with_labels=True, node_size=2, node_color="lightblue", edge_color="gray")
-    edge_labels = nx.get_edge_attributes(G, "polarity")
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-    plt.show()
+# def draw_network(G):
+#     """Draw network ."""
+#     pos = nx.spring_layout(G)  # Position nodes using Fruchterman-Reingold force-directed algorithm
+#     nx.draw(G, pos, with_labels=True, node_size=2, node_color="lightblue", edge_color="gray")
+#     edge_labels = nx.get_edge_attributes(G, "polarity")
+#     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+#     plt.show()
 
 
-def get_subgraph_from_nodes(G, node_list, descendants_only=False):
+def get_subgraph_from_nodes(
+    graph: nx.DiGraph, node_list: List[str], descendants_only: bool = False
+) -> nx.DiGraph:
     """Get subgraph of a graph from a node list."""
     # Initialize a set for all the nodes in the subgraph
     subgraph_nodes = set()
 
     # For each node in the list, find all descendants
     for node in node_list:
-        if node in G:
+        if node in graph:
             subgraph_nodes.add(node)
-            descendants = nx.descendants(G, node)
+            descendants = nx.descendants(graph, node)
             subgraph_nodes.update(descendants)
             if not descendants_only:
                 # For each descendant, add its ancestors
                 for desc in descendants:
-                    ancestors = nx.ancestors(G, desc)
+                    ancestors = nx.ancestors(graph, desc)
                     subgraph_nodes.update(ancestors)
         else:
-            warnings.warn(f"{node} not found in graph.")
+            warnings.warn(f"{node} not found in graph.", stacklevel=2)
 
     # Create the subgraph from the full graph using the nodes in the set
-    subgraph = G.subgraph(subgraph_nodes)
+    subgraph = graph.subgraph(subgraph_nodes)
     return subgraph
 
 
@@ -205,17 +213,36 @@ def get_subgraph_from_nodes(G, node_list, descendants_only=False):
 #     return subnetwork
 
 
-def generate_hill_equations(dag, activation_probability=0.5):
+def generate_hill_equations(dag: nx.DiGraph, activation_probability: float = 0.5) -> Tuple[
+    Dict[str, sy.Basic],
+    Dict[str, sy.Symbol],
+    Dict[Tuple[str, str], sy.Symbol],
+    Dict[Tuple[str, str], sy.Symbol],
+    Dict[Tuple[str, str], sy.Symbol],
+    Dict[str, sy.Symbol],
+]:
     """
     Generate symbolic Hill-like reaction dynamics equations for a gene regulatory network.
-    See:https://doi.org/10.1016/j.cels.2020.08.003
-    Note that basal rate = 0 for non master regulators, and production rate = basal rate for master regulators.
 
-    Args:
-    dag (nx.DiGraph): The directed acyclic graph representing the gene regulatory network.
+    :param dag: The directed acyclic graph representing the gene regulatory network.
+    :type dag: nx.DiGraph
+    :param activation_probability: Probability of activation for edges with '+/-' polarity. Defaults to 0.5.
+    :type activation_probability: float
+    :returns: A tuple containing:
+        - dict: Symbolic equations for the production rates of genes.
+        - dict: Symbols for basal rates.
+        - dict: Symbols for maximum contributions.
+        - dict: Symbols for Hill coefficients.
+        - dict: Symbols for half responses.
+        - dict: Symbols for gene expressions.
+    :rtype: tuple
+    :raises ValueError: If an unknown polarity is encountered.
 
-    Returns:
-    dict: Symbolic equations for the production rates of genes.
+    :seealso: `https://doi.org/10.1016/j.cels.2020.08.003`
+
+    .. note::
+        The basal rate = 0 for non-master regulators,
+        and the production rate is equal to the basal rate for master regulators.
     """
     # Initialize a dictionary to hold the equations
     equations = {}
@@ -246,7 +273,7 @@ def generate_hill_equations(dag, activation_probability=0.5):
         production_rate = basal_rates[gene]  # Start with the basal rate
         for regulator in dag.predecessors(gene):
             x = gene_expressions[regulator]
-            K = max_contributions[(regulator, gene)]
+            k = max_contributions[(regulator, gene)]
             n = hill_coefficients[(regulator, gene)]
             h = half_responses[(regulator, gene)]
             polarity = dag[regulator][gene]["polarity"]
@@ -254,14 +281,14 @@ def generate_hill_equations(dag, activation_probability=0.5):
             # double check these eqns
             # k should be exported as negative if repressor
             if polarity == "+":  # Activation
-                pij = K * x**n / (h**n + x**n)
+                pij = k * x**n / (h**n + x**n)
             elif polarity == "-":  # Repression
-                pij = K * (1 - x**n) / (h**n + x**n)
+                pij = k * (1 - x**n) / (h**n + x**n)
             elif polarity == "+/-":  # Randomly assigned polarity based on user-defined probability
                 if np.random.rand() < activation_probability:
-                    pij = K * x**n / (h**n + x**n)  # Activation
+                    pij = k * x**n / (h**n + x**n)  # Activation
                 else:
-                    pij = K * (1 - x**n) / (h**n + x**n)  # Repression
+                    pij = k * (1 - x**n) / (h**n + x**n)  # Repression
             else:
                 raise ValueError(f"Unknown polarity '{polarity}' for edge {regulator} -> {gene}")
             production_rate += pij
@@ -278,24 +305,46 @@ def generate_hill_equations(dag, activation_probability=0.5):
     )
 
 
-def generate_hill_equations_for_n_replicas(dag, activation_probability=0.5, N=1):
+def generate_hill_equations_for_n_replicas(
+    dag: nx.DiGraph, activation_probability: float = 0.5, n: int = 1
+) -> Dict[
+    int,
+    Tuple[
+        Dict[str, sy.Basic],
+        Dict[str, sy.Symbol],
+        Dict[Tuple[str, str], sy.Symbol],
+        Dict[Tuple[str, str], sy.Symbol],
+        Dict[Tuple[str, str], sy.Symbol],
+        Dict[str, sy.Symbol],
+    ],
+]:
     """
     Generate multiple replicas of Hill-like reaction dynamics equations for a gene regulatory network.
 
-    Args:
-    dag (nx.DiGraph): The directed acyclic graph representing the gene regulatory network.
-    activation_probability (float): Probability of activation for edges with '+/-' polarity.
-    N (int): Number of replicas to generate.
+    :param dag: The directed acyclic graph representing the gene regulatory network.
+    :type dag: nx.DiGraph
+    :param activation_probability: Probability of activation for edges with '+/-' polarity. Defaults to 0.5.
+    :type activation_probability: float
+    :param n: Number of replicas to generate. Defaults to 1.
+    :type n: int
+    :returns: A dictionary of N sets of symbolic equations for the production rates of genes and their parameters.
+    :rtype: dict
 
-    Returns:
-    dict: A dictionary containing N sets of symbolic equations for the production rates of genes and their parameters.
+    .. warning::
+        Ensure that the replica ID is 0-indexed when using the replicas in the range(N).
+
+    .. seealso::
+        `generate_hill_equations` function for generating a single set of Hill-like reaction dynamics equations.
+
+    .. note::
+        The basal rate = 0 for non-master regulators,
+        and the production rate is equal to the basal rate for master regulators.
     """
-
-    warnings.warn("using replica in range(N) - ensure replica id is 0 index.")
+    warnings.warn("using replica in range(N) - ensure replica id is 0 index.", stacklevel=2)
     all_replica_equations = {}
 
     # Generate N replicas of equations
-    for replica in range(N):
+    for replica in range(n):
         # Call the original generate_hill_equations function
         (
             equations,
@@ -318,21 +367,29 @@ def generate_hill_equations_for_n_replicas(dag, activation_probability=0.5, N=1)
 
     return all_replica_equations
 
+
 def assign_random_parameter_values(
-    basal_rates, max_contributions, hill_coefficients, half_responses, param_distributions
-):
+    basal_rates: Dict[str, sy.Symbol],
+    max_contributions: Dict[Tuple[str, str], sy.Symbol],
+    hill_coefficients: Dict[Tuple[str, str], sy.Symbol],
+    half_responses: Dict[Tuple[str, str], sy.Symbol],
+    param_distributions: Dict[str, Dict[str, float]],
+) -> Dict[sy.Symbol, float]:
     """
     Assign values to the parameters of the Hill equations based on specified distributions.
 
-    Args:
-    basal_rates (dict): Dictionary of symbols for basal rates.
-    max_contributions (dict): Dictionary of symbols for maximum contributions.
-    hill_coefficients (dict): Dictionary of symbols for Hill coefficients.
-    half_responses (dict): Dictionary of symbols for half responses.
-    param_distributions (dict): Dictionary with distribution settings for each parameter.
-
-    Returns:
-    dict: Dictionary with symbols as keys and assigned values as values.
+    :param basal_rates: Dictionary of symbols for basal rates.
+    :type basal_rates: dict
+    :param max_contributions: Dictionary of symbols for maximum contributions.
+    :type max_contributions: dict
+    :param hill_coefficients: Dictionary of symbols for Hill coefficients.
+    :type hill_coefficients: dict
+    :param half_responses: Dictionary of symbols for half responses.
+    :type half_responses: dict
+    :param param_distributions: Dictionary with distribution settings for each parameter.
+    :type param_distributions: dict
+    :returns: Dictionary with symbols as keys and assigned values as values.
+    :rtype: dict
     """
     parameter_values = {}
 
@@ -364,17 +421,30 @@ def assign_random_parameter_values(
     return parameter_values
 
 
-def assign_random_values_for_n_replicas(all_replica_equations, param_distributions_by_replica):
+def assign_random_values_for_n_replicas(
+    all_replica_equations: Dict[
+        int,
+        Tuple[
+            Dict[str, sy.Basic],
+            Dict[str, sy.Symbol],
+            Dict[Tuple[str, str], sy.Symbol],
+            Dict[Tuple[str, str], sy.Symbol],
+            Dict[Tuple[str, str], sy.Symbol],
+            Dict[str, sy.Symbol],
+        ],
+    ],
+    param_distributions_by_replica: Dict[int, Dict[str, Dict[str, float]]],
+) -> Dict[int, Dict[sy.Symbol, float]]:
     """
     Assign random values to the parameters of Hill equations for all replicas based on specified distributions.
 
-    Args:
-    all_replica_equations (dict): Dictionary containing N sets of symbolic equations for the production rates of genes.
-    param_distributions_by_replica (dict): Dictionary where each key is a replica ID and the value is the associated
+    :param all_replica_equations: Dictionary containing N sets of symbolic equations for the production rates of genes.
+    :type all_replica_equations: dict
+    :param param_distributions_by_replica: Dictionary where each key is a replica ID and the value is the associated
                                            param_distributions dictionary for that replica.
-
-    Returns:
-    dict: A dictionary containing N sets of assigned parameter values for the Hill equations.
+    :type param_distributions_by_replica: dict
+    :returns: A dictionary containing N sets of assigned parameter values for the Hill equations.
+    :rtype: dict
     """
     all_replica_parameter_values = {}
 
@@ -403,33 +473,35 @@ def assign_random_values_for_n_replicas(all_replica_equations, param_distributio
     return all_replica_parameter_values
 
 
-def create_node_to_idx_mapping(graph):
+def create_node_to_idx_mapping(graph: nx.DiGraph) -> Dict[str, int]:
     """
     Create a mapping from gene names to indices for a given graph.
 
-    Args:
-    dag (nx.DiGraph): The directed acyclic graph representing the gene regulatory network.
-
-    Returns:
-    dict: Mapping from gene names to indices starting at 0.
+    :param graph: The directed acyclic graph representing the gene regulatory network.
+    :type graph: nx.DiGraph
+    :returns: Mapping from gene names to indices starting at 0.
+    :rtype: dict
     """
     return {gene: idx for idx, gene in enumerate(graph.nodes())}
 
 
-def create_dataframes_for_sergio_inputs_from_one_replica(dag, parameter_values, node_to_idx):
+def create_dataframes_for_sergio_inputs_from_one_replica(
+    dag: nx.DiGraph, parameter_values: Dict[sy.Symbol, float], node_to_idx: Dict[str, int]
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Create pandas DataFrames for SERGIO inputs from one replica of a gene regulatory network.
 
-    Args:
-    dag (nx.DiGraph): The directed acyclic graph representing the gene regulatory network.
-    parameter_values (dict): Dictionary (k:symbol,v:parameter values) for the Hill equations for one replica.
-    node_to_idx (dict): Mapping from gene names to indices.
-
-    Returns:
-    pd.DataFrame: Data frame for the targets.
-    pd.DataFrame: Data frame for the master regulators.
+    :param dag: The directed acyclic graph representing the gene regulatory network.
+    :type dag: nx.DiGraph
+    :param parameter_values: Dictionary (k:symbol,v:parameter values) for the Hill equations for one replica.
+    :type parameter_values: dict
+    :param node_to_idx: Mapping from gene names to indices.
+    :type node_to_idx: dict
+    :returns: Data frame for the targets and data frame for the master regulators.
+    :rtype: tuple
+    :raises KeyError: If a gene is not found in the node_to_idx mapping
+        or an expected key is not found in parameter_values.
     """
-
     # Determine the maximum number of regulators for any gene
     max_regs = max(dag.in_degree(gene) for gene in dag.nodes())
 
@@ -455,22 +527,26 @@ def create_dataframes_for_sergio_inputs_from_one_replica(dag, parameter_values, 
         else:
             # Target genes
             regulators = list(dag.predecessors(gene))
-            row = [gene_idx, len(regulators)] + [None] * (3 * max_regs)
+            row = [gene_idx, float(len(regulators))] + [None] * (3 * max_regs)
+            # row = [gene_idx, len(regulators)] + [None] * (3 * max_regs)
             for i, reg in enumerate(regulators):
                 reg_idx = node_to_idx[reg]
-                K_key = sy.Symbol("K_" + reg + "_" + gene)
+                k_key = sy.Symbol("K_" + reg + "_" + gene)
                 n_key = sy.Symbol("n_" + reg + "_" + gene)
 
-                K_value = parameter_values[K_key]
+                k_value = parameter_values[k_key]
                 coop_state = parameter_values[n_key]
 
                 # If the regulator is a repressor, use -K_value
-                if dag[reg][gene]["polarity"] == "-" and K_value > 0:
-                    K_value *= -1
+                if dag[reg][gene]["polarity"] == "-" and k_value > 0:
+                    k_value *= -1
 
-                row[2 + i] = reg_idx
-                row[2 + max_regs + i] = K_value
-                row[2 + 2 * max_regs + i] = coop_state
+                # row[2 + int(i)] = reg_idx
+                # row[2 + int(max_regs) + int(i)] = k_value
+                # row[2 + 2 * int(max_regs) + int(i)] = coop_state
+                row[2 + int(i)] = float(reg_idx)
+                row[2 + int(max_regs) + int(i)] = float(k_value)
+                row[2 + 2 * int(max_regs) + int(i)] = float(coop_state)
             targets_data.append(row)
 
     # Create data frames
@@ -486,28 +562,33 @@ def create_dataframes_for_sergio_inputs_from_one_replica(dag, parameter_values, 
     return targets_df, regs_df
 
 
-def create_dataframes_for_sergio_inputs_from_n_replicas(dag, all_parameter_values, node_to_idx):
+def create_dataframes_for_sergio_inputs_from_n_replicas(
+    dag: nx.DiGraph,
+    all_parameter_values: Dict[int, Dict[sy.Symbol, float]],
+    node_to_idx: Dict[str, int],
+) -> Tuple[List[pd.DataFrame], List[pd.DataFrame]]:
     """
     Create lists of pandas DataFrames for SERGIO inputs from multiple replicas.
 
-    Args:
-    dag (nx.DiGraph): The directed acyclic graph representing the gene regulatory network.
-    all_parameter_values (list of dicts): List of parameter values dictionaries for the Hill equations for each replica.
-    node_to_idx (dict): Mapping from gene names to indices.
-
-    Returns:
-    list of pd.DataFrame: List of data frames for the targets for each replica.
-    list of pd.DataFrame: List of data frames for the master regulators for each replica.
+    :param dag: The directed acyclic graph representing the gene regulatory network.
+    :type dag: nx.DiGraph
+    :param all_parameter_values: List of parameter values dictionaries for the Hill equations for each replica.
+    :type all_parameter_values: dict
+    :param node_to_idx: Mapping from gene names to indices.
+    :type node_to_idx: dict
+    :returns: List of dataframes for the targets for each replica
+        and list of data frames for the master regulators for each replica.
+    :rtype: tuple
     """
-    assert isinstance(dag, nx.DiGraph)
-    assert isinstance(all_parameter_values, dict)
-    assert isinstance(node_to_idx, dict)
+    assert isinstance(dag, nx.DiGraph)  # noqa: S101
+    assert isinstance(all_parameter_values, dict)  # noqa: S101
+    assert isinstance(node_to_idx, dict)  # noqa: S101
 
     all_targets_dfs = []
     all_regs_dfs = []
 
     # Iterate over the parameter values for each replica
-    for replica, parameter_values in all_parameter_values.items():
+    for _, parameter_values in all_parameter_values.items():
         # Convert parameter keys to sympy Symbols if they are not already
         parameter_values_symbols = {
             sy.Symbol(k) if isinstance(k, str) else k: v for k, v in parameter_values.items()
@@ -522,19 +603,24 @@ def create_dataframes_for_sergio_inputs_from_n_replicas(dag, all_parameter_value
 
 
 def merge_n_replica_dataframes_for_sergio_inputs(
-    all_targets_dfs, all_regs_dfs, merge_type="first_only"
-):
+    all_targets_dfs: List[pd.DataFrame],
+    all_regs_dfs: List[pd.DataFrame],
+    merge_type: str = "first_only",
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Merge lists of pandas DataFrames for SERGIO inputs from multiple replicas based on the specified merge type.
 
-    Args:
-    all_targets_dfs (list of pd.DataFrame): List of data frames for the targets for each replica.
-    all_regs_dfs (list of pd.DataFrame): List of data frames for the master regulators for each replica.
-    merge_type (str): Merge type with default "first_only". If "first_only", return the first elements of the target df and concatenates reg production rates.
-
-    Returns:
-    pd.DataFrame: Merged data frame for the targets.
-    pd.DataFrame: Merged data frame for the master regulators with additional production rate columns.
+    :param all_targets_dfs: List of data frames for the targets for each replica.
+    :type all_targets_dfs: list
+    :param all_regs_dfs: List of data frames for the master regulators for each replica.
+    :type all_regs_dfs: list
+    :param merge_type: Merge type with default "first_only".
+        If "first_only", return the first elements of the target df and concatenates regulator production rates.
+    :type merge_type: str
+    :returns: Merged dataframe for the targets and
+        merged dataframe for the master regulators with additional production rate columns.
+    :rtype: tuple
+    :raises NotImplementedError: If the merge type is not implemented.
     """
     if merge_type == "first_only":
         # Make a copy of the first master regulators DataFrame
@@ -549,17 +635,22 @@ def merge_n_replica_dataframes_for_sergio_inputs(
     else:
         # Placeholder for other merge types, which can be implemented later
         raise NotImplementedError("Merge type not implemented.")
-    
 
-def write_input_files_for_sergio(targets_df, regs_df, filename_targets, filename_regs):
+
+def write_input_files_for_sergio(
+    targets_df: pd.DataFrame, regs_df: pd.DataFrame, filename_targets: str, filename_regs: str
+) -> None:
     """
     Save the targets and regulators data frames to text files without the index.
 
-    Args:
-    targets_df (pd.DataFrame): Data frame for the targets.
-    regs_df (pd.DataFrame): Data frame for the master regulators.
-    filename_targets (str): Filename for the targets text file.
-    filename_regs (str): Filename for the master regulators text file.
+    :param targets_df: Data frame for the targets.
+    :type targets_df: pd.DataFrame
+    :param regs_df: Data frame for the master regulators.
+    :type regs_df: pd.DataFrame
+    :param filename_targets: Filename for the targets text file.
+    :type filename_targets: str
+    :param filename_regs: Filename for the master regulators text file.
+    :type filename_regs: str
     """
     # Convert entire dataframes to float
     targets_df = targets_df.astype(float)
@@ -570,7 +661,8 @@ def write_input_files_for_sergio(targets_df, regs_df, filename_targets, filename
     regs_csv = regs_df.to_csv(index=False, header=False, na_rep="")
 
     # Remove unnecessary commas from CSV strings
-    def clean_csv_string(csv_string):
+    def _clean_csv_string(csv_string):
+        """Remove trailing commas and multiple commas."""
         # Remove trailing commas at the end of each line and any repeating commas
         csv_string = re.sub(r",+\n", "\n", csv_string)  # Remove trailing commas at the end of lines
         csv_string = re.sub(r",+", ",", csv_string)  # Replace multiple commas with a single one
@@ -578,13 +670,17 @@ def write_input_files_for_sergio(targets_df, regs_df, filename_targets, filename
 
     # Write the cleaned CSV strings to text files
     with open(filename_targets, "w") as f:
-        f.write(clean_csv_string(targets_csv))
+        f.write(_clean_csv_string(targets_csv))
     with open(filename_regs, "w") as f:
-        f.write(clean_csv_string(regs_csv))    
+        f.write(_clean_csv_string(regs_csv))
 
 
-def write_equation_info_to_file(hill_equations, parameter_values, data_filename):
-    """Writes equations and parameter values as strings in a textfile. TODO: save to .json"""
+def write_equation_info_to_file(
+    hill_equations: Dict[str, sy.Basic],
+    parameter_values: Dict[sy.Symbol, float],
+    data_filename: str,
+) -> None:
+    """Write equations and parameter values as strings in a textfile."""
     # Convert Sympy expressions to strings for serialization
     hill_equations_str = {str(k): str(v) for k, v in hill_equations.items()}
 
@@ -601,5 +697,3 @@ def write_equation_info_to_file(hill_equations, parameter_values, data_filename)
         # Write the parameter values
         for key, value in parameter_values.items():
             text_file.write(f"{key}: {value}\n")
-
-
