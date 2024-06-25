@@ -2,7 +2,7 @@
 
 import re
 import warnings
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 # import matplotlib.pyplot as plt
 import networkx as nx
@@ -102,7 +102,7 @@ def parse_regulation_file(file_path: str) -> nx.DiGraph:
 #     return G
 
 
-def convert_to_acyclic_graph_fancy(graph: nx.DiGraph, target_node: str) -> nx.DiGraph:
+def convert_to_acyclic_graph(graph: nx.DiGraph, target_node: str) -> nx.DiGraph:
     """Convert a (cyclic) directed graph into an acyclic directed graph by removing edges and disconnected nodes."""
     graph = graph.copy()
 
@@ -485,6 +485,87 @@ def create_node_to_idx_mapping(graph: nx.DiGraph) -> Dict[str, int]:
     return {gene: idx for idx, gene in enumerate(graph.nodes())}
 
 
+# def create_dataframes_for_sergio_inputs_from_one_replica(
+#     dag: nx.DiGraph, parameter_values: Dict[sy.Symbol, float], node_to_idx: Dict[str, int]
+# ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+#     """
+#     Create pandas DataFrames for SERGIO inputs from one replica of a gene regulatory network.
+
+#     :param dag: The directed acyclic graph representing the gene regulatory network.
+#     :type dag: nx.DiGraph
+#     :param parameter_values: Dictionary (k:symbol,v:parameter values) for the Hill equations for one replica.
+#     :type parameter_values: dict
+#     :param node_to_idx: Mapping from gene names to indices.
+#     :type node_to_idx: dict
+#     :returns: Data frame for the targets and data frame for the master regulators.
+#     :rtype: tuple
+#     :raises KeyError: If a gene is not found in the node_to_idx mapping
+#         or an expected key is not found in parameter_values.
+#     """
+#     # Determine the maximum number of regulators for any gene
+#     max_regs = max(dag.in_degree(gene) for gene in dag.nodes())
+
+#     # Initialize empty lists to store data
+#     regs_data = []
+#     targets_data = []
+
+#     # Iterate over genes in the DAG
+#     for gene in dag.nodes():
+#         gene_idx = node_to_idx.get(gene)
+#         if gene_idx is None:
+#             raise KeyError(f"Gene {gene} not found in node_to_idx mapping")
+
+#         # Check for master regulators
+#         if dag.in_degree(gene) == 0:
+#             b_key = sy.Symbol("b_" + gene)
+#             if b_key in parameter_values:
+#                 b_value = parameter_values[b_key]
+#                 regs_data.append([gene_idx, b_value])
+#             else:
+#                 raise KeyError(f"Expected key {b_key} not found in parameter_values")
+
+#         else:
+#             # Target genes
+#             regulators = list(dag.predecessors(gene))
+#             row = [gene_idx, float(len(regulators))] + [None] * (3 * max_regs)
+#             # row = [gene_idx, len(regulators)] + [None] * (3 * max_regs)
+#             for i, reg in enumerate(regulators):
+#                 reg_idx = node_to_idx[reg]
+#                 k_key = sy.Symbol("K_" + reg + "_" + gene)
+#                 n_key = sy.Symbol("n_" + reg + "_" + gene)
+
+#                 k_value = parameter_values[k_key]
+#                 coop_state = parameter_values[n_key]
+
+#                 # If the regulator is a repressor, use -K_value
+#                 if dag[reg][gene]["polarity"] == "-" and k_value > 0:
+#                     k_value *= -1
+
+#                 # row[2 + int(i)] = reg_idx
+#                 # row[2 + int(max_regs) + int(i)] = k_value
+#                 # row[2 + 2 * int(max_regs) + int(i)] = coop_state
+#                 row[2 + int(i)] = float(reg_idx)
+#                 row[2 + int(max_regs) + int(i)] = float(k_value)
+#                 row[2 + 2 * int(max_regs) + int(i)] = float(coop_state)
+#             targets_data.append(row)
+
+#     # Create data frames
+#     targets_df = pd.DataFrame(
+#         targets_data,
+#         columns=["Target Idx", "#regulators"]
+#         + ["regIdx" + str(i + 1) for i in range(max_regs)]
+#         + ["K" + str(i + 1) for i in range(max_regs)]
+#         + ["coop_state" + str(i + 1) for i in range(max_regs)],
+#     )
+#     regs_df = pd.DataFrame(regs_data, columns=["Master regulator Idx", "production_rate"])
+
+#     return targets_df, regs_df
+
+
+# Define the type for elements in the row, which can be either int or float
+RowElement = Union[int, float, None]
+
+
 def create_dataframes_for_sergio_inputs_from_one_replica(
     dag: nx.DiGraph, parameter_values: Dict[sy.Symbol, float], node_to_idx: Dict[str, int]
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -499,15 +580,14 @@ def create_dataframes_for_sergio_inputs_from_one_replica(
     :type node_to_idx: dict
     :returns: Data frame for the targets and data frame for the master regulators.
     :rtype: tuple
-    :raises KeyError: If a gene is not found in the node_to_idx mapping
-        or an expected key is not found in parameter_values.
+    :raises KeyError: If a gene is not found in the node_to_idx mapping or an expected key is not found in parameter_values.
     """
     # Determine the maximum number of regulators for any gene
     max_regs = max(dag.in_degree(gene) for gene in dag.nodes())
 
     # Initialize empty lists to store data
-    regs_data = []
-    targets_data = []
+    regs_data: List[List[Union[int, float]]] = []
+    targets_data: List[List[RowElement]] = []
 
     # Iterate over genes in the DAG
     for gene in dag.nodes():
@@ -527,8 +607,7 @@ def create_dataframes_for_sergio_inputs_from_one_replica(
         else:
             # Target genes
             regulators = list(dag.predecessors(gene))
-            row = [gene_idx, float(len(regulators))] + [None] * (3 * max_regs)
-            # row = [gene_idx, len(regulators)] + [None] * (3 * max_regs)
+            row: List[RowElement] = [gene_idx, len(regulators)] + [None] * (3 * max_regs)
             for i, reg in enumerate(regulators):
                 reg_idx = node_to_idx[reg]
                 k_key = sy.Symbol("K_" + reg + "_" + gene)
@@ -541,12 +620,9 @@ def create_dataframes_for_sergio_inputs_from_one_replica(
                 if dag[reg][gene]["polarity"] == "-" and k_value > 0:
                     k_value *= -1
 
-                # row[2 + int(i)] = reg_idx
-                # row[2 + int(max_regs) + int(i)] = k_value
-                # row[2 + 2 * int(max_regs) + int(i)] = coop_state
-                row[2 + int(i)] = float(reg_idx)
-                row[2 + int(max_regs) + int(i)] = float(k_value)
-                row[2 + 2 * int(max_regs) + int(i)] = float(coop_state)
+                row[2 + i] = reg_idx
+                row[2 + max_regs + i] = k_value
+                row[2 + 2 * max_regs + i] = coop_state
             targets_data.append(row)
 
     # Create data frames

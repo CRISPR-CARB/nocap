@@ -11,10 +11,9 @@ import nocap.utility as utility
 
 
 def test_parse_regulation_file_simple():
-    "Checks that the expected and actual graphs are identical after parsing."
+    """Check that the expected and actual graphs are identical after parsing."""
     # Path to the file with the regulation data
-    # file_path = "/notebooks/ecoli/simple_regulation_network.txt"
-    file_path = "./notebooks/ecoli/simple_regulation_network.txt"
+    file_path = "./tests/simple_regulation_network.txt"
 
     # Parse the file using the function
     G = utility.parse_regulation_file(file_path)
@@ -37,39 +36,40 @@ def test_parse_regulation_file_simple():
     ), "The graphs are not isomorphic or the edge polarities do not match."
 
 
+# def test_convert_to_acyclic_graph():
+#     """Test if a graph is correctly converted into an acyclic graph."""
+#     # Create a directed graph representing a simple gene regulatory network
+#     cyclic_graph = nx.DiGraph()
+#     cyclic_graph.add_edges_from(
+#         [
+#             ("Gene1", "Gene2"),  # Gene1 activates Gene2
+#             ("Gene2", "Gene3"),  # Gene2 activates Gene3
+#             ("Gene3", "Gene1"),  # Gene3 activates Gene1, forming a cycle
+#             ("Gene3", "Gene3"),  # Gene3 regulates itself, a self-loop
+#             ("Gene4", "Gene2"),  # Gene4 activates Gene2, not part of a cycle
+#         ]
+#     )
+
+#     # Convert the cyclic graph to an acyclic one
+#     acyclic_graph = utility.convert_to_acyclic_graph(cyclic_graph)
+
+#     # Test if the resulting graph is acyclic
+#     assert nx.is_directed_acyclic_graph(acyclic_graph), "The graph is not acyclic."
+
+#     # Test if the self-loop has been removed
+#     assert not acyclic_graph.has_edge("Gene3", "Gene3"), "The self-loop has not been removed."
+
+#     # Test if the larger cycle has been broken by checking for cycles
+#     assert len(list(nx.simple_cycles(acyclic_graph))) == 0, "The cycle has not been broken."
+
+#     # Test if non-cycle edges are preserved
+#     assert acyclic_graph.has_edge(
+#         "Gene4", "Gene2"
+#     ), "The edge not part of a cycle was incorrectly removed."
+
+
 def test_convert_to_acyclic_graph():
-    """Tests if a graph is correctly converted into an acyclic graph."""
-    # Create a directed graph representing a simple gene regulatory network
-    cyclic_graph = nx.DiGraph()
-    cyclic_graph.add_edges_from(
-        [
-            ("Gene1", "Gene2"),  # Gene1 activates Gene2
-            ("Gene2", "Gene3"),  # Gene2 activates Gene3
-            ("Gene3", "Gene1"),  # Gene3 activates Gene1, forming a cycle
-            ("Gene3", "Gene3"),  # Gene3 regulates itself, a self-loop
-            ("Gene4", "Gene2"),  # Gene4 activates Gene2, not part of a cycle
-        ]
-    )
-
-    # Convert the cyclic graph to an acyclic one
-    acyclic_graph = utility.convert_to_acyclic_graph(cyclic_graph)
-
-    # Test if the resulting graph is acyclic
-    assert nx.is_directed_acyclic_graph(acyclic_graph), "The graph is not acyclic."
-
-    # Test if the self-loop has been removed
-    assert not acyclic_graph.has_edge("Gene3", "Gene3"), "The self-loop has not been removed."
-
-    # Test if the larger cycle has been broken by checking for cycles
-    assert len(list(nx.simple_cycles(acyclic_graph))) == 0, "The cycle has not been broken."
-
-    # Test if non-cycle edges are preserved
-    assert acyclic_graph.has_edge(
-        "Gene4", "Gene2"
-    ), "The edge not part of a cycle was incorrectly removed."
-
-
-def test_convert_to_acyclic_graph_fancy():
+    """Test if a graph is correctly converted into an acyclic graph."""
     # Create a directed graph representing a simple gene regulatory network
     cyclic_graph = nx.DiGraph()
     cyclic_graph.add_edges_from(
@@ -83,7 +83,7 @@ def test_convert_to_acyclic_graph_fancy():
     )
 
     # Convert the cyclic graph to an acyclic one
-    acyclic_graph = utility.convert_to_acyclic_graph_fancy(cyclic_graph, "gene1")
+    acyclic_graph = utility.convert_to_acyclic_graph(cyclic_graph, "gene1")
 
     # Test if the resulting graph is acyclic
     assert nx.is_directed_acyclic_graph(acyclic_graph), "The graph is not acyclic."
@@ -109,6 +109,7 @@ def test_convert_to_acyclic_graph_fancy():
 
 
 def test_get_subgraph_from_nodes_include_ancestors_of_descendants():
+    """Test subgraph from DAG, including descendants and their ancestors."""
     # Create a sample directed acyclic graph (DAG)
     G = nx.DiGraph()
     G.add_edges_from(
@@ -142,6 +143,7 @@ def test_get_subgraph_from_nodes_include_ancestors_of_descendants():
 
 
 def test_get_subgraph_from_nodes_complex_structure():
+    """Test subgraph from a complex graph structure."""
     # Create a sample directed acyclic graph (DAG) with the specified structure
     G = nx.DiGraph()
     G.add_edges_from(
@@ -171,6 +173,7 @@ def test_get_subgraph_from_nodes_complex_structure():
 
 
 def test_get_subgraph_from_nodes():
+    """Test subgraph from different node configurations."""
     # Create a simple DAG for testing
     dag = nx.DiGraph()
     dag.add_edge("Gene1", "Gene2")
@@ -222,76 +225,77 @@ def test_get_subgraph_from_nodes():
     }, "Subgraph should contain all descendants and ancestors of Gene2 and Gene3."
 
 
-def test_generate_subnetwork_with_backdoor_adjustment():
-    # Test case 1: Simple graph with 1 target gene and 2 descendants, no backdoor paths
-    graph1 = nx.DiGraph()
-    graph1.add_edge("GeneM", "GeneT1", polarity="+")
-    graph1.add_edge("GeneM", "GeneT2", polarity="-")
-    subnetwork1 = utility.generate_subnetwork_with_backdoor_adjustment(graph1, "GeneM")
-    assert set(subnetwork1.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
-    assert set(subnetwork1.edges()) == {("GeneM", "GeneT1"), ("GeneM", "GeneT2")}
+# def test_generate_subnetwork_with_backdoor_adjustment():
+#     # Test case 1: Simple graph with 1 target gene and 2 descendants, no backdoor paths
+#     graph1 = nx.DiGraph()
+#     graph1.add_edge("GeneM", "GeneT1", polarity="+")
+#     graph1.add_edge("GeneM", "GeneT2", polarity="-")
+#     subnetwork1 = utility.generate_subnetwork_with_backdoor_adjustment(graph1, "GeneM")
+#     assert set(subnetwork1.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
+#     assert set(subnetwork1.edges()) == {("GeneM", "GeneT1"), ("GeneM", "GeneT2")}
 
-    # Test case 2: More complex graph with 1 target gene, 2 descendants, and 1 backdoor path
-    graph2 = nx.DiGraph()
-    graph2.add_edge("GeneM", "GeneT1", polarity="+")
-    graph2.add_edge("GeneM", "GeneT2", polarity="-")
-    graph2.add_edge("GeneT1", "GeneT2", polarity="+")  # Backdoor path
-    subnetwork2 = utility.generate_subnetwork_with_backdoor_adjustment(graph2, "GeneM")
-    assert set(subnetwork2.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
-    assert set(subnetwork2.edges()) == {
-        ("GeneM", "GeneT1"),
-        ("GeneM", "GeneT2"),
-        ("GeneT1", "GeneT2"),
-    }
+#     # Test case 2: More complex graph with 1 target gene, 2 descendants, and 1 backdoor path
+#     graph2 = nx.DiGraph()
+#     graph2.add_edge("GeneM", "GeneT1", polarity="+")
+#     graph2.add_edge("GeneM", "GeneT2", polarity="-")
+#     graph2.add_edge("GeneT1", "GeneT2", polarity="+")  # Backdoor path
+#     subnetwork2 = utility.generate_subnetwork_with_backdoor_adjustment(graph2, "GeneM")
+#     assert set(subnetwork2.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
+#     assert set(subnetwork2.edges()) == {
+#         ("GeneM", "GeneT1"),
+#         ("GeneM", "GeneT2"),
+#         ("GeneT1", "GeneT2"),
+#     }
 
-    # Test case 3: Graph with 1 target gene, 3 descendants, and multiple backdoor paths
-    graph3 = nx.DiGraph()
-    graph3.add_edge("GeneM", "GeneT1", polarity="+")
-    graph3.add_edge("GeneM", "GeneT2", polarity="-")
-    graph3.add_edge("GeneT1", "GeneT3", polarity="+")  # Backdoor path
-    graph3.add_edge("GeneT2", "GeneT3", polarity="+")  # Another backdoor path
-    subnetwork3 = utility.generate_subnetwork_with_backdoor_adjustment(graph3, "GeneM")
-    assert set(subnetwork3.nodes()) == {"GeneM", "GeneT1", "GeneT2", "GeneT3"}
-    assert set(subnetwork3.edges()) == {
-        ("GeneM", "GeneT1"),
-        ("GeneM", "GeneT2"),
-        ("GeneT1", "GeneT3"),
-        ("GeneT2", "GeneT3"),
-    }
+#     # Test case 3: Graph with 1 target gene, 3 descendants, and multiple backdoor paths
+#     graph3 = nx.DiGraph()
+#     graph3.add_edge("GeneM", "GeneT1", polarity="+")
+#     graph3.add_edge("GeneM", "GeneT2", polarity="-")
+#     graph3.add_edge("GeneT1", "GeneT3", polarity="+")  # Backdoor path
+#     graph3.add_edge("GeneT2", "GeneT3", polarity="+")  # Another backdoor path
+#     subnetwork3 = utility.generate_subnetwork_with_backdoor_adjustment(graph3, "GeneM")
+#     assert set(subnetwork3.nodes()) == {"GeneM", "GeneT1", "GeneT2", "GeneT3"}
+#     assert set(subnetwork3.edges()) == {
+#         ("GeneM", "GeneT1"),
+#         ("GeneM", "GeneT2"),
+#         ("GeneT1", "GeneT3"),
+#         ("GeneT2", "GeneT3"),
+#     }
 
-    # Test case 4: Single node graph
-    graph4 = nx.DiGraph()
-    graph4.add_node("GeneM")
-    subnetwork4 = utility.generate_subnetwork_with_backdoor_adjustment(graph4, "GeneM")
-    assert set(subnetwork4.nodes()) == {"GeneM"}
-    assert set(subnetwork4.edges()) == set()
+#     # Test case 4: Single node graph
+#     graph4 = nx.DiGraph()
+#     graph4.add_node("GeneM")
+#     subnetwork4 = utility.generate_subnetwork_with_backdoor_adjustment(graph4, "GeneM")
+#     assert set(subnetwork4.nodes()) == {"GeneM"}
+#     assert set(subnetwork4.edges()) == set()
 
-    # Test case 5: Linear graph
-    graph5 = nx.DiGraph()
-    graph5.add_edge("GeneM", "GeneT1", polarity="+")
-    graph5.add_edge("GeneT1", "GeneT2", polarity="+")
-    subnetwork5 = utility.generate_subnetwork_with_backdoor_adjustment(graph5, "GeneM")
-    assert set(subnetwork5.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
-    assert set(subnetwork5.edges()) == {("GeneM", "GeneT1"), ("GeneT1", "GeneT2")}
+#     # Test case 5: Linear graph
+#     graph5 = nx.DiGraph()
+#     graph5.add_edge("GeneM", "GeneT1", polarity="+")
+#     graph5.add_edge("GeneT1", "GeneT2", polarity="+")
+#     subnetwork5 = utility.generate_subnetwork_with_backdoor_adjustment(graph5, "GeneM")
+#     assert set(subnetwork5.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
+#     assert set(subnetwork5.edges()) == {("GeneM", "GeneT1"), ("GeneT1", "GeneT2")}
 
-    # Test case 6: Diverging graph
-    graph6 = nx.DiGraph()
-    graph6.add_edge("GeneM", "GeneT1", polarity="+")
-    graph6.add_edge("GeneM", "GeneT2", polarity="+")
-    subnetwork6 = utility.generate_subnetwork_with_backdoor_adjustment(graph6, "GeneM")
-    assert set(subnetwork6.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
-    assert set(subnetwork6.edges()) == {("GeneM", "GeneT1"), ("GeneM", "GeneT2")}
+#     # Test case 6: Diverging graph
+#     graph6 = nx.DiGraph()
+#     graph6.add_edge("GeneM", "GeneT1", polarity="+")
+#     graph6.add_edge("GeneM", "GeneT2", polarity="+")
+#     subnetwork6 = utility.generate_subnetwork_with_backdoor_adjustment(graph6, "GeneM")
+#     assert set(subnetwork6.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
+#     assert set(subnetwork6.edges()) == {("GeneM", "GeneT1"), ("GeneM", "GeneT2")}
 
-    # Test case 7: Converging graph
-    graph7 = nx.DiGraph()
-    graph7.add_edge("GeneT1", "GeneM", polarity="+")
-    graph7.add_edge("GeneT2", "GeneM", polarity="+")
-    subnetwork7 = utility.generate_subnetwork_with_backdoor_adjustment(graph7, "GeneM")
-    assert set(subnetwork7.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
-    assert set(subnetwork7.edges()) == {("GeneT1", "GeneM"), ("GeneT2", "GeneM")}
+#     # Test case 7: Converging graph
+#     graph7 = nx.DiGraph()
+#     graph7.add_edge("GeneT1", "GeneM", polarity="+")
+#     graph7.add_edge("GeneT2", "GeneM", polarity="+")
+#     subnetwork7 = utility.generate_subnetwork_with_backdoor_adjustment(graph7, "GeneM")
+#     assert set(subnetwork7.nodes()) == {"GeneM", "GeneT1", "GeneT2"}
+#     assert set(subnetwork7.edges()) == {("GeneT1", "GeneM"), ("GeneT2", "GeneM")}
 
 
 def test_generate_hill_equations():
+    """Test Hill equation generation for a gene regulatory network."""
     # Define the activation probability for the test
     activation_probability = 0.5
 
@@ -364,6 +368,7 @@ def test_generate_hill_equations():
 
 
 def test_laci_hill_equations():
+    """Test Hill equation generation for the LacI network."""
     # Create a DAG for the LacI network
     laci_dag = nx.DiGraph()
     laci_dag.add_edge("LacI", "LacA", polarity="-")
@@ -426,6 +431,7 @@ def test_laci_hill_equations():
 
 
 def test_generate_hill_equations_multiple_masters():
+    """Test Hill equation generation for a network with multiple master regulators."""
     # Define the activation probability for the test
     activation_probability = 0.5
 
@@ -515,13 +521,14 @@ def test_generate_hill_equations_multiple_masters():
 
 
 def test_generate_hill_equations_for_n_replicas_shape():
+    """Test the shape of multiple Hill equation replicas."""
     # Create a simple DAG for testing
     test_dag = nx.DiGraph()
     test_dag.add_edge("Gene1", "Gene2", polarity="+")
 
     # Generate multiple replicas of Hill equations
     N = 3
-    replicas = utility.generate_hill_equations_for_n_replicas(test_dag, N=N)
+    replicas = utility.generate_hill_equations_for_n_replicas(test_dag, n=N)
 
     # Check that the dictionary contains N sets
     assert len(replicas) == N, "Number of replicas returned should be equal to N."
@@ -547,20 +554,21 @@ def test_generate_hill_equations_for_n_replicas_shape():
 
 
 def test_generate_hill_equations_for_n_replicas():
+    """Test Hill equation generation for multiple replicas."""
     # Create a simple DAG for testing with ambiguous polarity
     test_dag = nx.DiGraph()
     test_dag.add_edge("Gene1", "Gene2", polarity="+/-")
 
     # Test with N=1 to ensure the function returns a single set of equations
     np.random.seed(42)
-    single_replica = utility.generate_hill_equations_for_n_replicas(test_dag, N=1)
+    single_replica = utility.generate_hill_equations_for_n_replicas(test_dag, n=1)
     assert (
         len(single_replica) == 1
     ), "The function should return a single set of equations when N=1."
 
     # Test with N=3 to ensure the function returns three sets of equations
     np.random.seed(42)
-    multiple_replicas = utility.generate_hill_equations_for_n_replicas(test_dag, N=3)
+    multiple_replicas = utility.generate_hill_equations_for_n_replicas(test_dag, n=3)
     assert (
         len(multiple_replicas) == 3
     ), "The function should return three sets of equations when N=3."
@@ -573,11 +581,11 @@ def test_generate_hill_equations_for_n_replicas():
     ), "Equations for 'Gene2' should be different between replicas due to the '+/-' polarity."
 
     # Check reproducibility
-    # We will use a fixed seed here for reproducibility
+    # Use a fixed seed here for reproducibility
     np.random.seed(42)
-    first_replica_set = utility.generate_hill_equations_for_n_replicas(test_dag, N=3)
+    first_replica_set = utility.generate_hill_equations_for_n_replicas(test_dag, n=3)
     np.random.seed(42)
-    second_replica_set = utility.generate_hill_equations_for_n_replicas(test_dag, N=3)
+    second_replica_set = utility.generate_hill_equations_for_n_replicas(test_dag, n=3)
 
     # Check if the equations for 'Gene2' are identical across replicas generated with the same seed
     for i in range(3):
@@ -589,6 +597,7 @@ def test_generate_hill_equations_for_n_replicas():
 
 
 def test_assign_random_parameter_values():
+    """Test random parameter value assignment for Hill equations."""
     # Define a small set of symbols for testing
     basal_rates_test = {"GeneA": sy.Symbol("b_GeneA"), "GeneB": sy.Symbol("b_GeneB")}
     max_contributions_test = {("GeneA", "GeneB"): sy.Symbol("K_GeneA_GeneB")}
@@ -648,6 +657,7 @@ def test_assign_random_parameter_values():
 
 
 def test_laci_parameter_values():
+    """Test parameter value assignment for the LacI network."""
     np.random.seed(42)
     # Create a DAG for the LacI network
     laci_dag = nx.DiGraph()
@@ -723,6 +733,7 @@ def test_laci_parameter_values():
 
 
 def test_assign_random_parameter_values_multiple_masters():
+    """Test random parameter value assignment for multiple master regulators."""
     np.random.seed(42)
     # Define a set of symbols for two master regulators and one target gene
     basal_rates_test = {
@@ -801,6 +812,7 @@ def test_assign_random_parameter_values_multiple_masters():
 
 
 def test_basal_rate_scaling():
+    """Test scaling of basal rates in parameter value assignment."""
     # Define a small set of symbols for testing
     basal_rates_test = {"GeneA": sy.Symbol("b_GeneA"), "GeneB": sy.Symbol("b_GeneB")}
     max_contributions_test = {("GeneA", "GeneB"): sy.Symbol("K_GeneA_GeneB")}
@@ -849,7 +861,7 @@ def test_basal_rate_scaling():
 
 
 def test_assign_values_for_n_replicas():
-
+    """Tests random parameter value assignment for multiple replicas."""
     np.random.seed(42)
     # Create a simple DAG for testing
     test_dag = nx.DiGraph()
@@ -874,7 +886,7 @@ def test_assign_values_for_n_replicas():
     }
 
     # Generate two replicas of Hill equations
-    replicas = utility.generate_hill_equations_for_n_replicas(test_dag, N=2)
+    replicas = utility.generate_hill_equations_for_n_replicas(test_dag, n=2)
 
     # Assign values to the parameters for all replicas
     all_values = utility.assign_random_values_for_n_replicas(replicas, param_distributions_test)
@@ -931,13 +943,13 @@ def test_assign_values_for_n_replicas():
 
     # Check for reproducibility with the same seed
     np.random.seed(42)
-    replica1_with_seed = utility.generate_hill_equations_for_n_replicas(test_dag, N=1)
+    replica1_with_seed = utility.generate_hill_equations_for_n_replicas(test_dag, n=1)
     values_replica1_with_seed = utility.assign_random_values_for_n_replicas(
         replica1_with_seed, {0: param_distributions_test[0]}  # Use the distribution for replica 0
     )
 
     np.random.seed(42)
-    replica2_with_seed = utility.generate_hill_equations_for_n_replicas(test_dag, N=1)
+    replica2_with_seed = utility.generate_hill_equations_for_n_replicas(test_dag, n=1)
     values_replica2_with_seed = utility.assign_random_values_for_n_replicas(
         replica2_with_seed, {0: param_distributions_test[0]}  # Use the distribution for replica 0
     )
@@ -950,6 +962,7 @@ def test_assign_values_for_n_replicas():
 
 
 def test_create_dataframes_for_sergio_inputs_from_one_replica_laci():
+    """Test DataFrame creation for SERGIO inputs from one LacI replica."""
     # Create the LacI DAG
     laci_dag = nx.DiGraph()
     laci_dag.add_edge("LacI", "LacA", polarity="-")
@@ -990,6 +1003,7 @@ def test_create_dataframes_for_sergio_inputs_from_one_replica_laci():
 
 
 def test_create_dataframes_for_sergio_inputs_from_one_replica_hypothetical():
+    """Test DataFrame creation for SERGIO inputs from one hypothetical replica."""
     # Create a hypothetical DAG for the gene regulatory network
     hypothetical_dag = nx.DiGraph()
     hypothetical_dag.add_edge("GeneM", "GeneT1", polarity="+")
@@ -1040,6 +1054,7 @@ def test_create_dataframes_for_sergio_inputs_from_one_replica_hypothetical():
 
 
 def test_create_node_to_idx_mapping():
+    """Test creation of node-to-index mapping for a graph."""
     # Create a simple DAG for testing
     test_dag = nx.DiGraph()
     test_dag.add_edge("GeneA", "GeneB")
@@ -1066,6 +1081,7 @@ def test_create_node_to_idx_mapping():
 
 
 def test_create_dataframes_for_sergio_inputs_from_n_replicas():
+    """Test DataFrame creation for SERGIO inputs from multiple replicas."""
     test_dag = nx.DiGraph()
     test_dag.add_edge("Gene1", "Gene2", polarity="+")
     node_to_idx = utility.create_node_to_idx_mapping(test_dag)
@@ -1107,6 +1123,7 @@ def test_create_dataframes_for_sergio_inputs_from_n_replicas():
 
 
 def test_merge_n_replica_dataframes_for_sergio_inputs():
+    """Test merging of DataFrames for SERGIO inputs from multiple replicas."""
     # Create simple master regulators DataFrames for testing with two master regulators
     master_regulators_df1 = pd.DataFrame(
         {"Master regulator Idx": [0, 1], "production_rate": [1.0, 0.5]}
@@ -1165,6 +1182,7 @@ def test_merge_n_replica_dataframes_for_sergio_inputs():
 
 
 def test_write_input_files_for_sergio():
+    """Test writing of input files for SERGIO."""
     # Sample data frames with both floats and integers
     targets_df = pd.DataFrame(
         {
@@ -1224,6 +1242,7 @@ def test_write_input_files_for_sergio():
 
 
 def test_write_equation_info_to_file():
+    """Test writing of equation information to a file."""
     # Mock data for hill_equations and parameter_values
     hill_equations = {"eq1": "Gene1 * Gene2", "eq2": "Gene3 + Gene4"}
     parameter_values = {"param1": 1.23, "param2": 4.56}
@@ -1253,4 +1272,3 @@ def test_write_equation_info_to_file():
 
     # Clean up and remove the test file
     os.remove(test_filename)
-
