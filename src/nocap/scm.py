@@ -241,46 +241,59 @@ def calibrate_lscm(
     graph: NxMixedGraph, data: pd.DataFrame
 ) -> dict[tuple[Variable, Variable], float]:
     """Estimate parameter values for a linear SCM using single door criterion."""
-    rv = {}
-
     assert nx.is_directed_acyclic_graph(graph.directed)  # noqa: S101
+
+    rv = {}
+    model = LinearRegression()
 
     for source, target in graph.directed.edges():
         temp_graph = graph.copy()
         temp_graph.directed.remove_edge(source, target)  # remove edge from source to target
         pgmpy_graph = mixed_graph_to_pgmpy(temp_graph)
-        try:
-            raw_adjustment_sets = pgmpy_graph.minimal_dseparator(source.name, target.name)
-            if raw_adjustment_sets is None:
-                # There are no valid adjustment sets.
-                continue
-            # Ensure we have a set of frozensets, with each frozenset containing variable names
-            adjustment_sets = {
-                (
-                    frozenset([adjustment_set])
-                    if isinstance(adjustment_set, str)
-                    else frozenset(adjustment_set)
-                )
-                for adjustment_set in raw_adjustment_sets
-            }
-        except ValueError:
-            # There are no valid adjustment sets.
-            continue
 
-        if not adjustment_sets:
-            # There is a valid adjustment set, and it is the empty set, so just regress the target on the source.
-            adjustment_sets = {frozenset()}
+        the_adjustment_set = pgmpy_graph.minimal_dseparator(source.name, target.name)
 
-        coefficients = []
-        for adjustment_set in adjustment_sets:
-            # Ensure adjustment_set is a set before performing the union operation.
-            variables = sorted(set(adjustment_set) | {source.name})
-            idx = variables.index(source.name)
-            model = LinearRegression()
-            model.fit(data[variables], data[target.name])
-            coefficients.append(model.coef_[idx])
+        if the_adjustment_set is None:
+            raise ValueError("It is not possible to d-separate {source.name} and {target.name}.")
 
-        rv[source, target] = fmean(coefficients)
+        # try:
+        #     #raw_adjustment_sets = pgmpy_graph.minimal_dseparator(source.name, target.name)
+        #     the_adjustment_set = pgmpy_graph.minimal_dseparator(source.name, target.name)
+        # #     if raw_adjustment_sets is None:
+        # #         # There are no valid adjustment sets.
+        # #         continue
+        # #     # Ensure we have a set of frozensets, with each frozenset containing variable names
+        # #     adjustment_sets = {
+        # #         (
+        # #             frozenset([adjustment_set])
+        # #             if isinstance(adjustment_set, str)
+        # #             else frozenset(adjustment_set)
+        # #         )
+        # #         for adjustment_set in raw_adjustment_sets
+        # #     }
+        # except ValueError:
+        #     # There are no valid adjustment sets.
+        #     continue
+
+        # if not adjustment_sets:
+        #     # There is a valid adjustment set, and it is the empty set, so just regress the target on the source.
+        #     adjustment_sets = {frozenset()}
+
+        # coefficients = []
+        variables = sorted(set(the_adjustment_set) | {source.name})
+        idx = variables.index(source.name)
+        # model = LinearRegression()
+        model.fit(data[variables], data[target.name])
+        # coefficients.append(model.coef_[idx])
+        # for adjustment_set in adjustment_sets:
+        #     # Ensure adjustment_set is a set before performing the union operation.
+        #     variables = sorted(set(adjustment_set) | {source.name})
+        #     idx = variables.index(source.name)
+        #     model = LinearRegression()
+        #     model.fit(data[variables], data[target.name])
+        #     coefficients.append(model.coef_[idx])
+
+        rv[source, target] = model.coef_[idx]
 
     return rv
 
