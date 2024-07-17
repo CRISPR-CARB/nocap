@@ -213,7 +213,7 @@ def get_subgraph_from_nodes(
 #     return subnetwork
 
 
-def generate_hill_equations(dag: nx.DiGraph, activation_probability: float = 0.5) -> Tuple[
+def generate_hill_equations(dag: nx.DiGraph, activation_probability: float = 0.5, seed: int=0) -> Tuple[
     Dict[str, sy.Basic],
     Dict[str, sy.Symbol],
     Dict[Tuple[str, str], sy.Symbol],
@@ -244,6 +244,7 @@ def generate_hill_equations(dag: nx.DiGraph, activation_probability: float = 0.5
         The basal rate = 0 for non-master regulators,
         and the production rate is equal to the basal rate for master regulators.
     """
+    np.random.seed(seed)
     # Initialize a dictionary to hold the equations
     equations = {}
 
@@ -306,7 +307,7 @@ def generate_hill_equations(dag: nx.DiGraph, activation_probability: float = 0.5
 
 
 def generate_hill_equations_for_n_replicas(
-    dag: nx.DiGraph, activation_probability: float = 0.5, n: int = 1
+    dag: nx.DiGraph, activation_probability: float, n: int, seed: list[int],
 ) -> Dict[
     int,
     Tuple[
@@ -340,6 +341,7 @@ def generate_hill_equations_for_n_replicas(
         The basal rate = 0 for non-master regulators,
         and the production rate is equal to the basal rate for master regulators.
     """
+    
     warnings.warn("using replica in range(N) - ensure replica id is 0 index.", stacklevel=2)
     all_replica_equations = {}
 
@@ -353,7 +355,7 @@ def generate_hill_equations_for_n_replicas(
             hill_coefficients,
             half_responses,
             gene_expressions,
-        ) = generate_hill_equations(dag, activation_probability)
+        ) = generate_hill_equations(dag, activation_probability, seed=seed[replica])
 
         # Store the equations and parameters for this replica
         all_replica_equations[replica] = (
@@ -374,6 +376,7 @@ def assign_random_parameter_values(
     hill_coefficients: Dict[Tuple[str, str], sy.Symbol],
     half_responses: Dict[Tuple[str, str], sy.Symbol],
     param_distributions: Dict[str, Dict[str, float]],
+    seed: int = 0,
 ) -> Dict[sy.Symbol, float]:
     """
     Assign values to the parameters of the Hill equations based on specified distributions.
@@ -391,6 +394,7 @@ def assign_random_parameter_values(
     :returns: Dictionary with symbols as keys and assigned values as values.
     :rtype: dict
     """
+    np.random.seed(seed)
     parameter_values = {}
 
     # Assign values to basal rates
@@ -398,6 +402,7 @@ def assign_random_parameter_values(
         if gene in param_distributions["master_regulators"]:
             a, b = param_distributions["b"]["a"], param_distributions["b"]["b"]
             parameter_values[br] = np.random.beta(a, b) * param_distributions["b"]["scale"]
+            print(f'{br} {parameter_values[br]}')
         else:
             parameter_values[br] = 0
 
@@ -434,6 +439,7 @@ def assign_random_values_for_n_replicas(
         ],
     ],
     param_distributions_by_replica: Dict[int, Dict[str, Dict[str, float]]],
+    seed: List[int]
 ) -> Dict[int, Dict[sy.Symbol, float]]:
     """
     Assign random values to the parameters of Hill equations for all replicas based on specified distributions.
@@ -449,7 +455,7 @@ def assign_random_values_for_n_replicas(
     all_replica_parameter_values = {}
 
     # Iterate over each set of equations in all replicas
-    for replica, equations_info in all_replica_equations.items():
+    for i, (replica, equations_info) in enumerate(all_replica_equations.items()):
         # Extract the parameter dictionaries from the equations_info tuple
         (
             equations,
@@ -465,7 +471,7 @@ def assign_random_values_for_n_replicas(
 
         # Assign parameter values for this set of equations
         parameter_values = assign_random_parameter_values(
-            basal_rates, max_contributions, hill_coefficients, half_responses, param_distributions
+            basal_rates, max_contributions, hill_coefficients, half_responses, param_distributions, seed[i]
         )
         # Store the assigned parameter values for this replica
         all_replica_parameter_values[replica] = parameter_values
