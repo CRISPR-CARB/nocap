@@ -2,13 +2,21 @@
 
 import os
 import re
+from functools import partial
+from statistics import fmean
 
 import networkx as nx
+import numpy as np
+import pandas as pd
 import pydot
 import sympy as sy
+import warnings
 from networkx.drawing.nx_pydot import from_pydot
+from pgmpy.models import BayesianNetwork
+from sklearn.linear_model import LinearRegression
 from y0.dsl import Variable
 from y0.graph import NxMixedGraph
+from y0.simulation import LinearSCM
 
 
 def dagitty_to_dot(daggity_string: str | None) -> str:
@@ -186,11 +194,171 @@ def convert_to_eqn_array_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
     return eqn_array
 
 
-def generate_synthetic_data_from_lscm():
-    """Generate data given an lscm, parameter values, and number of samples."""
-    raise NotImplementedError
+def mixed_graph_to_pgmpy(graph: NxMixedGraph) -> BayesianNetwork:
+    """Convert a mixed graph to an equivalent :class:`pgmpy.BayesianNetwork`."""
+    # Get all directed edges with node names
+    edges = [(u.name, v.name) for u, v in graph.directed.edges() if u != v]
+
+    # Initialize set for latent variables
+    latents = set()
+
+    # Handle undirected edges by introducing latent variables
+    for u, v in graph.undirected.edges():
+        if u != v:  # no self loops
+            latent = f"U_{u.name}_{v.name}"
+            latents.add(latent)
+            edges.append((latent, u.name))
+            edges.append((latent, v.name))
+
+    # Initialize the BayesianNetwork with edges
+    model = BayesianNetwork(ebunch=edges, latents=latents)
+
+    # Add all original nodes to the BayesianNetwork
+    for node in graph.directed.nodes():
+        if node.name not in model.nodes():
+            model.add_node(node.name)
+
+    return model
 
 
-def regress_lscm():
-    """Regress on lscm model using data and the single door criteria."""
-    raise NotImplementedError
+def simulate_lscm(
+    graph: NxMixedGraph,
+    node_generators: dict[Variable, partial],
+    edge_weights: dict[tuple[Variable, Variable], float],
+    n_samples: int,
+) -> pd.DataFrame:
+    """Generate N lscm samples based on node generators and edge weights."""
+    assert nx.is_directed_acyclic_graph(graph.directed)  # noqa: S101
+
+    linear_scm = LinearSCM(graph, generators=node_generators, weights=edge_weights)
+    results = {
+        trial: {variable.name: values for variable, values in linear_scm.trial().items()}
+        for trial in range(n_samples)
+    }
+    rv = pd.DataFrame(results).T
+    return rv
+
+
+def calibrate_lscm(
+    graph: NxMixedGraph, data: pd.DataFrame
+) -> dict[tuple[Variable, Variable], float]:
+    """Estimate parameter values for a linear SCM using single door criterion."""
+    assert nx.is_directed_acyclic_graph(graph.directed)  # noqa: S101
+
+    rv = {}
+    model = LinearRegression()
+
+    for source, target in graph.directed.edges():
+        temp_graph = graph.copy()
+        temp_graph.directed.remove_edge(source, target)  # remove edge from source to target
+        pgmpy_graph = mixed_graph_to_pgmpy(temp_graph)
+
+        the_adjustment_set = pgmpy_graph.minimal_dseparator(source.name, target.name)
+
+        if the_adjustment_set is None:
+            raise ValueError("It is not possible to d-separate {source.name} and {target.name}.")
+
+        # try:
+        #     #raw_adjustment_sets = pgmpy_graph.minimal_dseparator(source.name, target.name)
+        #     the_adjustment_set = pgmpy_graph.minimal_dseparator(source.name, target.name)
+        # #     if raw_adjustment_sets is None:
+        # #         # There are no valid adjustment sets.
+        # #         continue
+        # #     # Ensure we have a set of frozensets, with each frozenset containing variable names
+        # #     adjustment_sets = {
+        # #         (
+        # #             frozenset([adjustment_set])
+        # #             if isinstance(adjustment_set, str)
+        # #             else frozenset(adjustment_set)
+        # #         )
+        # #         for adjustment_set in raw_adjustment_sets
+        # #     }
+        # except ValueError:
+        #     # There are no valid adjustment sets.
+        #     continue
+
+        # if not adjustment_sets:
+        #     # There is a valid adjustment set, and it is the empty set, so just regress the target on the source.
+        #     adjustment_sets = {frozenset()}
+
+        # coefficients = []
+        variables = sorted(set(the_adjustment_set) | {source.name})
+        idx = variables.index(source.name)
+        # model = LinearRegression()
+        model.fit(data[variables], data[target.name])
+
+        corr_mat = data[variables].corr()
+        corr_threshold = 0.8
+        mask = np.triu(np.ones(corr_mat.shape), k=1).astype(bool)
+        high_corr_elements = (abs(corr_mat) > corr_threshold) & mask
+        num_high_corr_elements = high_corr_elements.sum().sum()
+        if num_high_corr_elements > 0:
+            warnings.warn(
+                f"Correlation matrix contains {num_high_corr_elements} off-diagonal elements "
+                f"with absolute values greater than the threshold of {corr_threshold}. "
+                f"Total number of variables: {len(variables)}.",
+                UserWarning,
+                stacklevel=2
+            )
+
+        # coefficients.append(model.coef_[idx])
+        # for adjustment_set in adjustment_sets:
+        #     # Ensure adjustment_set is a set before performing the union operation.
+        #     variables = sorted(set(adjustment_set) | {source.name})
+        #     idx = variables.index(source.name)
+        #     model = LinearRegression()
+        #     model.fit(data[variables], data[target.name])
+        #     coefficients.append(model.coef_[idx])
+
+        rv[source, target] = model.coef_[idx]
+
+    return rv
+
+
+def intervene_on_lscm(
+    original_graph: NxMixedGraph,
+    intervention_node: tuple[Variable, float],
+    original_node_generators: dict[Variable, partial],
+    original_edge_weights: dict[tuple[Variable, Variable], float],
+) -> LinearSCM:
+    """Intervenes on lscm graph by removing incoming edges to the intervention node."""
+    assert nx.is_directed_acyclic_graph(original_graph.directed)  # noqa: S101
+
+    # copy graph
+    intervened_graph = original_graph.copy()
+
+    # create intervened graph
+    incoming_edges = list(intervened_graph.directed.in_edges(intervention_node[0]))
+    intervened_graph.directed.remove_edges_from(incoming_edges)
+
+    # adjust node generators ()
+    intervened_node_generators = original_node_generators.copy()
+    intervened_node_generators[intervention_node[0]] = partial(
+        lambda *args, **kwargs: intervention_node[1]
+    )  # return fixed value
+
+    # update edge_weights to remove edges
+    intervened_edge_weights = original_edge_weights.copy()
+    for edge in incoming_edges:
+        if edge in intervened_edge_weights:
+            del intervened_edge_weights[edge]
+
+    # create lscm
+    intervened_lscm = LinearSCM(
+        intervened_graph, generators=intervened_node_generators, weights=intervened_edge_weights
+    )
+
+    return intervened_lscm
+
+
+def compute_average_treatment_effect(
+    treatment1: pd.DataFrame, treatment2: pd.DataFrame, outcome_variables: list[Variable]
+) -> dict[Variable, float]:
+    """Compute the average treatment effect (i.e., E[Y1-Y0])."""
+    avg_treatment_effect_dict = {}
+    for v in outcome_variables:
+        avg_untreated = treatment1.loc[:, str(v)].mean()
+        avg_treated = treatment2.loc[:, str(v)].mean()
+        avg_treatment_effect = avg_treated - avg_untreated
+        avg_treatment_effect_dict[v] = avg_treatment_effect
+    return avg_treatment_effect_dict

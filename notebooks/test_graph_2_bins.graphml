@@ -1,0 +1,25 @@
+graph [
+  directed 1
+  node [
+    id 0
+    label "Gene1"
+  ]
+  node [
+    id 1
+    label "Gene2"
+  ]
+  node [
+    id 2
+    label "Gene3"
+  ]
+  edge [
+    source 0
+    target 1
+    polarity "-"
+  ]
+  edge [
+    source 1
+    target 2
+    polarity "+/-"
+  ]
+]

@@ -1,0 +1,80 @@
+{
+  "header": {
+    "name": "Model",
+    "schema": "https://raw.githubusercontent.com/DARPA-ASKEM/Model-Representations/petrinet_v0.6/petrinet/petrinet_schema.json",
+    "schema_name": "petrinet",
+    "description": "Model",
+    "model_version": "0.1"
+  },
+  "properties": {},
+  "model": {
+    "states": [
+      {
+        "id": "A",
+        "name": "A",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "B",
+        "name": "B",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      }
+    ],
+    "transitions": [
+      {
+        "id": "t1",
+        "input": [
+          "A"
+        ],
+        "output": [
+          "B"
+        ],
+        "properties": {
+          "name": "t1"
+        }
+      }
+    ]
+  },
+  "semantics": {
+    "ode": {
+      "rates": [
+        {
+          "target": "t1",
+          "expression": "0.5*A",
+          "expression_mathml": "<apply><times/><cn>0.5</cn><ci>A</ci></apply>"
+        }
+      ],
+      "initials": [
+        {
+          "target": "A",
+          "expression": "2.0",
+          "expression_mathml": "<cn>2.0</cn>"
+        },
+        {
+          "target": "B",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        }
+      ],
+      "parameters": [
+        {
+          "id": "default_compartment",
+          "value": 1.0
+        }
+      ],
+      "observables": [],
+      "time": {
+        "id": "t"
+      }
+    }
+  },
+  "metadata": {
+    "annotations": {}
+  }
+}

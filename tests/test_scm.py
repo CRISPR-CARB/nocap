@@ -1,14 +1,23 @@
 """Test functions for the scm module."""
 
+from functools import partial
+
 import networkx as nx
+import numpy as np
+import pandas as pd
 
 # import numpy as np
 import sympy as sy
+from numpy.random import uniform
+from pgmpy.models import BayesianNetwork
+from y0.dsl import Variable
 
 # import y0
 from y0.graph import NxMixedGraph
 
 from nocap import (
+    calibrate_lscm,
+    compute_average_treatment_effect,
     convert_to_eqn_array_latex,
     convert_to_latex,
     dagitty_to_digraph,
@@ -20,7 +29,10 @@ from nocap import (
     get_symbols_from_bi_edges,
     get_symbols_from_di_edges,
     get_symbols_from_nodes,
+    intervene_on_lscm,
+    mixed_graph_to_pgmpy,
     read_dag_file,
+    simulate_lscm,
 )
 
 # TODO: use fixtures!
@@ -278,6 +290,234 @@ def test_convert_to_eqn_array_latex():
     expected = r"$$ \begin{array}{rcl}A &=& \epsilon_{A}\\ B &=& A \beta_{A ->B} + \epsilon_{B}\end{array}$$"
     actual = convert_to_eqn_array_latex(lscm_dict)
     assert actual == expected  # noqa: S101
+
+
+def test_mixed_graph_to_pgmpy():
+    """Convert a mixed graph to an equivalent :class:`pgmpy.BayesianNetwork`."""
+    # Create a complex mixed graph with mixed edges, disconnected nodes, and a fully disconnected node
+    graph = NxMixedGraph()
+    graph.add_node("A")
+    graph.add_node("B")
+    graph.add_node("C")
+    graph.add_directed_edge("A", "B")
+    graph.add_directed_edge("B", "C")
+    graph.add_undirected_edge("A", "C")
+    graph.add_undirected_edge("D", "E")
+    graph.add_node("F")  # Add a fully disconnected node
+
+    # Convert to BayesianNetwork
+    bn = mixed_graph_to_pgmpy(graph)
+
+    # Check if the BayesianNetwork has the correct edges and nodes
+    assert isinstance(bn, BayesianNetwork)  # noqa: S101
+    assert set(bn.edges()) == {  # noqa: S101
+        ("A", "B"),
+        ("B", "C"),
+        ("U_A_C", "A"),
+        ("U_A_C", "C"),
+        ("U_D_E", "D"),
+        ("U_D_E", "E"),
+    }
+    assert set(bn.nodes()) == {"A", "B", "C", "U_A_C", "D", "E", "U_D_E", "F"}  # noqa: S101
+
+
+def test_simulate_lscm_abc():
+    """Tests that simulation for LSCM works as expected for a simple ABC model."""
+    # Define the simple ABC graph: A -> B, B -> C
+    directed_edges = [("A", "B"), ("B", "C")]
+    graph = NxMixedGraph.from_str_edges(directed=directed_edges)
+
+    # Set a random seed for reproducibility
+    np.random.seed(42)
+
+    # Setup node generators and edge weights with fixed ranges
+    node_generators = {
+        Variable(node.name): partial(uniform, low=2.0, high=4.0) for node in graph.directed.nodes()
+    }
+    edge_weights = {edge: uniform(low=1.0, high=2.0) for edge in graph.directed.edges()}
+
+    # Simulate data
+    n_samples = 10000
+    df = simulate_lscm(
+        graph=graph, node_generators=node_generators, edge_weights=edge_weights, n_samples=n_samples
+    )
+
+    # Compute expected summary statistics for noise
+    def _compute_noise_stats(generator, n_samples):
+        """Compute the mean and stdev."""
+        samples = [generator() for _ in range(n_samples)]
+        return np.mean(samples), np.std(samples)
+
+    mean_a, std_a = _compute_noise_stats(node_generators[Variable("A")], n_samples)
+    mean_b, std_b = _compute_noise_stats(node_generators[Variable("B")], n_samples)
+    mean_c, std_c = _compute_noise_stats(node_generators[Variable("C")], n_samples)
+
+    # Direct computation of expected summary statistics
+    expected_mean_a, expected_std_a = mean_a, std_a
+    expected_mean_b = mean_b + (edge_weights[(Variable("A"), Variable("B"))] * mean_a)
+    expected_std_b = np.sqrt(std_b**2 + (edge_weights[(Variable("A"), Variable("B"))] * std_a) ** 2)
+    expected_mean_c = mean_c + (edge_weights[(Variable("B"), Variable("C"))] * expected_mean_b)
+    expected_std_c = np.sqrt(
+        std_c**2 + (edge_weights[(Variable("B"), Variable("C"))] * expected_std_b) ** 2
+    )
+
+    # Actual summary statistics from simulated data
+    actual_mean_a, actual_std_a = df["A"].mean(), df["A"].std()
+    actual_mean_b, actual_std_b = df["B"].mean(), df["B"].std()
+    actual_mean_c, actual_std_c = df["C"].mean(), df["C"].std()
+
+    # Check the shape of the dataframe
+    assert df.shape == (  # noqa: S101
+        n_samples,
+        len(graph.directed.nodes()),
+    ), "DataFrame shape is incorrect"
+
+    # Check the column names
+    expected_columns = sorted([node.name for node in graph.directed.nodes()])
+    assert sorted(df.columns) == expected_columns, "DataFrame columns are incorrect"  # noqa: S101
+
+    # Verify summary statistics match
+    np.testing.assert_allclose(
+        actual_mean_a, expected_mean_a, rtol=0.1, err_msg="Mean mismatch for column A"
+    )
+    np.testing.assert_allclose(
+        actual_std_a, expected_std_a, rtol=0.1, err_msg="Std dev mismatch for column A"
+    )
+
+    np.testing.assert_allclose(
+        actual_mean_b, expected_mean_b, rtol=0.1, err_msg="Mean mismatch for column B"
+    )
+    np.testing.assert_allclose(
+        actual_std_b, expected_std_b, rtol=0.1, err_msg="Std dev mismatch for column B"
+    )
+
+    np.testing.assert_allclose(
+        actual_mean_c, expected_mean_c, rtol=0.1, err_msg="Mean mismatch for column C"
+    )
+    np.testing.assert_allclose(
+        actual_std_c, expected_std_c, rtol=0.1, err_msg="Std dev mismatch for column C"
+    )
+
+
+def test_calibrate_lscm_abc():
+    """Test that calibration of LSCM works as expected for a simple ABC model."""
+    # Define the simple ABC graph: A -> B, B -> C
+    directed_edges = [("A", "B"), ("B", "C")]
+    graph = NxMixedGraph.from_str_edges(directed=directed_edges)
+
+    # Known edge weights
+    manual_edge_weights = {(Variable("A"), Variable("B")): 1.5, (Variable("B"), Variable("C")): 1.2}
+
+    # Set a random seed for reproducibility
+    np.random.seed(42)
+
+    # Setup node generators and known edge weights
+    node_generators = {
+        Variable(node.name): partial(uniform, low=2.0, high=4.0) for node in graph.directed.nodes()
+    }
+    edge_weights = manual_edge_weights
+
+    # Simulate data
+    n_samples = 10000
+    df = simulate_lscm(
+        graph=graph, node_generators=node_generators, edge_weights=edge_weights, n_samples=n_samples
+    )
+
+    # Calibrate the model using the simulated data
+    calibrated_weights = calibrate_lscm(graph, df)
+
+    # Check that the calibrated weights are within a tolerance level of the actual weights
+    for edge in edge_weights:
+        actual_weight = edge_weights[edge]
+        calibrated_weight = calibrated_weights[edge]
+        np.testing.assert_allclose(
+            calibrated_weight, actual_weight, rtol=0.1, err_msg=f"Weight mismatch for edge {edge}"
+        )
+
+
+def test_intervene_on_lscm():
+    """Test the intervene_on_lscm function using a specific graph and intervention."""
+    # Define the graph
+    directed_edges = [
+        ("V1", "V2"),
+        ("V1", "V4"),
+        ("V2", "V5"),
+        ("V4", "V5"),
+        ("V4", "V6"),
+        ("V5", "V6"),
+        ("V3", "V5"),
+    ]
+    graph = NxMixedGraph.from_str_edges(directed=directed_edges)
+
+    # Define node generators and edge weights
+    node_generators = {
+        Variable(node.name): partial(uniform, low=2.0, high=4.0) for node in graph.directed.nodes()
+    }
+    edge_weights = {edge: uniform(low=1.0, high=2.0) for edge in graph.directed.edges()}
+
+    # Perform the intervention on node V4 by setting it to 10
+    intervention_node = (Variable("V4"), 10.0)
+    intervened_lscm = intervene_on_lscm(graph, intervention_node, node_generators, edge_weights)
+
+    intervened_graph = intervened_lscm.graph.directed
+    intervened_generators = intervened_lscm.generators
+    intervened_weights = intervened_lscm.weights
+
+    # Check the edges of the intervened graph
+    expected_edges = [
+        (Variable("V1"), Variable("V2")),
+        (Variable("V2"), Variable("V5")),
+        (Variable("V4"), Variable("V5")),
+        (Variable("V4"), Variable("V6")),
+        (Variable("V5"), Variable("V6")),
+        (Variable("V3"), Variable("V5")),
+    ]
+    actual_edges = list(intervened_graph.edges())
+
+    assert sorted(actual_edges) == sorted(  # noqa: S101
+        expected_edges
+    ), f"Edges mismatch: expected {expected_edges}, got {actual_edges}"
+
+    # Check that the node generator for V4 returns 10
+    assert (  # noqa: S101
+        intervened_generators[Variable("V4")]() == 10.0
+    ), "Generator for V4 should return the intervention value 10"
+
+    # Check that the edge weights do not include any incoming edge weight for V4
+    removed_edge = ("V1", "V4")
+    assert (  # noqa: S101
+        removed_edge not in intervened_weights
+    ), f"Edge {removed_edge} should have been removed from edge weights"
+
+
+def test_compute_average_treatment_effect():
+    """Tests the compute_average_treatment_effect function using known values."""
+    # Define variables
+    outcome_variables = [Variable("Y1"), Variable("Y2")]
+
+    # Create example DataFrames for treatments
+    data_untreated = {"Y1": [1.0, 1.2, 1.1, 1.3, 1.0], "Y2": [2.0, 2.1, 2.0, 2.1, 2.0]}
+    data_treated = {"Y1": [1.5, 1.6, 1.7, 1.8, 1.5], "Y2": [2.5, 2.4, 2.5, 2.4, 2.5]}
+
+    df_untreated = pd.DataFrame(data_untreated)
+    df_treated = pd.DataFrame(data_treated)
+
+    # Expected average treatment effects
+    expected_ate = {Variable("Y1"): 0.5, Variable("Y2"): 0.42}
+
+    # Compute the average treatment effects
+    computed_ate = compute_average_treatment_effect(df_untreated, df_treated, outcome_variables)
+
+    # Validate the computed ATE against expected values
+    for variable in outcome_variables:
+        expected_value = expected_ate[variable]
+        computed_value = computed_ate[variable]
+        np.testing.assert_almost_equal(
+            computed_value,
+            expected_value,
+            decimal=2,
+            err_msg=f"ATE mismatch for variable {variable.name}: expected {expected_value}, got {computed_value}",
+        )
 
 
 # def test_generate_synthetic_data_from_lscm():

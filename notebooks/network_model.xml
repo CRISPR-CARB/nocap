@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" level="3" version="1">
+  <model id="network_model">
+    <listOfCompartments>
+      <compartment id="default_compartment" size="1" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="A" name="A" compartment="default_compartment" initialAmount="2" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="B" name="B" compartment="default_compartment" initialAmount="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="reaction_A_to_B" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="A" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="B" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> A </ci>
+              <cn> 0.5 </cn>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

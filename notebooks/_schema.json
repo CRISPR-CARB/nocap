@@ -1,0 +1,819 @@
+{
+   "$schema": "https://vega.github.io/schema/vega/v5.json",
+   "width": 500,
+   "height": 300,
+   "scales": [
+      {
+         "name": "xscale",
+         "type": "linear",
+         "range": "width",
+         "zero": false,
+         "domain": {
+            "fields": [
+               {
+                  "data": "distributions",
+                  "field": "timepoint"
+               },
+               {
+                  "data": "traces",
+                  "field": "timepoint"
+               },
+               {
+                  "data": "points",
+                  "field": "timepoint"
+               }
+            ]
+         }
+      },
+      {
+         "name": "yscale",
+         "type": "linear",
+         "range": "height",
+         "nice": true,
+         "zero": true,
+         "domain": {
+            "fields": [
+               {
+                  "data": "distributions",
+                  "field": "lower"
+               },
+               {
+                  "data": "distributions",
+                  "field": "upper"
+               },
+               {
+                  "data": "traces",
+                  "field": "value"
+               },
+               {
+                  "data": "points",
+                  "field": "value"
+               }
+            ]
+         }
+      },
+      {
+         "name": "color",
+         "type": "ordinal",
+         "range": "category",
+         "domain": {
+            "fields": [
+               {
+                  "data": "distributions",
+                  "field": "trajectory"
+               },
+               {
+                  "data": "traces",
+                  "field": "trajectory"
+               },
+               {
+                  "data": "points",
+                  "field": "trajectory"
+               }
+            ],
+            "sort": {
+               "order": "ascending"
+            }
+         }
+      }
+   ],
+   "axes": [
+      {
+         "name": "x_axis",
+         "orient": "bottom",
+         "scale": "xscale",
+         "zindex": 100
+      },
+      {
+         "name": "y_axis",
+         "orient": "left",
+         "scale": "yscale",
+         "zindex": 100
+      }
+   ],
+   "signals": [
+      {
+         "name": "clear",
+         "value": true,
+         "on": [
+            {
+               "events": "mouseup[!event.item]",
+               "update": "true",
+               "force": true
+            }
+         ]
+      },
+      {
+         "name": "shift",
+         "value": false,
+         "on": [
+            {
+               "events": "@legendSymbol:click, @legendLabel:click",
+               "update": "event.shiftKey",
+               "force": true
+            }
+         ]
+      },
+      {
+         "name": "clicked",
+         "value": null,
+         "on": [
+            {
+               "events": "@legendSymbol:click, @legendLabel:click",
+               "update": "{value: datum.value}",
+               "force": true
+            }
+         ]
+      },
+      {
+         "name": "clearData",
+         "value": true,
+         "on": [
+            {
+               "events": "mouseup[!event.item]",
+               "update": "true",
+               "force": true
+            }
+         ]
+      },
+      {
+         "name": "clickedData",
+         "value": null,
+         "on": [
+            {
+               "events": "@area:click",
+               "update": "{value: datum.trajectory}",
+               "force": true
+            }
+         ]
+      }
+   ],
+   "legends": [
+      {
+         "name": "color_legend",
+         "stroke": "color",
+         "encode": {
+            "symbols": {
+               "name": "legendSymbol",
+               "interactive": true,
+               "update": {
+                  "fill": {
+                     "value": "transparent"
+                  },
+                  "strokeWidth": {
+                     "value": 2
+                  },
+                  "opacity": [
+                     {
+                        "test": "!length(data('selected')) || indata('selected', 'value', datum.value) || indata('selectedData', 'value', datum.value)",
+                        "value": 0.7
+                     },
+                     {
+                        "value": 0.15
+                     }
+                  ],
+                  "size": {
+                     "value": 64
+                  }
+               }
+            },
+            "labels": {
+               "name": "legendLabel",
+               "interactive": true,
+               "update": {
+                  "opacity": [
+                     {
+                        "test": "!length(data('selectedData')) || indata('selectedData', 'value', datum.value)",
+                        "value": 1
+                     },
+                     {
+                        "value": 0.25
+                     }
+                  ]
+               }
+            }
+         }
+      }
+   ],
+   "marks": [
+      {
+         "type": "group",
+         "zindex": 3,
+         "name": "_points",
+         "from": {
+            "facet": {
+               "name": "points_split",
+               "data": "points",
+               "groupby": "trajectory"
+            }
+         },
+         "marks": [
+            {
+               "type": "symbol",
+               "name": "_points_symbol",
+               "from": {
+                  "data": "points_split"
+               },
+               "zindex": 3,
+               "encode": {
+                  "update": {
+                     "x": {
+                        "scale": "xscale",
+                        "field": "timepoint"
+                     },
+                     "y": {
+                        "scale": "yscale",
+                        "field": "value"
+                     },
+                     "size": {
+                        "value": 35
+                     },
+                     "strokeWidth": {
+                        "value": 2
+                     },
+                     "fill": {
+                        "scale": "color",
+                        "field": "trajectory"
+                     },
+                     "stroke": {
+                        "scale": "color",
+                        "field": "trajectory"
+                     },
+                     "fillOpacity": [
+                        {
+                           "test": "!length(data('selected')) || indata('selected', 'value', datum.trajectory)",
+                           "value": 0.5
+                        },
+                        {
+                           "value": 0.15
+                        }
+                     ],
+                     "strokeOpacity": [
+                        {
+                           "test": "!length(data('selected')) || indata('selected', 'value', datum.trajectory)",
+                           "value": 0.75
+                        },
+                        {
+                           "value": 0.15
+                        }
+                     ],
+                     "tooltip": {
+                        "field": "value"
+                     }
+                  },
+                  "hover": {
+                     "fillOpacity": {
+                        "value": 0.9
+                     }
+                  }
+               }
+            },
+            {
+               "type": "line",
+               "name": "_points_line",
+               "from": {
+                  "data": "points_split"
+               },
+               "zindex": 3,
+               "encode": {
+                  "update": {
+                     "x": {
+                        "scale": "xscale",
+                        "field": "timepoint"
+                     },
+                     "y": {
+                        "scale": "yscale",
+                        "field": "value"
+                     },
+                     "strokeWidth": {
+                        "value": 2
+                     },
+                     "stroke": {
+                        "scale": "color",
+                        "field": "trajectory"
+                     },
+                     "interpolate": {
+                        "value": "linear"
+                     },
+                     "strokeDash": {
+                        "value": [
+                           5,
+                           3
+                        ]
+                     },
+                     "strokeOpacity": [
+                        {
+                           "test": "!length(data('selected')) || indata('selected', 'value', datum.trajectory)",
+                           "value": 0.3
+                        },
+                        {
+                           "value": 0.1
+                        }
+                     ]
+                  },
+                  "hover": {
+                     "fillOpacity": {
+                        "value": 0.9
+                     }
+                  }
+               }
+            }
+         ]
+      },
+      {
+         "type": "group",
+         "zindex": 2,
+         "name": "_traces",
+         "from": {
+            "facet": {
+               "name": "traces_split",
+               "data": "traces",
+               "groupby": "trajectory"
+            }
+         },
+         "marks": [
+            {
+               "type": "line",
+               "name": "_traces_lines",
+               "from": {
+                  "data": "traces_split"
+               },
+               "encode": {
+                  "update": {
+                     "x": {
+                        "scale": "xscale",
+                        "field": "timepoint"
+                     },
+                     "y": {
+                        "scale": "yscale",
+                        "field": "value"
+                     },
+                     "strokeWidth": {
+                        "value": 2
+                     },
+                     "stroke": {
+                        "scale": "color",
+                        "field": "trajectory"
+                     },
+                     "interpolate": {
+                        "value": "linear"
+                     },
+                     "strokeOpacity": [
+                        {
+                           "test": "!length(data('selected')) || indata('selected', 'value', datum.trajectory)",
+                           "value": 0.75
+                        },
+                        {
+                           "value": 0.15
+                        }
+                     ]
+                  },
+                  "hover": {
+                     "fillOpacity": {
+                        "value": 0.9
+                     }
+                  }
+               }
+            }
+         ]
+      },
+      {
+         "type": "group",
+         "name": "_distributions",
+         "zindex": 1,
+         "from": {
+            "facet": {
+               "name": "trajectory_split",
+               "data": "distributions",
+               "groupby": "trajectory"
+            }
+         },
+         "marks": [
+            {
+               "type": "area",
+               "name": "area",
+               "interactive": true,
+               "from": {
+                  "data": "trajectory_split"
+               },
+               "encode": {
+                  "update": {
+                     "x": {
+                        "scale": "xscale",
+                        "field": "timepoint"
+                     },
+                     "y": {
+                        "scale": "yscale",
+                        "field": "upper"
+                     },
+                     "y2": {
+                        "scale": "yscale",
+                        "field": "lower"
+                     },
+                     "interpolate": {
+                        "value": "linear"
+                     },
+                     "strokeWidth": {
+                        "value": 2
+                     },
+                     "fill": {
+                        "scale": "color",
+                        "field": "trajectory"
+                     },
+                     "stroke": {
+                        "scale": "color",
+                        "field": "trajectory"
+                     },
+                     "fillOpacity": [
+                        {
+                           "test": "!length(data('selected')) || indata('selected', 'value', datum.trajectory)",
+                           "value": 0.5
+                        },
+                        {
+                           "value": 0.15
+                        }
+                     ],
+                     "strokeOpacity": [
+                        {
+                           "test": "!length(data('selected')) || indata('selected', 'value', datum.trajectory)",
+                           "value": 0.75
+                        },
+                        {
+                           "value": 0.15
+                        }
+                     ]
+                  },
+                  "hover": {
+                     "fillOpacity": {
+                        "value": 0.9
+                     }
+                  }
+               }
+            }
+         ]
+      },
+      {
+         "type": "group",
+         "name": "_markers_v",
+         "marks": [
+            {
+               "type": "rule",
+               "name": "_marker_v text",
+               "from": {
+                  "data": "markers_v"
+               },
+               "encode": {
+                  "enter": {
+                     "stroke": {
+                        "value": "lightgray"
+                     }
+                  },
+                  "update": {
+                     "x": {
+                        "scale": "xscale",
+                        "field": "axis_value"
+                     },
+                     "y2": {
+                        "value": 0
+                     },
+                     "y": {
+                        "signal": "height"
+                     },
+                     "opacity": {
+                        "value": 1
+                     }
+                  }
+               }
+            },
+            {
+               "type": "text",
+               "name": "_marker_v flags",
+               "from": {
+                  "data": "_marker_v text"
+               },
+               "encode": {
+                  "enter": {
+                     "text": {
+                        "field": "datum.label"
+                     },
+                     "y": {
+                        "value": 0
+                     },
+                     "fontSize": {
+                        "value": 8
+                     }
+                  }
+               },
+               "transform": [
+                  {
+                     "type": "label",
+                     "lineAnchor": "start",
+                     "as": [
+                        "x",
+                        "_y",
+                        "opacity",
+                        "align",
+                        "baseline"
+                     ],
+                     "offset": [
+                        1
+                     ],
+                     "size": {
+                        "signal": "[width, height]"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "type": "group",
+         "name": "_markers_h",
+         "marks": [
+            {
+               "type": "rule",
+               "name": "_marker_h text",
+               "from": {
+                  "data": "markers_h"
+               },
+               "encode": {
+                  "enter": {
+                     "stroke": {
+                        "value": "lightgray"
+                     }
+                  },
+                  "update": {
+                     "y": {
+                        "scale": "yscale",
+                        "field": "axis_value"
+                     },
+                     "x2": {
+                        "value": 0
+                     },
+                     "x": {
+                        "signal": "width"
+                     },
+                     "opacity": {
+                        "value": 1
+                     }
+                  }
+               }
+            },
+            {
+               "type": "text",
+               "name": "_marker_h flags",
+               "from": {
+                  "data": "_marker_h text"
+               },
+               "encode": {
+                  "enter": {
+                     "text": {
+                        "field": "datum.label"
+                     },
+                     "x": {
+                        "signal": "width+20"
+                     },
+                     "fontSize": {
+                        "value": 8
+                     }
+                  }
+               },
+               "transform": [
+                  {
+                     "type": "label",
+                     "lineAnchor": "start",
+                     "as": [
+                        "_x",
+                        "y",
+                        "opacity",
+                        "align",
+                        "baseline"
+                     ],
+                     "offset": [
+                        1
+                     ],
+                     "size": {
+                        "signal": "[width, height]"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "data": [
+      {
+         "name": "distributions",
+         "values": [
+            {
+               "trajectory": "A_state",
+               "timepoint": 0.0,
+               "lower": 2.0,
+               "upper": 2.0
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 1.0,
+               "lower": 1.2130612134933472,
+               "upper": 1.2130612134933472
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 2.0,
+               "lower": 0.7357588410377502,
+               "upper": 0.7357588410377502
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 3.0,
+               "lower": 0.44626036286354065,
+               "upper": 0.44626036286354065
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 4.0,
+               "lower": 0.27067068219184875,
+               "upper": 0.27067068219184875
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 5.0,
+               "lower": 0.16417011618614197,
+               "upper": 0.16417011618614197
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 6.0,
+               "lower": 0.09957417100667953,
+               "upper": 0.09957417100667953
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 7.0,
+               "lower": 0.060394808650016785,
+               "upper": 0.060394808650016785
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 8.0,
+               "lower": 0.036631327122449875,
+               "upper": 0.036631327122449875
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 9.0,
+               "lower": 0.022218024358153343,
+               "upper": 0.022218024358153343
+            },
+            {
+               "trajectory": "A_state",
+               "timepoint": 10.0,
+               "lower": 0.013475880026817322,
+               "upper": 0.013475880026817322
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 0.0,
+               "lower": 1.0,
+               "upper": 1.0
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 1.0,
+               "lower": 1.786939024925232,
+               "upper": 1.786939024925232
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 2.0,
+               "lower": 2.2642409801483154,
+               "upper": 2.2642409801483154
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 3.0,
+               "lower": 2.553738832473755,
+               "upper": 2.553738832473755
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 4.0,
+               "lower": 2.7293291091918945,
+               "upper": 2.7293291091918945
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 5.0,
+               "lower": 2.835831880569458,
+               "upper": 2.835831880569458
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 6.0,
+               "lower": 2.9004299640655518,
+               "upper": 2.9004299640655518
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 7.0,
+               "lower": 2.9396073818206787,
+               "upper": 2.9396073818206787
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 8.0,
+               "lower": 2.963369607925415,
+               "upper": 2.963369607925415
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 9.0,
+               "lower": 2.9777817726135254,
+               "upper": 2.9777817726135254
+            },
+            {
+               "trajectory": "B_state",
+               "timepoint": 10.0,
+               "lower": 2.9865245819091797,
+               "upper": 2.9865245819091797
+            }
+         ],
+         "transform": [
+            {
+               "type": "collect",
+               "sort": {
+                  "field": [
+                     "trajectory",
+                     "timepoint"
+                  ]
+               }
+            }
+         ]
+      },
+      {
+         "name": "traces",
+         "values": [],
+         "transform": [
+            {
+               "type": "filter",
+               "expr": "isValid(datum.value)"
+            },
+            {
+               "type": "collect",
+               "sort": {
+                  "field": [
+                     "trajectory",
+                     "timepoint"
+                  ]
+               }
+            }
+         ]
+      },
+      {
+         "name": "points",
+         "values": []
+      },
+      {
+         "name": "markers_v",
+         "values": []
+      },
+      {
+         "name": "markers_h",
+         "values": []
+      },
+      {
+         "name": "selected",
+         "on": [
+            {
+               "trigger": "clear",
+               "remove": true
+            },
+            {
+               "trigger": "!shift",
+               "remove": true
+            },
+            {
+               "trigger": "!shift && clicked",
+               "insert": "clicked"
+            },
+            {
+               "trigger": "shift && clicked",
+               "toggle": "clicked"
+            }
+         ]
+      },
+      {
+         "name": "selectedData",
+         "on": [
+            {
+               "trigger": "clearData",
+               "remove": true
+            },
+            {
+               "trigger": "clickedData",
+               "toggle": "clickedData"
+            }
+         ]
+      }
+   ]
+}
