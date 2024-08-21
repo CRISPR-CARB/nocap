@@ -19,10 +19,10 @@ from .scm import (
     read_dag_file,
     regress_lscm,
 )
-from .utility import convert_grn_dag_to_sbml
+from .utility import create_sbml_model_from_nx
 
 __all__ = [
-    "convert_grn_dag_to_sbml",
+    "create_sbml_model_from_nx",
     "convert_to_eqn_array_latex",
     "convert_to_latex",
     "dagitty_to_digraph",

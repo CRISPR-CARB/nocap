@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" level="3" version="1">
+  <model id="grn_model" name="Gene Regulatory Network Model" substanceUnits="mole" timeUnits="second" extentUnits="mole">
+    <listOfUnitDefinitions>
+      <unitDefinition id="per_second">
+        <listOfUnits>
+          <unit kind="second" exponent="-1" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="compartment" size="1" units="litre" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="GeneA" compartment="compartment" initialAmount="0" substanceUnits="mole" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="ProteinB" compartment="compartment" initialAmount="0" substanceUnits="mole" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="GeneC" compartment="compartment" initialAmount="0" substanceUnits="mole" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="reaction_GeneA_to_ProteinB" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GeneA" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ProteinB" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> k_GeneA_to_ProteinB </ci>
+              <ci> GeneA </ci>
+            </apply>
+          </math>
+          <listOfLocalParameters>
+            <localParameter id="k_GeneA_to_ProteinB" value="1" units="per_second"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_ProteinB_to_GeneC" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ProteinB" stoichiometry="1" constant="false"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GeneC" stoichiometry="1" constant="false"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <ci> k_ProteinB_to_GeneC </ci>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <ci> ProteinB </ci>
+              </apply>
+            </apply>
+          </math>
+          <listOfLocalParameters>
+            <localParameter id="k_ProteinB_to_GeneC" value="1" units="per_second"/>
+          </listOfLocalParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
