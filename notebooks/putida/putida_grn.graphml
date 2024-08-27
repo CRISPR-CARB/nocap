@@ -1,0 +1,2219 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d0" for="edge" attr.name="polarity" attr.type="string"/>
+<graph edgedefault="directed"><node id="amrZ"/>
+<node id="alg44"/>
+<node id="alg8"/>
+<node id="algA"/>
+<node id="algD"/>
+<node id="algE"/>
+<node id="algF"/>
+<node id="algG"/>
+<node id="algI"/>
+<node id="algJ"/>
+<node id="algK"/>
+<node id="algL"/>
+<node id="algX"/>
+<node id="peaA"/>
+<node id="peaB"/>
+<node id="peaC"/>
+<node id="peaD"/>
+<node id="catR"/>
+<node id="catA1"/>
+<node id="catB"/>
+<node id="catC"/>
+<node id="finR"/>
+<node id="fpr1"/>
+<node id="hutC"/>
+<node id="hutF"/>
+<node id="hutG"/>
+<node id="hutH"/>
+<node id="hutI"/>
+<node id="hutU"/>
+<node id="nicC"/>
+<node id="nicD"/>
+<node id="nicE"/>
+<node id="nicF"/>
+<node id="nicR"/>
+<node id="nicX"/>
+<node id="pP_5034"/>
+<node id="proY"/>
+<node id="fleQ"/>
+<node id="aldB-I"/>
+<node id="arcA"/>
+<node id="arcB"/>
+<node id="arcC"/>
+<node id="arcD-I"/>
+<node id="arcD-II"/>
+<node id="bcsA"/>
+<node id="bcsB"/>
+<node id="bcsG"/>
+<node id="bcsZ"/>
+<node id="bfr2"/>
+<node id="birA"/>
+<node id="calA"/>
+<node id="clpB"/>
+<node id="coaX"/>
+<node id="cpsG"/>
+<node id="exbB"/>
+<node id="exbD"/>
+<node id="fatB"/>
+<node id="fatD"/>
+<node id="fba"/>
+<node id="fecI"/>
+<node id="fecR"/>
+<node id="fleN"/>
+<node id="fleR"/>
+<node id="fleS"/>
+<node id="flgA"/>
+<node id="flgB"/>
+<node id="flgC"/>
+<node id="flgD"/>
+<node id="flgE"/>
+<node id="flgF"/>
+<node id="flgG"/>
+<node id="flgH"/>
+<node id="flgI"/>
+<node id="flgJ"/>
+<node id="flgK"/>
+<node id="flgL"/>
+<node id="flgM"/>
+<node id="flgN"/>
+<node id="flhA"/>
+<node id="flhB"/>
+<node id="flhF"/>
+<node id="fliD"/>
+<node id="fliE"/>
+<node id="fliF"/>
+<node id="fliG"/>
+<node id="fliH"/>
+<node id="fliI"/>
+<node id="fliJ"/>
+<node id="fliK"/>
+<node id="fliL"/>
+<node id="fliM"/>
+<node id="fliN"/>
+<node id="fliO"/>
+<node id="fliP"/>
+<node id="fliQ"/>
+<node id="fliR"/>
+<node id="fliS"/>
+<node id="fliT"/>
+<node id="folEB"/>
+<node id="folK"/>
+<node id="gacS"/>
+<node id="gcbA"/>
+<node id="gcdG"/>
+<node id="gcdH"/>
+<node id="glnA"/>
+<node id="gltR-II"/>
+<node id="iutY"/>
+<node id="lapA"/>
+<node id="lapB"/>
+<node id="lapC"/>
+<node id="lapE"/>
+<node id="ldhA"/>
+<node id="lolE"/>
+<node id="mcoA"/>
+<node id="mgtE"/>
+<node id="nadC"/>
+<node id="ndh"/>
+<node id="ooxB"/>
+<node id="oprD"/>
+<node id="oprG"/>
+<node id="oprH"/>
+<node id="oprQ"/>
+<node id="parI"/>
+<node id="pbpG"/>
+<node id="pcnB"/>
+<node id="pet"/>
+<node id="pfeS-I"/>
+<node id="pfeS-II"/>
+<node id="phnN"/>
+<node id="phoP"/>
+<node id="phoQ"/>
+<node id="pP_0051"/>
+<node id="pP_0116"/>
+<node id="pP_0131"/>
+<node id="pP_0160"/>
+<node id="pP_0161"/>
+<node id="pP_0162"/>
+<node id="pP_0180"/>
+<node id="pP_0267"/>
+<node id="pP_0350"/>
+<node id="pP_0351"/>
+<node id="pP_0352"/>
+<node id="pP_0439"/>
+<node id="pP_0534"/>
+<node id="pP_0535"/>
+<node id="pP_0546"/>
+<node id="pP_0564"/>
+<node id="pP_0565"/>
+<node id="pP_0598"/>
+<node id="pP_0599"/>
+<node id="pP_0667"/>
+<node id="pP_0668"/>
+<node id="pP_0681"/>
+<node id="pP_0685"/>
+<node id="pP_0703"/>
+<node id="pP_0704"/>
+<node id="pP_0705"/>
+<node id="pP_0788"/>
+<node id="pP_0861"/>
+<node id="pP_0862"/>
+<node id="pP_0863"/>
+<node id="pP_0998"/>
+<node id="pP_1006"/>
+<node id="pP_1013"/>
+<node id="pP_1083"/>
+<node id="pP_1147"/>
+<node id="pP_1148"/>
+<node id="pP_1149"/>
+<node id="pP_1150"/>
+<node id="pP_1151"/>
+<node id="pP_1157"/>
+<node id="pP_1184"/>
+<node id="pP_1207"/>
+<node id="pP_1208"/>
+<node id="pP_1647"/>
+<node id="pP_1648"/>
+<node id="pP_1651"/>
+<node id="pP_1728"/>
+<node id="pP_1729"/>
+<node id="pP_1776"/>
+<node id="pP_1778"/>
+<node id="pP_1779"/>
+<node id="pP_1780"/>
+<node id="pP_1786"/>
+<node id="pP_1787"/>
+<node id="pP_1788"/>
+<node id="pP_1789"/>
+<node id="pP_1790"/>
+<node id="pP_1791"/>
+<node id="pP_1792"/>
+<node id="pP_1793"/>
+<node id="pP_1794"/>
+<node id="pP_1795"/>
+<node id="pP_1797"/>
+<node id="pP_1798"/>
+<node id="pP_1864"/>
+<node id="pP_1865"/>
+<node id="pP_1878"/>
+<node id="pP_1970"/>
+<node id="pP_1971"/>
+<node id="pP_1978"/>
+<node id="pP_1979"/>
+<node id="pP_2114"/>
+<node id="pP_2191"/>
+<node id="pP_2219"/>
+<node id="pP_2220"/>
+<node id="pP_2240"/>
+<node id="pP_2310"/>
+<node id="pP_2429"/>
+<node id="pP_2473"/>
+<node id="pP_2509"/>
+<node id="pP_2590"/>
+<node id="pP_2592"/>
+<node id="pP_2593"/>
+<node id="pP_2595"/>
+<node id="pP_2596"/>
+<node id="pP_2628"/>
+<node id="pP_2631"/>
+<node id="pP_2633"/>
+<node id="pP_2634"/>
+<node id="pP_2638"/>
+<node id="pP_2735"/>
+<node id="pP_2736"/>
+<node id="pP_2737"/>
+<node id="pP_2738"/>
+<node id="pP_3011"/>
+<node id="pP_3085"/>
+<node id="pP_3086"/>
+<node id="pP_3126"/>
+<node id="pP_3127"/>
+<node id="pP_3128"/>
+<node id="pP_3186"/>
+<node id="pP_3323"/>
+<node id="pP_3325"/>
+<node id="pP_3326"/>
+<node id="pP_3503"/>
+<node id="pP_3504"/>
+<node id="pP_3547"/>
+<node id="pP_3611"/>
+<node id="pP_3612"/>
+<node id="pP_3685"/>
+<node id="pP_3696"/>
+<node id="pP_3733"/>
+<node id="pP_3789"/>
+<node id="pP_4057"/>
+<node id="pP_4070"/>
+<node id="pP_4316"/>
+<node id="pP_4317"/>
+<node id="pP_4318"/>
+<node id="pP_4333"/>
+<node id="pP_4334"/>
+<node id="pP_4335"/>
+<node id="pP_4345"/>
+<node id="pP_4350"/>
+<node id="pP_4393"/>
+<node id="pP_4458"/>
+<node id="pP_4459"/>
+<node id="pP_4606"/>
+<node id="pP_4607"/>
+<node id="pP_4608"/>
+<node id="pP_4609"/>
+<node id="pP_4610"/>
+<node id="pP_4755"/>
+<node id="pP_4881"/>
+<node id="pP_4882"/>
+<node id="pP_4888"/>
+<node id="pP_4961"/>
+<node id="pP_5263"/>
+<node id="pP_5305"/>
+<node id="pP_5587"/>
+<node id="pP_5631"/>
+<node id="pP_5693"/>
+<node id="pP_5699"/>
+<node id="pP_5745"/>
+<node id="pP_t01"/>
+<node id="pP_t02"/>
+<node id="pP_t03"/>
+<node id="pP_t04"/>
+<node id="quiA"/>
+<node id="rbbA"/>
+<node id="recB"/>
+<node id="recC"/>
+<node id="recD"/>
+<node id="rep"/>
+<node id="rhtA"/>
+<node id="rlmB"/>
+<node id="rmlA"/>
+<node id="rmlB"/>
+<node id="rmlC1"/>
+<node id="rmlD"/>
+<node id="rnr"/>
+<node id="rnt"/>
+<node id="rpoN"/>
+<node id="thiI"/>
+<node id="tonB"/>
+<node id="trpC"/>
+<node id="trpD"/>
+<node id="trpG"/>
+<node id="tsaA"/>
+<node id="tufA"/>
+<node id="yfdC"/>
+<node id="yhhJ"/>
+<node id="yhiI"/>
+<node id="znuB"/>
+<node id="fliA"/>
+<node id="bifA"/>
+<node id="cheA"/>
+<node id="cheBA"/>
+<node id="cheY"/>
+<node id="cheZ"/>
+<node id="fleL"/>
+<node id="fliC"/>
+<node id="pctA"/>
+<node id="pctB"/>
+<node id="pP_0779"/>
+<node id="pP_0913"/>
+<node id="pP_2211"/>
+<node id="pP_4336"/>
+<node id="fnrA"/>
+<node id="ccoN-I"/>
+<node id="ccoO-I"/>
+<node id="ccoP-I"/>
+<node id="ccoQ-I"/>
+<node id="cioA"/>
+<node id="cioB"/>
+<node id="cyoA"/>
+<node id="cyoB"/>
+<node id="cyoC"/>
+<node id="cyoD"/>
+<node id="cyoE"/>
+<node id="fur"/>
+<node id="bfr1"/>
+<node id="gacA"/>
+<node id="rpoS"/>
+<node id="gclR"/>
+<node id="gcl"/>
+<node id="glxR"/>
+<node id="hyi"/>
+<node id="pykF"/>
+<node id="ttuD"/>
+<node id="glpR"/>
+<node id="glpD"/>
+<node id="glpF"/>
+<node id="glpK"/>
+<node id="gtsA"/>
+<node id="gtsB"/>
+<node id="gtsC"/>
+<node id="gtsD"/>
+<node id="oprB-I"/>
+<node id="gnuR"/>
+<node id="czcA5"/>
+<node id="gntT"/>
+<node id="gnuK"/>
+<node id="mmgF"/>
+<node id="mtrc2"/>
+<node id="pP_2333"/>
+<node id="pP_2741"/>
+<node id="pP_3418"/>
+<node id="prpC"/>
+<node id="hexR"/>
+<node id="eda"/>
+<node id="edd"/>
+<node id="gapA"/>
+<node id="glk"/>
+<node id="pgl"/>
+<node id="zwf-1"/>
+<node id="lldR"/>
+<node id="lldD"/>
+<node id="lldE"/>
+<node id="lldP"/>
+<node id="mqsA"/>
+<node id="mqsR"/>
+<node id="mucA"/>
+<node id="mucB"/>
+<node id="pP_3288"/>
+<node id="rpoE"/>
+<node id="ntrC"/>
+<node id="amtB"/>
+<node id="braD"/>
+<node id="braE"/>
+<node id="braF"/>
+<node id="cbcV"/>
+<node id="cbcW"/>
+<node id="cbcX"/>
+<node id="codA"/>
+<node id="codB"/>
+<node id="dppA-I"/>
+<node id="dppA-II"/>
+<node id="dppA-III"/>
+<node id="dppB"/>
+<node id="dppC"/>
+<node id="dppD"/>
+<node id="dppF"/>
+<node id="gdhA"/>
+<node id="glnK"/>
+<node id="livF-I"/>
+<node id="livF-II"/>
+<node id="livG"/>
+<node id="livH"/>
+<node id="livK"/>
+<node id="livM"/>
+<node id="opdP"/>
+<node id="opdT-I"/>
+<node id="pP_2685"/>
+<node id="pP_2686"/>
+<node id="pP_2687"/>
+<node id="pP_2688"/>
+<node id="pP_3188"/>
+<node id="pP_4465"/>
+<node id="pP_4867"/>
+<node id="ureA"/>
+<node id="ureB"/>
+<node id="ureC"/>
+<node id="ureD"/>
+<node id="ureE"/>
+<node id="ureF"/>
+<node id="ureG"/>
+<node id="ureJ"/>
+<node id="urtA"/>
+<node id="urtB"/>
+<node id="urtC"/>
+<node id="urtD"/>
+<node id="urtE"/>
+<node id="yhdW"/>
+<node id="yhdX"/>
+<node id="yhdY"/>
+<node id="yhdZ"/>
+<node id="oxyR"/>
+<node id="ahpC"/>
+<node id="katA"/>
+<node id="katG"/>
+<node id="trxB"/>
+<node id="pedR1"/>
+<node id="pedA"/>
+<node id="pedB"/>
+<node id="pedC"/>
+<node id="pedD"/>
+<node id="pedE"/>
+<node id="pedF"/>
+<node id="pedG"/>
+<node id="pedH"/>
+<node id="pedI"/>
+<node id="pedR2"/>
+<node id="pedS1"/>
+<node id="pedS2"/>
+<node id="pP_2663"/>
+<node id="pP_2666"/>
+<node id="pP_2668"/>
+<node id="pP_2677"/>
+<node id="pP_2678"/>
+<node id="pP_2683"/>
+<node id="pqqD-II"/>
+<node id="yiaY"/>
+<node id="pP_2046"/>
+<node id="fadA"/>
+<node id="fadBx"/>
+<node id="pP_2048"/>
+<node id="pP_2049"/>
+<node id="pP_2050"/>
+<node id="pP_4553"/>
+<node id="mgtC"/>
+<node id="paaA"/>
+<node id="paaB"/>
+<node id="paaC"/>
+<node id="paaD"/>
+<node id="paaE"/>
+<node id="paaF"/>
+<node id="paaG"/>
+<node id="paaH"/>
+<node id="paaI"/>
+<node id="paaJ"/>
+<node id="paaK"/>
+<node id="pP_1388"/>
+<node id="pP_2441"/>
+<node id="pP_3243"/>
+<node id="pP_3878"/>
+<node id="pP_3879"/>
+<node id="pP_3880"/>
+<node id="pP_3881"/>
+<node id="pP_3882"/>
+<node id="pP_5329"/>
+<node id="pstA"/>
+<node id="pstB-I"/>
+<node id="pstC"/>
+<node id="ttgA"/>
+<node id="ttgB"/>
+<node id="ttgC"/>
+<node id="ttgR"/>
+<node id="psrA"/>
+<node id="fadB"/>
+<node id="ptxS"/>
+<node id="kguE"/>
+<node id="kguK"/>
+<node id="pP_3382"/>
+<node id="pP_3383"/>
+<node id="pP_3384"/>
+<node id="rpoD"/>
+<node id="davD"/>
+<node id="davT"/>
+<node id="pP_mr03"/>
+<node id="pP_4957"/>
+<node id="rup4959"/>
+<node id="ygjP"/>
+<edge source="amrZ" target="alg44">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="alg8">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algA">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algD">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algE">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algF">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algG">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algI">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algJ">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algK">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algL">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="algX">
+  <data key="d0">+</data>
+</edge>
+<edge source="amrZ" target="peaA">
+  <data key="d0">-</data>
+</edge>
+<edge source="amrZ" target="peaB">
+  <data key="d0">-</data>
+</edge>
+<edge source="amrZ" target="peaC">
+  <data key="d0">-</data>
+</edge>
+<edge source="amrZ" target="peaD">
+  <data key="d0">-</data>
+</edge>
+<edge source="catR" target="catA1">
+  <data key="d0">+</data>
+</edge>
+<edge source="catR" target="catB">
+  <data key="d0">+</data>
+</edge>
+<edge source="catR" target="catC">
+  <data key="d0">+</data>
+</edge>
+<edge source="finR" target="finR">
+  <data key="d0">-</data>
+</edge>
+<edge source="finR" target="fpr1">
+  <data key="d0">+</data>
+</edge>
+<edge source="finR" target="hutC">
+  <data key="d0">-</data>
+</edge>
+<edge source="finR" target="hutF">
+  <data key="d0">-</data>
+</edge>
+<edge source="finR" target="hutG">
+  <data key="d0">-</data>
+</edge>
+<edge source="finR" target="hutH">
+  <data key="d0">-</data>
+</edge>
+<edge source="finR" target="hutI">
+  <data key="d0">-</data>
+</edge>
+<edge source="finR" target="hutU">
+  <data key="d0">-</data>
+</edge>
+<edge source="finR" target="nicC">
+  <data key="d0">+</data>
+</edge>
+<edge source="finR" target="nicD">
+  <data key="d0">+</data>
+</edge>
+<edge source="finR" target="nicE">
+  <data key="d0">+</data>
+</edge>
+<edge source="finR" target="nicF">
+  <data key="d0">+</data>
+</edge>
+<edge source="finR" target="nicR">
+  <data key="d0">+</data>
+</edge>
+<edge source="finR" target="nicX">
+  <data key="d0">+</data>
+</edge>
+<edge source="finR" target="pP_5034">
+  <data key="d0">-</data>
+</edge>
+<edge source="finR" target="proY">
+  <data key="d0">-</data>
+</edge>
+<edge source="hutC" target="hutC">
+  <data key="d0">-</data>
+</edge>
+<edge source="hutC" target="hutF">
+  <data key="d0">-</data>
+</edge>
+<edge source="hutC" target="hutG">
+  <data key="d0">-</data>
+</edge>
+<edge source="hutC" target="hutH">
+  <data key="d0">-</data>
+</edge>
+<edge source="hutC" target="hutI">
+  <data key="d0">-</data>
+</edge>
+<edge source="hutC" target="hutU">
+  <data key="d0">-</data>
+</edge>
+<edge source="hutC" target="pP_5034">
+  <data key="d0">-</data>
+</edge>
+<edge source="hutC" target="proY">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="aldB-I">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="alg44">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="alg8">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algD">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algE">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algF">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algG">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algI">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algJ">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algK">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algL">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="algX">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="amrZ">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="arcA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="arcB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="arcC">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="arcD-I">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="arcD-II">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="bcsA">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="bcsB">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="bcsG">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="bcsZ">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="bfr2">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="birA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="calA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="clpB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="coaX">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="cpsG">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="exbB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="exbD">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fatB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fatD">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fba">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fecI">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fecR">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="finR">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fleN">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fleR">
+  <data key="d0">+</data>
+</edge>
+<edge source="fleQ" target="fleS">
+  <data key="d0">+</data>
+</edge>
+<edge source="fleQ" target="flgA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgC">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgD">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgE">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgF">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgG">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgH">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgI">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgJ">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgK">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgL">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgM">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flgN">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="flhA">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="flhB">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="flhF">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fliD">
+  <data key="d0">+</data>
+</edge>
+<edge source="fleQ" target="fliE">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliF">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliG">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliH">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliI">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliJ">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliK">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fliL">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliM">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliN">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliO">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliP">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliQ">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliR">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="fleQ" target="fliS">
+  <data key="d0">+</data>
+</edge>
+<edge source="fleQ" target="fliT">
+  <data key="d0">+</data>
+</edge>
+<edge source="fleQ" target="folEB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="folK">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="fpr1">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="gacS">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="gcbA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="gcdG">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="gcdH">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="glnA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="gltR-II">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="iutY">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="lapA">
+  <data key="d0">+</data>
+</edge>
+<edge source="fleQ" target="lapB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="lapC">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="lapE">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="ldhA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="lolE">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="mcoA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="mgtE">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="nadC">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="ndh">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="ooxB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="oprD">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="oprG">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="oprH">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="oprQ">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="parI">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pbpG">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pcnB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pet">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pfeS-I">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pfeS-II">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="phnN">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="phoP">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="phoQ">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0051">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0116">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0131">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0160">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0161">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0162">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0180">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0267">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0350">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0351">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0352">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0439">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0534">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0535">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0546">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0564">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0565">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0598">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0599">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0667">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0668">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0681">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0685">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0703">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0704">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0705">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0788">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0861">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0862">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0863">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_0998">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1006">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1013">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1083">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1147">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1148">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1149">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1150">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1151">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1157">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1184">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1207">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1208">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1647">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1648">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1651">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1728">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1729">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1776">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1778">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1779">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1780">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1786">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1787">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1788">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1789">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1790">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1791">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1792">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1793">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1794">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1795">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1797">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1798">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1864">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1865">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1878">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1970">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1971">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1978">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_1979">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2114">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2191">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2219">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2220">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2240">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2310">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2429">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2473">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2509">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2590">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2592">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2593">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2595">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2596">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2628">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2631">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="pP_2633">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="pP_2634">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="pP_2638">
+  <data key="d0">-</data>
+</edge>
+<edge source="fleQ" target="pP_2735">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2736">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2737">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_2738">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3011">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3085">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3086">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3126">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3127">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3128">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3186">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3323">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3325">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3326">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3503">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3504">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3547">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3611">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3612">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3685">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3696">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3733">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_3789">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4057">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4070">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4316">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4317">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4318">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4333">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4334">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4335">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4345">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4350">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4393">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4458">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4459">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4606">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4607">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4608">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4609">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4610">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4755">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4881">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4882">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4888">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_4961">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_5263">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_5305">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_5587">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_5631">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_5693">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_5699">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_5745">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_t01">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_t02">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_t03">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="pP_t04">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="quiA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rbbA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="recB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="recC">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="recD">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rep">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rhtA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rlmB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rmlA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rmlB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rmlC1">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rmlD">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rnr">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rnt">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="rpoN">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="thiI">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="tonB">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="trpC">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="trpD">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="trpG">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="tsaA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="tufA">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="yfdC">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="yhhJ">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="yhiI">
+  <data key="d0"></data>
+</edge>
+<edge source="fleQ" target="znuB">
+  <data key="d0"></data>
+</edge>
+<edge source="gltR-II" target="gtsA">
+  <data key="d0">+</data>
+</edge>
+<edge source="gltR-II" target="gtsB">
+  <data key="d0">+</data>
+</edge>
+<edge source="gltR-II" target="gtsC">
+  <data key="d0">+</data>
+</edge>
+<edge source="gltR-II" target="gtsD">
+  <data key="d0">+</data>
+</edge>
+<edge source="gltR-II" target="oprB-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fleN">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fleR">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fleS">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgA">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgB">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgC">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgE">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgF">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgG">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgH">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgI">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgJ">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgK">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flgL">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flhA">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flhB">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="flhF">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliD">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliE">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliF">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliG">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliH">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliI">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliJ">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliK">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliL">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliM">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliN">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliO">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliP">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliQ">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliR">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliS">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoN" target="fliT">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="bifA">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="cheA">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="cheBA">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="cheY">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="cheZ">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="fleL">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="flgM">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="flgN">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="fliC">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="pctA">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="pctB">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="pP_0779">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="pP_0913">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="pP_2211">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="pP_4335">
+  <data key="d0">+</data>
+</edge>
+<edge source="fliA" target="pP_4336">
+  <data key="d0">+</data>
+</edge>
+<edge source="fnrA" target="ccoN-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="fnrA" target="ccoO-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="fnrA" target="ccoP-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="fnrA" target="ccoQ-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="fnrA" target="cioA">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnrA" target="cioB">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnrA" target="cyoA">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnrA" target="cyoB">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnrA" target="cyoC">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnrA" target="cyoD">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnrA" target="cyoE">
+  <data key="d0">-</data>
+</edge>
+<edge source="fur" target="bfr1">
+  <data key="d0">+</data>
+</edge>
+<edge source="fur" target="bfr2">
+  <data key="d0">+</data>
+</edge>
+<edge source="gacA" target="lapA">
+  <data key="d0">+</data>
+</edge>
+<edge source="gacA" target="rpoS">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoS" target="peaA">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoS" target="peaB">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoS" target="peaC">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoS" target="peaD">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoS" target="pP_4957">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoS" target="rup4959">
+  <data key="d0">+</data>
+</edge>
+<edge source="rpoS" target="ygjP">
+  <data key="d0">+</data>
+</edge>
+<edge source="gclR" target="gcl">
+  <data key="d0">-</data>
+</edge>
+<edge source="gclR" target="glxR">
+  <data key="d0">-</data>
+</edge>
+<edge source="gclR" target="hyi">
+  <data key="d0">-</data>
+</edge>
+<edge source="gclR" target="pykF">
+  <data key="d0">-</data>
+</edge>
+<edge source="gclR" target="ttuD">
+  <data key="d0">-</data>
+</edge>
+<edge source="glpR" target="glpD">
+  <data key="d0">-</data>
+</edge>
+<edge source="glpR" target="glpF">
+  <data key="d0">-</data>
+</edge>
+<edge source="glpR" target="glpK">
+  <data key="d0">-</data>
+</edge>
+<edge source="glpR" target="glpR">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="czcA5">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="gntT">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="gnuK">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="gnuR">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="mmgF">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="mtrc2">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="pP_2333">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="pP_2741">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="pP_3418">
+  <data key="d0">-</data>
+</edge>
+<edge source="gnuR" target="prpC">
+  <data key="d0">-</data>
+</edge>
+<edge source="hexR" target="eda">
+  <data key="d0">-</data>
+</edge>
+<edge source="hexR" target="edd">
+  <data key="d0">-</data>
+</edge>
+<edge source="hexR" target="gapA">
+  <data key="d0">-</data>
+</edge>
+<edge source="hexR" target="glk">
+  <data key="d0">-</data>
+</edge>
+<edge source="hexR" target="gltR-II">
+  <data key="d0">-</data>
+</edge>
+<edge source="hexR" target="pgl">
+  <data key="d0">-</data>
+</edge>
+<edge source="hexR" target="pP_1013">
+  <data key="d0">-</data>
+</edge>
+<edge source="hexR" target="zwf-1">
+  <data key="d0">-</data>
+</edge>
+<edge source="lldR" target="lldD">
+  <data key="d0">-</data>
+</edge>
+<edge source="lldR" target="lldE">
+  <data key="d0">-</data>
+</edge>
+<edge source="lldR" target="lldP">
+  <data key="d0">-</data>
+</edge>
+<edge source="mqsA" target="mqsA">
+  <data key="d0">-</data>
+</edge>
+<edge source="mqsA" target="mqsR">
+  <data key="d0">-</data>
+</edge>
+<edge source="mqsA" target="mucA">
+  <data key="d0">-</data>
+</edge>
+<edge source="mqsA" target="mucB">
+  <data key="d0">-</data>
+</edge>
+<edge source="mqsA" target="pP_3288">
+  <data key="d0">-</data>
+</edge>
+<edge source="mqsA" target="rpoE">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="amtB">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="braD">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="braE">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="braF">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="cbcV">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="cbcW">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="cbcX">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="codA">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="codB">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="dppA-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="dppA-II">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="dppA-III">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="dppB">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="dppC">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="dppD">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="dppF">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="eda">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="gapA">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="gdhA">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="glnA">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="glnK">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="glpD">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="glpF">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="glpK">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="glpR">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="livF-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="livF-II">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="livG">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="livH">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="livK">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="livM">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="opdP">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="opdT-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="oprD">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="pgl">
+  <data key="d0">-</data>
+</edge>
+<edge source="ntrC" target="pP_2685">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="pP_2686">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="pP_2687">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="pP_2688">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="pP_3188">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="pP_4465">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="pP_4867">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="ureA">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="ureB">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="ureC">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="ureD">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="ureE">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="ureF">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="ureG">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="ureJ">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="urtA">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="urtB">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="urtC">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="urtD">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="urtE">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="yhdW">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="yhdX">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="yhdY">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="yhdZ">
+  <data key="d0">+</data>
+</edge>
+<edge source="ntrC" target="zwf-1">
+  <data key="d0">-</data>
+</edge>
+<edge source="oxyR" target="ahpC">
+  <data key="d0">-</data>
+</edge>
+<edge source="oxyR" target="katA">
+  <data key="d0">-</data>
+</edge>
+<edge source="oxyR" target="katG">
+  <data key="d0">-</data>
+</edge>
+<edge source="oxyR" target="trxB">
+  <data key="d0">-</data>
+</edge>
+<edge source="pedR1" target="pedA">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedB">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedC">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedD">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedE">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedF">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedG">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedH">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedI">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedR1">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedR2">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedS1">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pedS2">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pP_2663">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pP_2666">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pP_2668">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pP_2677">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pP_2678">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pP_2683">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="pqqD-II">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR1" target="yiaY">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR2" target="pedE">
+  <data key="d0">+</data>
+</edge>
+<edge source="pedR2" target="pedH">
+  <data key="d0">-</data>
+</edge>
+<edge source="pP_2046" target="fadA">
+  <data key="d0">-</data>
+</edge>
+<edge source="pP_2046" target="fadBx">
+  <data key="d0">-</data>
+</edge>
+<edge source="pP_2046" target="pP_2048">
+  <data key="d0">-</data>
+</edge>
+<edge source="pP_2046" target="pP_2049">
+  <data key="d0">-</data>
+</edge>
+<edge source="pP_2046" target="pP_2050">
+  <data key="d0">-</data>
+</edge>
+<edge source="pP_4553" target="mgtC">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaA">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaB">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaC">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaD">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaE">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaF">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaG">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaH">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaI">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaJ">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="paaK">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_1388">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_2441">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_3243">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_3878">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_3879">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_3880">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_3881">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_3882">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pP_5329">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pstA">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pstB-I">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="pstC">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="ttgA">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="ttgB">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="ttgC">
+  <data key="d0">+</data>
+</edge>
+<edge source="pP_4553" target="ttgR">
+  <data key="d0">+</data>
+</edge>
+<edge source="psrA" target="fadA">
+  <data key="d0">-</data>
+</edge>
+<edge source="psrA" target="fadB">
+  <data key="d0">-</data>
+</edge>
+<edge source="psrA" target="psrA">
+  <data key="d0">-</data>
+</edge>
+<edge source="psrA" target="rpoS">
+  <data key="d0">+</data>
+</edge>
+<edge source="ptxS" target="kguE">
+  <data key="d0">-</data>
+</edge>
+<edge source="ptxS" target="kguK">
+  <data key="d0">-</data>
+</edge>
+<edge source="ptxS" target="pP_3382">
+  <data key="d0">-</data>
+</edge>
+<edge source="ptxS" target="pP_3383">
+  <data key="d0">-</data>
+</edge>
+<edge source="ptxS" target="pP_3384">
+  <data key="d0">-</data>
+</edge>
+<edge source="ptxS" target="ptxS">
+  <data key="d0">-</data>
+</edge>
+<edge source="rpoD" target="davD">
+  <data key="d0"></data>
+</edge>
+<edge source="rpoD" target="davT">
+  <data key="d0"></data>
+</edge>
+<edge source="rpoD" target="pP_mr03">
+  <data key="d0"></data>
+</edge>
+</graph></graphml>

@@ -1,0 +1,68 @@
+# Organism: Pseudomonas putida KT2440
+# Database: PPUT160488CYC
+# Version: 28.1
+# Date and time generated: August 27, 2024, 12:53:33
+#
+# This file depicts the full regulatory network in this Pathway/Genome Database.
+# Types of regulation included are transcriptional (including sigma factors) and translational 
+# regulation (including by small RNAs). Regulators are marked with "*".  A new level of indentation 
+# is introduced to list the direct regulatees of the gene at the previous indention level. The polarity 
+# of regulation of a gene by its regulator is printed as "+", "-", or "+/-", for example, accA 
+# negatively regulates accD.
+#
+# The network contains 504 total genes (regulators plus regulatees) and 27 regulatory genes.
+#
+amrZ*
+  +alg44  +alg8  +algA  +algD  +algE  +algF  +algG  +algI  +algJ  +algK  +algL  +algX  -peaA  -peaB  -peaC  -peaD
+catR*
+  +catA1  +catB  +catC
+finR*
+  -finR*  +fpr1  -hutC*  -hutF  -hutG  -hutH  -hutI  -hutU  +nicC  +nicD  +nicE  +nicF  +nicR  +nicX  -PP_5034  -proY
+fleQ*
+  aldB-I  alg44  alg8  algA  algD  algE  algF  algG  algI  algJ  algK  algL  algX  amrZ*  arcA  arcB  arcC  arcD-I  arcD-II  -bcsA  -bcsB  -bcsG  -bcsZ  bfr2  birA  calA  clpB  coaX  cpsG  exbB  exbD  fatB  fatD  fba  fecI  fecR  finR*  fleN  +fleR  +fleS  flgA  flgB  flgC  flgD  flgE  flgF  flgG  flgH  flgI  flgJ  flgK  flgL  flgM  flgN  +/-flhA  +/-flhA  +/-flhB  +/-flhB  flhF  +fliD  +/-fliE  +/-fliE  +/-fliF  +/-fliF  +/-fliG  +/-fliG  +/-fliH  +/-fliH  +/-fliI  +/-fliI  +/-fliJ  +/-fliJ  fliK  +/-fliL  +/-fliL  +/-fliM  +/-fliM  +/-fliN  +/-fliN  +/-fliO  +/-fliO  +/-fliP  +/-fliP  +/-fliQ  +/-fliQ  +/-fliR  +/-fliR  +fliS  +fliT  folEB  folK  fpr1  gacS  gcbA  gcdG  gcdH  glnA  gltR-II*  iutY  +lapA  lapB  lapC  lapE  ldhA  lolE  mcoA  mgtE  nadC  ndh  ooxB  oprD  oprG  oprH  oprQ  parI  pbpG  pcnB  pet  pfeS-I  pfeS-II  phnN  phoP  phoQ  PP_0051  PP_0116  PP_0131  PP_0160  PP_0161  PP_0162  PP_0180  PP_0267  PP_0350  PP_0351  PP_0352  PP_0439  PP_0534  PP_0535  PP_0546  PP_0564  PP_0565  PP_0598  PP_0599  PP_0667  PP_0668  PP_0681  PP_0685  PP_0703  PP_0704  PP_0705  PP_0788  PP_0861  PP_0862  PP_0863  PP_0998  PP_1006  PP_1013  PP_1083  PP_1147  PP_1148  PP_1149  PP_1150  PP_1151  PP_1157  PP_1184  PP_1207  PP_1208  PP_1647  PP_1648  PP_1651  PP_1728  PP_1729  PP_1776  PP_1778  PP_1779  PP_1780  PP_1786  PP_1787  PP_1788  PP_1789  PP_1790  PP_1791  PP_1792  PP_1793  PP_1794  PP_1795  PP_1797  PP_1798  PP_1864  PP_1865  PP_1878  PP_1970  PP_1971  PP_1978  PP_1979  PP_2114  PP_2191  PP_2219  PP_2220  PP_2240  PP_2310  PP_2429  PP_2473  PP_2509  PP_2590  PP_2592  PP_2593  PP_2595  PP_2596  PP_2628  -PP_2631  -PP_2633  -PP_2634  -PP_2638  PP_2735  PP_2736  PP_2737  PP_2738  PP_3011  PP_3085  PP_3086  PP_3126  PP_3127  PP_3128  PP_3186  PP_3323  PP_3325  PP_3326  PP_3503  PP_3504  PP_3547  PP_3611  PP_3612  PP_3685  PP_3696  PP_3733  PP_3789  PP_4057  PP_4070  PP_4316  PP_4317  PP_4318  PP_4333  PP_4334  PP_4335  PP_4345  PP_4350  PP_4393  PP_4458  PP_4459  PP_4606  PP_4607  PP_4608  PP_4609  PP_4610  PP_4755  PP_4881  PP_4882  PP_4888  PP_4961  PP_5263  PP_5305  PP_5587  PP_5631  PP_5693  PP_5699  PP_5745  PP_t01  PP_t02  PP_t03  PP_t04  quiA  rbbA  recB  recC  recD  rep  rhtA  rlmB  rmlA  rmlB  rmlC1  rmlD  rnr  rnt  rpoN*  thiI  tonB  trpC  trpD  trpG  tsaA  tufA  yfdC  yhhJ  yhiI  znuB
+fliA*
+  +bifA  +cheA  +cheBA  +cheY  +cheZ  +fleL  +flgM  +flgN  +fliC  +pctA  +pctB  +PP_0779  +PP_0913  +PP_2211  +PP_4335  +PP_4336
+fnrA*
+  +ccoN-I  +ccoO-I  +ccoP-I  +ccoQ-I  -cioA  -cioB  -cyoA  -cyoB  -cyoC  -cyoD  -cyoE
+fur*
+  +bfr1  +bfr2
+gacA*
+  +lapA  +rpoS*
+gclR*
+  -gcl  -glxR  -hyi  -pykF  -ttuD
+glpR*
+  -glpD  -glpF  -glpK  -glpR*
+gltR-II*
+  +gtsA  +gtsB  +gtsC  +gtsD  +oprB-I
+gnuR*
+  -czcA5  -gntT  -gnuK  -gnuR*  -mmgF  -mtrc2  -PP_2333  -PP_2741  -PP_3418  -prpC
+hexR*
+  -eda  -edd  -gapA  -glk  -gltR-II*  -pgl  -PP_1013  -zwf-1
+hutC*
+  -hutC*  -hutF  -hutG  -hutH  -hutI  -hutU  -PP_5034  -proY
+lldR*
+  -lldD  -lldE  -lldP
+mqsA*
+  -mqsA*  -mqsR  -mucA  -mucB  -PP_3288  -rpoE
+ntrC*
+  +amtB  +braD  +braE  +braF  +cbcV  +cbcW  +cbcX  +codA  +codB  +dppA-I  +dppA-II  +dppA-III  +dppB  +dppC  +dppD  +dppF  -eda  -gapA  -gdhA  +glnA  +glnK  -glpD  -glpF  -glpK  -glpR*  +livF-I  +livF-II  +livG  +livH  +livK  +livM  +opdP  +opdT-I  +oprD  -pgl  +PP_2685  +PP_2686  +PP_2687  +PP_2688  +PP_3188  +PP_4465  +PP_4867  +ureA  +ureB  +ureC  +ureD  +ureE  +ureF  +ureG  +ureJ  +urtA  +urtB  +urtC  +urtD  +urtE  +yhdW  +yhdX  +yhdY  +yhdZ  -zwf-1
+oxyR*
+  -ahpC  -katA  -katG  -trxB
+pedR1*
+  +pedA  +pedB  +pedC  +pedD  +pedE  +pedF  +pedG  +pedH  +pedI  +pedR1*  +pedR2*  +pedS1  +pedS2  +PP_2663  +PP_2666  +PP_2668  +PP_2677  +PP_2678  +PP_2683  +pqqD-II  +yiaY
+pedR2*
+  +pedE  -pedH
+PP_2046*
+  -fadA  -fadBx  -PP_2048  -PP_2049  -PP_2050
+PP_4553*
+  +mgtC  +paaA  +paaB  +paaC  +paaD  +paaE  +paaF  +paaG  +paaH  +paaI  +paaJ  +paaK  +PP_1388  +PP_2441  +PP_3243  +PP_3878  +PP_3879  +PP_3880  +PP_3881  +PP_3882  +PP_5329  +pstA  +pstB-I  +pstC  +ttgA  +ttgB  +ttgC  +ttgR
+psrA*
+  -fadA  -fadB  -psrA*  +rpoS*
+ptxS*
+  -kguE  -kguK  -PP_3382  -PP_3383  -PP_3384  -ptxS*
+rpoD*
+  davD  davT  PP_mr03
+rpoN*
+  +fleN  +fleR  +fleS  +flgA  +flgB  +flgC  +flgD  +flgE  +flgF  +flgG  +flgH  +flgI  +flgJ  +flgK  +flgL  +flhA  +flhB  +flhF  +fliD  +fliE  +fliF  +fliG  +fliH  +fliI  +fliJ  +fliK  +fliL  +fliM  +fliN  +fliO  +fliP  +fliQ  +fliR  +fliS  +fliT
+rpoS*
+  +peaA  +peaB  +peaC  +peaD  +PP_4957  +rup4959  +ygjP
