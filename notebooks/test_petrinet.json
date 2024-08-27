@@ -1,0 +1,134 @@
+{
+  "header": {
+    "name": "test_petrinet",
+    "schema": "https://raw.githubusercontent.com/DARPA-ASKEM/Model-Representations/petrinet_v0.6/petrinet/petrinet_schema.json",
+    "schema_name": "petrinet",
+    "description": "test_petrinet",
+    "model_version": "0.1"
+  },
+  "properties": {},
+  "model": {
+    "states": [
+      {
+        "id": "GeneA",
+        "name": "GeneA",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "GeneB",
+        "name": "GeneB",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "GeneC",
+        "name": "GeneC",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      }
+    ],
+    "transitions": [
+      {
+        "id": "t1",
+        "input": [
+          "GeneA"
+        ],
+        "output": [
+          "GeneB"
+        ],
+        "properties": {
+          "name": "t1"
+        }
+      },
+      {
+        "id": "t2",
+        "input": [
+          "GeneA"
+        ],
+        "output": [
+          "GeneC"
+        ],
+        "properties": {
+          "name": "t2"
+        }
+      }
+    ]
+  },
+  "semantics": {
+    "ode": {
+      "rates": [
+        {
+          "target": "t1",
+          "expression": "GeneA**n_GeneA_to_GeneB*beta_GeneA_to_GeneB/(GeneA**n_GeneA_to_GeneB + K_GeneA_to_GeneB**n_GeneA_to_GeneB)",
+          "expression_mathml": "<apply><divide/><apply><times/><apply><power/><ci>GeneA</ci><ci>n_GeneA_to_GeneB</ci></apply><ci>beta_GeneA_to_GeneB</ci></apply><apply><plus/><apply><power/><ci>GeneA</ci><ci>n_GeneA_to_GeneB</ci></apply><apply><power/><ci>K_GeneA_to_GeneB</ci><ci>n_GeneA_to_GeneB</ci></apply></apply></apply>"
+        },
+        {
+          "target": "t2",
+          "expression": "beta_GeneA_to_GeneC/(GeneA**n_GeneA_to_GeneC/K_GeneA_to_GeneC**n_GeneA_to_GeneC + 1)",
+          "expression_mathml": "<apply><divide/><ci>beta_GeneA_to_GeneC</ci><apply><plus/><apply><divide/><apply><power/><ci>GeneA</ci><ci>n_GeneA_to_GeneC</ci></apply><apply><power/><ci>K_GeneA_to_GeneC</ci><ci>n_GeneA_to_GeneC</ci></apply></apply><cn>1</cn></apply></apply>"
+        }
+      ],
+      "initials": [
+        {
+          "target": "GeneA",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "GeneB",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "GeneC",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        }
+      ],
+      "parameters": [
+        {
+          "id": "K_GeneA_to_GeneB",
+          "value": 1.0
+        },
+        {
+          "id": "beta_GeneA_to_GeneB",
+          "value": 1.0
+        },
+        {
+          "id": "n_GeneA_to_GeneB",
+          "value": 1.0
+        },
+        {
+          "id": "K_GeneA_to_GeneC",
+          "value": 1.0
+        },
+        {
+          "id": "beta_GeneA_to_GeneC",
+          "value": 1.0
+        },
+        {
+          "id": "n_GeneA_to_GeneC",
+          "value": 1.0
+        },
+        {
+          "id": "default_compartment",
+          "value": 1.0
+        }
+      ],
+      "observables": [],
+      "time": {
+        "id": "t"
+      }
+    }
+  },
+  "metadata": {
+    "annotations": {}
+  }
+}

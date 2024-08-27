@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version2/core" level="3" version="2">
+  <model metaid="grn_model" id="grn_model">
+    <listOfCompartments>
+      <compartment sboTerm="SBO:0000410" id="default_compartment" spatialDimensions="3" size="1" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="GeneA" name="GeneA" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="GeneB" name="GeneB" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="beta_GeneA_to_GeneB" value="1" constant="true"/>
+      <parameter id="n_GeneA_to_GeneB" value="1" constant="true"/>
+      <parameter id="K_GeneA_to_GeneB" value="1" constant="true"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="J_GeneA_to_GeneB" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GeneA" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GeneB" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> beta_GeneA_to_GeneB </ci>
+                <apply>
+                  <power/>
+                  <ci> GeneA </ci>
+                  <ci> n_GeneA_to_GeneB </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> K_GeneA_to_GeneB </ci>
+                  <ci> n_GeneA_to_GeneB </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> GeneA </ci>
+                  <ci> n_GeneA_to_GeneB </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
