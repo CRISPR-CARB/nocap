@@ -4,15 +4,27 @@ import libsbml
 
 def create_sbml_model_from_nx(dag, output_file='model.xml'):
     def dag_to_antimony(dag):
+
+        # Check if the input graph is a directed acyclic graph (DAG)
+        if not nx.is_directed_acyclic_graph(dag):
+            raise ValueError("Input graph must be a directed acyclic graph (DAG).")
+
         model_str = ""
 
         model_str += "model grn_model()\n"
         # Global compartment declaration
         model_str += "  compartment default_compartment = 1;\n"
 
-        for node in dag.nodes():
-            model_str += f"  species {node} in default_compartment;\n"
-            model_str += f"  {node} = 1;\n"
+        # Check and retrieve initial values for nodes
+        for node in dag.nodes(data=True):
+            value = node[1].get('value', None)
+            if value is None:
+                raise ValueError(f"Node {node[0]} is missing the 'value' attribute.")
+            if not isinstance(value, (int, float)) or value < 0:
+                raise ValueError(f"Node {node[0]} has an invalid 'value' attribute: {value}. Must be a non-negative number.")
+
+            model_str += f"  species {node[0]} in default_compartment;\n"
+            model_str += f"  {node[0]} = {value};\n"
 
         for source, target, data in dag.edges(data=True):
             if 'interaction_type' not in data:
@@ -55,14 +67,12 @@ def create_sbml_model_from_nx(dag, output_file='model.xml'):
 
     if model is not None:
         for species in model.getListOfSpecies():
+            initial_value = species.getInitialConcentration()  # Get the initial concentration from Antimony
             species.setInitialAmount(0.0)  # Set initial amount to 0.0
+            species.setInitialConcentration(initial_value)  # Set initial concentration
             species.setHasOnlySubstanceUnits(False)
-            species.setInitialConcentration(1.0)  # Ensure initial concentration is correct
             species.setName(species.getId())
 
-        # for compartment in model.getListOfCompartments():
-        #     compartment.setUnits("litre")  # Ensure the units are set to litre for compartments
-        
         # Write updated SBML back to string
         sbml_str = libsbml.writeSBMLToString(document)
 
@@ -71,4 +81,3 @@ def create_sbml_model_from_nx(dag, output_file='model.xml'):
         f.write(sbml_str)
 
     print(f"SBML model written to {output_file}")
-

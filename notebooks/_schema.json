@@ -614,62 +614,62 @@
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.10000000149011612,
-               "lower": 0.8999999761581421,
-               "upper": 0.8999999761581421
+               "lower": 0.9478503465652466,
+               "upper": 0.9530914396047592
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.20000000298023224,
-               "lower": 0.800000011920929,
-               "upper": 0.800000011920929
+               "lower": 0.8973969280719757,
+               "upper": 0.907599687576294
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.30000001192092896,
-               "lower": 0.699999988079071,
-               "upper": 0.699999988079071
+               "lower": 0.8486618578433991,
+               "upper": 0.8635372340679168
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.4000000059604645,
-               "lower": 0.6000000238418579,
-               "upper": 0.6000000238418579
+               "lower": 0.8016627848148346,
+               "upper": 0.8209169417619705
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.5,
-               "lower": 0.5,
-               "upper": 0.5
+               "lower": 0.7564146012067795,
+               "upper": 0.7797449946403503
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.6000000238418579,
-               "lower": 0.3999999463558197,
-               "upper": 0.3999999463558197
+               "lower": 0.7129258751869202,
+               "upper": 0.7400265455245971
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.699999988079071,
-               "lower": 0.30000001192092896,
-               "upper": 0.30000001192092896
+               "lower": 0.6711129128932953,
+               "upper": 0.7017628192901612
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.800000011920929,
-               "lower": 0.19999994337558746,
-               "upper": 0.19999994337558746
+               "lower": 0.6309951364994049,
+               "upper": 0.664951303601265
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 0.8999999761581421,
-               "lower": 0.09999999403953552,
-               "upper": 0.09999999403953552
+               "lower": 0.5926017940044404,
+               "upper": 0.6295861840248108
             },
             {
                "trajectory": "GeneA_state",
                "timepoint": 1.0,
-               "lower": -7.574077187655348e-08,
-               "upper": -7.574077187655348e-08
+               "lower": 0.5552695214748382,
+               "upper": 0.5956576347351074
             },
             {
                "trajectory": "GeneB_state",
@@ -680,128 +680,62 @@
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.10000000149011612,
-               "lower": 1.0487067699432373,
-               "upper": 1.0487067699432373
+               "lower": 1.046908473968506,
+               "upper": 1.0521479427814484
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.20000000298023224,
-               "lower": 1.0946401357650757,
-               "upper": 1.0946401357650757
+               "lower": 1.0924002587795258,
+               "upper": 1.1026030421257018
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.30000001192092896,
-               "lower": 1.1374807357788086,
-               "upper": 1.1374807357788086
+               "lower": 1.136462664604187,
+               "upper": 1.151338165998459
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.4000000059604645,
-               "lower": 1.1768561601638794,
-               "upper": 1.1768561601638794
+               "lower": 1.1790830373764039,
+               "upper": 1.1983371436595918
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.5,
-               "lower": 1.2123184204101562,
-               "upper": 1.2123184204101562
+               "lower": 1.2202550172805786,
+               "upper": 1.2435854911804198
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.6000000238418579,
-               "lower": 1.243324875831604,
-               "upper": 1.243324875831604
+               "lower": 1.2599735319614411,
+               "upper": 1.2870745599269866
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.699999988079071,
-               "lower": 1.269216775894165,
-               "upper": 1.269216775894165
+               "lower": 1.2982381224632262,
+               "upper": 1.3288879215717315
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.800000011920929,
-               "lower": 1.289176106452942,
-               "upper": 1.289176106452942
+               "lower": 1.3350485563278198,
+               "upper": 1.36900475025177
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 0.8999999761581421,
-               "lower": 1.3021622896194458,
-               "upper": 1.3021622896194458
+               "lower": 1.3704136550426482,
+               "upper": 1.4073980510234834
             },
             {
                "trajectory": "GeneB_state",
                "timepoint": 1.0,
-               "lower": 1.3068537712097168,
-               "upper": 1.3068537712097168
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.0,
-               "lower": 1.0,
-               "upper": 1.0
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.10000000149011612,
-               "lower": 1.0512933731079102,
-               "upper": 1.0512933731079102
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.20000000298023224,
-               "lower": 1.1053612232208252,
-               "upper": 1.1053612232208252
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.30000001192092896,
-               "lower": 1.1625193357467651,
-               "upper": 1.1625193357467651
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.4000000059604645,
-               "lower": 1.2231440544128418,
-               "upper": 1.2231440544128418
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.5,
-               "lower": 1.2876818180084229,
-               "upper": 1.2876818180084229
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.6000000238418579,
-               "lower": 1.3566752672195435,
-               "upper": 1.3566752672195435
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.699999988079071,
-               "lower": 1.4307836294174194,
-               "upper": 1.4307836294174194
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.800000011920929,
-               "lower": 1.5108273029327393,
-               "upper": 1.5108273029327393
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 0.8999999761581421,
-               "lower": 1.5978378057479858,
-               "upper": 1.5978378057479858
-            },
-            {
-               "trajectory": "GeneC_state",
-               "timepoint": 1.0,
-               "lower": 1.6931462287902832,
-               "upper": 1.6931462287902832
+               "lower": 1.4043418228626252,
+               "upper": 1.444730168581009
             }
          ],
          "transform": [
