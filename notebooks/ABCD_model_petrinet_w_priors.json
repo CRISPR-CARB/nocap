@@ -1,0 +1,239 @@
+{
+  "header": {
+    "name": "ABCD_model_petrinet_w_priors",
+    "schema": "https://raw.githubusercontent.com/DARPA-ASKEM/Model-Representations/petrinet_v0.6/petrinet/petrinet_schema.json",
+    "schema_name": "petrinet",
+    "description": "ABCD_model_petrinet_w_priors",
+    "model_version": "0.1"
+  },
+  "properties": {},
+  "model": {
+    "states": [
+      {
+        "id": "GeneA",
+        "name": "GeneA",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "GeneB",
+        "name": "GeneB",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "GeneD",
+        "name": "GeneD",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "GeneC",
+        "name": "GeneC",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      }
+    ],
+    "transitions": [
+      {
+        "id": "t1",
+        "input": [
+          "GeneA"
+        ],
+        "output": [
+          "GeneB"
+        ],
+        "properties": {
+          "name": "t1"
+        }
+      },
+      {
+        "id": "t2",
+        "input": [
+          "GeneB"
+        ],
+        "output": [
+          "GeneD"
+        ],
+        "properties": {
+          "name": "t2"
+        }
+      },
+      {
+        "id": "t3",
+        "input": [
+          "GeneC"
+        ],
+        "output": [
+          "GeneB"
+        ],
+        "properties": {
+          "name": "t3"
+        }
+      }
+    ]
+  },
+  "semantics": {
+    "ode": {
+      "rates": [
+        {
+          "target": "t1",
+          "expression": "0.5*GeneA**n_GeneA_to_GeneB/(GeneA**n_GeneA_to_GeneB + K_GeneA_to_GeneB**n_GeneA_to_GeneB)",
+          "expression_mathml": "<apply><divide/><apply><times/><cn>0.5</cn><apply><power/><ci>GeneA</ci><ci>n_GeneA_to_GeneB</ci></apply></apply><apply><plus/><apply><power/><ci>GeneA</ci><ci>n_GeneA_to_GeneB</ci></apply><apply><power/><ci>K_GeneA_to_GeneB</ci><ci>n_GeneA_to_GeneB</ci></apply></apply></apply>"
+        },
+        {
+          "target": "t2",
+          "expression": "0.4*GeneB**n_GeneB_to_GeneD/(GeneB**n_GeneB_to_GeneD + K_GeneB_to_GeneD**n_GeneB_to_GeneD)",
+          "expression_mathml": "<apply><divide/><apply><times/><cn>0.40000000000000002</cn><apply><power/><ci>GeneB</ci><ci>n_GeneB_to_GeneD</ci></apply></apply><apply><plus/><apply><power/><ci>GeneB</ci><ci>n_GeneB_to_GeneD</ci></apply><apply><power/><ci>K_GeneB_to_GeneD</ci><ci>n_GeneB_to_GeneD</ci></apply></apply></apply>"
+        },
+        {
+          "target": "t3",
+          "expression": "0.3/(GeneC**n_GeneC_to_GeneB/3 + 1)",
+          "expression_mathml": "<apply><divide/><cn>0.29999999999999999</cn><apply><plus/><apply><divide/><apply><power/><ci>GeneC</ci><ci>n_GeneC_to_GeneB</ci></apply><cn>3</cn></apply><cn>1</cn></apply></apply>"
+        }
+      ],
+      "initials": [
+        {
+          "target": "GeneA",
+          "expression": "10.0",
+          "expression_mathml": "<cn>10.0</cn>"
+        },
+        {
+          "target": "GeneB",
+          "expression": "0.0",
+          "expression_mathml": "<cn>0.0</cn>"
+        },
+        {
+          "target": "GeneD",
+          "expression": "0.0",
+          "expression_mathml": "<cn>0.0</cn>"
+        },
+        {
+          "target": "GeneC",
+          "expression": "10.0",
+          "expression_mathml": "<cn>10.0</cn>"
+        }
+      ],
+      "parameters": [
+        {
+          "id": "K_GeneA_to_GeneB",
+          "value": 2.0,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "n_GeneA_to_GeneB",
+          "value": 2.0,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "K_GeneB_to_GeneD",
+          "value": 4.0,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "n_GeneB_to_GeneD",
+          "value": 3.0,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "n_GeneC_to_GeneB",
+          "value": 1.0,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "beta_GeneA_to_GeneB",
+          "value": 0.5,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "beta_GeneB_to_GeneD",
+          "value": 0.4,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "beta_GeneC_to_GeneB",
+          "value": 0.3,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "K_GeneC_to_GeneB",
+          "value": 3.0,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 3.0
+            }
+          }
+        },
+        {
+          "id": "default_compartment",
+          "value": 1.0
+        }
+      ],
+      "observables": [],
+      "time": {
+        "id": "t"
+      }
+    }
+  },
+  "metadata": {
+    "annotations": {}
+  }
+}
