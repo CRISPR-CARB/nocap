@@ -26,6 +26,11 @@ def create_sbml_model_from_nx(dag, output_file='model.xml'):
             model_str += f"  species {node[0]} in default_compartment;\n"
             model_str += f"  {node[0]} = {value};\n"
 
+            # Update the nodes to mark source nodes as constant
+            source_nodes = [node for node in dag.nodes() if dag.in_degree(node) == 0]
+            for source_node in source_nodes:
+                model_str += f"  const {source_node};\n"
+
         for source, target, data in dag.edges(data=True):
             if 'interaction_type' not in data:
                 raise ValueError(f"No 'interaction_type' attribute for edge {source} -> {target}")
