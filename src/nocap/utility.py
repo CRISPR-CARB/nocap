@@ -29,8 +29,8 @@ def create_sbml_model_from_nx(dag, output_file='model.xml', hill_params=None):
         node_initial_values = [node[1]['value'] for node in dag.nodes(data=True)]
         last_node_name = node_names[-1]
 
-        total_initial_values = sum(node_initial_values)
-        n_1_names_str = " + ".join(node_names[:-1])
+        # total_initial_values = sum(node_initial_values)
+        # n_1_names_str = " + ".join(node_names[:-1])
 
 
         for node in dag.nodes(data=True):
