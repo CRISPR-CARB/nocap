@@ -2,8 +2,8 @@ import networkx as nx
 import tellurium as te
 import libsbml
 
-def create_sbml_model_from_nx(dag, output_file='model.xml', hill_params=None):
-    def dag_to_antimony(dag, hill_params):
+def create_sbml_model_from_nx(dag, output_file='model.xml', hill_params=None, dist_params=None):
+    def dag_to_antimony(dag, hill_params, dist_params=None):
         # Default Hill parameters
         default_hill_params = {
             'beta': 1.0,
@@ -11,8 +11,16 @@ def create_sbml_model_from_nx(dag, output_file='model.xml', hill_params=None):
             'n': 1.0
         }
         
+        default_dist_params = {
+            'state_variable_distribution': 'uniform(0,10)',
+            'parameter_distribution': 'uniform(0.1,3)'
+        }
+
         if hill_params is None:
             hill_params = {}
+        
+        if dist_params is None:
+            dist_params = {}
 
         # Check if the input graph is a directed acyclic graph (DAG)
         if not nx.is_directed_acyclic_graph(dag):
@@ -56,6 +64,13 @@ def create_sbml_model_from_nx(dag, output_file='model.xml', hill_params=None):
             # for source_node in source_nodes:
             #     model_str += f"  const {source_node};\n"
 
+            # add distribution to chemical species
+            # see: https://tellurium.readthedocs.io/en/latest/antimony.html#uncertainty-information 
+            species_distribution = dist_params.get(f"{node[0]}",
+                                                   default_dist_params['state_variable_distribution'])
+            model_str += f"  {node[0]}.distribution = {species_distribution};\n"
+            
+
         for source, target, data in dag.edges(data=True):
             if 'interaction_type' not in data:
                 raise ValueError(f"No 'interaction_type' attribute for edge {source} -> {target}")
@@ -64,6 +79,14 @@ def create_sbml_model_from_nx(dag, output_file='model.xml', hill_params=None):
             beta = hill_params.get(f'beta_{source}_to_{target}', default_hill_params['beta'])
             K = hill_params.get(f'K_{source}_to_{target}', default_hill_params['K'])
             n = hill_params.get(f'n_{source}_to_{target}', default_hill_params['n'])
+            
+            # get parameter distributions
+            beta_distribution = dist_params.get(f'beta_{source}_to_{target}',
+                                                   default_dist_params['parameter_distribution'])
+            K_distribution = dist_params.get(f'K_{source}_to_{target}',
+                                                   default_dist_params['parameter_distribution'])
+            n_distribution = dist_params.get(f'n_{source}_to_{target}',
+                                                   default_dist_params['parameter_distribution'])
             
             if interaction_type == 'activation':
                 rate_law = f"{beta} * {source}^n_{source}_to_{target} / (K_{source}_to_{target}^n_{source}_to_{target} + {source}^n_{source}_to_{target})"
@@ -78,6 +101,11 @@ def create_sbml_model_from_nx(dag, output_file='model.xml', hill_params=None):
             model_str += f"  beta_{source}_to_{target} = {beta}; // units: mole_per_second\n"
             model_str += f"  K_{source}_to_{target} = {K}; // units: mole\n"
             model_str += f"  n_{source}_to_{target} = {n}; // units: dimensionless\n"
+
+            # add parameter distributions
+            model_str += f"  beta_{source}_to_{target}.distribution = {beta_distribution};\n"
+            model_str += f"  K_{source}_to_{target}.distribution = {K_distribution};\n"
+            model_str += f"  n_{source}_to_{target}.distribution = {n_distribution};\n"
 
         model_str += "end"
 
