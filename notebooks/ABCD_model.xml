@@ -67,7 +67,7 @@
       </species>
     </listOfSpecies>
     <listOfParameters>
-      <parameter id="n_GeneA_to_GeneB" value="2" constant="true">
+      <parameter id="n_GeneA_to_GeneB" value="1" constant="true">
         <distrib:listOfUncertainties>
           <distrib:uncertainty>
             <distrib:uncertParameter distrib:type="distribution">
@@ -82,7 +82,7 @@
           </distrib:uncertainty>
         </distrib:listOfUncertainties>
       </parameter>
-      <parameter id="K_GeneA_to_GeneB" value="2" constant="true">
+      <parameter id="K_GeneA_to_GeneB" value="1" constant="true">
         <distrib:listOfUncertainties>
           <distrib:uncertainty>
             <distrib:uncertParameter distrib:type="distribution">
@@ -97,7 +97,7 @@
           </distrib:uncertainty>
         </distrib:listOfUncertainties>
       </parameter>
-      <parameter id="beta_GeneA_to_GeneB" value="0.5" constant="true">
+      <parameter id="beta_GeneA_to_GeneB" value="1" constant="true">
         <distrib:listOfUncertainties>
           <distrib:uncertainty>
             <distrib:uncertParameter distrib:type="distribution">
@@ -112,7 +112,7 @@
           </distrib:uncertainty>
         </distrib:listOfUncertainties>
       </parameter>
-      <parameter id="n_GeneB_to_GeneD" value="3" constant="true">
+      <parameter id="n_GeneB_to_GeneD" value="1" constant="true">
         <distrib:listOfUncertainties>
           <distrib:uncertainty>
             <distrib:uncertParameter distrib:type="distribution">
@@ -127,7 +127,7 @@
           </distrib:uncertainty>
         </distrib:listOfUncertainties>
       </parameter>
-      <parameter id="K_GeneB_to_GeneD" value="4" constant="true">
+      <parameter id="K_GeneB_to_GeneD" value="1" constant="true">
         <distrib:listOfUncertainties>
           <distrib:uncertainty>
             <distrib:uncertParameter distrib:type="distribution">
@@ -142,7 +142,7 @@
           </distrib:uncertainty>
         </distrib:listOfUncertainties>
       </parameter>
-      <parameter id="beta_GeneB_to_GeneD" value="0.4" constant="true">
+      <parameter id="beta_GeneB_to_GeneD" value="1" constant="true">
         <distrib:listOfUncertainties>
           <distrib:uncertainty>
             <distrib:uncertParameter distrib:type="distribution">
@@ -172,7 +172,7 @@
           </distrib:uncertainty>
         </distrib:listOfUncertainties>
       </parameter>
-      <parameter id="beta_GeneC_to_GeneB" value="0.3" constant="true">
+      <parameter id="beta_GeneC_to_GeneB" value="1" constant="true">
         <distrib:listOfUncertainties>
           <distrib:uncertainty>
             <distrib:uncertParameter distrib:type="distribution">
@@ -187,7 +187,7 @@
           </distrib:uncertainty>
         </distrib:listOfUncertainties>
       </parameter>
-      <parameter id="K_GeneC_to_GeneB" value="3" constant="true">
+      <parameter id="K_GeneC_to_GeneB" value="1" constant="true">
         <distrib:listOfUncertainties>
           <distrib:uncertainty>
             <distrib:uncertParameter distrib:type="distribution">
@@ -217,7 +217,7 @@
               <divide/>
               <apply>
                 <times/>
-                <cn> 0.5 </cn>
+                <cn type="integer"> 1 </cn>
                 <apply>
                   <power/>
                   <ci> GeneA </ci>
@@ -254,7 +254,7 @@
               <divide/>
               <apply>
                 <times/>
-                <cn> 0.4 </cn>
+                <cn type="integer"> 1 </cn>
                 <apply>
                   <power/>
                   <ci> GeneB </ci>
@@ -289,7 +289,7 @@
           <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
               <divide/>
-              <cn> 0.3 </cn>
+              <cn type="integer"> 1 </cn>
               <apply>
                 <plus/>
                 <cn type="integer"> 1 </cn>
@@ -300,7 +300,7 @@
                     <ci> GeneC </ci>
                     <ci> n_GeneC_to_GeneB </ci>
                   </apply>
-                  <cn type="integer"> 3 </cn>
+                  <cn type="integer"> 1 </cn>
                 </apply>
               </apply>
             </apply>
