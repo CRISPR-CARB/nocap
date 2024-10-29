@@ -67,141 +67,15 @@
       </species>
     </listOfSpecies>
     <listOfParameters>
-      <parameter id="n_GeneA_to_GeneB" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
-      <parameter id="K_GeneA_to_GeneB" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
-      <parameter id="beta_GeneA_to_GeneB" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
-      <parameter id="n_GeneB_to_GeneD" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
-      <parameter id="K_GeneB_to_GeneD" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
-      <parameter id="beta_GeneB_to_GeneD" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
-      <parameter id="n_GeneC_to_GeneB" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
-      <parameter id="beta_GeneC_to_GeneB" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
-      <parameter id="K_GeneC_to_GeneB" value="1" constant="true">
-        <distrib:listOfUncertainties>
-          <distrib:uncertainty>
-            <distrib:uncertParameter distrib:type="distribution">
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-                <apply>
-                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
-                  <cn> 0.1 </cn>
-                  <cn type="integer"> 3 </cn>
-                </apply>
-              </math>
-            </distrib:uncertParameter>
-          </distrib:uncertainty>
-        </distrib:listOfUncertainties>
-      </parameter>
+      <parameter id="n_GeneA_to_GeneB" value="1" constant="true"/>
+      <parameter id="K_GeneA_to_GeneB" value="1" constant="true"/>
+      <parameter id="beta_GeneA_to_GeneB" value="1" constant="true"/>
+      <parameter id="n_GeneB_to_GeneD" value="1" constant="true"/>
+      <parameter id="K_GeneB_to_GeneD" value="1" constant="true"/>
+      <parameter id="beta_GeneB_to_GeneD" value="1" constant="true"/>
+      <parameter id="n_GeneC_to_GeneB" value="1" constant="true"/>
+      <parameter id="beta_GeneC_to_GeneB" value="1" constant="true"/>
+      <parameter id="K_GeneC_to_GeneB" value="1" constant="true"/>
     </listOfParameters>
     <listOfReactions>
       <reaction id="J_GeneA_to_GeneB" reversible="false">
