@@ -1,14 +1,16 @@
 """Process for data generation."""
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
 
 
-def generate_test_data_tensor(n_rows=100, n_cols=200, seed=42, scale_dist_params=(0, 1), loc_dist_params=(2, 50)):
+def generate_test_data_tensor(
+    n_rows=100, n_cols=200, seed=42, scale_dist_params=(0, 1), loc_dist_params=(2, 50)
+):
     """
     Generates a tensor of test data with specified dimensions and random values.
-    
+
     Args:
         n_rows (int, optional): Number of rows in the generated tensor. Default is 100.
         n_cols (int, optional): Number of columns in the generated tensor. Default is 200.
@@ -22,21 +24,19 @@ def generate_test_data_tensor(n_rows=100, n_cols=200, seed=42, scale_dist_params
         torch.Tensor: A tensor of shape (n_rows, n_cols) with random float values.
     """
     torch.manual_seed(seed)
-    
+
     scale_mean, scale_std = scale_dist_params
     loc_shape, loc_scale = loc_dist_params
-    
+
     # Generate random scales and locations for each column using PyTorch distributions
     scales = torch.distributions.LogNormal(scale_mean, scale_std).sample((n_cols,))
     locs = torch.distributions.Gamma(loc_shape, loc_scale).sample((n_cols,))
 
-    data_array = torch.stack([
-        scale * torch.rand(n_rows) + loc
-        for scale, loc in zip(scales, locs)
-    ], dim=1)
+    data_array = torch.stack(
+        [scale * torch.rand(n_rows) + loc for scale, loc in zip(scales, locs)], dim=1
+    )
 
     return data_array
-
 
 
 def apply_lognormal_noise_process(tensor, mean=0.0, std=1.0):
@@ -56,7 +56,6 @@ def apply_lognormal_noise_process(tensor, mean=0.0, std=1.0):
     """
     noise = torch.distributions.LogNormal(mean, std).sample(tensor.size())
     return tensor + noise
-
 
 
 def apply_bernoulli_lognormal_outlier_process(tensor, pi, mu, sigma):
@@ -87,7 +86,7 @@ def apply_row_normalization_and_lognormal_scaling(tensor, mu, sigma):
     Applies row normalization and log-normal scaling to the given tensor.
 
     This function normalizes each row of the input tensor by dividing by the sum of the elements in that row.
-    It then scales the normalized tensor by sampling from a log-normal distribution with the given mean ($\mu$) 
+    It then scales the normalized tensor by sampling from a log-normal distribution with the given mean ($\mu$)
     and standard deviation ($\sigma$).
 
     Args:
@@ -107,7 +106,7 @@ def apply_quantile_logistic_dropout_process(tensor, k, q):
     """
     Applies a quantile-based logistic dropout process to the input tensor.
 
-    This function calculates dropout probabilities using a logistic function centered at the quantile threshold 
+    This function calculates dropout probabilities using a logistic function centered at the quantile threshold
     of the logarithmically transformed tensor values. It then applies dropout based on these probabilities.
 
     Args:
