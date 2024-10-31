@@ -10,7 +10,7 @@ from nocap.process import (
     apply_lognormal_noise_process,
     apply_poisson_process,
     apply_quantile_logistic_dropout_process,
-    apply_row_normalization_and_lognormal_scaling,
+    apply_row_normalization_and_lognormal_scaling_process,
     generate_test_data_tensor,
 )
 
@@ -166,7 +166,7 @@ def test_apply_bernoulli_lognormal_outlier_process_outlier_range():
 def test_apply_row_normalization_and_lognormal_scaling_shape():
     """Test shape after normalization and scaling."""
     tensor = generate_test_data_tensor(n_rows=100, n_cols=200)
-    normalized_scaled_tensor = apply_row_normalization_and_lognormal_scaling(
+    normalized_scaled_tensor = apply_row_normalization_and_lognormal_scaling_process(
         tensor, mu=0.0, sigma=1.0
     )
     assert (
@@ -177,7 +177,7 @@ def test_apply_row_normalization_and_lognormal_scaling_shape():
 def test_apply_row_normalization_and_lognormal_scaling_no_nan_inf_negative():
     """Test no NaN, Inf, or negative values after normalization and scaling."""
     tensor = generate_test_data_tensor(n_rows=100, n_cols=200)
-    normalized_scaled_tensor = apply_row_normalization_and_lognormal_scaling(
+    normalized_scaled_tensor = apply_row_normalization_and_lognormal_scaling_process(
         tensor, mu=0.0, sigma=1.0
     )
     assert not torch.isnan(
@@ -235,10 +235,10 @@ def test_apply_row_normalization_and_lognormal_scaling_no_nan_inf_negative():
 def test_apply_row_normalization_and_lognormal_scaling_different_mu_sigma():
     """Test different mu and sigma values produce different normalized and scaled tensors."""
     tensor = generate_test_data_tensor(n_rows=100, n_cols=200, seed=42)
-    normalized_scaled_tensor1 = apply_row_normalization_and_lognormal_scaling(
+    normalized_scaled_tensor1 = apply_row_normalization_and_lognormal_scaling_process(
         tensor, mu=0.0, sigma=1.0
     )
-    normalized_scaled_tensor2 = apply_row_normalization_and_lognormal_scaling(
+    normalized_scaled_tensor2 = apply_row_normalization_and_lognormal_scaling_process(
         tensor, mu=1.0, sigma=2.0
     )
     assert not torch.equal(

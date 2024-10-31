@@ -81,7 +81,7 @@ def apply_bernoulli_lognormal_outlier_process(tensor, pi, mu, sigma):
     return updated_tensor
 
 
-def apply_row_normalization_and_lognormal_scaling(tensor, mu, sigma):
+def apply_row_normalization_and_lognormal_scaling_process(tensor, mu, sigma):
     """
     Applies row normalization and log-normal scaling to the given tensor.
 
