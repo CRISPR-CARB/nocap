@@ -1,7 +1,5 @@
 """Process for data generation."""
 
-import numpy as np
-import pandas as pd
 import torch
 
 
@@ -9,7 +7,7 @@ def generate_test_data_tensor(
     n_rows=100, n_cols=200, seed=42, scale_dist_params=(0, 1), loc_dist_params=(2, 50)
 ):
     """
-    Generates a tensor of test data with specified dimensions and random values.
+    Generate a tensor of test data with specified dimensions and random values.
 
     Args:
         n_rows (int, optional): Number of rows in the generated tensor. Default is 100.
@@ -41,26 +39,26 @@ def generate_test_data_tensor(
 
 def apply_lognormal_noise_process(tensor, mean=0.0, std=1.0):
     """
-    Applies a log-normal noise process to the input tensor.
+    Apply a log-normal noise process to the input tensor.
 
     This function generates log-normal noise with the specified mean and standard deviation,
     and adds it to the input tensor.
 
-    Parameters:
-    tensor (torch.Tensor): The input tensor to which noise will be added.
-    mean (float, optional): The mean of the log-normal distribution. Default is 0.0.
-    std (float, optional): The standard deviation of the log-normal distribution. Default is 1.0.
+    Args:
+        tensor (torch.Tensor): The input tensor to which noise will be added.
+        mean (float, optional): The mean of the log-normal distribution. Default is 0.0.
+        std (float, optional): The standard deviation of the log-normal distribution. Default is 1.0.
 
     Returns:
-    torch.Tensor: The tensor with added log-normal noise.
+        torch.Tensor: The tensor with added log-normal noise.
     """
     noise = torch.distributions.LogNormal(mean, std).sample(tensor.size())
     return tensor + noise
 
 
 def apply_bernoulli_lognormal_outlier_process(tensor, pi, mu, sigma):
-    """
-    Applies a Bernoulli-LogNormal outlier process to the input tensor.
+    r"""
+    Apply a Bernoulli-LogNormal outlier process to the input tensor.
 
     This function generates binary indicators using a Bernoulli distribution with probability $\pi$,
     and scale factors using a LogNormal distribution with mean $\mu$ and standard deviation $\sigma$.
@@ -82,8 +80,8 @@ def apply_bernoulli_lognormal_outlier_process(tensor, pi, mu, sigma):
 
 
 def apply_row_normalization_and_lognormal_scaling_process(tensor, mu, sigma):
-    """
-    Applies row normalization and log-normal scaling to the given tensor.
+    r"""
+    Apply row normalization and log-normal scaling to the input tensor.
 
     This function normalizes each row of the input tensor by dividing by the sum of the elements in that row.
     It then scales the normalized tensor by sampling from a log-normal distribution with the given mean ($\mu$)
@@ -98,13 +96,13 @@ def apply_row_normalization_and_lognormal_scaling_process(tensor, mu, sigma):
         torch.Tensor: The normalized and scaled tensor.
     """
     row_sums = tensor.sum(dim=1, keepdim=True)
-    L = torch.distributions.LogNormal(mu, sigma).sample([tensor.size(0), 1])
-    return (L * tensor) / row_sums
+    scaling_factors = torch.distributions.LogNormal(mu, sigma).sample([tensor.size(0), 1])
+    return (scaling_factors * tensor) / row_sums
 
 
 def apply_quantile_logistic_dropout_process(tensor, k, q):
     """
-    Applies a quantile-based logistic dropout process to the input tensor.
+    Apply a quantile-based logistic dropout process to the input tensor.
 
     This function calculates dropout probabilities using a logistic function centered at the quantile threshold
     of the logarithmically transformed tensor values. It then applies dropout based on these probabilities.
@@ -117,23 +115,23 @@ def apply_quantile_logistic_dropout_process(tensor, k, q):
     Returns:
         torch.Tensor: The tensor after applying the dropout process.
     """
-    Y = torch.log(tensor + 1)  # log transformation of the data
-    y_0 = torch.quantile(Y, q)
-    pi = 1 / (1 + torch.exp(-k * (Y - y_0)))
+    log_y = torch.log(tensor + 1)  # log transformation of the data
+    log_y_0 = torch.quantile(log_y, q)
+    pi = 1 / (1 + torch.exp(-k * (log_y - log_y_0)))
     binary_indicators = torch.distributions.Bernoulli(pi).sample()
     return binary_indicators * tensor
 
 
 def apply_poisson_process(tensor):
-    """
-    Applies a Poisson process to the input tensor.
+    r"""
+    Apply a Poisson process to the input tensor.
 
     This function takes a tensor as input and generates samples from a Poisson distribution
-    with the rate parameter (lambda) given by the values in the input tensor. The resulting
+    with the rate parameter ($\lambda$) given by the values in the input tensor. The resulting
     tensor contains the sampled values.
 
     Args:
-        tensor (torch.Tensor): A tensor containing the rate parameters (lambda) for the Poisson distribution.
+        tensor (torch.Tensor): A tensor containing the rate parameters ($\lambda$) for the Poisson distribution.
 
     Returns:
         torch.Tensor: A tensor containing the sampled values from the Poisson distribution.
