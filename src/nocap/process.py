@@ -56,7 +56,7 @@ def apply_lognormal_noise_process(tensor, mean=0.0, std=1.0):
     return tensor + noise
 
 
-def apply_bernoulli_lognormal_outlier_process(tensor, pi, mu, sigma):
+def apply_bernoulli_lognormal_outlier_process(tensor, pi=0.1, mu=0.0, sigma=1.0):
     r"""
     Apply a Bernoulli-LogNormal outlier process to the input tensor.
 
@@ -66,9 +66,12 @@ def apply_bernoulli_lognormal_outlier_process(tensor, pi, mu, sigma):
 
     Args:
         tensor (torch.Tensor): The input tensor to which the outlier process will be applied.
-        pi (float): The probability of an element being an outlier (Bernoulli distribution parameter).
-        mu (float): The mean of the LogNormal distribution for generating scale factors.
-        sigma (float): The standard deviation of the LogNormal distribution for generating scale factors.
+        pi (float, optional): The probability of an element being an outlier (Bernoulli distribution parameter).
+            Default is 0.1.
+        mu (float, optional): The mean of the LogNormal distribution for generating scale factors.
+            Default is 0.0.
+        sigma (float, optional): The standard deviation of the LogNormal distribution for generating scale factors.
+            Default is 1.0.
 
     Returns:
         torch.Tensor: The tensor with applied Bernoulli-LogNormal outlier process.
@@ -79,7 +82,7 @@ def apply_bernoulli_lognormal_outlier_process(tensor, pi, mu, sigma):
     return updated_tensor
 
 
-def apply_row_normalization_and_lognormal_scaling_process(tensor, mu, sigma):
+def apply_row_normalization_and_lognormal_scaling_process(tensor, mu=0.0, sigma=1.0):
     r"""
     Apply row normalization and log-normal scaling to the input tensor.
 
@@ -89,8 +92,8 @@ def apply_row_normalization_and_lognormal_scaling_process(tensor, mu, sigma):
 
     Args:
         tensor (torch.Tensor): The input tensor to be normalized and scaled.
-        mu (float): The mean of the log-normal distribution.
-        sigma (float): The standard deviation of the log-normal distribution.
+        mu (float, optional): The mean of the log-normal distribution. Default is 0.0.
+        sigma (float, optional): The standard deviation of the log-normal distribution. Default is 1.0.
 
     Returns:
         torch.Tensor: The normalized and scaled tensor.
@@ -100,7 +103,7 @@ def apply_row_normalization_and_lognormal_scaling_process(tensor, mu, sigma):
     return (scaling_factors * tensor) / row_sums
 
 
-def apply_quantile_logistic_dropout_process(tensor, k, q):
+def apply_quantile_logistic_dropout_process(tensor, k=1.0, q=0.5):
     """
     Apply a quantile-based logistic dropout process to the input tensor.
 
@@ -109,8 +112,9 @@ def apply_quantile_logistic_dropout_process(tensor, k, q):
 
     Args:
         tensor (torch.Tensor): The input tensor to which the dropout process will be applied.
-        k (float): The slope parameter controlling the steepness of the logistic function.
-        q (float): The quantile threshold for determining the central point of the logistic function.
+        k (float, optional): The slope parameter controlling the steepness of the logistic function. Default is 1.0.
+        q (float, optional): The quantile threshold for determining the central point of the logistic function.
+            Default is 0.5.
 
     Returns:
         torch.Tensor: The tensor after applying the dropout process.
