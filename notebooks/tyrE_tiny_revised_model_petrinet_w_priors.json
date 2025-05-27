@@ -1,0 +1,666 @@
+{
+  "header": {
+    "name": "tyrE_tiny_revised_model_petrinet_w_priors",
+    "schema": "https://raw.githubusercontent.com/DARPA-ASKEM/Model-Representations/petrinet_v0.6/petrinet/petrinet_schema.json",
+    "schema_name": "petrinet",
+    "description": "tyrE_tiny_revised_model_petrinet_w_priors",
+    "model_version": "0.1"
+  },
+  "properties": {},
+  "model": {
+    "states": [
+      {
+        "id": "tyrR",
+        "name": "tyrR",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "aroF",
+        "name": "aroF",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "aroG",
+        "name": "aroG",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "aroL",
+        "name": "aroL",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "aroM",
+        "name": "aroM",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "aroP",
+        "name": "aroP",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "folA",
+        "name": "folA",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "mtr",
+        "name": "mtr",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "tyrA",
+        "name": "tyrA",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "tyrB",
+        "name": "tyrB",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "tyrP",
+        "name": "tyrP",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      },
+      {
+        "id": "yaiA",
+        "name": "yaiA",
+        "grounding": {
+          "identifiers": {},
+          "modifiers": {}
+        }
+      }
+    ],
+    "transitions": [
+      {
+        "id": "t1",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "aroF"
+        ],
+        "properties": {
+          "name": "t1"
+        }
+      },
+      {
+        "id": "t2",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "aroG"
+        ],
+        "properties": {
+          "name": "t2"
+        }
+      },
+      {
+        "id": "t3",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "aroL"
+        ],
+        "properties": {
+          "name": "t3"
+        }
+      },
+      {
+        "id": "t4",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "aroM"
+        ],
+        "properties": {
+          "name": "t4"
+        }
+      },
+      {
+        "id": "t5",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "aroP"
+        ],
+        "properties": {
+          "name": "t5"
+        }
+      },
+      {
+        "id": "t6",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "folA"
+        ],
+        "properties": {
+          "name": "t6"
+        }
+      },
+      {
+        "id": "t7",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "mtr"
+        ],
+        "properties": {
+          "name": "t7"
+        }
+      },
+      {
+        "id": "t8",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "tyrA"
+        ],
+        "properties": {
+          "name": "t8"
+        }
+      },
+      {
+        "id": "t9",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "tyrB"
+        ],
+        "properties": {
+          "name": "t9"
+        }
+      },
+      {
+        "id": "t10",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "tyrP"
+        ],
+        "properties": {
+          "name": "t10"
+        }
+      },
+      {
+        "id": "t11",
+        "input": [
+          "tyrR"
+        ],
+        "output": [
+          "yaiA"
+        ],
+        "properties": {
+          "name": "t11"
+        }
+      }
+    ]
+  },
+  "semantics": {
+    "ode": {
+      "rates": [
+        {
+          "target": "t1",
+          "expression": "1/(tyrR**n_tyrR_to_aroF + 1)",
+          "expression_mathml": "<apply><power/><apply><plus/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_aroF</ci></apply><cn>1</cn></apply><cn>-1</cn></apply>"
+        },
+        {
+          "target": "t2",
+          "expression": "1/(tyrR**n_tyrR_to_aroG + 1)",
+          "expression_mathml": "<apply><power/><apply><plus/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_aroG</ci></apply><cn>1</cn></apply><cn>-1</cn></apply>"
+        },
+        {
+          "target": "t3",
+          "expression": "1/(tyrR**n_tyrR_to_aroL + 1)",
+          "expression_mathml": "<apply><power/><apply><plus/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_aroL</ci></apply><cn>1</cn></apply><cn>-1</cn></apply>"
+        },
+        {
+          "target": "t4",
+          "expression": "1/(tyrR**n_tyrR_to_aroM + 1)",
+          "expression_mathml": "<apply><power/><apply><plus/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_aroM</ci></apply><cn>1</cn></apply><cn>-1</cn></apply>"
+        },
+        {
+          "target": "t5",
+          "expression": "1/(tyrR**n_tyrR_to_aroP + 1)",
+          "expression_mathml": "<apply><power/><apply><plus/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_aroP</ci></apply><cn>1</cn></apply><cn>-1</cn></apply>"
+        },
+        {
+          "target": "t6",
+          "expression": "tyrR**n_tyrR_to_folA/(K_tyrR_to_folA**n_tyrR_to_folA + tyrR**n_tyrR_to_folA)",
+          "expression_mathml": "<apply><divide/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_folA</ci></apply><apply><plus/><apply><power/><ci>K_tyrR_to_folA</ci><ci>n_tyrR_to_folA</ci></apply><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_folA</ci></apply></apply></apply>"
+        },
+        {
+          "target": "t7",
+          "expression": "tyrR**n_tyrR_to_mtr/(K_tyrR_to_mtr**n_tyrR_to_mtr + tyrR**n_tyrR_to_mtr)",
+          "expression_mathml": "<apply><divide/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_mtr</ci></apply><apply><plus/><apply><power/><ci>K_tyrR_to_mtr</ci><ci>n_tyrR_to_mtr</ci></apply><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_mtr</ci></apply></apply></apply>"
+        },
+        {
+          "target": "t8",
+          "expression": "1/(tyrR**n_tyrR_to_tyrA + 1)",
+          "expression_mathml": "<apply><power/><apply><plus/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_tyrA</ci></apply><cn>1</cn></apply><cn>-1</cn></apply>"
+        },
+        {
+          "target": "t9",
+          "expression": "1/(tyrR**n_tyrR_to_tyrB + 1)",
+          "expression_mathml": "<apply><power/><apply><plus/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_tyrB</ci></apply><cn>1</cn></apply><cn>-1</cn></apply>"
+        },
+        {
+          "target": "t10",
+          "expression": "tyrR**n_tyrR_to_tyrP/(K_tyrR_to_tyrP**n_tyrR_to_tyrP + tyrR**n_tyrR_to_tyrP)",
+          "expression_mathml": "<apply><divide/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_tyrP</ci></apply><apply><plus/><apply><power/><ci>K_tyrR_to_tyrP</ci><ci>n_tyrR_to_tyrP</ci></apply><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_tyrP</ci></apply></apply></apply>"
+        },
+        {
+          "target": "t11",
+          "expression": "1/(tyrR**n_tyrR_to_yaiA + 1)",
+          "expression_mathml": "<apply><power/><apply><plus/><apply><power/><ci>tyrR</ci><ci>n_tyrR_to_yaiA</ci></apply><cn>1</cn></apply><cn>-1</cn></apply>"
+        }
+      ],
+      "initials": [
+        {
+          "target": "tyrR",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "aroF",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "aroG",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "aroL",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "aroM",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "aroP",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "folA",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "mtr",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "tyrA",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "tyrB",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "tyrP",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        },
+        {
+          "target": "yaiA",
+          "expression": "1.0",
+          "expression_mathml": "<cn>1.0</cn>"
+        }
+      ],
+      "parameters": [
+        {
+          "id": "n_tyrR_to_aroF",
+          "value": 1.0
+        },
+        {
+          "id": "n_tyrR_to_aroG",
+          "value": 1.0
+        },
+        {
+          "id": "n_tyrR_to_aroL",
+          "value": 1.0
+        },
+        {
+          "id": "n_tyrR_to_aroM",
+          "value": 1.0
+        },
+        {
+          "id": "n_tyrR_to_aroP",
+          "value": 1.0
+        },
+        {
+          "id": "K_tyrR_to_folA",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "n_tyrR_to_folA",
+          "value": 1.0
+        },
+        {
+          "id": "K_tyrR_to_mtr",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "n_tyrR_to_mtr",
+          "value": 1.0
+        },
+        {
+          "id": "n_tyrR_to_tyrA",
+          "value": 1.0
+        },
+        {
+          "id": "n_tyrR_to_tyrB",
+          "value": 1.0
+        },
+        {
+          "id": "K_tyrR_to_tyrP",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "n_tyrR_to_tyrP",
+          "value": 1.0
+        },
+        {
+          "id": "n_tyrR_to_yaiA",
+          "value": 1.0
+        },
+        {
+          "id": "beta_tyrR_to_aroF",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "K_tyrR_to_aroF",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_aroG",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "K_tyrR_to_aroG",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_aroL",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "K_tyrR_to_aroL",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_aroM",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "K_tyrR_to_aroM",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_aroP",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "K_tyrR_to_aroP",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_folA",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_mtr",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_tyrA",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "K_tyrR_to_tyrA",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_tyrB",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "K_tyrR_to_tyrB",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_tyrP",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "beta_tyrR_to_yaiA",
+          "value": 5.05,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 0.1,
+              "maximum": 10.0
+            }
+          }
+        },
+        {
+          "id": "K_tyrR_to_yaiA",
+          "value": 2.7500000000000004e-06,
+          "distribution": {
+            "type": "Uniform1",
+            "parameters": {
+              "minimum": 5e-07,
+              "maximum": 5e-06
+            }
+          }
+        },
+        {
+          "id": "default_compartment",
+          "value": 1.0
+        }
+      ],
+      "observables": [],
+      "time": {
+        "id": "t"
+      }
+    }
+  },
+  "metadata": {
+    "annotations": {}
+  }
+}

@@ -1,0 +1,1032 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version2/core" xmlns:distrib="http://www.sbml.org/sbml/level3/version1/distrib/version1" level="3" version="2" distrib:required="true">
+  <model metaid="grn_model" id="grn_model">
+    <listOfCompartments>
+      <compartment sboTerm="SBO:0000410" id="default_compartment" spatialDimensions="3" size="1" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="aroM" name="aroM" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="aroP" name="aroP" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="aroG" name="aroG" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="folA" name="folA" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="tyrB" name="tyrB" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="aroL" name="aroL" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="mtr" name="mtr" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="yaiA" name="yaiA" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="tyrA" name="tyrA" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="tyrR" name="tyrR" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="tyrP" name="tyrP" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+      <species id="aroF" name="aroF" compartment="default_compartment" initialConcentration="1" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn type="integer"> 0 </cn>
+                  <cn type="integer"> 10 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="n_tyrR_to_aroF" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_aroF" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_aroF" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_aroG" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_aroG" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_aroG" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_aroL" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_aroL" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_aroL" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_aroM" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_aroM" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_aroM" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_aroP" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_aroP" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_aroP" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_folA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_folA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_folA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_mtr" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_mtr" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_mtr" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_tyrA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_tyrA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_tyrA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_tyrB" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_tyrB" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_tyrB" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_tyrP" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_tyrP" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_tyrP" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="n_tyrR_to_yaiA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="beta_tyrR_to_yaiA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+      <parameter id="K_tyrR_to_yaiA" value="1" constant="true">
+        <distrib:listOfUncertainties>
+          <distrib:uncertainty>
+            <distrib:uncertParameter distrib:type="distribution">
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/distrib/uniform"> uniform </csymbol>
+                  <cn> 0.1 </cn>
+                  <cn type="integer"> 3 </cn>
+                </apply>
+              </math>
+            </distrib:uncertParameter>
+          </distrib:uncertainty>
+        </distrib:listOfUncertainties>
+      </parameter>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="J_tyrR_to_aroF" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="aroF" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tyrR </ci>
+                    <ci> n_tyrR_to_aroF </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_aroG" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="aroG" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tyrR </ci>
+                    <ci> n_tyrR_to_aroG </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_aroL" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="aroL" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tyrR </ci>
+                    <ci> n_tyrR_to_aroL </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_aroM" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="aroM" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tyrR </ci>
+                    <ci> n_tyrR_to_aroM </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_aroP" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="aroP" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tyrR </ci>
+                    <ci> n_tyrR_to_aroP </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_folA" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="folA" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <power/>
+                  <ci> tyrR </ci>
+                  <ci> n_tyrR_to_folA </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> K_tyrR_to_folA </ci>
+                  <ci> n_tyrR_to_folA </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> tyrR </ci>
+                  <ci> n_tyrR_to_folA </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_mtr" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mtr" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <power/>
+                  <ci> tyrR </ci>
+                  <ci> n_tyrR_to_mtr </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> K_tyrR_to_mtr </ci>
+                  <ci> n_tyrR_to_mtr </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> tyrR </ci>
+                  <ci> n_tyrR_to_mtr </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_tyrA" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tyrA" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tyrR </ci>
+                    <ci> n_tyrR_to_tyrA </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_tyrB" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tyrB" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tyrR </ci>
+                    <ci> n_tyrR_to_tyrB </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_tyrP" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tyrP" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <power/>
+                  <ci> tyrR </ci>
+                  <ci> n_tyrR_to_tyrP </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> K_tyrR_to_tyrP </ci>
+                  <ci> n_tyrR_to_tyrP </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> tyrR </ci>
+                  <ci> n_tyrR_to_tyrP </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="J_tyrR_to_yaiA" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tyrR" stoichiometry="1" constant="true"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="yaiA" stoichiometry="1" constant="true"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <divide/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> tyrR </ci>
+                    <ci> n_tyrR_to_yaiA </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

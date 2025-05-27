@@ -1,0 +1,578 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d0" for="edge" attr.name="polarity" attr.type="string"/>
+<graph edgedefault="directed"><node id="ompR"/>
+<node id="slyA"/>
+<node id="sdiA"/>
+<node id="zraR"/>
+<node id="phoP"/>
+<node id="fur"/>
+<node id="bglJ"/>
+<node id="lldR"/>
+<node id="rutR"/>
+<node id="sutR"/>
+<node id="hdfR"/>
+<node id="torR"/>
+<node id="mqsA"/>
+<node id="gadE"/>
+<node id="matA"/>
+<node id="cspA"/>
+<node id="nac"/>
+<node id="rcsB"/>
+<node id="rstA"/>
+<node id="nsrR"/>
+<node id="mlrA"/>
+<node id="flhD"/>
+<node id="leuO"/>
+<node id="cytR"/>
+<node id="qseB"/>
+<node id="oxyR"/>
+<node id="cpxR"/>
+<node id="evgA"/>
+<node id="tyrR"/>
+<node id="phoB"/>
+<node id="dnaA"/>
+<node id="hupB"/>
+<node id="glaR"/>
+<node id="arcA"/>
+<node id="cra"/>
+<node id="basR"/>
+<node id="gadX"/>
+<node id="argP"/>
+<node id="fnr"/>
+<node id="hns"/>
+<node id="fliZ"/>
+<node id="argR"/>
+<node id="ihfA"/>
+<node id="lrp"/>
+<node id="yjjQ"/>
+<node id="bolA"/>
+<node id="rcsA"/>
+<node id="acrR"/>
+<node id="crp"/>
+<node id="csgD"/>
+<node id="soxS"/>
+<node id="glnG"/>
+<node id="hupA"/>
+<node id="lrhA"/>
+<node id="stpA"/>
+<node id="soxR"/>
+<node id="gadW"/>
+<node id="pgrR"/>
+<node id="btsR"/>
+<node id="flhC"/>
+<node id="ydeO"/>
+<node id="fis"/>
+<node id="rcdA"/>
+<node id="ihfB"/>
+<node id="adiY"/>
+<edge source="ompR" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="ompR" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="slyA" target="leuO">
+  <data key="d0">+</data>
+</edge>
+<edge source="sdiA" target="gadW">
+  <data key="d0">+</data>
+</edge>
+<edge source="zraR" target="gadW">
+  <data key="d0">+</data>
+</edge>
+<edge source="phoP" target="gadE">
+  <data key="d0">+</data>
+</edge>
+<edge source="phoP" target="gadW">
+  <data key="d0">+</data>
+</edge>
+<edge source="phoP" target="rstA">
+  <data key="d0">+</data>
+</edge>
+<edge source="phoP" target="ydeO">
+  <data key="d0">-</data>
+</edge>
+<edge source="fur" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="fur" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="bglJ" target="leuO">
+  <data key="d0">+</data>
+</edge>
+<edge source="lldR" target="gadW">
+  <data key="d0">+</data>
+</edge>
+<edge source="rutR" target="gadW">
+  <data key="d0">-</data>
+</edge>
+<edge source="rutR" target="gadX">
+  <data key="d0">-</data>
+</edge>
+<edge source="sutR" target="fliZ">
+  <data key="d0">-</data>
+</edge>
+<edge source="hdfR" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="hdfR" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="torR" target="gadE">
+  <data key="d0">+</data>
+</edge>
+<edge source="torR" target="gadX">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="mqsA" target="csgD">
+  <data key="d0">-</data>
+</edge>
+<edge source="gadE" target="gadW">
+  <data key="d0">+</data>
+</edge>
+<edge source="gadE" target="gadX">
+  <data key="d0">+</data>
+</edge>
+<edge source="matA" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="matA" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="matA" target="fliZ">
+  <data key="d0">-</data>
+</edge>
+<edge source="nac" target="gadX">
+  <data key="d0">-</data>
+</edge>
+<edge source="nac" target="hupA">
+  <data key="d0">+</data>
+</edge>
+<edge source="nac" target="leuO">
+  <data key="d0">-</data>
+</edge>
+<edge source="nac" target="ompR">
+  <data key="d0">-</data>
+</edge>
+<edge source="nac" target="rcsA">
+  <data key="d0">-</data>
+</edge>
+<edge source="nac" target="sdiA">
+  <data key="d0">-</data>
+</edge>
+<edge source="rcsB" target="csgD">
+  <data key="d0">-</data>
+</edge>
+<edge source="rcsB" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="rcsB" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="rcsB" target="gadX">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="rcsB" target="leuO">
+  <data key="d0">+</data>
+</edge>
+<edge source="rcsB" target="rcsA">
+  <data key="d0">+</data>
+</edge>
+<edge source="rcsB" target="ydeO">
+  <data key="d0">+</data>
+</edge>
+<edge source="rstA" target="csgD">
+  <data key="d0">-</data>
+</edge>
+<edge source="nsrR" target="fliZ">
+  <data key="d0">-</data>
+</edge>
+<edge source="nsrR" target="ihfA">
+  <data key="d0">-</data>
+</edge>
+<edge source="nsrR" target="lrp">
+  <data key="d0">-</data>
+</edge>
+<edge source="mlrA" target="csgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="leuO" target="yjjQ">
+  <data key="d0">+</data>
+</edge>
+<edge source="qseB" target="dnaA">
+  <data key="d0">-</data>
+</edge>
+<edge source="qseB" target="flhC">
+  <data key="d0">+</data>
+</edge>
+<edge source="qseB" target="flhD">
+  <data key="d0">+</data>
+</edge>
+<edge source="oxyR" target="fur">
+  <data key="d0">+</data>
+</edge>
+<edge source="cpxR" target="csgD">
+  <data key="d0">-</data>
+</edge>
+<edge source="cpxR" target="cspA">
+  <data key="d0">+</data>
+</edge>
+<edge source="cpxR" target="matA">
+  <data key="d0">-</data>
+</edge>
+<edge source="evgA" target="gadE">
+  <data key="d0">+</data>
+</edge>
+<edge source="evgA" target="ydeO">
+  <data key="d0">+</data>
+</edge>
+<edge source="phoB" target="argP">
+  <data key="d0">+</data>
+</edge>
+<edge source="phoB" target="cra">
+  <data key="d0">-</data>
+</edge>
+<edge source="phoB" target="gadW">
+  <data key="d0">+</data>
+</edge>
+<edge source="phoB" target="gadX">
+  <data key="d0">+</data>
+</edge>
+<edge source="glaR" target="gadW">
+  <data key="d0">-</data>
+</edge>
+<edge source="glaR" target="gadX">
+  <data key="d0">+</data>
+</edge>
+<edge source="glaR" target="ydeO">
+  <data key="d0">+</data>
+</edge>
+<edge source="glaR" target="yjjQ">
+  <data key="d0">-</data>
+</edge>
+<edge source="glaR" target="zraR">
+  <data key="d0">-</data>
+</edge>
+<edge source="arcA" target="argR">
+  <data key="d0">+</data>
+</edge>
+<edge source="arcA" target="fnr">
+  <data key="d0">-</data>
+</edge>
+<edge source="arcA" target="gadE">
+  <data key="d0">+</data>
+</edge>
+<edge source="arcA" target="gadX">
+  <data key="d0">+</data>
+</edge>
+<edge source="arcA" target="lldR">
+  <data key="d0">-</data>
+</edge>
+<edge source="arcA" target="rstA">
+  <data key="d0">+</data>
+</edge>
+<edge source="cra" target="crp">
+  <data key="d0">+</data>
+</edge>
+<edge source="cra" target="csgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="basR" target="csgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="basR" target="qseB">
+  <data key="d0">+</data>
+</edge>
+<edge source="gadX" target="gadW">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="argP" target="dnaA">
+  <data key="d0">+</data>
+</edge>
+<edge source="fnr" target="gadW">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnr" target="gadX">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnr" target="nac">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnr" target="soxR">
+  <data key="d0">-</data>
+</edge>
+<edge source="fnr" target="soxS">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="adiY">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="bglJ">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="bolA">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="csgD">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="cspA">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="evgA">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="flhC">
+  <data key="d0">+</data>
+</edge>
+<edge source="hns" target="flhD">
+  <data key="d0">+</data>
+</edge>
+<edge source="hns" target="fliZ">
+  <data key="d0">+</data>
+</edge>
+<edge source="hns" target="gadE">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="gadW">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="gadX">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="hdfR">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="leuO">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="lrp">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="rcsA">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="rcsB">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="stpA">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="ydeO">
+  <data key="d0">-</data>
+</edge>
+<edge source="hns" target="yjjQ">
+  <data key="d0">-</data>
+</edge>
+<edge source="fliZ" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="fliZ" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="fliZ" target="gadE">
+  <data key="d0">-</data>
+</edge>
+<edge source="fliZ" target="mlrA">
+  <data key="d0">-</data>
+</edge>
+<edge source="argR" target="stpA">
+  <data key="d0">-</data>
+</edge>
+<edge source="ihfA" target="csgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="ihfA" target="fis">
+  <data key="d0">+</data>
+</edge>
+<edge source="ihfA" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="ihfA" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="ihfA" target="fliZ">
+  <data key="d0">-</data>
+</edge>
+<edge source="ihfA" target="ompR">
+  <data key="d0">-</data>
+</edge>
+<edge source="lrp" target="argR">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="lrp" target="gadW">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="lrp" target="leuO">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="lrp" target="lrhA">
+  <data key="d0">+</data>
+</edge>
+<edge source="lrp" target="nac">
+  <data key="d0">+</data>
+</edge>
+<edge source="lrp" target="qseB">
+  <data key="d0">-</data>
+</edge>
+<edge source="lrp" target="slyA">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="lrp" target="soxS">
+  <data key="d0">+</data>
+</edge>
+<edge source="lrp" target="stpA">
+  <data key="d0">+</data>
+</edge>
+<edge source="lrp" target="tyrR">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="yjjQ" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="yjjQ" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="bolA" target="csgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="rcsA" target="csgD">
+  <data key="d0">-</data>
+</edge>
+<edge source="rcsA" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="rcsA" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="acrR" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="acrR" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="acrR" target="soxR">
+  <data key="d0">-</data>
+</edge>
+<edge source="acrR" target="soxS">
+  <data key="d0">-</data>
+</edge>
+<edge source="crp" target="csgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="crp" target="cytR">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="crp" target="fis">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="crp" target="flhC">
+  <data key="d0">+</data>
+</edge>
+<edge source="crp" target="flhD">
+  <data key="d0">+</data>
+</edge>
+<edge source="crp" target="fur">
+  <data key="d0">+</data>
+</edge>
+<edge source="crp" target="gadE">
+  <data key="d0">-</data>
+</edge>
+<edge source="crp" target="gadX">
+  <data key="d0">-</data>
+</edge>
+<edge source="crp" target="glnG">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="crp" target="hupA">
+  <data key="d0">+</data>
+</edge>
+<edge source="crp" target="hupB">
+  <data key="d0">+</data>
+</edge>
+<edge source="crp" target="ompR">
+  <data key="d0">+/-</data>
+</edge>
+<edge source="crp" target="oxyR">
+  <data key="d0">+</data>
+</edge>
+<edge source="crp" target="zraR">
+  <data key="d0">+</data>
+</edge>
+<edge source="soxS" target="fur">
+  <data key="d0">+</data>
+</edge>
+<edge source="glnG" target="nac">
+  <data key="d0">+</data>
+</edge>
+<edge source="lrhA" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="lrhA" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="lrhA" target="leuO">
+  <data key="d0">+</data>
+</edge>
+<edge source="stpA" target="leuO">
+  <data key="d0">-</data>
+</edge>
+<edge source="soxR" target="soxS">
+  <data key="d0">+</data>
+</edge>
+<edge source="pgrR" target="tyrR">
+  <data key="d0">-</data>
+</edge>
+<edge source="btsR" target="csgD">
+  <data key="d0">-</data>
+</edge>
+<edge source="ydeO" target="gadE">
+  <data key="d0">+</data>
+</edge>
+<edge source="ydeO" target="gadW">
+  <data key="d0">+</data>
+</edge>
+<edge source="fis" target="cspA">
+  <data key="d0">+</data>
+</edge>
+<edge source="fis" target="dnaA">
+  <data key="d0">-</data>
+</edge>
+<edge source="fis" target="gadX">
+  <data key="d0">-</data>
+</edge>
+<edge source="fis" target="hupA">
+  <data key="d0">+</data>
+</edge>
+<edge source="fis" target="hupB">
+  <data key="d0">-</data>
+</edge>
+<edge source="rcdA" target="csgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="ihfB" target="csgD">
+  <data key="d0">+</data>
+</edge>
+<edge source="ihfB" target="fis">
+  <data key="d0">+</data>
+</edge>
+<edge source="ihfB" target="flhC">
+  <data key="d0">-</data>
+</edge>
+<edge source="ihfB" target="flhD">
+  <data key="d0">-</data>
+</edge>
+<edge source="ihfB" target="fliZ">
+  <data key="d0">-</data>
+</edge>
+<edge source="ihfB" target="ihfA">
+  <data key="d0">-</data>
+</edge>
+<edge source="ihfB" target="ompR">
+  <data key="d0">-</data>
+</edge>
+<edge source="adiY" target="gadX">
+  <data key="d0">+</data>
+</edge>
+</graph></graphml>
