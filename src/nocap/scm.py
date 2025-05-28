@@ -335,7 +335,7 @@ def fit_model(
     """Fit a model to the data using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert type(nocap_model) is nx.DiGraph, (
+        assert isinstance(nocap_model, nx.DiGraph), (
             "Model must be a networkx DiGraph for pgmpy backend"
         )
         model = create_lgbn_from_dag(nocap_model)
