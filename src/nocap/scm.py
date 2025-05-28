@@ -4,16 +4,16 @@ import os
 import re
 
 import networkx as nx
+import numpy as np
+import pgmpy.inference.CausalInference as CausalInference
+import plotly.graph_objects as go
 import pydot
 import sympy as sy
 from networkx.drawing.nx_pydot import from_pydot
+from pgmpy.factors.continuous import LinearGaussianCPD
+from pgmpy.models import DiscreteBayesianNetwork, LinearGaussianBayesianNetwork
 from y0.dsl import Variable
 from y0.graph import NxMixedGraph
-import plotly.graph_objects as go
-import numpy as np
-from pgmpy.models import LinearGaussianBayesianNetwork, DiscreteBayesianNetwork
-from pgmpy.factors.continuous import LinearGaussianCPD
-import pgmpy.inference.CausalInference as CausalInference
 
 
 def dagitty_to_dot(daggity_string: str | None) -> str:
@@ -51,9 +51,7 @@ def read_dag_file(file_path: str) -> str | None:
         return None
 
 
-def dagitty_to_mixed_graph(
-    dagitty_input: str, str_var_name: bool = False
-) -> NxMixedGraph:
+def dagitty_to_mixed_graph(dagitty_input: str, str_var_name: bool = False) -> NxMixedGraph:
     """Convert a string in dagitty (.dag) to NxMixedGraph."""
     # Check if the input is a file path
     if os.path.isfile(dagitty_input):
@@ -154,8 +152,7 @@ def get_symbols_from_di_edges(
 ) -> dict[tuple[Variable, Variable], sy.Symbol]:
     """Get symbols from directional edges in graph."""
     return {
-        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}")
-        for u, v in graph.directed.edges()
+        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in graph.directed.edges()
     }
 
 
@@ -189,9 +186,7 @@ def convert_to_eqn_array_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
     for lhs, rhs in equations_dict.items():
         equation_latex = sy.latex(lhs) + " &=& " + sy.latex(rhs)
         latex_equations.append(equation_latex)
-    eqn_array = (
-        r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
-    )
+    eqn_array = r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
     return eqn_array
 
 
@@ -260,9 +255,7 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
     fig = go.Figure(data=[edge_trace, node_trace], layout=layout)
 
     # Customize hovertemplate for displaying rendered LaTeX equations
-    fig.update_traces(
-        hovertemplate="<b>%{text}</b><br>%{customdata}"
-    )  # Render customdata as LaTeX
+    fig.update_traces(hovertemplate="<b>%{text}</b><br>%{customdata}")  # Render customdata as LaTeX
 
     fig.show()
 
@@ -300,9 +293,7 @@ def simulate_data_with_outliers(
     """Simulate data from a structural causal model with outliers."""
     # Todo: add test
     if backend == "pgmpy":
-        assert type(nocap_model) is nx.DiGraph, (
-            "Model must be a networkx DiGraph for pgmpy backend"
-        )
+        assert type(nocap_model) is nx.DiGraph, "Model must be a networkx DiGraph for pgmpy backend"
         model = create_lgbn_from_dag(nocap_model)
     else:
         raise ValueError(f"Unsupported backend: {backend}")
@@ -314,9 +305,7 @@ def simulate_data_with_outliers(
 
     # Outliers introduction
     num_outliers = int(outlier_fraction * num_samples)
-    outlier_indices = np.random.choice(
-        simulated_data.index, num_outliers, replace=False
-    )
+    outlier_indices = np.random.choice(simulated_data.index, num_outliers, replace=False)
 
     # Assume outlier adds an arbitrary large value or multiplies by a high factor
     simulated_data.loc[outlier_indices] *= outlier_magnitude
@@ -333,9 +322,7 @@ def fit_model(
     """Fit a model to the data using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert type(nocap_model) is nx.DiGraph, (
-            "Model must be a networkx DiGraph for pgmpy backend"
-        )
+        assert type(nocap_model) is nx.DiGraph, "Model must be a networkx DiGraph for pgmpy backend"
         model = create_lgbn_from_dag(nocap_model)
         model.fit(data, method=method)
         return model
@@ -347,9 +334,7 @@ def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
     """Estimate the Average Treatment Effect (ATE) using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert type(nocap_model) is nx.DiGraph, (
-            "Model must be a networkx DiGraph for pgmpy backend"
-        )
+        assert type(nocap_model) is nx.DiGraph, "Model must be a networkx DiGraph for pgmpy backend"
         model = DiscreteBayesianNetwork(nocap_model)
         inference = CausalInference(model)
         ate = inference.estimate_ate(X, Y, data)
