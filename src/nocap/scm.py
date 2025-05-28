@@ -22,7 +22,7 @@ def dagitty_to_dot(daggity_string: str | None) -> str:
     Modified from dowhy: https://www.pywhy.org/dowhy/v0.11.1/_modules/dowhy/utils/graph_operations.html#daggity_to_dot
     Converts the input daggity_string to valid DOT graph format.
     """  # noqa: DAR101 DAR201 DAR401
-    if type(daggity_string) == str:
+    if type(daggity_string) is str:
         graph = re.sub(r"\n", "; ", daggity_string)
         graph = re.sub(r"^dag ", "digraph ", graph)
         graph = re.sub("{;", "{", graph)
@@ -268,6 +268,7 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
 
 
 def create_lgbn_from_dag(dag):
+    """Create a Linear Gaussian Bayesian Network from a directed acyclic graph (DAG)."""
     model = LinearGaussianBayesianNetwork(dag)
 
     for node in dag.nodes():
@@ -295,6 +296,7 @@ def simulate_data_with_outliers(
     outlier_fraction=0.01,
     outlier_magnitude=10,
 ):
+    """Simulate data from a structural causal model with outliers."""
     if backend == "pgmpy":
         assert type(nocap_model) is nx.DiGraph, (
             "Model must be a networkx DiGraph for pgmpy backend"
@@ -326,6 +328,7 @@ def fit_model(
     backend="pgmpy",
     method="mle",
 ):
+    """Fit a model to the data using the specified backend."""
     if backend == "pgmpy":
         assert type(nocap_model) is nx.DiGraph, (
             "Model must be a networkx DiGraph for pgmpy backend"
@@ -338,6 +341,7 @@ def fit_model(
 
 
 def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
+    """Estimate the Average Treatment Effect (ATE) using the specified backend."""
     if backend == "pgmpy":
         assert type(nocap_model) is nx.DiGraph, (
             "Model must be a networkx DiGraph for pgmpy backend"
