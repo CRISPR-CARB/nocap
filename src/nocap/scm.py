@@ -269,6 +269,7 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
 
 def create_lgbn_from_dag(dag):
     """Create a Linear Gaussian Bayesian Network from a directed acyclic graph (DAG)."""
+    # Todo: add test
     model = LinearGaussianBayesianNetwork(dag)
 
     for node in dag.nodes():
@@ -297,6 +298,7 @@ def simulate_data_with_outliers(
     outlier_magnitude=10,
 ):
     """Simulate data from a structural causal model with outliers."""
+    # Todo: add test
     if backend == "pgmpy":
         assert type(nocap_model) is nx.DiGraph, (
             "Model must be a networkx DiGraph for pgmpy backend"
@@ -329,6 +331,7 @@ def fit_model(
     method="mle",
 ):
     """Fit a model to the data using the specified backend."""
+    # Todo: add test
     if backend == "pgmpy":
         assert type(nocap_model) is nx.DiGraph, (
             "Model must be a networkx DiGraph for pgmpy backend"
@@ -342,6 +345,7 @@ def fit_model(
 
 def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
     """Estimate the Average Treatment Effect (ATE) using the specified backend."""
+    # Todo: add test
     if backend == "pgmpy":
         assert type(nocap_model) is nx.DiGraph, (
             "Model must be a networkx DiGraph for pgmpy backend"
