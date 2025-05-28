@@ -349,7 +349,7 @@ def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
     """Estimate the Average Treatment Effect (ATE) using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert type(nocap_model) is nx.DiGraph, (
+        assert isinstance(nocap_model, nx.DiGraph), (
             "Model must be a networkx DiGraph for pgmpy backend"
         )
         model = DiscreteBayesianNetwork(nocap_model)
