@@ -51,7 +51,9 @@ def read_dag_file(file_path: str) -> str | None:
         return None
 
 
-def dagitty_to_mixed_graph(dagitty_input: str, str_var_name: bool = False) -> NxMixedGraph:
+def dagitty_to_mixed_graph(
+    dagitty_input: str, str_var_name: bool = False
+) -> NxMixedGraph:
     """Convert a string in dagitty (.dag) to NxMixedGraph."""
     # Check if the input is a file path
     if os.path.isfile(dagitty_input):
@@ -152,7 +154,8 @@ def get_symbols_from_di_edges(
 ) -> dict[tuple[Variable, Variable], sy.Symbol]:
     """Get symbols from directional edges in graph."""
     return {
-        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in graph.directed.edges()
+        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}")
+        for u, v in graph.directed.edges()
     }
 
 
@@ -186,7 +189,9 @@ def convert_to_eqn_array_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
     for lhs, rhs in equations_dict.items():
         equation_latex = sy.latex(lhs) + " &=& " + sy.latex(rhs)
         latex_equations.append(equation_latex)
-    eqn_array = r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
+    eqn_array = (
+        r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
+    )
     return eqn_array
 
 
@@ -255,7 +260,9 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
     fig = go.Figure(data=[edge_trace, node_trace], layout=layout)
 
     # Customize hovertemplate for displaying rendered LaTeX equations
-    fig.update_traces(hovertemplate="<b>%{text}</b><br>%{customdata}")  # Render customdata as LaTeX
+    fig.update_traces(
+        hovertemplate="<b>%{text}</b><br>%{customdata}"
+    )  # Render customdata as LaTeX
 
     fig.show()
 
@@ -289,23 +296,29 @@ def simulate_data_with_outliers(
     num_samples=1000,
     outlier_fraction=0.01,
     outlier_magnitude=10,
+    seed=42,
 ):
     """Simulate data from a structural causal model with outliers."""
     # Todo: add test
+
+    np.random.seed(seed)
     if backend == "pgmpy":
-        assert type(nocap_model) is nx.DiGraph, "Model must be a networkx DiGraph for pgmpy backend"
+        assert type(nocap_model) is nx.DiGraph, (
+            "Model must be a networkx DiGraph for pgmpy backend"
+        )
         model = create_lgbn_from_dag(nocap_model)
+        simulated_data = model.simulate(n=num_samples, seed=seed)
     else:
         raise ValueError(f"Unsupported backend: {backend}")
-
-    simulated_data = model.simulate(n=num_samples)
 
     # Apply non-negative constraint
     simulated_data[simulated_data < 0] = 0
 
     # Outliers introduction
     num_outliers = int(outlier_fraction * num_samples)
-    outlier_indices = np.random.choice(simulated_data.index, num_outliers, replace=False)
+    outlier_indices = np.random.choice(
+        simulated_data.index, num_outliers, replace=False
+    )
 
     # Assume outlier adds an arbitrary large value or multiplies by a high factor
     simulated_data.loc[outlier_indices] *= outlier_magnitude
@@ -322,7 +335,9 @@ def fit_model(
     """Fit a model to the data using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert type(nocap_model) is nx.DiGraph, "Model must be a networkx DiGraph for pgmpy backend"
+        assert type(nocap_model) is nx.DiGraph, (
+            "Model must be a networkx DiGraph for pgmpy backend"
+        )
         model = create_lgbn_from_dag(nocap_model)
         model.fit(data, method=method)
         return model
@@ -334,7 +349,9 @@ def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
     """Estimate the Average Treatment Effect (ATE) using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert type(nocap_model) is nx.DiGraph, "Model must be a networkx DiGraph for pgmpy backend"
+        assert type(nocap_model) is nx.DiGraph, (
+            "Model must be a networkx DiGraph for pgmpy backend"
+        )
         model = DiscreteBayesianNetwork(nocap_model)
         inference = CausalInference(model)
         ate = inference.estimate_ate(X, Y, data)
