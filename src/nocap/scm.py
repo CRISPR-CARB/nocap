@@ -2,6 +2,7 @@
 
 import os
 import re
+from copy import deepcopy
 
 import networkx as nx
 import numpy as np
@@ -290,6 +291,41 @@ def create_lgbn_from_dag(dag):
     return model
 
 
+def create_dag_from_lscm(lscm: dict[sy.Symbol, sy.Expr]) -> nx.DiGraph:
+    """Generate a directed acyclic graph (DAG) from a linear structural causal model (LSCM)."""
+    dag = nx.DiGraph()
+
+    for node_sym, equation in lscm.items():
+        node_name = str(node_sym)
+        dag.add_node(node_name)
+
+        # Extract parent symbols from the equation
+        for term in equation.args:
+            # If a term is a simple multiplication between a beta and a parent symbol, it will have exactly two factors
+            if isinstance(term, sy.Mul) and len(term.args) == 2:
+                for factor in term.args:
+                    if isinstance(factor, sy.Symbol) and not str(factor).startswith(
+                        "beta"
+                    ):
+                        # This is a parent symbol. Add an edge between the parent and the current node.
+                        parent_name = str(factor)
+                        dag.add_edge(parent_name, node_name)
+
+    # Verify that the constructed graph is a DAG
+    if not nx.is_directed_acyclic_graph(dag):
+        raise ValueError("Generated graph is not a DAG.")
+    return dag
+
+
+def compile_lgbn_from_lscm(
+    lscm: dict[sy.Symbol, sy.Expr],
+) -> LinearGaussianBayesianNetwork:
+    """Compile a Linear Gaussian Bayesian Network from a linear structural causal model (LSCM). Cyclic LSCMs will raise an exception."""
+    lscm_dag = create_dag_from_lscm(lscm)
+    lgbn = create_lgbn_from_dag(lscm_dag)
+    return lgbn
+
+
 def simulate_data_with_outliers(
     nocap_model,
     backend="pgmpy",
@@ -303,15 +339,16 @@ def simulate_data_with_outliers(
 
     np.random.seed(seed)
     if backend == "pgmpy":
-        assert isinstance(nocap_model, nx.DiGraph), (
-            "Model must be a networkx DiGraph for pgmpy backend"
+        assert isinstance(nocap_model, LinearGaussianBayesianNetwork), (
+            "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
         )
-        model = create_lgbn_from_dag(nocap_model)
-        simulated_data = model.simulate(n=num_samples, seed=seed)
+        lgbn_model = nocap_model
+        simulated_data = lgbn_model.simulate(n=num_samples, seed=seed)
+
     else:
         raise ValueError(f"Unsupported backend: {backend}")
 
-    # Apply non-negative constraint
+    # Apply non-negative constraint (dropout effect)
     simulated_data[simulated_data < 0] = 0
 
     # Outliers introduction
@@ -322,7 +359,6 @@ def simulate_data_with_outliers(
 
     # Assume outlier adds an arbitrary large value or multiplies by a high factor
     simulated_data.loc[outlier_indices] *= outlier_magnitude
-
     return simulated_data
 
 
@@ -335,12 +371,12 @@ def fit_model(
     """Fit a model to the data using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert isinstance(nocap_model, nx.DiGraph), (
-            "Model must be a networkx DiGraph for pgmpy backend"
+        assert isinstance(nocap_model, LinearGaussianBayesianNetwork), (
+            "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
         )
-        model = create_lgbn_from_dag(nocap_model)
-        model.fit(data, method=method)
-        return model
+        lgbn_model = deepcopy(nocap_model)
+        lgbn_model.fit(data, method=method)
+        return lgbn_model
     else:
         raise ValueError(f"Unsupported backend: {backend}")
 
