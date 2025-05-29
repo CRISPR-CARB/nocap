@@ -62,7 +62,9 @@ pip install nocap
 The most recent code and data can be installed directly from GitHub with:
 
 ```shell
-pip install git+https://github.com/pnnl-compbio/nocap.git
+pip install git+https://github.com/CRISPR-CARB/nocap.git
+
+
 ```
 
 ## 👐 Contributing
