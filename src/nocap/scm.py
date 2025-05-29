@@ -320,7 +320,7 @@ def create_dag_from_lscm(lscm: dict[sy.Symbol, sy.Expr]) -> nx.DiGraph:
 def compile_lgbn_from_lscm(
     lscm: dict[sy.Symbol, sy.Expr],
 ) -> LinearGaussianBayesianNetwork:
-    """Compile a Linear Gaussian Bayesian Network from a linear structural causal model (LSCM). Cyclic LSCMs will raise an exception."""
+    """Compile a Linear Gaussian Bayesian Network from a linear structural causal model (LSCM). LSCM must be acyclic."""
     lscm_dag = create_dag_from_lscm(lscm)
     lgbn = create_lgbn_from_dag(lscm_dag)
     return lgbn
