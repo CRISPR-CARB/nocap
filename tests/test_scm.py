@@ -1,20 +1,15 @@
 """Test functions for the scm module."""
 
 import networkx as nx
+import pandas as pd
 
 # import numpy as np
 import sympy as sy
+from pgmpy.factors.continuous import LinearGaussianCPD
+from pgmpy.models import LinearGaussianBayesianNetwork
 
 # import y0
 from y0.graph import NxMixedGraph
-from nocap.scm import create_lgbn_from_dag
-from pgmpy.models import LinearGaussianBayesianNetwork
-from pgmpy.factors.continuous import LinearGaussianCPD
-from nocap.scm import simulate_data_with_outliers
-from nocap.scm import fit_model
-import pandas as pd
-from nocap.scm import estimate_ate
-
 
 from nocap import (
     convert_to_eqn_array_latex,
@@ -29,6 +24,14 @@ from nocap import (
     get_symbols_from_di_edges,
     get_symbols_from_nodes,
     read_dag_file,
+)
+from nocap.scm import (
+    compile_lgbn_from_lscm,
+    create_dag_from_lscm,
+    create_lgbn_from_dag,
+    estimate_ate,
+    fit_model,
+    simulate_data_with_outliers,
 )
 
 # TODO: use fixtures!
@@ -77,9 +80,7 @@ def test_with_exposure_keyword():
 def test_with_combined_keywords():
     """Test conversion of daggity to dot format with combined keywords."""
     # Test conversion with the 'latent', 'adjusted', 'outcome', and 'exposure' keywords
-    daggity_string = (
-        "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> A; }"
-    )
+    daggity_string = "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> A; }"
     expected_dot = 'digraph { observed="no", A -> B; B -> C; C -> A; }'
     assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
 
@@ -93,10 +94,10 @@ def test_with_empty_input():
 
 def test_with_complex_graph_structure():
     """Test conversion of daggity to dot format with a complex graph structure."""
-    daggity_string = "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> D; D -> A; E -> F; G; }"
-    expected_dot = (
-        'digraph { observed="no", A -> B; B -> C; C -> D; D -> A; E -> F; G; }'
+    daggity_string = (
+        "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> D; D -> A; E -> F; G; }"
     )
+    expected_dot = 'digraph { observed="no", A -> B; B -> C; C -> D; D -> A; E -> F; G; }'
     assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
 
 
@@ -122,9 +123,9 @@ def test_dagitty_to_mixed_graph():
 
     def mixed_graphs_equal(graph1: NxMixedGraph, graph2: NxMixedGraph) -> bool:
         """Test if two mixed graphs are equal."""
-        if nx.utils.graphs_equal(
-            graph1.undirected, graph2.undirected
-        ) and nx.utils.graphs_equal(graph1.directed, graph2.directed):
+        if nx.utils.graphs_equal(graph1.undirected, graph2.undirected) and nx.utils.graphs_equal(
+            graph1.directed, graph2.directed
+        ):
             return True
         else:
             return False
@@ -171,10 +172,8 @@ def test_generate_lscm_from_dag():
     graph.add_edges_from([("A", "B"), ("B", "C")])
     expected_equations = {
         sy.Symbol("A"): sy.Symbol("epsilon_A"),
-        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A")
-        + sy.Symbol("epsilon_B"),
-        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B")
-        + sy.Symbol("epsilon_C"),
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
+        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B") + sy.Symbol("epsilon_C"),
     }
     actual_equations = generate_lscm_from_dag(graph)
     for node in expected_equations:  # symbolic equality
@@ -191,8 +190,7 @@ def test_generate_lscm_from_mixed_graph():
         sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A")
         + sy.Symbol("epsilon_B")
         + sy.Symbol("gamma_A_<->B"),
-        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B")
-        + sy.Symbol("epsilon_C"),
+        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B") + sy.Symbol("epsilon_C"),
     }
     actual_equations = generate_lscm_from_mixed_graph(graph)
     for node in expected_equations:  # symbolic equality
@@ -277,9 +275,7 @@ def test_convert_to_latex():
     edges = [("A", "B")]
     graph = NxMixedGraph.from_str_edges(directed=edges)
     lscm_dict = generate_lscm_from_mixed_graph(graph)
-    expected = (
-        r"$$A = \epsilon_{A}$$" + "\n " + r"$$B = A \beta_{A ->B} + \epsilon_{B}$$"
-    )
+    expected = r"$$A = \epsilon_{A}$$" + "\n " + r"$$B = A \beta_{A ->B} + \epsilon_{B}$$"
     actual = convert_to_latex(lscm_dict)
     assert actual == expected  # noqa: S101
 
@@ -351,7 +347,7 @@ def test_simulate_data_with_outliers_basic():
     outlier_magnitude = 50
 
     data = simulate_data_with_outliers(
-        dag,
+        create_lgbn_from_dag(dag),
         num_samples=num_samples,
         outlier_fraction=outlier_fraction,
         outlier_magnitude=outlier_magnitude,
@@ -409,7 +405,8 @@ def test_fit_model_pgmpy_basic():
             "B": [0.5, 0.6, 0.7, 0.8],
         }
     )
-    model = fit_model(dag, data, backend="pgmpy", method="mle")
+
+    model = fit_model(LinearGaussianBayesianNetwork(dag), data, backend="pgmpy", method="mle")
     # Model should be a LinearGaussianBayesianNetwork
     assert isinstance(model, LinearGaussianBayesianNetwork)
     # Model should have the correct nodes and edges
@@ -461,3 +458,117 @@ def test_estimate_ate_invalid_backend():
         assert False, "Should raise ValueError for unsupported backend"
     except ValueError:
         pass
+
+
+def test_compile_lgbn_from_lscm_simple():
+    """Test compile_lgbn_from_lscm with a simple LSCM."""
+
+    # LSCM for A -> B
+    lscm = {
+        sy.Symbol("A"): sy.Symbol("epsilon_A"),
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
+    }
+    model = compile_lgbn_from_lscm(lscm)
+    assert isinstance(model, LinearGaussianBayesianNetwork)
+    assert set(model.nodes()) == {"A", "B"}
+    assert set(model.edges()) == {("A", "B")}
+    assert model.check_model() is True
+
+
+def test_compile_lgbn_from_lscm_disconnected():
+    """Test compile_lgbn_from_lscm with a disconnected LSCM."""
+
+    lscm = {
+        sy.Symbol("A"): sy.Symbol("epsilon_A"),
+        sy.Symbol("B"): sy.Symbol("epsilon_B"),
+        sy.Symbol("C"): sy.Symbol("epsilon_C"),
+    }
+    model = compile_lgbn_from_lscm(lscm)
+    assert isinstance(model, LinearGaussianBayesianNetwork)
+    assert set(model.nodes()) == {"A", "B", "C"}
+    assert set(model.edges()) == set()
+    assert model.check_model() is True
+
+
+def test_compile_lgbn_from_lscm_cycle_raises():
+    """Test compile_lgbn_from_lscm raises error on cyclic LSCM."""
+
+    # Cyclic: A -> B, B -> A
+    lscm = {
+        sy.Symbol("A"): sy.Symbol("beta_B_->A") * sy.Symbol("B") + sy.Symbol("epsilon_A"),
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
+    }
+    try:
+        compile_lgbn_from_lscm(lscm)
+        assert False, "Should raise an exception for cyclic LSCM"
+    except Exception:
+        pass  # Expected
+
+
+def test_create_dag_from_lscm_simple():
+    """Test create_dag_from_lscm with a simple LSCM (A -> B -> C)."""
+    lscm = {
+        sy.Symbol("A"): sy.Symbol("epsilon_A"),
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
+        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B") + sy.Symbol("epsilon_C"),
+    }
+    dag = create_dag_from_lscm(lscm)
+    assert isinstance(dag, nx.DiGraph)
+    assert set(dag.nodes()) == {"A", "B", "C"}
+    assert set(dag.edges()) == {("A", "B"), ("B", "C")}
+    assert nx.is_directed_acyclic_graph(dag)
+
+
+def test_create_dag_from_lscm_disconnected():
+    """Test create_dag_from_lscm with disconnected nodes (no edges)."""
+    lscm = {
+        sy.Symbol("A"): sy.Symbol("epsilon_A"),
+        sy.Symbol("B"): sy.Symbol("epsilon_B"),
+        sy.Symbol("C"): sy.Symbol("epsilon_C"),
+    }
+    dag = create_dag_from_lscm(lscm)
+    assert set(dag.nodes()) == {"A", "B", "C"}
+    assert set(dag.edges()) == set()
+    assert nx.is_directed_acyclic_graph(dag)
+
+
+def test_create_dag_from_lscm_cycle_raises():
+    """Test create_dag_from_lscm raises error on cyclic LSCM."""
+    lscm = {
+        sy.Symbol("A"): sy.Symbol("beta_B_->A") * sy.Symbol("B") + sy.Symbol("epsilon_A"),
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
+    }
+    try:
+        create_dag_from_lscm(lscm)
+        assert False, "Should raise an exception for cyclic LSCM"
+    except AssertionError:
+        pass
+
+
+def test_create_dag_from_lscm_ignores_non_parent_terms():
+    """Test create_dag_from_lscm ignores terms that are not parent multiplications."""
+    lscm = {
+        sy.Symbol("A"): sy.Symbol("epsilon_A") + 2,
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B") + 3,
+    }
+    dag = create_dag_from_lscm(lscm)
+    assert set(dag.nodes()) == {"A", "B"}
+    assert set(dag.edges()) == {("A", "B")}
+    assert nx.is_directed_acyclic_graph(dag)
+
+
+def test_create_dag_from_lscm_multiple_parents():
+    """Test create_dag_from_lscm with a node having multiple parents."""
+    lscm = {
+        sy.Symbol("A"): sy.Symbol("epsilon_A"),
+        sy.Symbol("B"): sy.Symbol("epsilon_B"),
+        sy.Symbol("C"): (
+            sy.Symbol("beta_A_->C") * sy.Symbol("A")
+            + sy.Symbol("beta_B_->C") * sy.Symbol("B")
+            + sy.Symbol("epsilon_C")
+        ),
+    }
+    dag = create_dag_from_lscm(lscm)
+    assert set(dag.nodes()) == {"A", "B", "C"}
+    assert set(dag.edges()) == {("A", "C"), ("B", "C")}
+    assert nx.is_directed_acyclic_graph(dag)

@@ -4,8 +4,10 @@
 
 from .api import *  # noqa
 from .scm import (
+    compile_lgbn_from_lscm,
     convert_to_eqn_array_latex,
     convert_to_latex,
+    create_dag_from_lscm,
     create_lgbn_from_dag,
     dagitty_to_digraph,
     dagitty_to_dot,
@@ -24,8 +26,10 @@ from .scm import (
 )
 
 __all__ = [
+    "compile_lgbn_from_lscm",
     "convert_to_eqn_array_latex",
     "convert_to_latex",
+    "create_dag_from_lscm",
     "create_lgbn_from_dag",
     "dagitty_to_digraph",
     "dagitty_to_dot",
