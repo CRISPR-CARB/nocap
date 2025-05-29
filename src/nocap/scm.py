@@ -52,7 +52,9 @@ def read_dag_file(file_path: str) -> str | None:
         return None
 
 
-def dagitty_to_mixed_graph(dagitty_input: str, str_var_name: bool = False) -> NxMixedGraph:
+def dagitty_to_mixed_graph(
+    dagitty_input: str, str_var_name: bool = False
+) -> NxMixedGraph:
     """Convert a string in dagitty (.dag) to NxMixedGraph."""
     # Check if the input is a file path
     if os.path.isfile(dagitty_input):
@@ -153,7 +155,8 @@ def get_symbols_from_di_edges(
 ) -> dict[tuple[Variable, Variable], sy.Symbol]:
     """Get symbols from directional edges in graph."""
     return {
-        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in graph.directed.edges()
+        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}")
+        for u, v in graph.directed.edges()
     }
 
 
@@ -187,7 +190,9 @@ def convert_to_eqn_array_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
     for lhs, rhs in equations_dict.items():
         equation_latex = sy.latex(lhs) + " &=& " + sy.latex(rhs)
         latex_equations.append(equation_latex)
-    eqn_array = r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
+    eqn_array = (
+        r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
+    )
     return eqn_array
 
 
@@ -256,7 +261,9 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
     fig = go.Figure(data=[edge_trace, node_trace], layout=layout)
 
     # Customize hovertemplate for displaying rendered LaTeX equations
-    fig.update_traces(hovertemplate="<b>%{text}</b><br>%{customdata}")  # Render customdata as LaTeX
+    fig.update_traces(
+        hovertemplate="<b>%{text}</b><br>%{customdata}"
+    )  # Render customdata as LaTeX
 
     fig.show()
 
@@ -297,7 +304,9 @@ def create_dag_from_lscm(lscm: dict[sy.Symbol, sy.Expr]) -> nx.DiGraph:
             # If a term is a simple multiplication between a beta and a parent symbol, it will have exactly two factors
             if isinstance(term, sy.Mul) and len(term.args) == 2:
                 for factor in term.args:
-                    if isinstance(factor, sy.Symbol) and not str(factor).startswith("beta"):
+                    if isinstance(factor, sy.Symbol) and not str(factor).startswith(
+                        "beta"
+                    ):
                         # This is a parent symbol. Add an edge between the parent and the current node.
                         parent_name = str(factor)
                         dag.add_edge(parent_name, node_name)
@@ -311,7 +320,7 @@ def create_dag_from_lscm(lscm: dict[sy.Symbol, sy.Expr]) -> nx.DiGraph:
 def compile_lgbn_from_lscm(
     lscm: dict[sy.Symbol, sy.Expr],
 ) -> LinearGaussianBayesianNetwork:
-    """Compile a Linear Gaussian Bayesian Network from a linear structural causal model (LSCM)."""
+    """Compile a Linear Gaussian Bayesian Network from a linear structural causal model (LSCM). Cyclic LSCMs will raise an exception."""
     lscm_dag = create_dag_from_lscm(lscm)
     lgbn = create_lgbn_from_dag(lscm_dag)
     return lgbn
@@ -330,9 +339,9 @@ def simulate_data_with_outliers(
 
     np.random.seed(seed)
     if backend == "pgmpy":
-        assert isinstance(
-            nocap_model, LinearGaussianBayesianNetwork
-        ), "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
+        assert isinstance(nocap_model, LinearGaussianBayesianNetwork), (
+            "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
+        )
         lgbn_model = nocap_model
         simulated_data = lgbn_model.simulate(n=num_samples, seed=seed)
 
@@ -344,7 +353,9 @@ def simulate_data_with_outliers(
 
     # Outliers introduction
     num_outliers = int(outlier_fraction * num_samples)
-    outlier_indices = np.random.choice(simulated_data.index, num_outliers, replace=False)
+    outlier_indices = np.random.choice(
+        simulated_data.index, num_outliers, replace=False
+    )
 
     # Assume outlier adds an arbitrary large value or multiplies by a high factor
     simulated_data.loc[outlier_indices] *= outlier_magnitude
@@ -360,9 +371,9 @@ def fit_model(
     """Fit a model to the data using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert isinstance(
-            nocap_model, LinearGaussianBayesianNetwork
-        ), "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
+        assert isinstance(nocap_model, LinearGaussianBayesianNetwork), (
+            "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
+        )
         lgbn_model = deepcopy(nocap_model)
         lgbn_model.fit(data, method=method)
         return lgbn_model
@@ -374,9 +385,9 @@ def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
     """Estimate the Average Treatment Effect (ATE) using the specified backend."""
     # Todo: add test
     if backend == "pgmpy":
-        assert isinstance(
-            nocap_model, nx.DiGraph
-        ), "Model must be a networkx DiGraph for pgmpy backend"
+        assert isinstance(nocap_model, nx.DiGraph), (
+            "Model must be a networkx DiGraph for pgmpy backend"
+        )
         model = DiscreteBayesianNetwork(nocap_model)
         inference = CausalInference(model)
         ate = inference.estimate_ate(X, Y, data)
