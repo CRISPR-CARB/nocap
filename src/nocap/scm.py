@@ -303,8 +303,8 @@ def create_dag_from_lscm(lscm: dict[sy.Symbol, sy.Expr]) -> nx.DiGraph:
                         dag.add_edge(parent_name, node_name)
 
     # Verify that the constructed graph is a DAG
-    assert nx.is_directed_acyclic_graph(dag), "Generated graph is not a DAG."
-
+    if not nx.is_directed_acyclic_graph(dag):
+        raise ValueError("Generated graph is not a DAG.")
     return dag
 
 
