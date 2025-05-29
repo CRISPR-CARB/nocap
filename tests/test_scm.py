@@ -498,11 +498,8 @@ def test_compile_lgbn_from_lscm_cycle_raises():
         sy.Symbol("A"): sy.Symbol("beta_B_->A") * sy.Symbol("B") + sy.Symbol("epsilon_A"),
         sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
     }
-    try:
+    with pytest.raises(Exception, match="Expected error message for cyclic LSCM"):
         compile_lgbn_from_lscm(lscm)
-        assert False, "Should raise an exception for cyclic LSCM"
-    except Exception:
-        pass  # Expected
 
 
 def test_create_dag_from_lscm_simple():
