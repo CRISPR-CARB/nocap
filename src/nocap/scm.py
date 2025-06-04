@@ -268,11 +268,11 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
     fig.show()
 
 
-def create_lgbn_from_dag(dag):
+def create_lgbn_from_dag(dag, seed=1234):
     """Create a Linear Gaussian Bayesian Network from a directed acyclic graph (DAG)."""
     # Todo: add test
     model = LinearGaussianBayesianNetwork(dag)
-
+    np.random.seed(seed)  # Set seed for reproducibility
     for node in dag.nodes():
         parents = list(dag.predecessors(node))
         num_parents = len(parents)
@@ -319,10 +319,11 @@ def create_dag_from_lscm(lscm: dict[sy.Symbol, sy.Expr]) -> nx.DiGraph:
 
 def compile_lgbn_from_lscm(
     lscm: dict[sy.Symbol, sy.Expr],
+    seed: int = 1234,
 ) -> LinearGaussianBayesianNetwork:
     """Compile a Linear Gaussian Bayesian Network from a linear structural causal model (LSCM). LSCM must be acyclic."""
     lscm_dag = create_dag_from_lscm(lscm)
-    lgbn = create_lgbn_from_dag(lscm_dag)
+    lgbn = create_lgbn_from_dag(lscm_dag, seed)
     return lgbn
 
 
@@ -382,19 +383,9 @@ def fit_model(
 
 
 def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
-    """Estimate the Average Treatment Effect (ATE) using the specified backend."""
-    # Todo: add test
-    if backend == "pgmpy":
-        assert isinstance(nocap_model, nx.DiGraph), (
-            "Model must be a networkx DiGraph for pgmpy backend"
-        )
-        model = DiscreteBayesianNetwork(nocap_model)
-        inference = CausalInference(model)
-        ate = inference.estimate_ate(X, Y, data)
-
-    else:
-        raise ValueError(f"Unsupported backend: {backend}")
-    return ate
+    raise NotImplementedError(
+        "The estimate_ate function is not implemented. Please use the bootstrap_ATE function instead."
+    )
 
 
 def bootstrap_ATE(
@@ -473,6 +464,8 @@ def perform_soft_intervention_lgbn(lgbn_model, dag, intervention_var, factor=10)
     # Find the CPD for the intervention variable
     target_cpd = next((cpd for cpd in cpds if cpd.variable == intervention_var), None)
 
+    # print(f"Target CPD: {target_cpd}")
+
     if target_cpd is None:
         raise ValueError(f"Variable {intervention_var} not found in model CPDs.")
 
@@ -486,6 +479,8 @@ def perform_soft_intervention_lgbn(lgbn_model, dag, intervention_var, factor=10)
     updated_target_cpd = LinearGaussianCPD(
         intervention_var, new_beta, target_cpd.std, target_cpd.evidence
     )
+
+    # print(f"Updated CPD: {updated_target_cpd}")
 
     # Replace old CPD with updated one
     new_cpds = [
