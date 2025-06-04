@@ -727,16 +727,13 @@ def test_bootstrap_ATE_invalid_column_raises():
     data_control = pd.DataFrame({"Y": [1, 2, 3]})
     data_intervention = pd.DataFrame({"Z": [4, 5, 6]})
 
-    try:
+    with pytest.raises(KeyError, match="Z"):
         bootstrap_ATE(
             data_control,
             data_intervention,
             outcome_variable="Z",
             n_iterations=10,
         )
-        assert False, "Should raise KeyError for missing column"
-    except KeyError:
-        pass
 
 
 def test_bootstrap_ATE_empty_data():
