@@ -4,6 +4,7 @@
 
 from .api import *  # noqa
 from .scm import (
+    bootstrap_ATE,
     compile_lgbn_from_lscm,
     convert_to_eqn_array_latex,
     convert_to_latex,
@@ -20,12 +21,14 @@ from .scm import (
     get_symbols_from_bi_edges,
     get_symbols_from_di_edges,
     get_symbols_from_nodes,
+    perform_soft_intervention_lgbn,
     plot_interactive_lscm_graph,
     read_dag_file,
     simulate_data_with_outliers,
 )
 
 __all__ = [
+    "bootstrap_ATE",
     "compile_lgbn_from_lscm",
     "convert_to_eqn_array_latex",
     "convert_to_latex",
@@ -42,6 +45,7 @@ __all__ = [
     "get_symbols_from_bi_edges",
     "get_symbols_from_di_edges",
     "get_symbols_from_nodes",
+    "perform_soft_intervention_lgbn",
     "plot_interactive_lscm_graph",
     "read_dag_file",
     "simulate_data_with_outliers",
