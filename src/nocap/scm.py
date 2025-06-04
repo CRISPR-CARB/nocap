@@ -268,11 +268,11 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
     fig.show()
 
 
-def create_lgbn_from_dag(dag):
+def create_lgbn_from_dag(dag, seed=1234):
     """Create a Linear Gaussian Bayesian Network from a directed acyclic graph (DAG)."""
     # Todo: add test
     model = LinearGaussianBayesianNetwork(dag)
-
+    rng = np.random.default_rng(seed)  # Create a local random generator instance
     for node in dag.nodes():
         parents = list(dag.predecessors(node))
         num_parents = len(parents)
@@ -319,10 +319,11 @@ def create_dag_from_lscm(lscm: dict[sy.Symbol, sy.Expr]) -> nx.DiGraph:
 
 def compile_lgbn_from_lscm(
     lscm: dict[sy.Symbol, sy.Expr],
+    seed: int = 1234,
 ) -> LinearGaussianBayesianNetwork:
     """Compile a Linear Gaussian Bayesian Network from a linear structural causal model (LSCM). LSCM must be acyclic."""
     lscm_dag = create_dag_from_lscm(lscm)
-    lgbn = create_lgbn_from_dag(lscm_dag)
+    lgbn = create_lgbn_from_dag(lscm_dag, seed)
     return lgbn
 
 
@@ -332,7 +333,7 @@ def simulate_data_with_outliers(
     num_samples=1000,
     outlier_fraction=0.01,
     outlier_magnitude=10,
-    seed=42,
+    seed=1234,
 ):
     """Simulate data from a structural causal model with outliers."""
     # Todo: add test
@@ -382,16 +383,112 @@ def fit_model(
 
 
 def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
-    """Estimate the Average Treatment Effect (ATE) using the specified backend."""
-    # Todo: add test
-    if backend == "pgmpy":
-        assert isinstance(nocap_model, nx.DiGraph), (
-            "Model must be a networkx DiGraph for pgmpy backend"
-        )
-        model = DiscreteBayesianNetwork(nocap_model)
-        inference = CausalInference(model)
-        ate = inference.estimate_ate(X, Y, data)
+    raise NotImplementedError(
+        "The estimate_ate function is not implemented. Please use the bootstrap_ATE function instead."
+    )
 
-    else:
-        raise ValueError(f"Unsupported backend: {backend}")
-    return ate
+
+def bootstrap_ATE(
+    data_control,
+    data_intervention,
+    outcome_variable,
+    n_iterations=10000,
+    confidence_level=0.95,
+):
+    """
+    Computes bootstrap confidence interval for the Average Treatment Effect (ATE) and returns the observed ATE.
+
+    Parameters:
+    - data_control: DataFrame containing the control (observed) data.
+    - data_intervention: DataFrame containing the intervention data.
+    - outcome_variable: String name of the outcome variable column.
+    - n_iterations: Number of bootstrap iterations (default is 10000).
+    - confidence_level: Confidence level for the interval (default is 0.95).
+
+    Returns:
+    - observed_ate: The observed ATE calculated from the input data.
+    - confidence_interval: Tuple containing lower and upper bounds of the confidence interval for ATE.
+    """
+
+    # Extract the relevant outcome data
+    control_outcome = data_control[outcome_variable].values
+    intervened_outcome = data_intervention[outcome_variable].values
+
+    # Calculate the observed ATE
+    observed_ate = np.mean(intervened_outcome) - np.mean(control_outcome)
+
+    # Store ATE estimates from bootstrapping
+    bootstrapped_ates = []
+
+    for _ in range(n_iterations):
+        # Resample with replacement
+        resampled_control = np.random.choice(
+            control_outcome, size=len(control_outcome), replace=True
+        )
+        resampled_intervened = np.random.choice(
+            intervened_outcome, size=len(intervened_outcome), replace=True
+        )
+
+        # Compute ATE for resampled data
+        resampled_ate = np.mean(resampled_intervened) - np.mean(resampled_control)
+        bootstrapped_ates.append(resampled_ate)
+
+    # Calculate confidence interval percentiles
+    lower_percentile = (1 - confidence_level) / 2 * 100
+    upper_percentile = (1 + confidence_level) / 2 * 100
+
+    lower_bound = np.percentile(bootstrapped_ates, lower_percentile)
+    upper_bound = np.percentile(bootstrapped_ates, upper_percentile)
+
+    return observed_ate, (lower_bound, upper_bound)
+
+
+def perform_soft_intervention_lgbn(lgbn_model, dag, intervention_var, factor=10):
+    """
+    Performs a soft intervention on a specified variable in a Linear Gaussian Bayesian Network model
+    by scaling its intercept and updating the model accordingly.
+
+    Parameters:
+    - lgbn_model: The original Linear Gaussian Bayesian Network model from pgmpy.
+    - dag: The directed acyclic graph associated with the model.
+    - intervention_var: The variable to intervene on.
+    - factor: The factor by which to scale the intercept (default is 10).
+
+    Returns:
+    - new_model: A new Linear Gaussian Bayesian Network model with the updated CPD.
+    """
+
+    # Copy CPDs from the original model
+    cpds = [cpd.copy() for cpd in lgbn_model.get_cpds()]
+
+    # Find the CPD for the intervention variable
+    target_cpd = next((cpd for cpd in cpds if cpd.variable == intervention_var), None)
+
+    # print(f"Target CPD: {target_cpd}")
+
+    if target_cpd is None:
+        raise ValueError(f"Variable {intervention_var} not found in model CPDs.")
+
+    # Modify the intercept
+    original_intercept = target_cpd.beta[0]
+    new_intercept = original_intercept * factor
+    new_beta = target_cpd.beta.copy()
+    new_beta[0] = new_intercept
+
+    # Create an updated CPD
+    updated_target_cpd = LinearGaussianCPD(
+        intervention_var, new_beta, target_cpd.std, target_cpd.evidence
+    )
+
+    # print(f"Updated CPD: {updated_target_cpd}")
+
+    # Replace old CPD with updated one
+    new_cpds = [
+        updated_target_cpd if cpd.variable == intervention_var else cpd for cpd in cpds
+    ]
+
+    # Create a new model
+    new_model = LinearGaussianBayesianNetwork(dag)
+    new_model.add_cpds(*new_cpds)
+
+    return new_model
