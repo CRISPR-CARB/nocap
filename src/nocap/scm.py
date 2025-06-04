@@ -272,7 +272,7 @@ def create_lgbn_from_dag(dag, seed=1234):
     """Create a Linear Gaussian Bayesian Network from a directed acyclic graph (DAG)."""
     # Todo: add test
     model = LinearGaussianBayesianNetwork(dag)
-    np.random.seed(seed)  # Set seed for reproducibility
+    rng = np.random.default_rng(seed)  # Create a local random generator instance
     for node in dag.nodes():
         parents = list(dag.predecessors(node))
         num_parents = len(parents)
