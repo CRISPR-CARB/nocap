@@ -1,6 +1,8 @@
 """Process for data generation."""
 
 import torch
+import pyro
+import pyro.distributions as dist
 
 
 def generate_test_data_tensor(
@@ -52,8 +54,10 @@ def apply_lognormal_noise_process(tensor, mean=0.0, std=1.0):
     Returns:
         torch.Tensor: The tensor with added log-normal noise.
     """
-    noise = torch.distributions.LogNormal(mean, std).sample(tensor.size())
-    return tensor + noise
+    
+    #noise = pyro.distributions.LogNormal(mean, std).sample(tensor.size())
+    noise = pyro.sample("biological noise", dist.LogNormal(tensor+mean, std))
+    return noise #pyro.sample("log normal noise", tensor + noise)
 
 
 def apply_bernoulli_lognormal_outlier_process(tensor, pi=0.1, mu=0.0, sigma=1.0):
@@ -76,10 +80,15 @@ def apply_bernoulli_lognormal_outlier_process(tensor, pi=0.1, mu=0.0, sigma=1.0)
     Returns:
         torch.Tensor: The tensor with applied Bernoulli-LogNormal outlier process.
     """
-    binary_indicators = torch.distributions.Bernoulli(pi).sample(tensor.size())
-    scale_factors = torch.distributions.LogNormal(mu, sigma).sample(tensor.size())
-    updated_tensor = tensor * scale_factors * binary_indicators + (1 - binary_indicators) * tensor
+    # binary_indicators = torch.distributions.Bernoulli(pi).sample(tensor.size())
+    # scale_factors = torch.distributions.LogNormal(mu, sigma).sample(tensor.size())
+    # updated_tensor = tensor * scale_factors * binary_indicators + (1 - binary_indicators) * tensor
+    # return updated_tensor
+    binary_indicators = pyro.sample("binary indicators", dist.Bernoulli(pi).expand(tensor.size()).to_event(0)) #.to_event(0) is used to treat the tensor as a batch of independent events
+    scale_factors = pyro.sample("scale factors", dist.LogNormal(mu, sigma).expand(tensor.size()).to_event(0))
+    updated_tensor = pyro.deterministic("outlier",tensor * scale_factors * binary_indicators + (1 - binary_indicators) * tensor)
     return updated_tensor
+
 
 
 def apply_row_normalization_and_lognormal_scaling_process(tensor, mu=0.0, sigma=1.0):
@@ -98,9 +107,13 @@ def apply_row_normalization_and_lognormal_scaling_process(tensor, mu=0.0, sigma=
     Returns:
         torch.Tensor: The normalized and scaled tensor.
     """
+    # row_sums = tensor.sum(dim=1, keepdim=True)
+    # scaling_factors = torch.distributions.LogNormal(mu, sigma).sample([tensor.size(0), 1])
+    # return (scaling_factors * tensor) / row_sums
     row_sums = tensor.sum(dim=1, keepdim=True)
-    scaling_factors = torch.distributions.LogNormal(mu, sigma).sample([tensor.size(0), 1])
-    return (scaling_factors * tensor) / row_sums
+    scaling_factors = pyro.sample("scaling factors", dist.LogNormal(mu, sigma).expand(tensor.size()).to_event(0)) #.to_event(0) is used to treat the tensor as a batch of independent events
+    library_size = pyro.deterministic("library size", (scaling_factors * tensor) / row_sums)
+    return library_size
 
 
 def apply_quantile_logistic_dropout_process(tensor, k=1.0, q=0.5):
@@ -122,8 +135,11 @@ def apply_quantile_logistic_dropout_process(tensor, k=1.0, q=0.5):
     log_y = torch.log(tensor + 1)  # log transformation of the data
     log_y_0 = torch.quantile(log_y, q)
     pi = 1 / (1 + torch.exp(-k * (log_y - log_y_0)))
-    binary_indicators = torch.distributions.Bernoulli(pi).sample()
-    return binary_indicators * tensor
+    # binary_indicators = torch.distributions.Bernoulli(pi).sample()
+    # return binary_indicators * tensor
+    binary_indicators = pyro.sample("dropout binary indicators", dist.Bernoulli(pi).expand(tensor.size()).to_event(0))
+    dropout = pyro.deterministic("dropout",binary_indicators * tensor)
+    return dropout
 
 
 def apply_poisson_process(tensor):
@@ -140,4 +156,6 @@ def apply_poisson_process(tensor):
     Returns:
         torch.Tensor: A tensor containing the sampled values from the Poisson distribution.
     """
-    return torch.distributions.Poisson(tensor).sample()
+    umi_counts = pyro.sample("UMI counts", dist.Poisson(tensor))
+    #return torch.distributions.Poisson(tensor).sample()
+    return umi_counts
