@@ -1,0 +1,7 @@
+query,type,result,explanation,implication
+P(soxS | do(fnr)),Single-gene,✓ IDENTIFIABLE,fnr outside 3-gene cycle,Can predict computationally
+P(oxyR | do(fnr)),Single-gene,✓ IDENTIFIABLE,fnr outside 3-gene cycle,Can predict computationally
+P(oxyR | do(fur)),Single-gene,✗ UNIDENTIFIABLE,Both in 3-gene cycle,Need CRISPR experiment
+"P(soxS | do(fnr, fur))",Multi-gene,✓ IDENTIFIABLE,Interventions outside soxS district,Can predict computationally
+"P(oxyR | do(fur, soxR))",Multi-gene,✗ UNIDENTIFIABLE,Both interventions in same cycle,Need CRISPR experiment
+"P(oxyR, soxS | do(fnr))",Multi-outcome,✓ IDENTIFIABLE,"fnr outside cycle, both reachable",Can predict joint effect
