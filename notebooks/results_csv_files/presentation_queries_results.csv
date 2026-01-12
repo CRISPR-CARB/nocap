@@ -1,6 +1,0 @@
-query_num,notation,interventions,outcomes,expected,actual,match,reason,runtime,estimand_length,estimand,error
-1,P(soxS | do(fnr)),fnr,soxS,IDENTIFIABLE,IDENTIFIABLE,True,fnr is outside the 3-gene cycle,0.0,62.0,"Sum[fur, oxyR, soxR]((P(fnr, fur, oxyR, soxR, soxS) / P(fnr)))",
-2,P(oxyR | do(fnr)),fnr,oxyR,IDENTIFIABLE,IDENTIFIABLE,True,fnr is outside the 3-gene cycle,0.0,50.0,"Sum[fur, soxR]((P(fnr, fur, oxyR, soxR) / P(fnr)))",
-3,P(soxR | do(soxS)),soxS,soxR,UNIDENTIFIABLE,IDENTIFIABLE,False,No edge soxS → soxR (no causal path),0.008220911026000977,44.0,"Sum[fnr, fur, oxyR](P(fnr, fur, oxyR, soxR))",
-4,"P(soxS | do(fnr, fur))","fnr, fur",soxS,IDENTIFIABLE,UNIDENTIFIABLE,False,Both interventions outside cycle,0.0010483264923095703,,,"Cannot identify P{soxS} | do{fur, fnr})). District frozenset({soxR}) failed identification."
-5,"P(oxyR, soxS | do(fnr))",fnr,"oxyR, soxS",IDENTIFIABLE,IDENTIFIABLE,True,"fnr outside cycle, both outcomes reachable",0.002641916275024414,56.0,"Sum[fur, soxR]((P(fnr, fur, oxyR, soxR, soxS) / P(fnr)))",

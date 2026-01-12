@@ -898,6 +898,5 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,python,jupyternotebooks,jetbrains,pycharm,vim,emacs,visualstudiocode,visualstudio
 
-scratch/
-notebooks/results_csv_files/*. csv
-notebooks/results_csv_files/ecoli_valid_multi_2_intervention_pairs.csv
+# large csv files from analysis
+notebooks/results_csv_files/*.csv
