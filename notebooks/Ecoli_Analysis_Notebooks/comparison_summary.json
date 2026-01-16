@@ -1,0 +1,15 @@
+{
+  "total_queries": 40,
+  "agreements": 20,
+  "disagreements": 20,
+  "agreement_rate_percent": 50.0,
+  "single_gene_queries": 20,
+  "multi_gene_queries": 20,
+  "single_gene_agreement_rate": 50.0,
+  "multi_gene_agreement_rate": 50.0,
+  "identifiable_agreement_rate": 100.0,
+  "unidentifiable_agreement_rate": 0.0,
+  "mean_time_seconds": 0.18898169398307801,
+  "total_time_seconds": 7.55926775932312,
+  "analysis_date": "2026-01-16 17:18:16"
+}
