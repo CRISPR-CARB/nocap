@@ -1,0 +1,41 @@
+intervention,target,cyclic_id_result,standard_id_result,standard_id_time,results_match,query_type,query_number
+glrR,eco,True,True,0.13942861557006836,True,single_identifiable,1
+rcdA,livF,True,True,0.13042140007019043,True,single_identifiable,2
+glaR,yehW,True,True,0.1536417007446289,True,single_identifiable,3
+spf,fucK,True,True,0.538067102432251,True,single_identifiable,4
+nsrR,rclB,True,True,0.22510766983032227,True,single_identifiable,5
+btsR,cycA,True,True,0.2267162799835205,True,single_identifiable,6
+nsrR,ynbB,True,True,0.19828581809997559,True,single_identifiable,7
+nsrR,ldtC,True,True,0.22013425827026367,True,single_identifiable,8
+btsR,stfQ,True,True,0.17713117599487305,True,single_identifiable,9
+glaR,avtA,True,True,0.16095519065856934,True,single_identifiable,10
+gadE,yjjY,False,True,0.37676000595092773,False,single_unidentifiable,1
+gadW,mtlR,False,True,0.13110995292663574,False,single_unidentifiable,2
+slyA,speF,False,True,0.13714146614074707,False,single_unidentifiable,3
+fnr,cadC,False,True,0.15998220443725586,False,single_unidentifiable,4
+phoP,fadA,False,True,0.13512063026428223,False,single_unidentifiable,5
+rpoS,pyrD,False,True,0.13272404670715332,False,single_unidentifiable,6
+mlrA,yghG,False,True,0.1340808868408203,False,single_unidentifiable,7
+fnr,yidQ,False,True,0.3504183292388916,False,single_unidentifiable,8
+cytR,livM,False,True,0.11741018295288086,False,single_unidentifiable,9
+nac,sgbE,False,True,0.1577143669128418,False,single_unidentifiable,10
+"['ycaM', 'tufB', 'ydhV', 'hslO', 'blr']","['atoC', 'cysH', 'chpS', 'pitA', 'yqeH']",True,True,0.1512131690979004,True,multi_identifiable,1
+"['mdtF', 'nuoK', 'pgk', 'fimB', 'lnt']","['ydeO', 'lacZ', 'pyrC', 'yihM', 'sthA']",True,True,0.1412525177001953,True,multi_identifiable,2
+"['pabA', 'rrsC', 'livJ', 'ybeZ', 'ytfP']","['ptrA', 'iscS', 'argU', 'slyB', 'waaF']",True,True,0.1332836151123047,True,multi_identifiable,3
+"['astD', 'asnT', 'yiaT', 'yiaN', 'recQ']","['lapC', 'hycI', 'yqjF', 'ompW', 'yjbR']",True,True,0.1373763084411621,True,multi_identifiable,4
+"['frc', 'narJ', 'alaW', 'trxC', 'allW']","['hcaF', 'uraA', 'moaE', 'patD', 'yaaX']",True,True,0.33664417266845703,True,multi_identifiable,5
+"['lpd', 'csiE', 'norR', 'ompA', 'fliH']","['metK', 'ykfI', 'lsrR', 'narK', 'pnuC']",True,True,0.12299704551696777,True,multi_identifiable,6
+"['mocA', 'uxuR', 'lacA', 'pykF', 'yaiA']","['fecA', 'mlaF', 'topA', 'mdtC', 'gntU']",True,True,0.13267731666564941,True,multi_identifiable,7
+"['ddpB', 'potG', 'rbfA', 'frlA', 'fixB']","['acrD', 'ampH', 'mazF', 'gcvP', 'dgcT']",True,True,0.12419557571411133,True,multi_identifiable,8
+"['ileS', 'astD', 'ygbI', 'ppdD', 'hisA']","['metC', 'bcp', 'cas3', 'treC', 'nrfF']",True,True,0.13456058502197266,True,multi_identifiable,9
+"['ptsI', 'motB', 'flhB', 'allA', 'ychA']","['glrK', 'ybjS', 'lacA', 'lsrF', 'yagF']",True,True,0.13308119773864746,True,multi_identifiable,10
+"['patD', 'ydiL', 'pdeB', 'paaX', 'rstA']","['yagE', 'malF', 'frmR', 'thiQ', 'ubiU']",False,True,0.15988421440124512,False,multi_unidentifiable,1
+"['qseB', 'ydfX', 'ybiX', 'rutR', 'rpiA']","['tauA', 'thrL', 'ileV', 'xapB', 'melB']",False,True,0.3648533821105957,False,multi_unidentifiable,2
+"['lon', 'ydgI', 'cysI', 'cbrC', 'ihfA']","['ykgO', 'fadA', 'greB', 'erpA', 'narJ']",False,True,0.26900243759155273,False,multi_unidentifiable,3
+"['pyrS', 'pgaB', 'yafP', 'rpoH', 'insH3']","['accD', 'rplT', 'mglA', 'dsbG', 'uhpT']",False,True,0.1363074779510498,False,multi_unidentifiable,4
+"['glyW', 'mocA', 'arcA', 'eamA', 'mprA']","['rplK', 'amn', 'nrfC', 'fhuF', 'fruA']",False,True,0.13947319984436035,False,multi_unidentifiable,5
+"['hyfH', 'argA', 'ydeO', 'asnT', 'lapB']","['selC', 'yoaC', 'trmD', 'wzb', 'sufS']",False,True,0.1246793270111084,False,multi_unidentifiable,6
+"['yigL', 'cvpA', 'yedL', 'phoB', 'yfcO']","['amiA', 'arsR', 'yhdZ', 'yfdN', 'trpL']",False,True,0.13254284858703613,False,multi_unidentifiable,7
+"['dsbC', 'gsk', 'hyfR', 'rpoH', 'mtn']","['dcuD', 'pepT', 'ptsG', 'acs', 'kbp']",False,True,0.19536423683166504,False,multi_unidentifiable,8
+"['thiC', 'ykgA', 'lrp', 'narI', 'dmsC']","['bioF', 'ycgX', 'idnR', 'rpoD', 'moaE']",False,True,0.35526371002197266,False,multi_unidentifiable,9
+"['cra', 'murE', 'puuR', 'yfdP', 'metT']","['purU', 'thrU', 'hlyE', 'recA', 'xapA']",False,True,0.1322641372680664,False,multi_unidentifiable,10
