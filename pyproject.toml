@@ -1,8 +1,4 @@
 # See https://setuptools.readthedocs.io/en/latest/build_meta.html
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
-
 [tool.black]
 line-length = 100
 target-version = ["py310", "py311"]
@@ -13,3 +9,76 @@ multi_line_output = 3
 line_length = 100
 include_trailing_comma = true
 reverse_relative = true
+
+[tool.pdm]
+distribution = false
+package-dir = "src"
+
+[project]
+name = "nocap"
+version = "0.1.0"
+description = "Network Optimization and Causal Analysis of Petrurb-seq"
+authors = [
+    {name = "August George", email = "30163079+augeorge@users.noreply.github.com"},
+    {name = "August George", email = "august.george@pnnl.gov"},
+]
+dependencies = [
+    "click",
+    "jupyter",
+    "more_click",
+    "more_itertools",
+    "networkx",
+    "numpy",
+    "pandas",
+    "pgmpy",
+    "plotly",
+    "pydot==2.0.0",
+    "seaborn",
+    "sympy",
+    "torch",
+    "tqdm",
+    "y0",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["snekpack", "cookiecutter"]
+maintainers = [
+    {name = "August George", email = "august.george@pnnl.gov"},
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Environment :: Console",
+    "Framework :: Pytest",
+    "Framework :: Sphinx",
+    "Framework :: tox",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/pnnl-compbio/nocap"
+Downloads = "https://github.com/pnnl-compbio/nocap/releases"
+Tracker = "https://github.com/pnnl-compbio/nocap/issues"
+Source = "https://github.com/pnnl-compbio/nocap"
+Documentation = "https://nocap.readthedocs.io"
+
+[project.optional-dependencies]
+tests = [
+    "coverage",
+    "pytest",
+]
+docs = [
+    "sphinx",
+    "sphinx-click",
+    "sphinx-rtd-theme",
+    "sphinx_automodapi",
+]
+
+[project.scripts]
+nocap = "nocap.cli:main"
