@@ -6,6 +6,9 @@ build-backend = "setuptools.build_meta"
 [tool.uv]
 package = true
 
+[tool.uv.sources]
+y0 = { git = "https://github.com/y0-causal-inference/y0.git", branch = "402-add-σ-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs" }
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -135,7 +138,7 @@ dependencies = [
     "tqdm",
     "y0",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
 keywords = ["snekpack", "cookiecutter"]
@@ -167,6 +170,7 @@ Documentation = "https://nocap.readthedocs.io"
 [project.optional-dependencies]
 tests = [
     "coverage",
+    "hypothesis",
     "pytest",
 ]
 docs = [

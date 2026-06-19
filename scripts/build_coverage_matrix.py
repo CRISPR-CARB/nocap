@@ -71,6 +71,8 @@ def build_baseline_queries(ecoli_graph, valid_genes):
     """
     pairs = []
     for gene in valid_genes:
+        if gene not in ecoli_graph:
+            continue
         for target in ecoli_graph.successors(gene):
             if target in valid_genes and target != gene:
                 pairs.append((gene, target))
