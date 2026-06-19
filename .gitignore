@@ -907,3 +907,6 @@ git-commit-message.md
 
 # AI assistance rules
 .clinerules
+
+# Axiomander proof cache (local, machine-specific)
+.axiomander/

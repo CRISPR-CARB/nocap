@@ -403,7 +403,12 @@ def bootstrap_ATE(  # noqa: N802
         The observed ATE calculated from the input data.
     confidence_interval:
         Tuple containing lower and upper bounds of the confidence interval for ATE.
+
+    axiomander:
+        requires:
+            n_iterations > 0
     """
+    assert n_iterations > 0, "n_iterations must be positive"  # noqa: S101
     # Extract the relevant outcome data
     control_outcome = data_control[outcome_variable].values
     intervened_outcome = data_intervention[outcome_variable].values
