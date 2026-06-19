@@ -900,3 +900,10 @@ FodyWeavers.xsd
 
 # large csv files from analysis
 notebooks/results_csv_files/*.csv
+
+
+# Git commit messages
+git-commit-message.md
+
+# AI assistance rules
+.clinerules
