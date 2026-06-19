@@ -102,6 +102,8 @@ def single_candidate_matrix():
 
 
 class TestGreedyMaxCoverage:
+    """Tests for the greedy_max_coverage budget-constrained optimizer."""
+
     def test_greedy_order(self, simple_matrix):
         """First pick should be the candidate with highest single coverage."""
         candidates, queries, matrix = simple_matrix
@@ -205,6 +207,8 @@ class TestGreedyMaxCoverage:
 
 
 class TestGreedyMinSetCover:
+    """Tests for the greedy_min_set_cover minimum-cover optimizer."""
+
     def test_covers_all_resolvable(self, simple_matrix):
         """Min cover should resolve all 6 resolvable queries."""
         candidates, queries, matrix = simple_matrix
@@ -274,6 +278,8 @@ class TestGreedyMinSetCover:
 
 
 class TestBuildMarginalGainCurve:
+    """Tests for the build_marginal_gain_curve utility."""
+
     def test_starts_at_zero(self, simple_matrix):
         """Curve must start at (0, 0, 0.0)."""
         candidates, queries, matrix = simple_matrix
@@ -325,6 +331,8 @@ class TestBuildMarginalGainCurve:
 
 
 class TestLoadCoverageMatrix:
+    """Tests for the load_coverage_matrix CSV round-trip."""
+
     def test_round_trip(self, simple_matrix, tmp_path):
         """Write then read a coverage matrix CSV and verify exact round-trip."""
         candidates, queries, matrix = simple_matrix
@@ -384,6 +392,7 @@ class TestCycleBreakingScore:
 
     @pytest.fixture
     def cycle_graph(self):
+        """Fixture: directed graph with two overlapping cycles and one acyclic branch."""
         import networkx as nx
 
         G = nx.DiGraph()

@@ -38,11 +38,65 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "src/nocap/version.py" = ["S603", "S607"]
-"docs/source/conf.py" = ["ERA001"]
-"notebooks/**/*.ipynb" = ["T201", "S101", "N811", "N802", "N803"]
+"docs/source/conf.py" = ["ERA001", "D100", "F821"]
+"notebooks/**" = [
+    "T201",  # print
+    "S101",  # assert
+    "N811", "N802", "N803", "N806", "N807", "N816",  # naming
+    "E402",  # imports not at top
+    "E712",  # comparison to True/False
+    "E722",  # bare except
+    "W291", "W293",  # trailing whitespace
+    "D100", "D101", "D102", "D103", "D205", "D400", "D401",  # docstrings
+    "B007",  # loop variable not used
+    "B018",  # useless expression
+    "C408",  # unnecessary dict()
+    "C401",  # unnecessary generator
+    "S311",  # random not for crypto
+    "S112",  # try-except-continue
+    "RUF001", "RUF015",  # ruff style
+    "F811",  # redefinition of unused name
+    "F841",  # local variable assigned but never used
+    "B006",  # mutable default argument
+    "C414",  # unnecessary list() within sorted()
+    "C901",  # function too complex
+]
 # Tests: allow assert statements, uppercase CPD variable names, missing docstrings,
 # bare except-pass patterns, assert False idiom, and dict() constructor
-"tests/**/*.py" = ["S101", "N806", "N802", "N803", "D101", "D102", "D103", "D205", "D400", "B011", "B007", "S110", "C408", "C414", "RUF005"]
+"tests/**/*.py" = ["S101", "N806", "N802", "N803", "D101", "D102", "D103", "D205", "D400", "B011", "B007", "S110", "C408", "C414", "RUF005", "RUF059"]
+# Scripts: dev/analysis scripts — allow print, top-level imports after code,
+# assert, security-adjacent patterns, naming conventions, and comprehension style
+"scripts/**/*.py" = [
+    "T201",  # print statements are intentional in CLI scripts
+    "E402",  # module-level imports not at top (sys.path manipulation)
+    "S101",  # assert in scripts
+    "S311",  # random not for crypto
+    "S112",  # try-except-continue
+    "B007",  # loop variable not used
+    "B905",  # zip without strict
+    "N806",  # variable in function should be lowercase
+    "N807",  # function name should not start with get
+    "N816",  # mixed-case variable in global scope
+    "N817",  # CamelCase imported as acronym
+    "N803",  # argument name should be lowercase
+    "C408",  # unnecessary dict() call
+    "C401",  # unnecessary generator
+    "C901",  # complex function
+    "RUF001", # ambiguous unicode
+    "RUF015", # prefer next()
+    "RUF059", # unpacked variable not used
+    "E712",  # comparison to True/False
+    "E722",  # bare except
+    "W291",  # trailing whitespace (handled by formatter)
+    "W293",  # whitespace before comment
+    "F811",  # redefinition of unused name
+    "F841",  # local variable assigned but never used
+    "D100",  # missing docstring in public module
+    "D103",  # missing docstring in public function
+    "D401",  # first line should be in imperative mood
+    "D400",  # first line should end with period
+    "D205",  # 1 blank line required between summary and description
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
@@ -124,6 +178,11 @@ docs = [
 
 [project.scripts]
 nocap = "nocap.cli:main"
+
+[dependency-groups]
+dev = [
+    "docstr-coverage>=2.3.2",
+]
 
 ##########################
 # Coverage Configuration #

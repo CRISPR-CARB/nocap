@@ -817,6 +817,20 @@ wheels = [
 ]
 
 [[package]]
+name = "docstr-coverage"
+version = "2.3.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "pyyaml" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/75/86/d3f02e5baf426eac0f039849272204649137449f050d3fe0eb104c6f399c/docstr-coverage-2.3.2.tar.gz", hash = "sha256:e99a28c502ed21ae8a310cb9e14e8de2d7cff44d365b46fa6dca6de05bf156a0", size = 26750, upload-time = "2024-05-07T16:54:33.514Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/db/f7/7923d915a80aa2e04939260f7a000e1a353b25c7ffcf7771cd777559c27a/docstr_coverage-2.3.2-py3-none-any.whl", hash = "sha256:37a885d6560ad87e289b23bf0e54527885bacbf6b17cf55278d514dd0fef8ff5", size = 25816, upload-time = "2024-05-07T16:54:31.636Z" },
+]
+
+[[package]]
 name = "docutils"
 version = "0.21.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2008,6 +2022,11 @@ tests = [
     { name = "pytest" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "docstr-coverage" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "click" },
@@ -2034,6 +2053,9 @@ requires-dist = [
     { name = "y0" },
 ]
 provides-extras = ["tests", "docs"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "docstr-coverage", specifier = ">=2.3.2" }]
 
 [[package]]
 name = "notebook"

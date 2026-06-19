@@ -28,14 +28,13 @@ Outputs:
 import argparse
 import csv
 import os
-from typing import Dict, List, Optional, Set, Tuple
 
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
 
 
-def load_coverage_matrix(path: str) -> Tuple[List[str], List[str], Dict[str, List[bool]]]:
+def load_coverage_matrix(path: str) -> tuple[list[str], list[str], dict[str, list[bool]]]:
     """
     Load coverage_matrix.csv.
 
@@ -46,7 +45,7 @@ def load_coverage_matrix(path: str) -> Tuple[List[str], List[str], Dict[str, Lis
     """
     candidates = []
     queries = []
-    matrix: Dict[str, List[bool]] = {}
+    matrix: dict[str, list[bool]] = {}
 
     with open(path) as f:
         reader = csv.reader(f)
@@ -67,12 +66,12 @@ def load_coverage_matrix(path: str) -> Tuple[List[str], List[str], Dict[str, Lis
 
 
 def greedy_max_coverage(
-    candidates: List[str],
-    queries: List[str],
-    matrix: Dict[str, List[bool]],
+    candidates: list[str],
+    queries: list[str],
+    matrix: dict[str, list[bool]],
     budget_k: int,
-    intervenable: Set[str] | None = None,
-) -> List[Tuple[str, int, int]]:
+    intervenable: set[str] | None = None,
+) -> list[tuple[str, int, int]]:
     """
     Greedy budgeted maximum coverage.
 
@@ -92,7 +91,7 @@ def greedy_max_coverage(
     """
     pool = [c for c in candidates if intervenable is None or c in intervenable]
     n_queries = len(queries)
-    unresolved: Set[int] = set(range(n_queries))
+    unresolved: set[int] = set(range(n_queries))
     selected = []
 
     for step in range(budget_k):
@@ -122,11 +121,11 @@ def greedy_max_coverage(
 
 
 def greedy_min_set_cover(
-    candidates: List[str],
-    queries: List[str],
-    matrix: Dict[str, List[bool]],
-    intervenable: Set[str] | None = None,
-) -> List[Tuple[str, int, int]]:
+    candidates: list[str],
+    queries: list[str],
+    matrix: dict[str, list[bool]],
+    intervenable: set[str] | None = None,
+) -> list[tuple[str, int, int]]:
     """
     Greedy minimum set cover.
 
@@ -140,7 +139,7 @@ def greedy_min_set_cover(
     n_queries = len(queries)
 
     # Only try to cover queries that are resolvable by at least one TF
-    resolvable: Set[int] = set()
+    resolvable: set[int] = set()
     for cand in pool:
         for qi, val in enumerate(matrix[cand]):
             if val:
@@ -172,12 +171,12 @@ def greedy_min_set_cover(
 
 
 def build_marginal_gain_curve(
-    candidates: List[str],
-    queries: List[str],
-    matrix: Dict[str, List[bool]],
+    candidates: list[str],
+    queries: list[str],
+    matrix: dict[str, list[bool]],
     max_k: int,
-    intervenable: Set[str] | None = None,
-) -> List[Tuple[int, int, float]]:
+    intervenable: set[str] | None = None,
+) -> list[tuple[int, int, float]]:
     """
     Run greedy_max_coverage up to max_k and return the cumulative coverage
     curve for plotting.
@@ -198,7 +197,7 @@ def build_marginal_gain_curve(
 # ---------------------------------------------------------------------------
 
 
-def write_nomination_csv(path: str, selected: List[Tuple[str, int, int]], n_queries: int):
+def write_nomination_csv(path: str, selected: list[tuple[str, int, int]], n_queries: int):
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(
@@ -215,12 +214,12 @@ def write_nomination_csv(path: str, selected: List[Tuple[str, int, int]], n_quer
             writer.writerow([rank, tf, gain, cumulative, f"{pct:.1f}"])
 
 
-def write_curve_csv(path: str, curve: List[Tuple[int, int, float]], n_queries: int):
+def write_curve_csv(path: str, curve: list[tuple[int, int, float]], n_queries: int):
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["k", "queries_resolved", "fraction_resolved", "pct_resolved"])
         for k, resolved, frac in curve:
-            writer.writerow([k, resolved, f"{frac:.4f}", f"{frac*100:.1f}"])
+            writer.writerow([k, resolved, f"{frac:.4f}", f"{frac * 100:.1f}"])
 
 
 # ---------------------------------------------------------------------------
@@ -259,11 +258,11 @@ def cycle_breaking_score(node: str, graph) -> int:
 
 
 def rank_candidates_by_cycle_score(
-    candidates: List[str],
+    candidates: list[str],
     graph,
     use_scc_fallback: bool = True,
     scc_fallback_threshold: int = 500,
-) -> List[str]:
+) -> list[str]:
     """
     Return *candidates* sorted descending by cycle-breaking score.
 
@@ -292,7 +291,7 @@ def rank_candidates_by_cycle_score(
     if use_scc_fallback and n_nodes > scc_fallback_threshold:
         # SCC-size proxy: size of the SCC containing each node minus 1
         # (subtract 1 so singleton SCCs — not in any cycle — score 0)
-        scc_map: Dict[str, int] = {}
+        scc_map: dict[str, int] = {}
         for scc in nx.strongly_connected_components(graph):
             scc_size = len(scc)
             for node in scc:
@@ -365,7 +364,7 @@ def main():
     print(f"  Curve written to: {curve_path}")
 
     # --- Min set cover ---
-    print(f"\nRunning greedy min-set-cover...")
+    print("\nRunning greedy min-set-cover...")
     min_cover = greedy_min_set_cover(candidates, queries, matrix)
     min_cover_path = os.path.join(args.output_dir, "nomination_min_cover.csv")
     write_nomination_csv(min_cover_path, min_cover, n_queries)
@@ -373,7 +372,7 @@ def main():
         final_cov = min_cover[-1][2]
         print(
             f"  Min cover: {len(min_cover)} TFs cover {final_cov}/{len(resolvable)} "
-            f"resolvable queries ({final_cov/len(resolvable)*100:.1f}%)"
+            f"resolvable queries ({final_cov / len(resolvable) * 100:.1f}%)"
         )
     print(f"  -> {min_cover_path}")
 

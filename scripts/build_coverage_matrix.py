@@ -109,7 +109,7 @@ def get_candidate_tfs(ecoli_graph, valid_genes):
     """
     raw = [n for n in ecoli_graph.nodes() if ecoli_graph.out_degree(n) >= 1]
     print(f"  Candidate TFs (out-degree >= 1): {len(raw)}")
-    print(f"  Ranking candidates by cycle-breaking score...")
+    print("  Ranking candidates by cycle-breaking score...")
     ranked = rank_candidates_by_cycle_score(raw, ecoli_graph)
     print(f"  Top 5 by cycle score: {ranked[:5]}")
     return ranked
@@ -213,8 +213,8 @@ def main():
                 pct = done / total * 100
                 print(
                     f"  Progress: {done}/{total} ({pct:.1f}%) | "
-                    f"query {q_idx+1}/{len(unidentifiable)}: do({tf1})->{outcome}, "
-                    f"candidate {c_idx+1}/{len(candidates)}: {candidate}"
+                    f"query {q_idx + 1}/{len(unidentifiable)}: do({tf1})->{outcome}, "
+                    f"candidate {c_idx + 1}/{len(candidates)}: {candidate}"
                 )
                 with open(checkpoint_path, "w") as f:
                     json.dump({"results": results, "completed": list(completed)}, f)
@@ -237,7 +237,7 @@ def main():
 
     with open(args.output, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["candidate_tf"] + query_labels)
+        writer.writerow(["candidate_tf", *query_labels])
         for cand in candidate_set:
             row = [cand]
             for qlabel in query_labels:
@@ -249,7 +249,7 @@ def main():
     for tf1, candidate, outcome, found in results:
         if found:
             resolved_queries.add(f"{tf1}->{outcome}")
-    print(f"\n--- Coverage Matrix Summary ---")
+    print("\n--- Coverage Matrix Summary ---")
     print(f"Unidentifiable queries:          {len(unidentifiable)}")
     print(f"Queries resolvable by >= 1 TF:   {len(resolved_queries)}")
     print(f"Queries with no rescue found:    {len(unidentifiable) - len(resolved_queries)}")
