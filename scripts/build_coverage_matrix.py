@@ -27,26 +27,26 @@ import argparse
 import csv
 import json
 import os
+import os as _os
+
+# Import cycle-breaking ranker from sibling script
 import sys
+import sys as _sys
 
 import networkx as nx
-
-from y0.graph import NxMixedGraph
-from y0.dsl import Variable, P
 from y0.algorithm.identify.cyclic_id import cyclic_id
 from y0.algorithm.identify.utils import Unidentifiable
 from y0.algorithm.ioscm.utils import get_apt_order
+from y0.dsl import P, Variable
+from y0.graph import NxMixedGraph
 
-# Import cycle-breaking ranker from sibling script
-import sys as _sys
-import os as _os
 _sys.path.insert(0, _os.path.dirname(__file__))
 from perturbation_optimizer import rank_candidates_by_cycle_score
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def load_valid_genes(supptable_path, network_nodes):
     """Return the set of experimental genes present in the network."""
@@ -119,12 +119,13 @@ def get_candidate_tfs(ecoli_graph, valid_genes):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(description="Build single-background coverage matrix")
-    parser.add_argument("--graphml",     required=True)
-    parser.add_argument("--supptable",   required=True)
-    parser.add_argument("--output",      default="coverage_matrix.csv")
-    parser.add_argument("--checkpoint",  default="coverage_checkpoint.json")
+    parser.add_argument("--graphml", required=True)
+    parser.add_argument("--supptable", required=True)
+    parser.add_argument("--output", default="coverage_matrix.csv")
+    parser.add_argument("--checkpoint", default="coverage_checkpoint.json")
     args = parser.parse_args()
 
     # --- Load graph ---
@@ -169,7 +170,7 @@ def main():
     if os.path.exists(checkpoint_path):
         with open(checkpoint_path) as f:
             ckpt = json.load(f)
-        results = ckpt["results"]          # list of [tf1, candidate, outcome, found]
+        results = ckpt["results"]  # list of [tf1, candidate, outcome, found]
         completed = set(tuple(x) for x in ckpt["completed"])
         print(f"Resuming from checkpoint: {len(completed)} pairs done, {len(results)} results")
     else:
@@ -210,9 +211,11 @@ def main():
             # progress + checkpoint every 100 pairs
             if done % 100 == 0:
                 pct = done / total * 100
-                print(f"  Progress: {done}/{total} ({pct:.1f}%) | "
-                      f"query {q_idx+1}/{len(unidentifiable)}: do({tf1})->{outcome}, "
-                      f"candidate {c_idx+1}/{len(candidates)}: {candidate}")
+                print(
+                    f"  Progress: {done}/{total} ({pct:.1f}%) | "
+                    f"query {q_idx+1}/{len(unidentifiable)}: do({tf1})->{outcome}, "
+                    f"candidate {c_idx+1}/{len(candidates)}: {candidate}"
+                )
                 with open(checkpoint_path, "w") as f:
                     json.dump({"results": results, "completed": list(completed)}, f)
 

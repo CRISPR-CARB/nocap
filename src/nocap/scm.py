@@ -6,13 +6,12 @@ from copy import deepcopy
 
 import networkx as nx
 import numpy as np
-import pgmpy.inference.CausalInference as CausalInference
 import plotly.graph_objects as go
 import pydot
 import sympy as sy
 from networkx.drawing.nx_pydot import from_pydot
 from pgmpy.factors.continuous import LinearGaussianCPD
-from pgmpy.models import DiscreteBayesianNetwork, LinearGaussianBayesianNetwork
+from pgmpy.models import LinearGaussianBayesianNetwork
 from y0.dsl import Variable
 from y0.graph import NxMixedGraph
 
@@ -22,7 +21,7 @@ def dagitty_to_dot(daggity_string: str | None) -> str:
 
     Modified from dowhy: https://www.pywhy.org/dowhy/v0.11.1/_modules/dowhy/utils/graph_operations.html#daggity_to_dot
     Converts the input daggity_string to valid DOT graph format.
-    """  # noqa: DAR101 DAR201 DAR401
+    """
     if type(daggity_string) is str:
         graph = re.sub(r"\n", "; ", daggity_string)
         graph = re.sub(r"^dag ", "digraph ", graph)
@@ -45,16 +44,14 @@ def dagitty_to_dot(daggity_string: str | None) -> str:
 def read_dag_file(file_path: str) -> str | None:
     """Read the contents of a .dag file and returns it as a multiline string."""
     try:
-        with open(file_path, "r") as file:
+        with open(file_path) as file:
             return file.read()
-    except IOError:
+    except OSError:
         # print(f"Error reading file: {e}")
         return None
 
 
-def dagitty_to_mixed_graph(
-    dagitty_input: str, str_var_name: bool = False
-) -> NxMixedGraph:
+def dagitty_to_mixed_graph(dagitty_input: str, str_var_name: bool = False) -> NxMixedGraph:
     """Convert a string in dagitty (.dag) to NxMixedGraph."""
     # Check if the input is a file path
     if os.path.isfile(dagitty_input):
@@ -94,7 +91,7 @@ def dagitty_to_digraph(dagitty_input: str) -> nx.DiGraph:
     return nx_graph
 
 
-def generate_lscm_from_dag(graph: nx.DiGraph) -> dict[sy.Symbol, sy.Expr]:  # noqa: N802
+def generate_lscm_from_dag(graph: nx.DiGraph) -> dict[sy.Symbol, sy.Expr]:
     """Generate a linear structural causal model from a directed acycle graph (networkx DAG)."""
     assert nx.is_directed_acyclic_graph(graph), "Not a DAG"  # noqa: S101 # check input DAG
     equations = {}
@@ -114,7 +111,7 @@ def generate_lscm_from_dag(graph: nx.DiGraph) -> dict[sy.Symbol, sy.Expr]:  # no
     return equations
 
 
-def generate_lscm_from_mixed_graph(graph: NxMixedGraph) -> dict[sy.Symbol, sy.Expr]:  # noqa: N802
+def generate_lscm_from_mixed_graph(graph: NxMixedGraph) -> dict[sy.Symbol, sy.Expr]:
     """Generate a linear structural causal model from a mixed directed and bidirected graph (y0 NxMixedGraph)."""
     assert nx.is_directed_acyclic_graph(graph.directed), "Not a DAG"  # noqa: S101 # check input DAG
     equations = {}
@@ -155,8 +152,7 @@ def get_symbols_from_di_edges(
 ) -> dict[tuple[Variable, Variable], sy.Symbol]:
     """Get symbols from directional edges in graph."""
     return {
-        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}")
-        for u, v in graph.directed.edges()
+        (str(u), str(v)): sy.Symbol(f"beta_{u.name}_->{v.name}") for u, v in graph.directed.edges()
     }
 
 
@@ -190,9 +186,7 @@ def convert_to_eqn_array_latex(equations_dict: dict[sy.Symbol, sy.Expr]) -> str:
     for lhs, rhs in equations_dict.items():
         equation_latex = sy.latex(lhs) + " &=& " + sy.latex(rhs)
         latex_equations.append(equation_latex)
-    eqn_array = (
-        r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
-    )
+    eqn_array = r"$$ \begin{array}{rcl}" + r"\\ ".join(latex_equations) + r"\end{array}$$"
     return eqn_array
 
 
@@ -225,11 +219,11 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
         customdata=[],
         mode="markers+text",
         hoverinfo="text",
-        marker=dict(size=20, color="lightblue"),
+        marker={"size": 20, "color": "lightblue"},
         textposition="bottom center",
     )
 
-    edge_trace = go.Scatter(x=[], y=[], mode="lines", line=dict(width=2, color="grey"))
+    edge_trace = go.Scatter(x=[], y=[], mode="lines", line={"width": 2, "color": "grey"})
 
     # Populate node_trace and edge_trace
     for node_name in graph.nodes():
@@ -253,17 +247,15 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
         title="Interactive LSCM Graph",
         hovermode="closest",
         showlegend=False,
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
+        yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
     )
 
     # Plot figure
     fig = go.Figure(data=[edge_trace, node_trace], layout=layout)
 
     # Customize hovertemplate for displaying rendered LaTeX equations
-    fig.update_traces(
-        hovertemplate="<b>%{text}</b><br>%{customdata}"
-    )  # Render customdata as LaTeX
+    fig.update_traces(hovertemplate="<b>%{text}</b><br>%{customdata}")  # Render customdata as LaTeX
 
     fig.show()
 
@@ -304,9 +296,7 @@ def create_dag_from_lscm(lscm: dict[sy.Symbol, sy.Expr]) -> nx.DiGraph:
             # If a term is a simple multiplication between a beta and a parent symbol, it will have exactly two factors
             if isinstance(term, sy.Mul) and len(term.args) == 2:
                 for factor in term.args:
-                    if isinstance(factor, sy.Symbol) and not str(factor).startswith(
-                        "beta"
-                    ):
+                    if isinstance(factor, sy.Symbol) and not str(factor).startswith("beta"):
                         # This is a parent symbol. Add an edge between the parent and the current node.
                         parent_name = str(factor)
                         dag.add_edge(parent_name, node_name)
@@ -340,11 +330,11 @@ def simulate_data_with_outliers(
 
     np.random.seed(seed)
     if backend == "pgmpy":
-        assert isinstance(nocap_model, LinearGaussianBayesianNetwork), (
-            "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
-        )
+        assert isinstance(  # noqa: S101
+            nocap_model, LinearGaussianBayesianNetwork
+        ), "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
         lgbn_model = nocap_model
-        simulated_data = lgbn_model.simulate(n=num_samples, seed=seed)
+        simulated_data = lgbn_model.simulate(n_samples=num_samples, seed=seed)
 
     else:
         raise ValueError(f"Unsupported backend: {backend}")
@@ -354,9 +344,7 @@ def simulate_data_with_outliers(
 
     # Outliers introduction
     num_outliers = int(outlier_fraction * num_samples)
-    outlier_indices = np.random.choice(
-        simulated_data.index, num_outliers, replace=False
-    )
+    outlier_indices = np.random.choice(simulated_data.index, num_outliers, replace=False)
 
     # Assume outlier adds an arbitrary large value or multiplies by a high factor
     simulated_data.loc[outlier_indices] *= outlier_magnitude
@@ -367,49 +355,55 @@ def fit_model(
     nocap_model,
     data,
     backend="pgmpy",
-    method="mle",
 ):
     """Fit a model to the data using the specified backend."""
-    # Todo: add test
     if backend == "pgmpy":
-        assert isinstance(nocap_model, LinearGaussianBayesianNetwork), (
-            "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
-        )
+        assert isinstance(  # noqa: S101
+            nocap_model, LinearGaussianBayesianNetwork
+        ), "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
         lgbn_model = deepcopy(nocap_model)
-        lgbn_model.fit(data, method=method)
+        lgbn_model.fit(data)
         return lgbn_model
     else:
         raise ValueError(f"Unsupported backend: {backend}")
 
 
-def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):
+def estimate_ate(nocap_model, data, X, Y, backend="pgmpy"):  # noqa: N803
+    """Estimate average treatment effect (not implemented; use bootstrap_ATE)."""
     raise NotImplementedError(
         "The estimate_ate function is not implemented. Please use the bootstrap_ATE function instead."
     )
 
 
-def bootstrap_ATE(
+def bootstrap_ATE(  # noqa: N802
     data_control,
     data_intervention,
     outcome_variable,
     n_iterations=10000,
     confidence_level=0.95,
 ):
+    """Compute bootstrap confidence interval for the Average Treatment Effect (ATE).
+
+    Parameters
+    ----------
+    data_control:
+        DataFrame containing the control (observed) data.
+    data_intervention:
+        DataFrame containing the intervention data.
+    outcome_variable:
+        String name of the outcome variable column.
+    n_iterations:
+        Number of bootstrap iterations (default is 10000).
+    confidence_level:
+        Confidence level for the interval (default is 0.95).
+
+    Returns
+    -------
+    observed_ate:
+        The observed ATE calculated from the input data.
+    confidence_interval:
+        Tuple containing lower and upper bounds of the confidence interval for ATE.
     """
-    Computes bootstrap confidence interval for the Average Treatment Effect (ATE) and returns the observed ATE.
-
-    Parameters:
-    - data_control: DataFrame containing the control (observed) data.
-    - data_intervention: DataFrame containing the intervention data.
-    - outcome_variable: String name of the outcome variable column.
-    - n_iterations: Number of bootstrap iterations (default is 10000).
-    - confidence_level: Confidence level for the interval (default is 0.95).
-
-    Returns:
-    - observed_ate: The observed ATE calculated from the input data.
-    - confidence_interval: Tuple containing lower and upper bounds of the confidence interval for ATE.
-    """
-
     # Extract the relevant outcome data
     control_outcome = data_control[outcome_variable].values
     intervened_outcome = data_intervention[outcome_variable].values
@@ -444,20 +438,24 @@ def bootstrap_ATE(
 
 
 def perform_soft_intervention_lgbn(lgbn_model, dag, intervention_var, factor=10):
+    """Perform a soft intervention on a variable by scaling its intercept.
+
+    Parameters
+    ----------
+    lgbn_model:
+        The original Linear Gaussian Bayesian Network model from pgmpy.
+    dag:
+        The directed acyclic graph associated with the model.
+    intervention_var:
+        The variable to intervene on.
+    factor:
+        The factor by which to scale the intercept (default is 10).
+
+    Returns
+    -------
+    new_model:
+        A new Linear Gaussian Bayesian Network model with the updated CPD.
     """
-    Performs a soft intervention on a specified variable in a Linear Gaussian Bayesian Network model
-    by scaling its intercept and updating the model accordingly.
-
-    Parameters:
-    - lgbn_model: The original Linear Gaussian Bayesian Network model from pgmpy.
-    - dag: The directed acyclic graph associated with the model.
-    - intervention_var: The variable to intervene on.
-    - factor: The factor by which to scale the intercept (default is 10).
-
-    Returns:
-    - new_model: A new Linear Gaussian Bayesian Network model with the updated CPD.
-    """
-
     # Copy CPDs from the original model
     cpds = [cpd.copy() for cpd in lgbn_model.get_cpds()]
 
@@ -483,9 +481,7 @@ def perform_soft_intervention_lgbn(lgbn_model, dag, intervention_var, factor=10)
     # print(f"Updated CPD: {updated_target_cpd}")
 
     # Replace old CPD with updated one
-    new_cpds = [
-        updated_target_cpd if cpd.variable == intervention_var else cpd for cpd in cpds
-    ]
+    new_cpds = [updated_target_cpd if cpd.variable == intervention_var else cpd for cpd in cpds]
 
     # Create a new model
     new_model = LinearGaussianBayesianNetwork(dag)

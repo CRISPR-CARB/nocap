@@ -30,10 +30,10 @@ import csv
 import os
 from typing import Dict, List, Optional, Set, Tuple
 
-
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
+
 
 def load_coverage_matrix(path: str) -> Tuple[List[str], List[str], Dict[str, List[bool]]]:
     """
@@ -64,6 +64,7 @@ def load_coverage_matrix(path: str) -> Tuple[List[str], List[str], Dict[str, Lis
 # ---------------------------------------------------------------------------
 # Core algorithms
 # ---------------------------------------------------------------------------
+
 
 def greedy_max_coverage(
     candidates: List[str],
@@ -196,11 +197,19 @@ def build_marginal_gain_curve(
 # Output helpers
 # ---------------------------------------------------------------------------
 
+
 def write_nomination_csv(path: str, selected: List[Tuple[str, int, int]], n_queries: int):
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["rank", "candidate_tf", "marginal_gain", "cumulative_coverage",
-                         "pct_of_unidentifiable"])
+        writer.writerow(
+            [
+                "rank",
+                "candidate_tf",
+                "marginal_gain",
+                "cumulative_coverage",
+                "pct_of_unidentifiable",
+            ]
+        )
         for rank, (tf, gain, cumulative) in enumerate(selected, start=1):
             pct = cumulative / n_queries * 100
             writer.writerow([rank, tf, gain, cumulative, f"{pct:.1f}"])
@@ -217,6 +226,7 @@ def write_curve_csv(path: str, curve: List[Tuple[int, int, float]], n_queries: i
 # ---------------------------------------------------------------------------
 # Cycle-breaking heuristics
 # ---------------------------------------------------------------------------
+
 
 def cycle_breaking_score(node: str, graph) -> int:
     """
@@ -299,11 +309,13 @@ def rank_candidates_by_cycle_score(
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(description="Greedy perturbation panel optimizer")
-    parser.add_argument("--matrix",     required=True, help="Path to coverage_matrix.csv")
-    parser.add_argument("--budgets",    default="2,5,10,15,20,25",
-                        help="Comma-separated list of k budgets")
+    parser.add_argument("--matrix", required=True, help="Path to coverage_matrix.csv")
+    parser.add_argument(
+        "--budgets", default="2,5,10,15,20,25", help="Comma-separated list of k budgets"
+    )
     parser.add_argument("--output-dir", default=".", help="Directory for output CSVs")
     args = parser.parse_args()
 
@@ -337,8 +349,10 @@ def main():
         if selected_k:
             cov = selected_k[-1][2]
             pct = cov / n_queries * 100
-            print(f"  k={k:2d}: {cov}/{n_queries} queries resolved ({pct:.1f}%) "
-                  f"| top TF: {selected_k[0][0]} (gain={selected_k[0][1]})")
+            print(
+                f"  k={k:2d}: {cov}/{n_queries} queries resolved ({pct:.1f}%) "
+                f"| top TF: {selected_k[0][0]} (gain={selected_k[0][1]})"
+            )
         else:
             print(f"  k={k:2d}: no TFs selected (no resolvable queries?)")
         print(f"         -> {out_path}")
@@ -357,8 +371,10 @@ def main():
     write_nomination_csv(min_cover_path, min_cover, n_queries)
     if min_cover:
         final_cov = min_cover[-1][2]
-        print(f"  Min cover: {len(min_cover)} TFs cover {final_cov}/{len(resolvable)} "
-              f"resolvable queries ({final_cov/len(resolvable)*100:.1f}%)")
+        print(
+            f"  Min cover: {len(min_cover)} TFs cover {final_cov}/{len(resolvable)} "
+            f"resolvable queries ({final_cov/len(resolvable)*100:.1f}%)"
+        )
     print(f"  -> {min_cover_path}")
 
     print("\nDone.")

@@ -30,8 +30,8 @@ import re
 import sys
 import warnings
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import networkx as nx
 
@@ -47,6 +47,7 @@ _POLARITY_ATTR: str = "polarity"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _sanitize(name: str) -> str:
     """Replace non-identifier characters with underscores."""
@@ -77,7 +78,7 @@ def _polarity_prefix(
     return "reg"
 
 
-def _break_cycles(G: nx.DiGraph) -> tuple[nx.DiGraph, list[tuple]]:
+def _break_cycles(G: nx.DiGraph) -> tuple[nx.DiGraph, list[tuple]]:  # noqa: N803
     """Remove a minimal set of feedback edges to make *G* a DAG.
 
     Uses a DFS-based back-edge detection (iterative, O(V+E)).  A back edge
@@ -99,8 +100,8 @@ def _break_cycles(G: nx.DiGraph) -> tuple[nx.DiGraph, list[tuple]]:
         List of ``(src, tgt, data)`` tuples for every removed edge.
     """
     # States for iterative DFS colouring
-    WHITE, GRAY, BLACK = 0, 1, 2
-    color = {n: WHITE for n in G.nodes()}
+    WHITE, GRAY, BLACK = 0, 1, 2  # noqa: N806
+    color = dict.fromkeys(G.nodes(), WHITE)
     removed: list[tuple] = []
     feedback_set: set[tuple] = set()
 
@@ -137,7 +138,8 @@ def _break_cycles(G: nx.DiGraph) -> tuple[nx.DiGraph, list[tuple]]:
 # Main conversion function
 # ---------------------------------------------------------------------------
 
-def graphml_to_semopy(
+
+def graphml_to_semopy(  # noqa: C901
     path_or_graph: str | Path | nx.DiGraph,
     use_polarity: bool = True,
     pos_values: Iterable[str] = _DEFAULT_POS_VALUES,
@@ -181,10 +183,10 @@ def graphml_to_semopy(
     # ------------------------------------------------------------------
     # Load graph
     # ------------------------------------------------------------------
-    if isinstance(path_or_graph, (str, Path)):
-        G = nx.read_graphml(str(path_or_graph))
+    if isinstance(path_or_graph, str | Path):
+        G = nx.read_graphml(str(path_or_graph))  # noqa: N806
     else:
-        G = path_or_graph
+        G = path_or_graph  # noqa: N806
 
     if not isinstance(G, nx.DiGraph):
         raise TypeError(
@@ -204,18 +206,16 @@ def graphml_to_semopy(
             UserWarning,
             stacklevel=2,
         )
-        G = G.copy()
+        G = G.copy()  # noqa: N806
         G.remove_edges_from(self_loops)
 
     # ------------------------------------------------------------------
     # Handle cycles
     # ------------------------------------------------------------------
     if break_cycles:
-        G, removed_edges = _break_cycles(G)
+        G, removed_edges = _break_cycles(G)  # noqa: N806
         if removed_edges:
-            examples = ", ".join(
-                f"{s!r}→{t!r}" for s, t, _ in removed_edges[:3]
-            )
+            examples = ", ".join(f"{s!r}→{t!r}" for s, t, _ in removed_edges[:3])
             suffix = f" (e.g. {examples})" if removed_edges else ""
             warnings.warn(
                 f"Removed {len(removed_edges)} feedback edge(s) to break cycles{suffix}. "
@@ -234,7 +234,7 @@ def graphml_to_semopy(
                     UserWarning,
                     stacklevel=2,
                 )
-        except Exception:
+        except Exception:  # noqa: S110
             pass  # very large graphs may time out; skip cycle check
 
     # ------------------------------------------------------------------
@@ -294,6 +294,7 @@ def graphml_to_semopy(
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Convert a GraphML file to a semopy model description.",
@@ -301,7 +302,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("input", help="Path to the input .graphml file.")
     p.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         default=None,
         help="Write description to this file instead of stdout.",
     )
@@ -350,19 +352,20 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.validate:
         try:
-            import semopy  # noqa: F401
+            import semopy
+
             semopy.Model(desc)
-            print("✓ semopy.Model parsed the description successfully.", file=sys.stderr)
+            print("✓ semopy.Model parsed the description successfully.", file=sys.stderr)  # noqa: T201
         except ImportError:
-            print("semopy not installed; skipping validation.", file=sys.stderr)
+            print("semopy not installed; skipping validation.", file=sys.stderr)  # noqa: T201
         except Exception as exc:
-            print(f"✗ semopy.Model raised an error: {exc}", file=sys.stderr)
+            print(f"✗ semopy.Model raised an error: {exc}", file=sys.stderr)  # noqa: T201
 
     if args.output:
         Path(args.output).write_text(desc, encoding="utf-8")
-        print(f"Description written to {args.output}", file=sys.stderr)
+        print(f"Description written to {args.output}", file=sys.stderr)  # noqa: T201
     else:
-        print(desc)
+        print(desc)  # noqa: T201
 
 
 if __name__ == "__main__":

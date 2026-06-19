@@ -17,19 +17,17 @@ Tests are written first (TDD) and cover:
 from __future__ import annotations
 
 import re
-import tempfile
 import warnings
-from pathlib import Path
 
 import networkx as nx
 import pytest
 
-from nocap.graphml_to_semopy import graphml_to_semopy, _sanitize, _polarity_prefix, _break_cycles
-
+from nocap.graphml_to_semopy import _break_cycles, _polarity_prefix, _sanitize, graphml_to_semopy
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_graph(edges: list[tuple], polarity_attr: str = "polarity") -> nx.DiGraph:
     """Build a DiGraph from a list of (src, tgt, polarity_or_None) tuples."""
@@ -68,6 +66,7 @@ def _parse_bounds(desc: str) -> list[tuple[float, float, list[str]]]:
 # ---------------------------------------------------------------------------
 # Unit tests: helpers
 # ---------------------------------------------------------------------------
+
 
 class TestSanitize:
     def test_clean_name_unchanged(self):
@@ -118,6 +117,7 @@ class TestPolarityPrefix:
 # ---------------------------------------------------------------------------
 # Integration tests: graphml_to_semopy
 # ---------------------------------------------------------------------------
+
 
 class TestBasicConversion:
     def test_single_edge_produces_regression_line(self):
@@ -179,7 +179,9 @@ class TestSelfLoops:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             graphml_to_semopy(G)
-        msgs = [str(warning.message) for warning in w if "self-loop" in str(warning.message).lower()]
+        msgs = [
+            str(warning.message) for warning in w if "self-loop" in str(warning.message).lower()
+        ]
         assert len(msgs) == 1
         assert "2" in msgs[0]  # "Dropping 2 self-loop(s)"
 
@@ -240,8 +242,8 @@ class TestPolarityConstraints:
         bounds = _parse_bounds(desc)
         lo_vals = {lo for lo, hi, _ in bounds}
         hi_vals = {hi for lo, hi, _ in bounds}
-        assert 0.0 in lo_vals   # pos bound
-        assert 0.0 in hi_vals   # neg bound
+        assert 0.0 in lo_vals  # pos bound
+        assert 0.0 in hi_vals  # neg bound
         # reg_D_C should not appear in any bound
         all_bound_params = [p for _, _, ps in bounds for p in ps]
         assert "reg_D_C" not in all_bound_params
@@ -354,8 +356,6 @@ class TestCLI:
 
     def test_cli_no_polarity_flag(self, tmp_path):
         from nocap.graphml_to_semopy import main
-        import io
-        import sys
 
         G = _make_graph([("A", "B", "+")])
         graphml_path = tmp_path / "net.graphml"
@@ -374,6 +374,7 @@ class TestCLI:
 # ---------------------------------------------------------------------------
 # Unit tests: _break_cycles helper
 # ---------------------------------------------------------------------------
+
 
 class TestBreakCyclesHelper:
     def test_acyclic_graph_unchanged(self):
@@ -399,8 +400,7 @@ class TestBreakCyclesHelper:
     def test_two_independent_cycles_removes_two_edges(self):
         # Cycle 1: A → B → A
         # Cycle 2: C → D → C
-        G = _make_graph([("A", "B", "+"), ("B", "A", "-"),
-                         ("C", "D", "+"), ("D", "C", "-")])
+        G = _make_graph([("A", "B", "+"), ("B", "A", "-"), ("C", "D", "+"), ("D", "C", "-")])
         dag, removed = _break_cycles(G)
         assert len(removed) == 2
         assert nx.is_directed_acyclic_graph(dag)
@@ -439,6 +439,7 @@ class TestBreakCyclesHelper:
 # Integration tests: break_cycles=True in graphml_to_semopy
 # ---------------------------------------------------------------------------
 
+
 class TestBreakCyclesIntegration:
     def test_break_cycles_produces_dag_output(self):
         # A → B → A: with break_cycles, only one direction survives
@@ -458,8 +459,11 @@ class TestBreakCyclesIntegration:
             warnings.simplefilter("always")
             graphml_to_semopy(G, break_cycles=True)
         # Should NOT emit the "cycle" warning (cycles were removed)
-        cycle_warnings = [x for x in w if "cycle" in str(x.message).lower()
-                          and "removed" not in str(x.message).lower()]
+        cycle_warnings = [
+            x
+            for x in w
+            if "cycle" in str(x.message).lower() and "removed" not in str(x.message).lower()
+        ]
         assert len(cycle_warnings) == 0
 
     def test_break_cycles_emits_removal_warning(self):
@@ -467,10 +471,14 @@ class TestBreakCyclesIntegration:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             graphml_to_semopy(G, break_cycles=True)
-        removal_warnings = [x for x in w if "removed" in str(x.message).lower()
-                            or "feedback" in str(x.message).lower()
-                            or "broke" in str(x.message).lower()
-                            or "break" in str(x.message).lower()]
+        removal_warnings = [
+            x
+            for x in w
+            if "removed" in str(x.message).lower()
+            or "feedback" in str(x.message).lower()
+            or "broke" in str(x.message).lower()
+            or "break" in str(x.message).lower()
+        ]
         assert len(removal_warnings) >= 1
 
     def test_break_cycles_acyclic_graph_unchanged(self):
@@ -519,6 +527,7 @@ class TestBreakCyclesIntegration:
 # ---------------------------------------------------------------------------
 # CLI tests: --break-cycles flag
 # ---------------------------------------------------------------------------
+
 
 class TestCLIBreakCycles:
     def test_cli_break_cycles_flag_produces_dag(self, tmp_path):

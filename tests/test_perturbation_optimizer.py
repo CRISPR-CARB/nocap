@@ -15,7 +15,6 @@ Tests cover:
 import csv
 import os
 import sys
-import tempfile
 
 import pytest
 
@@ -23,20 +22,18 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from perturbation_optimizer import (
+    build_marginal_gain_curve,
+    cycle_breaking_score,
     greedy_max_coverage,
     greedy_min_set_cover,
-    build_marginal_gain_curve,
     load_coverage_matrix,
-    write_nomination_csv,
-    write_curve_csv,
-    cycle_breaking_score,
     rank_candidates_by_cycle_score,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def simple_matrix():
@@ -49,11 +46,11 @@ def simple_matrix():
     Resolvable: all 6.  Min cover: {g1, g2, g3}.
     """
     candidates = ["g1", "g2", "g3", "g4"]
-    queries    = ["q0", "q1", "q2", "q3", "q4", "q5"]
+    queries = ["q0", "q1", "q2", "q3", "q4", "q5"]
     matrix = {
-        "g1": [True,  True,  True,  False, False, False],
-        "g2": [False, False, True,  True,  True,  False],
-        "g3": [False, False, False, False, True,  True ],
+        "g1": [True, True, True, False, False, False],
+        "g2": [False, False, True, True, True, False],
+        "g3": [False, False, False, False, True, True],
         "g4": [False, False, False, False, False, False],
     }
     return candidates, queries, matrix
@@ -67,11 +64,11 @@ def disjoint_matrix():
     Min cover = {g1,g2,g3}, each with gain=2.
     """
     candidates = ["g1", "g2", "g3"]
-    queries    = ["q0", "q1", "q2", "q3", "q4", "q5"]
+    queries = ["q0", "q1", "q2", "q3", "q4", "q5"]
     matrix = {
-        "g1": [True,  True,  False, False, False, False],
-        "g2": [False, False, True,  True,  False, False],
-        "g3": [False, False, False, False, True,  True ],
+        "g1": [True, True, False, False, False, False],
+        "g2": [False, False, True, True, False, False],
+        "g3": [False, False, False, False, True, True],
     }
     return candidates, queries, matrix
 
@@ -80,7 +77,7 @@ def disjoint_matrix():
 def all_zero_matrix():
     """No candidate resolves any query."""
     candidates = ["g1", "g2"]
-    queries    = ["q0", "q1", "q2"]
+    queries = ["q0", "q1", "q2"]
     matrix = {
         "g1": [False, False, False],
         "g2": [False, False, False],
@@ -92,7 +89,7 @@ def all_zero_matrix():
 def single_candidate_matrix():
     """One candidate resolves all queries."""
     candidates = ["g1"]
-    queries    = ["q0", "q1", "q2"]
+    queries = ["q0", "q1", "q2"]
     matrix = {
         "g1": [True, True, True],
     }
@@ -103,8 +100,8 @@ def single_candidate_matrix():
 # greedy_max_coverage
 # ---------------------------------------------------------------------------
 
-class TestGreedyMaxCoverage:
 
+class TestGreedyMaxCoverage:
     def test_greedy_order(self, simple_matrix):
         """First pick should be the candidate with highest single coverage."""
         candidates, queries, matrix = simple_matrix
@@ -169,12 +166,10 @@ class TestGreedyMaxCoverage:
         assert result == []
 
     def test_intervenable_filter(self, simple_matrix):
-        """intervenable filter should restrict candidate pool."""
+        """Intervenable filter should restrict candidate pool."""
         candidates, queries, matrix = simple_matrix
         # Only allow g3 (covers q4,q5)
-        result = greedy_max_coverage(
-            candidates, queries, matrix, budget_k=3, intervenable={"g3"}
-        )
+        result = greedy_max_coverage(candidates, queries, matrix, budget_k=3, intervenable={"g3"})
         assert len(result) == 1
         assert result[0][0] == "g3"
         assert result[0][2] == 2
@@ -208,8 +203,8 @@ class TestGreedyMaxCoverage:
 # greedy_min_set_cover
 # ---------------------------------------------------------------------------
 
-class TestGreedyMinSetCover:
 
+class TestGreedyMinSetCover:
     def test_covers_all_resolvable(self, simple_matrix):
         """Min cover should resolve all 6 resolvable queries."""
         candidates, queries, matrix = simple_matrix
@@ -248,10 +243,10 @@ class TestGreedyMinSetCover:
         after covering all resolvable ones.
         """
         candidates = ["g1", "g2"]
-        queries    = ["q0", "q1", "q2", "q3"]  # q2,q3 irresolvable
+        queries = ["q0", "q1", "q2", "q3"]  # q2,q3 irresolvable
         matrix = {
-            "g1": [True,  False, False, False],
-            "g2": [False, True,  False, False],
+            "g1": [True, False, False, False],
+            "g2": [False, True, False, False],
         }
         result = greedy_min_set_cover(candidates, queries, matrix)
         assert len(result) == 2
@@ -277,8 +272,8 @@ class TestGreedyMinSetCover:
 # build_marginal_gain_curve
 # ---------------------------------------------------------------------------
 
-class TestBuildMarginalGainCurve:
 
+class TestBuildMarginalGainCurve:
     def test_starts_at_zero(self, simple_matrix):
         """Curve must start at (0, 0, 0.0)."""
         candidates, queries, matrix = simple_matrix
@@ -328,8 +323,8 @@ class TestBuildMarginalGainCurve:
 # load_coverage_matrix (round-trip)
 # ---------------------------------------------------------------------------
 
-class TestLoadCoverageMatrix:
 
+class TestLoadCoverageMatrix:
     def test_round_trip(self, simple_matrix, tmp_path):
         """Write then read a coverage matrix CSV and verify exact round-trip."""
         candidates, queries, matrix = simple_matrix
@@ -344,16 +339,12 @@ class TestLoadCoverageMatrix:
                 writer.writerow(row)
 
         # Read back
-        loaded_candidates, loaded_queries, loaded_matrix = load_coverage_matrix(
-            str(csv_path)
-        )
+        loaded_candidates, loaded_queries, loaded_matrix = load_coverage_matrix(str(csv_path))
 
         assert loaded_queries == queries
         assert set(loaded_candidates) == set(candidates)
         for cand in candidates:
-            assert loaded_matrix[cand] == matrix[cand], (
-                f"Matrix mismatch for {cand}"
-            )
+            assert loaded_matrix[cand] == matrix[cand], f"Matrix mismatch for {cand}"
 
     def test_empty_matrix(self, tmp_path):
         """CSV with header only (no candidates) should return empty structures."""
@@ -362,9 +353,7 @@ class TestLoadCoverageMatrix:
             writer = csv.writer(f)
             writer.writerow(["candidate_tf", "q0", "q1"])
 
-        loaded_candidates, loaded_queries, loaded_matrix = load_coverage_matrix(
-            str(csv_path)
-        )
+        loaded_candidates, loaded_queries, loaded_matrix = load_coverage_matrix(str(csv_path))
         assert loaded_candidates == []
         assert loaded_queries == ["q0", "q1"]
         assert loaded_matrix == {}
@@ -373,6 +362,7 @@ class TestLoadCoverageMatrix:
 # ---------------------------------------------------------------------------
 # cycle_breaking_score / rank_candidates_by_cycle_score
 # ---------------------------------------------------------------------------
+
 
 class TestCycleBreakingScore:
     """
@@ -395,12 +385,18 @@ class TestCycleBreakingScore:
     @pytest.fixture
     def cycle_graph(self):
         import networkx as nx
+
         G = nx.DiGraph()
-        G.add_edges_from([
-            ("A", "B"), ("B", "C"), ("C", "A"),  # cycle A-B-C
-            ("B", "D"), ("D", "B"),               # cycle B-D
-            ("E", "F"),                            # no cycle
-        ])
+        G.add_edges_from(
+            [
+                ("A", "B"),
+                ("B", "C"),
+                ("C", "A"),  # cycle A-B-C
+                ("B", "D"),
+                ("D", "B"),  # cycle B-D
+                ("E", "F"),  # no cycle
+            ]
+        )
         return G
 
     def test_b_has_highest_score(self, cycle_graph):
@@ -434,13 +430,12 @@ class TestCycleBreakingScore:
         candidates = ["A", "B", "C", "D", "E", "F"]
         ranked = rank_candidates_by_cycle_score(candidates, cycle_graph)
         # E and F should be in the last two positions
-        assert set(ranked[-2:]) == {"E", "F"}, (
-            f"Expected E,F last, got {ranked[-2:]}"
-        )
+        assert set(ranked[-2:]) == {"E", "F"}, f"Expected E,F last, got {ranked[-2:]}"
 
     def test_acyclic_graph_all_zero(self):
         """In a DAG, all cycle-breaking scores should be 0."""
         import networkx as nx
+
         G = nx.DiGraph()
         G.add_edges_from([("A", "B"), ("B", "C"), ("A", "C")])
         for node in ["A", "B", "C"]:
@@ -449,6 +444,7 @@ class TestCycleBreakingScore:
     def test_single_self_loop(self):
         """A self-loop counts as a cycle of length 1."""
         import networkx as nx
+
         G = nx.DiGraph()
         G.add_edge("A", "A")
         G.add_edge("B", "C")
@@ -460,6 +456,7 @@ class TestCycleBreakingScore:
     def test_rank_candidates_empty(self):
         """Empty candidate list should return empty ranking."""
         import networkx as nx
+
         G = nx.DiGraph()
         G.add_edge("A", "B")
         ranked = rank_candidates_by_cycle_score([], G)

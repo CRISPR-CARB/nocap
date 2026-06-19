@@ -9,16 +9,51 @@ package = true
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ["py310", "py311"]
+extend-include = ["*.ipynb"]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 100
-include_trailing_comma = true
-reverse_relative = true
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules
+extend-select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "C90", # mccabe
+    "I",   # isort
+    "UP",  # pyupgrade
+    "D",   # pydocstyle
+    "B",   # bugbear
+    "S",   # bandit
+    "T20", # print
+    "N",   # pep8 naming
+    "RUF", # ruff rules
+    "C4",  # comprehensions
+]
+ignore = [
+    "D105", # Missing docstring in magic method
+    "E203", # Black conflicts with the following
+    "E501",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/nocap/version.py" = ["S603", "S607"]
+"docs/source/conf.py" = ["ERA001"]
+"notebooks/**/*.ipynb" = ["T201", "S101", "N811", "N802", "N803"]
+# Tests: allow assert statements, uppercase CPD variable names, missing docstrings,
+# bare except-pass patterns, assert False idiom, and dict() constructor
+"tests/**/*.py" = ["S101", "N806", "N802", "N803", "D101", "D102", "D103", "D205", "D400", "B011", "B007", "S110", "C408", "C414", "RUF005"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.isort]
+relative-imports-order = "closest-to-furthest"
+known-third-party = ["tqdm"]
+known-first-party = ["nocap", "tests"]
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [project]
 name = "nocap"
@@ -89,3 +124,34 @@ docs = [
 
 [project.scripts]
 nocap = "nocap.cli:main"
+
+##########################
+# Coverage Configuration #
+##########################
+[tool.coverage.run]
+branch = true
+source = ["nocap"]
+omit = ["tests/*", "docs/*"]
+
+[tool.coverage.paths]
+source = [
+    "src/nocap",
+    ".tox/*/lib/python*/site-packages/nocap",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "def __str__",
+    "def __repr__",
+]
+
+######################
+# Doc8 Configuration #
+######################
+[tool.doc8]
+max-line-length = 120

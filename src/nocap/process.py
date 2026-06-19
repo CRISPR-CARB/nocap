@@ -31,7 +31,7 @@ def generate_test_data_tensor(
     locs = torch.distributions.Gamma(loc_shape, loc_scale).sample((n_cols,))
 
     data_array = torch.stack(
-        [scale * torch.rand(n_rows) + loc for scale, loc in zip(scales, locs)], dim=1
+        [scale * torch.rand(n_rows) + loc for scale, loc in zip(scales, locs, strict=False)], dim=1
     )
 
     return data_array
