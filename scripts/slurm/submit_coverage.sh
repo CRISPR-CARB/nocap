@@ -68,25 +68,26 @@ echo ""
 
 echo "--- Stage 1: Prepare ---"
 
-# Option A: run directly (fast, login-node safe):
-uv run python "${REPO_ROOT}/scripts/coverage_prepare.py" \
-    --graphml   "${GRAPHML}" \
-    --supptable "${SUPPTABLE}" \
-    --manifest  "${MANIFEST}"
+# Number of parallel workers for Phase 1.
+# Honour $SLURM_CPUS_PER_TASK when running inside a job; fall back to all
+# local CPUs on the login node.
+N_PREPARE_WORKERS="${SLURM_CPUS_PER_TASK:-$(python3 -c 'import os; print(os.cpu_count())')}"
 
-# Option B: submit as a short job (uncomment if needed):
-# PREPARE_JOB=$(sbatch --parsable \
-#     --job-name=cov_prepare \
-#     --account=crispr_carb \
-#     --partition=slurm \
-#     --time=00:30:00 \
-#     --mem=8G \
-#     --cpus-per-task=1 \
-#     --output="${OUTDIR}/logs/prepare_%j.out" \
-#     --wrap="cd ${REPO_ROOT} && uv run python scripts/coverage_prepare.py \
-#         --graphml ${GRAPHML} --supptable ${SUPPTABLE} --manifest ${MANIFEST}")
-# echo "  Prepare job: ${PREPARE_JOB}"
-# PREPARE_DEP="--dependency=afterok:${PREPARE_JOB}"
+# Idempotent: skip the prepare step if the manifest already exists unless the
+# caller sets FORCE_PREPARE=1.  This lets you run run_prepare.sh once (fast,
+# parallel, with tqdm) and then call submit_coverage.sh to submit the array
+# without re-doing the expensive Phase 1 scan.
+if [[ -f "${MANIFEST}" && "${FORCE_PREPARE:-0}" != "1" ]]; then
+    echo "  Manifest already exists — skipping prepare (set FORCE_PREPARE=1 to override)."
+    echo "  ${MANIFEST}"
+else
+    echo "  Running prepare (${N_PREPARE_WORKERS} worker(s))..."
+    uv run python "${REPO_ROOT}/scripts/coverage_prepare.py" \
+        --graphml   "${GRAPHML}" \
+        --supptable "${SUPPTABLE}" \
+        --manifest  "${MANIFEST}" \
+        --n-workers "${N_PREPARE_WORKERS}"
+fi
 
 # ---------------------------------------------------------------------------
 # Read array size from manifest

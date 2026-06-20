@@ -65,6 +65,7 @@ def evaluate_query(
         ensures:
             isinstance(result, list)
             all(len(result[i]) == 4 for i in range(len(result)))
+            len(result) == len([c for c in candidates if c != tf1 and c != outcome and (tf1, c, outcome) not in completed])
         modifies:
             none
     """
@@ -99,6 +100,14 @@ def evaluate_query(
     # --- POST ---
     assert isinstance(rows, list), "POST: result must be a list"
     assert all(len(r) == 4 for r in rows), "POST: every row has 4 elements"
+    _expected = sum(
+        1
+        for c in candidates
+        if c != tf1 and c != outcome and (tf1, c, outcome) not in completed
+    )
+    assert len(rows) == _expected, (
+        "POST: row count must equal eligible (non-self, not-already-done) candidates"
+    )
 
     return rows
 
