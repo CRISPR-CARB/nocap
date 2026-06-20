@@ -31,6 +31,7 @@ import argparse
 import json
 import os
 import sys
+from multiprocessing import cpu_count
 
 import networkx as nx
 from y0.algorithm.ioscm.utils import get_apt_order
@@ -55,6 +56,15 @@ def main():
         "--manifest",
         default="coverage_job.json",
         help="Output manifest path (default: coverage_job.json)",
+    )
+    parser.add_argument(
+        "--n-workers",
+        type=int,
+        default=cpu_count(),
+        help=(
+            "Number of parallel workers for Phase 1 identifiability check "
+            "(default: all available CPUs).  Set to 1 for serial execution."
+        ),
     )
     args = parser.parse_args()
 
@@ -88,8 +98,9 @@ def main():
     print("  Done.")
 
     # --- Phase 1: identify baseline unidentifiable queries ---
-    print("Running Phase 1 (baseline identifiability)...")
-    identifiable, unidentifiable = run_phase1(ecoli_mixed, query_pairs, apt_order)
+    n_workers = args.n_workers
+    print(f"Running Phase 1 (baseline identifiability, {n_workers} worker(s))...")
+    identifiable, unidentifiable = run_phase1(ecoli_mixed, query_pairs, apt_order, n_workers=n_workers)
     print(f"  Identifiable:   {len(identifiable)}")
     print(f"  Unidentifiable: {len(unidentifiable)}")
 

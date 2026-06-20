@@ -77,7 +77,8 @@ uv run python "${REPO_ROOT}/scripts/coverage_prepare.py" \
 # Option B: submit as a short job (uncomment if needed):
 # PREPARE_JOB=$(sbatch --parsable \
 #     --job-name=cov_prepare \
-#     --partition=CHANGE_ME_PARTITION \   # <-- edit
+#     --account=crispr_carb \
+#     --partition=slurm \
 #     --time=00:30:00 \
 #     --mem=8G \
 #     --cpus-per-task=1 \
@@ -111,9 +112,10 @@ mkdir -p "${SHARDS_DIR}"
 WORKER_JOB=$(sbatch --parsable \
     ${PREPARE_DEP:-} \
     --job-name=cov_worker \
-    --partition=CHANGE_ME_PARTITION \
-    --time=CHANGE_ME_TIME \
-    --mem=CHANGE_ME_MEM \
+    --account=crispr_carb \
+    --partition=slurm \
+    --time=08:00:00 \
+    --mem=12G \
     --cpus-per-task=1 \
     --array="0-${ARRAY_MAX}%${MAX_ARRAY_CONCURRENT}" \
     --output="${OUTDIR}/logs/worker_%A_%a.out" \
@@ -134,7 +136,8 @@ echo "--- Stage 3: Reduce ---"
 REDUCE_JOB=$(sbatch --parsable \
     --dependency=afterok:${WORKER_JOB} \
     --job-name=cov_reduce \
-    --partition=CHANGE_ME_PARTITION \
+    --account=crispr_carb \
+    --partition=slurm \
     --time=00:15:00 \
     --mem=4G \
     --cpus-per-task=1 \

@@ -30,6 +30,7 @@ Every public function carries:
 Production scripts are dependency-free (no axiomander import).
 """
 
+import concurrent.futures
 import csv
 import os
 import sys as _sys
@@ -269,38 +270,125 @@ def build_baseline_queries(ecoli_graph, valid_genes: set) -> list:
     return pairs
 
 
-def run_phase1(ecoli_mixed, query_pairs: list, apt_order) -> tuple:
+# ---------------------------------------------------------------------------
+# Phase-1 parallel worker infrastructure
+# ---------------------------------------------------------------------------
+
+# Module-level globals set by _phase1_worker_init so each worker process
+# receives the (potentially large) graph and apt_order exactly once via the
+# ProcessPoolExecutor initializer, rather than pickling them per-task.
+_worker_graph = None
+_worker_apt_order = None
+
+
+def _phase1_worker_init(ecoli_mixed, apt_order):
+    """Initializer for ProcessPoolExecutor workers: store shared state once."""
+    global _worker_graph, _worker_apt_order
+    _worker_graph = ecoli_mixed
+    _worker_apt_order = apt_order
+
+
+def _phase1_classify_one(pair):
+    """Classify a single (intervention, outcome) pair.  Top-level for pickling."""
+    from y0.algorithm.identify.cyclic_id import cyclic_id
+    from y0.algorithm.identify.utils import Unidentifiable
+    from y0.dsl import Variable
+
+    assert _worker_graph is not None, "worker graph not initialised — missing initializer call"
+    assert _worker_apt_order is not None, "worker apt_order not initialised — missing initializer call"
+
+    intervention, outcome = pair
+    try:
+        expr = cyclic_id(
+            graph=_worker_graph,
+            outcomes={Variable(outcome)},
+            interventions={Variable(intervention)},
+            ordering=_worker_apt_order,
+        )
+        return ("id", intervention, outcome, expr)
+    except Unidentifiable:
+        return ("unid", intervention, outcome, None)
+
+
+# ---------------------------------------------------------------------------
+# tqdm import with graceful no-op fallback
+# ---------------------------------------------------------------------------
+
+try:
+    from tqdm import tqdm as _tqdm
+except ImportError:  # pragma: no cover – tqdm is a listed dependency
+    def _tqdm(iterable, **kwargs):  # type: ignore[misc]
+        """No-op passthrough used when tqdm is unavailable."""
+        return iterable
+
+
+def run_phase1(ecoli_mixed, query_pairs: list, apt_order, n_workers: int = 1) -> tuple:
     """Return (identifiable, unidentifiable) lists from Phase 1.
+
+    When *n_workers* > 1 the query pairs are evaluated concurrently using
+    ``ProcessPoolExecutor``.  Each worker receives the graph and apt_order
+    once via the pool initializer (not per-task), avoiding redundant pickling.
+    A ``tqdm`` progress bar tracks completed queries on both parallel and
+    serial paths.
 
     axiomander:
         requires:
             isinstance(query_pairs, list)
+            n_workers >= 1
         ensures:
             isinstance(result, tuple)
             len(result) == 2
         modifies:
             none
     """
-    from y0.algorithm.identify.cyclic_id import cyclic_id
-    from y0.algorithm.identify.utils import Unidentifiable
-    from y0.dsl import Variable
-
     # --- PRE ---
     assert isinstance(query_pairs, list), "PRE: query_pairs must be a list"
+    assert isinstance(n_workers, int) and n_workers >= 1, "PRE: n_workers >= 1"
 
     identifiable: list = []
     unidentifiable: list = []
-    for intervention, outcome in query_pairs:
-        try:
-            result = cyclic_id(
-                graph=ecoli_mixed,
-                outcomes={Variable(outcome)},
-                interventions={Variable(intervention)},
-                ordering=apt_order,
-            )
-            identifiable.append((intervention, outcome, result))
-        except Unidentifiable:
-            unidentifiable.append((intervention, outcome))
+
+    if n_workers == 1:
+        # --- Serial path ---
+        from y0.algorithm.identify.cyclic_id import cyclic_id
+        from y0.algorithm.identify.utils import Unidentifiable
+        from y0.dsl import Variable
+
+        for intervention, outcome in _tqdm(
+            query_pairs,
+            total=len(query_pairs),
+            desc="Phase 1 identifiability",
+            unit="query",
+        ):
+            try:
+                expr = cyclic_id(
+                    graph=ecoli_mixed,
+                    outcomes={Variable(outcome)},
+                    interventions={Variable(intervention)},
+                    ordering=apt_order,
+                )
+                identifiable.append((intervention, outcome, expr))
+            except Unidentifiable:
+                unidentifiable.append((intervention, outcome))
+    else:
+        # --- Parallel path ---
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=n_workers,
+            initializer=_phase1_worker_init,
+            initargs=(ecoli_mixed, apt_order),
+        ) as pool:
+            futures = {pool.submit(_phase1_classify_one, pair): pair for pair in query_pairs}
+            for fut in _tqdm(
+                concurrent.futures.as_completed(futures),
+                total=len(query_pairs),
+                desc=f"Phase 1 identifiability ({n_workers} workers)",
+                unit="query",
+            ):
+                tag, intervention, outcome, expr = fut.result()
+                if tag == "id":
+                    identifiable.append((intervention, outcome, expr))
+                else:
+                    unidentifiable.append((intervention, outcome))
 
     # --- POST ---
     assert isinstance(identifiable, list), "POST: identifiable must be a list"
