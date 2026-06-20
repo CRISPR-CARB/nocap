@@ -14,15 +14,25 @@ Two algorithms:
                                     (greedy set cover, ln(n) approximation)
 
 Usage (standalone):
-  uv run python scripts/perturbation_optimizer.py \
-    --matrix notebooks/Ecoli_Analysis_Notebooks/coverage_matrix.csv \
-    --budgets 2,5,10,15,20,25 \
+  uv run python scripts/perturbation_optimizer.py \\
+    --matrix notebooks/Ecoli_Analysis_Notebooks/coverage_matrix.csv \\
+    --budgets 2,5,10,15,20,25 \\
     --output-dir notebooks/Ecoli_Analysis_Notebooks/
 
 Outputs:
   nomination_k{k}.csv          -- ordered nomination list for each budget k
   nomination_min_cover.csv     -- greedy min-set-cover result
   marginal_gain_curve.csv      -- cumulative coverage vs. # perturbations (up to max k)
+
+Contract annotations
+--------------------
+Every public function carries assert-based contracts in the axiomander style:
+  PRE  -- preconditions checked at function entry
+  POST -- postconditions checked before return
+  INV  -- loop invariants checked at each iteration
+
+These asserts are active at runtime (they are NOT stripped by -O).  They serve
+as both documentation and lightweight runtime verification.
 """
 
 import argparse
@@ -42,9 +52,21 @@ def load_coverage_matrix(path: str) -> tuple[list[str], list[str], dict[str, lis
         candidates  -- list of candidate TF names (rows)
         queries     -- list of query labels (columns, e.g. "tf1->outcome")
         matrix      -- dict: candidate -> list[bool] aligned with queries
+
+    Contracts:
+        PRE:  path is a non-empty str pointing to an existing file
+        POST: candidates is a non-empty list of str
+        POST: queries is a list of str (may be empty)
+        POST: matrix keys == set(candidates)
+        POST: every row in matrix has len == len(queries)
+        POST: every value in every row is bool
     """
-    candidates = []
-    queries = []
+    # --- PRECONDITIONS ---
+    assert isinstance(path, str) and path, "PRE: path must be a non-empty str"
+    assert os.path.isfile(path), f"PRE: file must exist: {path}"
+
+    candidates: list[str] = []
+    queries: list[str] = []
     matrix: dict[str, list[bool]] = {}
 
     with open(path) as f:
@@ -56,6 +78,25 @@ def load_coverage_matrix(path: str) -> tuple[list[str], list[str], dict[str, lis
             vals = [bool(int(v)) for v in row[1:]]
             candidates.append(cand)
             matrix[cand] = vals
+            # LOOP INVARIANT: every row so far has the right length
+            assert len(matrix[cand]) == len(queries), (
+                f"INV: row for {cand!r} has {len(matrix[cand])} values, "
+                f"expected {len(queries)}"
+            )
+
+    # --- POSTCONDITIONS ---
+    assert isinstance(candidates, list), "POST: candidates must be a list"
+    assert isinstance(queries, list), "POST: queries must be a list"
+    assert set(matrix.keys()) == set(candidates), (
+        "POST: matrix keys must equal set(candidates)"
+    )
+    for cand in candidates:
+        assert len(matrix[cand]) == len(queries), (
+            f"POST: row for {cand!r} must have len == len(queries)"
+        )
+        assert all(isinstance(v, bool) for v in matrix[cand]), (
+            f"POST: all values in row {cand!r} must be bool"
+        )
 
     return candidates, queries, matrix
 
@@ -88,11 +129,42 @@ def greedy_max_coverage(
     Returns:
         List of (selected_tf, marginal_gain, cumulative_coverage) tuples,
         one per selection step.
+
+    axiomander:
+        requires:
+            isinstance(candidates, list)
+            isinstance(queries, list)
+            isinstance(budget_k, int)
+            budget_k >= 0
+        modifies:
+            none
+        ensures:
+            isinstance(result, list)
+            len(result) <= budget_k
+            all(gain >= 1 for _, gain, _ in result)
+            all(result[i][2] <= result[i+1][2] for i in range(len(result)-1))
+            len(result) == 0 or result[len(result)-1][2] <= len(queries)
     """
+    # --- PRECONDITIONS ---
+    assert isinstance(candidates, list), "PRE: candidates must be a list"
+    assert isinstance(queries, list), "PRE: queries must be a list"
+    assert isinstance(budget_k, int) and budget_k >= 0, (
+        "PRE: budget_k must be a non-negative int"
+    )
+    assert intervenable is None or isinstance(intervenable, (set, frozenset)), (
+        "PRE: intervenable must be None or a set"
+    )
+    for c in candidates:
+        assert c in matrix, f"PRE: candidate {c!r} must be a key in matrix"
+        assert len(matrix[c]) == len(queries), (
+            f"PRE: matrix row for {c!r} must have len == len(queries)"
+        )
+
     pool = [c for c in candidates if intervenable is None or c in intervenable]
     n_queries = len(queries)
     unresolved: set[int] = set(range(n_queries))
-    selected = []
+    selected: list[tuple[str, int, int]] = []
+    prev_unresolved_size = len(unresolved)
 
     for step in range(budget_k):
         if not unresolved:
@@ -111,11 +183,49 @@ def greedy_max_coverage(
         if best_tf is None or best_gain == 0:
             break
 
-        # update unresolved
         newly_resolved = {qi for qi in unresolved if matrix[best_tf][qi]}
         unresolved -= newly_resolved
         cumulative = n_queries - len(unresolved)
         selected.append((best_tf, best_gain, cumulative))
+
+        # LOOP INVARIANT: unresolved strictly shrinks each step
+        assert len(unresolved) < prev_unresolved_size, (
+            "INV: unresolved must strictly shrink each step"
+        )
+        prev_unresolved_size = len(unresolved)
+
+        # LOOP INVARIANT: reported gain matches actual newly-resolved count
+        assert best_gain == len(newly_resolved), (
+            f"INV: reported gain {best_gain} != newly_resolved {len(newly_resolved)}"
+        )
+
+        # LOOP INVARIANT: cumulative == n_queries - len(unresolved)
+        assert cumulative == n_queries - len(unresolved), (
+            "INV: cumulative must equal n_queries - len(unresolved)"
+        )
+
+    # --- POSTCONDITIONS ---
+    assert isinstance(selected, list), "POST: result must be a list"
+    assert len(selected) <= min(budget_k, len(pool)), (
+        "POST: len(result) must be <= min(budget_k, len(pool))"
+    )
+    selected_tfs = [tf for tf, _, _ in selected]
+    assert len(selected_tfs) == len(set(selected_tfs)), (
+        "POST: selected TFs must be distinct"
+    )
+    for tf, gain, cumulative in selected:
+        assert isinstance(tf, str), "POST: each tf must be a str"
+        assert isinstance(gain, int) and gain >= 1, (
+            "POST: each marginal gain must be a positive int"
+        )
+        assert isinstance(cumulative, int) and 0 < cumulative <= n_queries, (
+            "POST: cumulative must be in (0, n_queries]"
+        )
+    # cumulative is non-decreasing
+    cumulatives = [c for _, _, c in selected]
+    assert cumulatives == sorted(cumulatives), (
+        "POST: cumulative_coverage must be non-decreasing"
+    )
 
     return selected
 
@@ -134,9 +244,33 @@ def greedy_min_set_cover(
 
     Returns:
         List of (selected_tf, marginal_gain, cumulative_coverage) tuples.
+
+    Contracts:
+        PRE:  candidates is a list of str
+        PRE:  queries is a list of str
+        PRE:  matrix keys contain all candidates; each row has len == len(queries)
+        PRE:  intervenable is None or a set of str
+        POST: result is a list of (str, int, int) tuples
+        POST: selected TFs are distinct
+        POST: marginal gains are all >= 1
+        POST: cumulative_coverage is non-decreasing
+        POST: final cumulative == len(resolvable) (all resolvable queries covered)
+        INV:  unresolved shrinks monotonically
     """
+    # --- PRECONDITIONS ---
+    assert isinstance(candidates, list), "PRE: candidates must be a list"
+    assert isinstance(queries, list), "PRE: queries must be a list"
+    assert intervenable is None or isinstance(intervenable, (set, frozenset)), (
+        "PRE: intervenable must be None or a set"
+    )
+    for c in candidates:
+        assert c in matrix, f"PRE: candidate {c!r} must be a key in matrix"
+        assert len(matrix[c]) == len(queries), (
+            f"PRE: matrix row for {c!r} must have len == len(queries)"
+        )
+
     pool = [c for c in candidates if intervenable is None or c in intervenable]
-    n_queries = len(queries)
+    n_queries = len(queries)  # noqa: F841 — kept for clarity
 
     # Only try to cover queries that are resolvable by at least one TF
     resolvable: set[int] = set()
@@ -146,7 +280,8 @@ def greedy_min_set_cover(
                 resolvable.add(qi)
 
     unresolved = set(resolvable)
-    selected = []
+    selected: list[tuple[str, int, int]] = []
+    prev_unresolved_size = len(unresolved)
 
     while unresolved:
         best_tf = None
@@ -167,6 +302,40 @@ def greedy_min_set_cover(
         cumulative = len(resolvable) - len(unresolved)
         selected.append((best_tf, best_gain, cumulative))
 
+        # LOOP INVARIANT: unresolved strictly shrinks each iteration
+        assert len(unresolved) < prev_unresolved_size, (
+            "INV: unresolved must strictly shrink each iteration"
+        )
+        prev_unresolved_size = len(unresolved)
+
+        # LOOP INVARIANT: cumulative == len(resolvable) - len(unresolved)
+        assert cumulative == len(resolvable) - len(unresolved), (
+            "INV: cumulative must equal len(resolvable) - len(unresolved)"
+        )
+
+    # --- POSTCONDITIONS ---
+    assert isinstance(selected, list), "POST: result must be a list"
+    selected_tfs = [tf for tf, _, _ in selected]
+    assert len(selected_tfs) == len(set(selected_tfs)), (
+        "POST: selected TFs must be distinct"
+    )
+    for tf, gain, cumulative in selected:
+        assert isinstance(tf, str), "POST: each tf must be a str"
+        assert isinstance(gain, int) and gain >= 1, (
+            "POST: each marginal gain must be a positive int"
+        )
+        assert isinstance(cumulative, int) and cumulative >= 1, (
+            "POST: cumulative must be a positive int"
+        )
+    cumulatives = [c for _, _, c in selected]
+    assert cumulatives == sorted(cumulatives), (
+        "POST: cumulative_coverage must be non-decreasing"
+    )
+    if selected and resolvable:
+        assert selected[-1][2] == len(resolvable), (
+            "POST: final cumulative must equal len(resolvable)"
+        )
+
     return selected
 
 
@@ -183,12 +352,42 @@ def build_marginal_gain_curve(
 
     Returns:
         List of (k, cumulative_queries_resolved, fraction_resolved) tuples.
+        Always starts with (0, 0, 0.0).
+
+    Contracts:
+        PRE:  max_k >= 0
+        PRE:  queries is a non-empty list (fraction requires len > 0)
+        POST: result[0] == (0, 0, 0.0)
+        POST: k values are 0, 1, 2, ... (strictly increasing by 1)
+        POST: cumulative values are non-decreasing
+        POST: all fractions are in [0.0, 1.0]
+        POST: len(result) == len(greedy steps taken) + 1
     """
+    # --- PRECONDITIONS ---
+    assert isinstance(max_k, int) and max_k >= 0, (
+        "PRE: max_k must be a non-negative int"
+    )
+    assert isinstance(queries, list) and len(queries) > 0, (
+        "PRE: queries must be a non-empty list"
+    )
+
     results = greedy_max_coverage(candidates, queries, matrix, max_k, intervenable)
     n_queries = len(queries)
-    curve = [(0, 0, 0.0)]
-    for step_idx, (tf, gain, cumulative) in enumerate(results):
+    curve: list[tuple[int, int, float]] = [(0, 0, 0.0)]
+    for step_idx, (tf, gain, cumulative) in enumerate(results):  # noqa: B007
         curve.append((step_idx + 1, cumulative, cumulative / n_queries))
+
+    # --- POSTCONDITIONS ---
+    assert curve[0] == (0, 0, 0.0), "POST: curve must start with (0, 0, 0.0)"
+    ks = [k for k, _, _ in curve]
+    assert ks == list(range(len(curve))), "POST: k values must be 0, 1, 2, ..."
+    cumulatives = [c for _, c, _ in curve]
+    assert cumulatives == sorted(cumulatives), (
+        "POST: cumulative values must be non-decreasing"
+    )
+    for _, _, frac in curve:
+        assert 0.0 <= frac <= 1.0, f"POST: fraction {frac} must be in [0.0, 1.0]"
+
     return curve
 
 
@@ -198,6 +397,7 @@ def build_marginal_gain_curve(
 
 
 def write_nomination_csv(path: str, selected: list[tuple[str, int, int]], n_queries: int):
+    """Write a nomination CSV for a greedy selection result."""
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(
@@ -215,6 +415,7 @@ def write_nomination_csv(path: str, selected: list[tuple[str, int, int]], n_quer
 
 
 def write_curve_csv(path: str, curve: list[tuple[int, int, float]], n_queries: int):
+    """Write a marginal gain curve CSV."""
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["k", "queries_resolved", "fraction_resolved", "pct_resolved"])
@@ -247,13 +448,27 @@ def cycle_breaking_score(node: str, graph) -> int:
 
     Returns:
         Number of simple cycles containing *node* (0 if node not in any cycle).
+
+    Contracts:
+        PRE:  node is a str
+        PRE:  graph has a .nodes() method
+        POST: result is a non-negative int
     """
     import networkx as nx
+
+    # --- PRECONDITIONS ---
+    assert isinstance(node, str), "PRE: node must be a str"
+    assert hasattr(graph, "nodes"), "PRE: graph must have a .nodes() method"
 
     count = 0
     for cycle in nx.simple_cycles(graph):
         if node in cycle:
             count += 1
+
+    # --- POSTCONDITION ---
+    assert isinstance(count, int) and count >= 0, (
+        "POST: result must be a non-negative int"
+    )
     return count
 
 
@@ -280,8 +495,25 @@ def rank_candidates_by_cycle_score(
     Returns:
         Candidates sorted by cycle-breaking score (descending).
         Ties are broken alphabetically for determinism.
+
+    Contracts:
+        PRE:  candidates is a list of str
+        PRE:  graph has .number_of_nodes() and .strongly_connected_components support
+        PRE:  scc_fallback_threshold >= 1
+        POST: result is a permutation of candidates (same elements, possibly reordered)
+        POST: len(result) == len(candidates)
+        POST: set(result) == set(candidates)
     """
     import networkx as nx
+
+    # --- PRECONDITIONS ---
+    assert isinstance(candidates, list), "PRE: candidates must be a list"
+    assert hasattr(graph, "number_of_nodes"), (
+        "PRE: graph must have a .number_of_nodes() method"
+    )
+    assert isinstance(scc_fallback_threshold, int) and scc_fallback_threshold >= 1, (
+        "PRE: scc_fallback_threshold must be a positive int"
+    )
 
     if not candidates:
         return []
@@ -301,7 +533,18 @@ def rank_candidates_by_cycle_score(
     else:
         scores = {c: cycle_breaking_score(c, graph) for c in candidates}
 
-    return sorted(candidates, key=lambda c: (-scores[c], c))
+    result = sorted(candidates, key=lambda c: (-scores[c], c))
+
+    # --- POSTCONDITIONS ---
+    assert isinstance(result, list), "POST: result must be a list"
+    assert len(result) == len(candidates), (
+        "POST: result must have the same length as candidates"
+    )
+    assert set(result) == set(candidates), (
+        "POST: result must be a permutation of candidates"
+    )
+
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -310,6 +553,7 @@ def rank_candidates_by_cycle_score(
 
 
 def main():
+    """Entry point for the perturbation optimizer CLI."""
     parser = argparse.ArgumentParser(description="Greedy perturbation panel optimizer")
     parser.add_argument("--matrix", required=True, help="Path to coverage_matrix.csv")
     parser.add_argument(

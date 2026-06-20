@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 package = true
 
 [tool.uv.sources]
-y0 = { git = "https://github.com/y0-causal-inference/y0.git", branch = "402-add-σ-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs" }
+y0 = { git = "https://github.com/y0-causal-inference/y0.git", branch = "final-changes-to-line-23-cyclic-id" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -161,10 +161,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/pnnl-compbio/nocap"
-Downloads = "https://github.com/pnnl-compbio/nocap/releases"
-Tracker = "https://github.com/pnnl-compbio/nocap/issues"
-Source = "https://github.com/pnnl-compbio/nocap"
+Homepage = "https://github.com/crispr-carb/nocap"
+Downloads = "https://github.com/crispr-carb/nocap/releases"
+Tracker = "https://github.com/crispr-carb/nocap/issues"
+Source = "https://github.com/crispr-carb/nocap"
 Documentation = "https://nocap.readthedocs.io"
 
 [project.optional-dependencies]

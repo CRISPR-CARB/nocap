@@ -1772,7 +1772,7 @@ requires-dist = [
     { name = "sympy" },
     { name = "torch" },
     { name = "tqdm" },
-    { name = "y0", git = "https://github.com/y0-causal-inference/y0.git?branch=402-add-%CF%83-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs" },
+    { name = "y0", git = "https://github.com/y0-causal-inference/y0.git?branch=final-changes-to-line-23-cyclic-id" },
 ]
 provides-extras = ["tests", "docs"]
 
@@ -3500,7 +3500,7 @@ wheels = [
 [[package]]
 name = "y0"
 version = "0.2.12.dev0"
-source = { git = "https://github.com/y0-causal-inference/y0.git?branch=402-add-%CF%83-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs#412313d4e27afbd0a6ecad60a431a96ef08131e6" }
+source = { git = "https://github.com/y0-causal-inference/y0.git?branch=final-changes-to-line-23-cyclic-id#003b32ee877e4b138232ed00d978e6ced01a92db" }
 dependencies = [
     { name = "click" },
     { name = "more-click" },
