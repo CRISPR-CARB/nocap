@@ -547,6 +547,109 @@ def rank_candidates_by_cycle_score(
     return result
 
 
+def scc_mass(graph) -> int:
+    """
+    Total cyclic mass of *graph*: sum of SCC sizes for all non-singleton SCCs.
+
+    Singleton SCCs (nodes not in any cycle) contribute 0.  This metric
+    quantifies how much cyclic structure remains in the graph — removing
+    in-edges to a set of nodes (a joint hard intervention) reduces it.
+
+    The ``cyclic_id`` algorithm reasons about SCCs, so this metric is
+    canonically aligned with identifiability: higher SCC mass = more
+    unidentifiable queries.
+
+    Args:
+        graph: networkx DiGraph
+
+    Returns:
+        Sum of SCC sizes for all SCCs with size >= 2.
+
+    axiomander:
+        requires:
+            hasattr(graph, 'nodes')
+        ensures:
+            result >= 0
+        modifies:
+            none
+    """
+    import networkx as nx
+
+    # --- PRE ---
+    assert hasattr(graph, "nodes"), "PRE: graph must have a .nodes() method"
+
+    total = 0
+    for scc in nx.strongly_connected_components(graph):
+        if len(scc) >= 2:
+            total += len(scc)
+
+    # --- POST ---
+    assert isinstance(total, int) and total >= 0, "POST: result must be a non-negative int"
+    return total
+
+
+def set_cycle_break_score(candidate_set: "set | frozenset", graph) -> int:
+    """
+    SCC-mass reduction from a joint hard intervention on *candidate_set*.
+
+    A hard intervention ``do(S)`` removes all incoming edges to every node in
+    S simultaneously, breaking every cycle that passes through any member of S.
+    The score is ``scc_mass(original) - scc_mass(after_intervention)``.
+
+    This is the canonical cycle-breaking metric for simultaneous perturbations
+    because ``cyclic_id`` itself reasons about SCCs: fewer / smaller SCCs after
+    the intervention means more queries become identifiable.
+
+    Unlike the single-node ``cycle_breaking_score`` (which counts simple cycles
+    and is slow on large graphs), this function uses only
+    ``nx.strongly_connected_components`` — O(V + E) — and is safe on the full
+    E. coli network.
+
+    Args:
+        candidate_set: set of node names to intervene on simultaneously
+        graph:         networkx DiGraph (not mutated)
+
+    Returns:
+        scc_mass(graph) - scc_mass(graph_after_joint_do(candidate_set))
+        A higher score means more cyclic structure is dissolved.
+
+    axiomander:
+        requires:
+            isinstance(candidate_set, (set, frozenset))
+            hasattr(graph, 'nodes')
+        ensures:
+            result >= 0
+        modifies:
+            none
+    """
+    import networkx as nx
+
+    # --- PRE ---
+    assert isinstance(candidate_set, (set, frozenset)), (
+        "PRE: candidate_set must be a set or frozenset"
+    )
+    assert hasattr(graph, "nodes"), "PRE: graph must have a .nodes() method"
+
+    before = scc_mass(graph)
+
+    # Build the intervened subgraph: remove all in-edges to every node in the set.
+    # We do NOT mutate the original — build a view using edge filtering.
+    intervened = graph.copy()
+    for node in candidate_set:
+        if node in intervened:
+            in_edges = list(intervened.in_edges(node))
+            intervened.remove_edges_from(in_edges)
+
+    after = scc_mass(intervened)
+    score = before - after
+
+    # --- POST ---
+    assert isinstance(score, int) and score >= 0, (
+        "POST: score must be a non-negative int"
+    )
+    return score
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
