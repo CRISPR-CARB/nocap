@@ -31,7 +31,7 @@
 # Edit the #SBATCH lines below to match your cluster's partition/queue names
 # and resource limits.  Each worker runs one joint cyclic_id call — typically
 # <1 min for small SCCs, up to ~30 min for a TF in a large SCC with many
-# descendants.  4G RAM per worker is conservative.
+# direct children.  4G RAM per worker is conservative.
 # =============================================================================
 
 set -euo pipefail
@@ -120,8 +120,8 @@ WORKER_JOB=$(sbatch --parsable \
     --job-name=scc_worker \
     --account=crispr_carb \
     --partition=slurm \
-    --time=02:00:00 \
-    --mem=8G \
+    --time=08:00:00 \
+    --mem=32G \
     --cpus-per-task=1 \
     --array="0-${ARRAY_MAX}%${MAX_ARRAY_CONCURRENT}" \
     --output="${OUTDIR}/logs/scc_worker_%A_%a.out" \

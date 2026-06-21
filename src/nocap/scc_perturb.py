@@ -1,0 +1,529 @@
+"""
+scc_perturb.py
+==============
+Pure graph-manipulation helpers for the SCC-perturbation pipeline.
+
+These functions contain no I/O, no SLURM logic, and no y0 imports at the
+module level.  They are the reusable "library" layer consumed by:
+
+  - scripts/scc_perturb_prepare.py  (compute B(t))
+  - scripts/scc_perturb_worker.py   (apply do(B(t)), query children)
+  - notebooks                        (residual-SCC analysis)
+
+Perturbation semantics
+----------------------
+A hard intervention ``do(S)`` on a node set *S* **removes the incoming edges**
+to every node in *S*.  The nodes themselves and their out-edges are retained.
+This is distinct from node deletion.
+
+B(t) — minimum background perturbation
+---------------------------------------
+For a TF *t* inside a non-trivial SCC, ``compute_min_cut_b`` finds the
+smallest set of *intermediate* SCC nodes (excluding *t* and its direct
+children) such that ``do(B(t))`` severs every return path ``child(t) → t``
+within the SCC.  The cut is computed as a minimum vertex cut (node-split
+max-flow, ``networkx.minimum_node_cut``) from a super-source over the
+in-SCC children of *t* to sink *t*.
+"""
+
+from __future__ import annotations
+
+import networkx as nx
+
+
+# ---------------------------------------------------------------------------
+# build_intervened_graph
+# ---------------------------------------------------------------------------
+
+
+def build_intervened_graph(graph: nx.DiGraph, perturb_set: list) -> nx.DiGraph:
+    """
+    Return a copy of *graph* with all in-edges to every node in *perturb_set*
+    removed (hard intervention do(perturb_set)).
+
+    The intervened nodes themselves — and all their out-edges — are preserved.
+    Only their *incoming* edges are deleted, reflecting the ``do(·)`` semantics
+    of a hard perturbation (knock-out or knock-in that blocks upstream signal).
+
+    Parameters
+    ----------
+    graph:
+        The original directed graph (not mutated).
+    perturb_set:
+        List of node names to intervene on.  May be empty.
+
+    Returns
+    -------
+    nx.DiGraph
+        A new graph (deep copy of *graph*) with in-edges to *perturb_set*
+        nodes removed.
+
+    axiomander:
+        ensures:
+            all(result.in_degree(n) == 0 for n in perturb_set if n in result.nodes())
+            result.number_of_nodes() == graph.number_of_nodes()
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(perturb_set, list), "PRE: perturb_set must be a list"
+
+    intervened = graph.copy()
+    for node in perturb_set:
+        if node in intervened:
+            in_edges = list(intervened.in_edges(node))
+            intervened.remove_edges_from(in_edges)
+
+    # --- POST ---
+    for node in perturb_set:
+        if node in intervened:
+            assert intervened.in_degree(node) == 0, (
+                f"POST: node {node!r} must have in-degree 0 after intervention"
+            )
+    return intervened
+
+
+# ---------------------------------------------------------------------------
+# get_direct_children
+# ---------------------------------------------------------------------------
+
+
+def get_direct_children(tf: str, graph: nx.DiGraph) -> list:
+    """
+    Return the sorted list of direct out-neighbours of *tf* in *graph*,
+    excluding *tf* itself (no self-loops).
+
+    This is the set O(t) used as the outcome variables for the ``cyclic_id``
+    query.  When called on the post-``do(B(t))`` graph, in-SCC children whose
+    return paths have been severed are included; the cut nodes are excluded
+    from the children because they were not targeted in the intervention.
+
+    Parameters
+    ----------
+    tf:
+        The TF gene name.
+    graph:
+        The (possibly intervened) directed graph.
+
+    Returns
+    -------
+    list[str]
+        Sorted list of direct children.
+
+    axiomander:
+        ensures:
+            tf not in result
+            result == sorted(result)
+            all(isinstance(g, str) for g in result)
+            all(graph.has_edge(tf, g) for g in result)
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(tf, str), "PRE: tf must be a str"
+
+    if tf not in graph:
+        return []
+
+    children = sorted(c for c in graph.successors(tf) if c != tf)
+
+    # --- POST ---
+    assert isinstance(children, list), "POST: result must be a list"
+    assert tf not in children, "POST: tf must not be in its own children"
+    return children
+
+
+# ---------------------------------------------------------------------------
+# find_in_scc_children
+# ---------------------------------------------------------------------------
+
+
+def find_in_scc_children(tf: str, scc_nodes: frozenset | set, graph: nx.DiGraph) -> list:
+    """
+    Return the direct children of *tf* that are members of *scc_nodes*.
+
+    These are the nodes ``c`` such that there is a directed edge ``tf → c``
+    and ``c`` is in the same SCC as *tf*.  They are the nodes whose return
+    paths ``c → … → tf`` need to be severed by ``do(B(t))``.
+
+    Parameters
+    ----------
+    tf:
+        The TF gene name.
+    scc_nodes:
+        The frozenset (or set) of nodes in the SCC containing *tf*.
+    graph:
+        The full directed graph.
+
+    Returns
+    -------
+    list[str]
+        Unsorted list of in-SCC direct children.
+
+    axiomander:
+        ensures:
+            len(result) <= len(list(graph.successors(tf)))
+            all(c != tf for c in result)
+            all(c in scc_nodes for c in result)
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(tf, str), "PRE: tf must be a str"
+    assert isinstance(scc_nodes, (set, frozenset)), (
+        "PRE: scc_nodes must be a set or frozenset"
+    )
+
+    children = [
+        c for c in graph.successors(tf)
+        if c in scc_nodes and c != tf
+    ]
+
+    # --- POST ---
+    assert isinstance(children, list), "POST: result must be a list"
+    assert all(c != tf for c in children), "POST: no self-loops in result"
+    assert all(c in scc_nodes for c in children), (
+        "POST: all children must be in scc_nodes"
+    )
+    return children
+
+
+# ---------------------------------------------------------------------------
+# compute_min_cut_b
+# ---------------------------------------------------------------------------
+
+
+def compute_min_cut_b(
+    tf: str,
+    scc_nodes: frozenset | set,
+    in_scc_children: list,
+    graph: nx.DiGraph,
+) -> list:
+    """
+    Compute the minimum background perturbation set B(t) for TF *tf*.
+
+    B(t) is the minimum vertex cut (on the SCC subgraph restricted to
+    ``scc_nodes``) that separates every return path from any in-SCC child
+    of *tf* back to *tf*, subject to:
+
+    - *tf* itself is NOT in B(t)
+    - direct children of *tf* that are in the SCC are NOT in B(t)
+      (Interpretation A: we perturb only *intermediate* nodes, not the
+      outcome variables themselves)
+
+    The cut is found via ``networkx.minimum_node_cut``, which internally
+    uses node-splitting + max-flow.  A virtual super-source is added and
+    connected to all in-SCC children so a single call handles all return
+    paths simultaneously.
+
+    If *tf* is not in any non-trivial SCC (``len(scc_nodes) <= 1``) or has
+    no in-SCC children, returns an empty list (B(t) = ∅, no background
+    perturbation required).
+
+    Parameters
+    ----------
+    tf:
+        The TF gene name.
+    scc_nodes:
+        The frozenset (or set) of nodes in the SCC containing *tf*.
+    in_scc_children:
+        List of *tf*'s direct children that are in the SCC (from
+        ``find_in_scc_children``).
+    graph:
+        The full directed graph.
+
+    Returns
+    -------
+    list[str]
+        Sorted list of node names constituting B(t).
+
+    axiomander:
+        ensures:
+            tf not in result
+            all(c not in result for c in in_scc_children)
+            all(n in scc_nodes for n in result)
+            implies(len(in_scc_children) == 0, len(result) == 0)
+            implies(len(scc_nodes) <= 1, len(result) == 0)
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(tf, str), "PRE: tf must be a str"
+    assert isinstance(scc_nodes, (set, frozenset)), (
+        "PRE: scc_nodes must be a set or frozenset"
+    )
+    assert isinstance(in_scc_children, list), (
+        "PRE: in_scc_children must be a list"
+    )
+
+    if not in_scc_children:
+        return []
+
+    if len(scc_nodes) <= 1:
+        return []
+
+    # Forbidden nodes: tf itself + its direct in-SCC children
+    forbidden = {tf} | set(in_scc_children)
+
+    # Build the SCC subgraph (copy() returns nx.DiGraph when graph is DiGraph)
+    scc_sub: nx.DiGraph = graph.subgraph(scc_nodes).copy()  # type: ignore[assignment]
+
+    # Add a virtual super-source outside the SCC that connects to all
+    # in-SCC children, so a single min-cut call handles all of them at once.
+    aux = scc_sub.copy()
+    super_src = "__SUPER_SRC__"
+    aux.add_node(super_src)
+    for c in in_scc_children:
+        aux.add_edge(super_src, c)
+
+    try:
+        raw_cut: set = set(nx.minimum_node_cut(aux, s=super_src, t=tf))
+        # Exclude the virtual super-source if it sneaked in
+        cut_nodes: set = raw_cut - {super_src}
+        # If any forbidden node ended up in the cut (shouldn't happen for
+        # correct graphs, but guard anyway), fall back to safe heuristic.
+        if cut_nodes & forbidden:
+            # Heuristic fallback: remove all in-neighbours of tf inside SCC
+            # except forbidden nodes — guaranteed to cut all return paths.
+            cut_nodes = {
+                n for n in scc_sub.predecessors(tf)
+                if n not in forbidden
+            }
+    except (nx.NetworkXError, nx.NetworkXNoPath):
+        # networkx raises when no path exists (already disconnected) or on
+        # degenerate graphs; in those cases B is empty.
+        cut_nodes = set()
+
+    result = sorted(cut_nodes)  # deterministic order
+
+    # --- POST ---
+    assert isinstance(result, list), "POST: result must be a list"
+    assert tf not in result, "POST: tf must not be in B(t)"
+    assert all(c not in result for c in in_scc_children), (
+        "POST: direct in-SCC children must not be in B(t)"
+    )
+    assert all(n in scc_nodes for n in result), (
+        "POST: all cut nodes must be in the SCC"
+    )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# residual_scc_analysis
+# ---------------------------------------------------------------------------
+
+
+def residual_scc_analysis(
+    tf: str,
+    children: list,
+    min_cut: list,
+    graph: nx.DiGraph,
+) -> dict:
+    """
+    Analyse residual cyclic structure among *tf*'s children in the
+    post-``do(B(t))`` graph.
+
+    After applying ``do(B(t))`` (removing in-edges to ``min_cut`` nodes),
+    the return paths ``child → tf`` are severed.  However, the children
+    of *tf* may still participate in cycles *among themselves* or with
+    other surviving network nodes.  This function identifies which children
+    sit in non-trivial SCCs of the post-intervention graph — the "residually
+    cyclic" children whose mutual entanglement explains why the joint
+    ``cyclic_id`` query fails even when B(t) is correct.
+
+    Parameters
+    ----------
+    tf:
+        The TF gene name.
+    children:
+        List of *tf*'s direct children in the post-``do(B(t))`` graph
+        (from ``get_direct_children``).
+    min_cut:
+        B(t) — the list of nodes to intervene on (passed to
+        ``build_intervened_graph``).
+    graph:
+        The full directed graph (pre-intervention).
+
+    Returns
+    -------
+    dict with keys:
+        ``g_do``              – the post-intervention nx.DiGraph
+        ``child_set``         – frozenset of child names
+        ``node_to_scc_id``    – dict mapping every node in g_do to its SCC index
+        ``scc_sizes``         – dict mapping SCC index → size
+        ``children_cyclic``   – list of children in non-trivial SCCs (size ≥ 2)
+        ``children_acyclic``  – list of children in trivial SCCs (singleton)
+        ``residual_clusters`` – list[frozenset] of non-trivial SCCs that contain
+                                ≥ 2 children of *tf*
+        ``tf_still_cyclic``   – bool: is *tf* itself in a non-trivial SCC of g_do?
+        ``cut_verified``      – bool: True iff no child can reach *tf* in g_do
+
+    axiomander:
+        ensures:
+            len(result["children_cyclic"]) + len(result["children_acyclic"]) == len(children)
+            isinstance(result["tf_still_cyclic"], bool)
+            isinstance(result["cut_verified"], bool)
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(tf, str), "PRE: tf must be a str"
+    assert isinstance(children, list), "PRE: children must be a list"
+    assert isinstance(min_cut, list), "PRE: min_cut must be a list"
+
+    g_do = build_intervened_graph(graph, min_cut)
+    child_set = frozenset(children)
+
+    # Compute SCCs of the full post-intervention graph
+    sccs = list(nx.strongly_connected_components(g_do))
+    node_to_scc_id: dict = {}
+    scc_sizes: dict = {}
+    for idx, scc in enumerate(sccs):
+        scc_sizes[idx] = len(scc)
+        for node in scc:
+            node_to_scc_id[node] = idx
+
+    # Tag each child
+    children_cyclic = []
+    children_acyclic = []
+    for c in children:
+        if c in node_to_scc_id:
+            scc_id = node_to_scc_id[c]
+            if scc_sizes[scc_id] >= 2:
+                children_cyclic.append(c)
+            else:
+                children_acyclic.append(c)
+        else:
+            children_acyclic.append(c)  # node absent from graph → acyclic
+
+    # Find residual clusters: non-trivial SCCs containing ≥2 children of tf
+    residual_clusters = []
+    for idx, scc in enumerate(sccs):
+        if scc_sizes[idx] >= 2:
+            scc_children = child_set & scc
+            if len(scc_children) >= 2:
+                residual_clusters.append(frozenset(scc_children))
+
+    # Is tf itself still in a non-trivial SCC?
+    tf_cyclic = False
+    if tf in node_to_scc_id:
+        tf_cyclic = scc_sizes[node_to_scc_id[tf]] >= 2
+
+    # Verify that no child can still reach tf
+    cut_verified = True
+    for c in children:
+        if c in g_do and tf in g_do:
+            try:
+                if nx.has_path(g_do, c, tf):
+                    cut_verified = False
+                    break
+            except nx.NetworkXError:
+                pass
+
+    result = {
+        "g_do": g_do,
+        "child_set": child_set,
+        "node_to_scc_id": node_to_scc_id,
+        "scc_sizes": scc_sizes,
+        "children_cyclic": sorted(children_cyclic),
+        "children_acyclic": sorted(children_acyclic),
+        "residual_clusters": residual_clusters,
+        "tf_still_cyclic": tf_cyclic,
+        "cut_verified": cut_verified,
+    }
+
+    # --- POST ---
+    assert len(result["children_cyclic"]) + len(result["children_acyclic"]) == len(children), (
+        "POST: all children must be classified"
+    )
+    assert isinstance(result["tf_still_cyclic"], bool), (
+        "POST: tf_still_cyclic must be bool"
+    )
+    assert isinstance(result["cut_verified"], bool), (
+        "POST: cut_verified must be bool"
+    )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# residual_cluster_size_distribution
+# ---------------------------------------------------------------------------
+
+
+def residual_cluster_size_distribution(analysis_result: dict) -> dict:
+    """
+    Summarise the size distribution of residual clusters from the output of
+    ``residual_scc_analysis``.
+
+    A *residual cluster* is a non-trivial SCC in the post-``do(B(t))`` graph
+    that contains **≥ 2 direct children** of the TF.  This function extracts
+    the per-cluster child-counts (not total SCC sizes) — i.e. how many of the
+    TF's own children are entangled inside each cluster — and derives summary
+    statistics over those counts.
+
+    Parameters
+    ----------
+    analysis_result:
+        The dict returned by ``residual_scc_analysis``.
+
+    Returns
+    -------
+    dict with keys:
+        ``n_clusters``               – int: number of residual clusters
+        ``sizes``                    – list[int]: sorted child-counts per cluster
+        ``max_size``                 – int: largest cluster child-count (0 if none)
+        ``total_children_in_clusters`` – int: total children across all clusters
+                                         (may count a child twice only if it
+                                         appears in two distinct clusters, which
+                                         cannot happen since SCCs are disjoint)
+        ``has_residual_cluster``     – bool: True iff n_clusters >= 1
+
+    axiomander:
+        ensures:
+            result["n_clusters"] == len(result["sizes"])
+            isinstance(result["has_residual_cluster"], bool)
+            result["has_residual_cluster"] == (result["n_clusters"] >= 1)
+            implies(result["n_clusters"] == 0, result["max_size"] == 0)
+            implies(result["n_clusters"] >= 1, result["max_size"] >= 2)
+            result["total_children_in_clusters"] == sum(result["sizes"])
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(analysis_result, dict), "PRE: analysis_result must be a dict"
+    assert "residual_clusters" in analysis_result, (
+        "PRE: analysis_result must contain 'residual_clusters' key"
+    )
+
+    clusters: list = analysis_result["residual_clusters"]
+
+    # Each element of residual_clusters is a frozenset of child names
+    # (children of tf that share this SCC).  The size is the child-count.
+    sizes = sorted(len(c) for c in clusters)
+    n_clusters = len(sizes)
+    max_size = max(sizes) if sizes else 0
+    total_in_clusters = sum(sizes)
+    has_cluster = n_clusters >= 1
+
+    result = {
+        "n_clusters": n_clusters,
+        "sizes": sizes,
+        "max_size": max_size,
+        "total_children_in_clusters": total_in_clusters,
+        "has_residual_cluster": has_cluster,
+    }
+
+    # --- POST ---
+    assert result["n_clusters"] == len(result["sizes"]), (
+        "POST: n_clusters must equal len(sizes)"
+    )
+    assert isinstance(result["has_residual_cluster"], bool), (
+        "POST: has_residual_cluster must be bool"
+    )
+    assert result["has_residual_cluster"] == (result["n_clusters"] >= 1), (
+        "POST: has_residual_cluster must match n_clusters >= 1"
+    )
+    assert result["total_children_in_clusters"] == sum(result["sizes"]), (
+        "POST: total_children_in_clusters must equal sum(sizes)"
+    )
+    return result

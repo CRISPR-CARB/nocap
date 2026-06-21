@@ -1,0 +1,38 @@
+{
+  "tf": "torR",
+  "min_cut": [
+    "rpoD"
+  ],
+  "scc_size": 68,
+  "in_scc_children": [
+    "gadE",
+    "gadX",
+    "rpoS"
+  ],
+  "n_children": 20,
+  "outcomes": [
+    "adiA",
+    "adiC",
+    "gadA",
+    "gadB",
+    "gadC",
+    "gadE",
+    "gadX",
+    "hdeA",
+    "hdeB",
+    "mdtE",
+    "mdtF",
+    "rpoS",
+    "slp",
+    "tnaA",
+    "tnaB",
+    "tnaC",
+    "torA",
+    "torC",
+    "torD",
+    "yhiD"
+  ],
+  "joint_identifiable": true,
+  "per_gene": {},
+  "note": ""
+}

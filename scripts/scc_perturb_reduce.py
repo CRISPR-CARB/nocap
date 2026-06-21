@@ -16,7 +16,7 @@ Run this after all array tasks have completed (SLURM dependency:
   --dependency=afterok:<array_job_id>).
 
 Output CSV columns:
-  tf, scc_size, min_cut_size, min_cut_nodes, n_descendants,
+  tf, scc_size, min_cut_size, min_cut_nodes, n_children,
   joint_identifiable, n_per_gene_identifiable, pct_per_gene_identifiable,
   note
 """
@@ -58,7 +58,7 @@ def load_shards(shards_dir: str) -> list:
             shards.append(json.load(f))
         print(f"  {os.path.basename(path)}: tf={shards[-1].get('tf', '?')}, "
               f"joint={shards[-1].get('joint_identifiable', '?')}, "
-              f"n_desc={shards[-1].get('n_descendants', '?')}")
+              f"n_children={shards[-1].get('n_children', '?')}")
 
     # --- POST ---
     assert isinstance(shards, list), "POST: result must be a list"
@@ -109,7 +109,7 @@ def merge_and_write(
             "scc_size",
             "min_cut_size",
             "min_cut_nodes",
-            "n_descendants",
+            "n_children",
             "joint_identifiable",
             "n_per_gene_identifiable",
             "pct_per_gene_identifiable",
@@ -119,20 +119,20 @@ def merge_and_write(
             tf = shard.get("tf", "")
             scc_size = shard.get("scc_size", 0)
             min_cut = shard.get("min_cut", [])
-            n_desc = shard.get("n_descendants", 0)
+            n_children = shard.get("n_children", 0)
             joint_id = shard.get("joint_identifiable", None)
             per_gene = shard.get("per_gene", {})
             note = shard.get("note", "")
 
             n_per_gene = sum(1 for v in per_gene.values() if v)
-            pct = n_per_gene / n_desc * 100 if n_desc > 0 and per_gene else ""
+            pct = n_per_gene / n_children * 100 if n_children > 0 and per_gene else ""
 
             writer.writerow([
                 tf,
                 scc_size,
                 len(min_cut),
                 "+".join(sorted(min_cut)),
-                n_desc,
+                n_children,
                 joint_id,
                 n_per_gene if per_gene else "",
                 f"{pct:.1f}" if pct != "" else "",
@@ -191,7 +191,7 @@ def main():
         1 for s in shards if s.get("joint_identifiable") is False
     )
     no_desc_count = sum(
-        1 for s in shards if s.get("note") == "no_descendants"
+        1 for s in shards if s.get("note") == "no_children"
     )
     dag_tfs = manifest.get("dag_tfs", [])
 
@@ -200,7 +200,7 @@ def main():
     print(f"Shards processed:                    {len(shards)}")
     print(f"Jointly identifiable:                {joint_id_count}")
     print(f"Jointly unidentifiable:              {joint_unid_count}")
-    print(f"No descendants (empty shard):        {no_desc_count}")
+    print(f"No children (empty shard):           {no_desc_count}")
     print(f"DAG TFs (no perturbation needed):    {len(dag_tfs)}")
     print(f"Output written to:                   {output_path}")
 

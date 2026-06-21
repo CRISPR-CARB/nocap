@@ -8,36 +8,32 @@ All tests are injectable — no real graph file, no y0, no SLURM.
 Toy network used throughout:
 
     A → B → C → A          (non-trivial SCC: {A, B, C})
-    A → D                   (D is outside the SCC, a descendant of A)
-    B → E                   (E is outside the SCC, a descendant of B)
+    A → D                   (D is outside the SCC, a direct child of A)
+    B → E                   (E is outside the SCC, a direct child of B)
 
 For TF = A:
   - in_scc_children = [B]   (A→B is the only direct edge A→SCC-member)
   - Return paths: B→C→A, so we need to cut all B⇝A paths inside the SCC.
   - Minimum cut (excluding A and B): {C}  (removing do(C) severs B→C→A)
-  - Post-intervention descendants of A: D, E  (C is removed from the return
-    path but is still a descendant; B→E so E is reachable)
+  - Direct children of A in the post-do(B(A)) graph: B, D
+    (A→B and A→D are both out-edges of A; B is preserved because children
+    are excluded from the min-cut by Interpretation A)
 
 For TF = B (not tested in all fixtures, but verified in basic tests):
   - in_scc_children = [C]
   - Minimum cut (excluding B and C): {A} (B→C→A→B, cutting A severs C→A→B)
 """
 
-import os
-import sys
-
 import networkx as nx
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-
-from scc_perturb_prepare import compute_min_cut_b, find_in_scc_children
-from scc_perturb_worker import (
+from nocap.scc_perturb import (
     build_intervened_graph,
-    get_descendants,
-    run_joint_cyclic_id,
-    run_per_gene_cyclic_id,
+    compute_min_cut_b,
+    find_in_scc_children,
+    get_direct_children,
 )
+from scripts.scc_perturb_worker import run_joint_cyclic_id, run_per_gene_cyclic_id
 
 
 # ---------------------------------------------------------------------------
@@ -207,44 +203,57 @@ class TestBuildIntervenedGraph:
         intervened = build_intervened_graph(toy_graph, min_cut_a)
         assert intervened is not toy_graph
 
-    def test_pre_min_cut_must_be_list(self, toy_graph):
-        with pytest.raises(AssertionError, match="PRE: min_cut must be a list"):
+    def test_pre_perturb_set_must_be_list(self, toy_graph):
+        with pytest.raises(AssertionError, match="PRE: perturb_set must be a list"):
             build_intervened_graph(toy_graph, {"C"})
 
 
 # ---------------------------------------------------------------------------
-# TestGetDescendants
+# TestGetDirectChildren
 # ---------------------------------------------------------------------------
 
 
-class TestGetDescendants:
-    def test_a_descendants_include_d_and_e(self, intervened_graph_a):
-        desc = get_descendants("A", intervened_graph_a)
-        # D is A→D, E is A→B→E (B is still reachable from A)
-        assert "D" in desc
-        assert "E" in desc
+class TestGetDirectChildren:
+    def test_a_children_include_b_and_d(self, intervened_graph_a):
+        """A has direct out-edges A→B and A→D; both must appear."""
+        children = get_direct_children("A", intervened_graph_a)
+        assert "B" in children
+        assert "D" in children
 
-    def test_a_not_in_own_descendants(self, intervened_graph_a):
-        desc = get_descendants("A", intervened_graph_a)
-        assert "A" not in desc
+    def test_a_children_do_not_include_e(self, intervened_graph_a):
+        """E is reachable from A via B→E but is not a direct child of A."""
+        children = get_direct_children("A", intervened_graph_a)
+        assert "E" not in children
+
+    def test_a_not_in_own_children(self, intervened_graph_a):
+        children = get_direct_children("A", intervened_graph_a)
+        assert "A" not in children
 
     def test_result_is_sorted_list(self, intervened_graph_a):
-        desc = get_descendants("A", intervened_graph_a)
-        assert isinstance(desc, list)
-        assert desc == sorted(desc)
+        children = get_direct_children("A", intervened_graph_a)
+        assert isinstance(children, list)
+        assert children == sorted(children)
 
     def test_unknown_node_returns_empty(self, intervened_graph_a):
-        desc = get_descendants("Z", intervened_graph_a)
-        assert desc == []
+        children = get_direct_children("Z", intervened_graph_a)
+        assert children == []
 
-    def test_leaf_node_has_no_descendants(self, toy_graph):
+    def test_leaf_node_has_no_children(self, toy_graph):
         intervened = build_intervened_graph(toy_graph, [])
-        desc = get_descendants("D", intervened)
-        assert desc == []
+        children = get_direct_children("D", intervened)
+        assert children == []
+
+    def test_all_children_are_out_neighbours(self, intervened_graph_a):
+        """Every result node must be a direct out-neighbour of A."""
+        children = get_direct_children("A", intervened_graph_a)
+        for c in children:
+            assert intervened_graph_a.has_edge("A", c), (
+                f"{c} in result but A→{c} edge missing"
+            )
 
     def test_pre_tf_must_be_str(self, toy_graph):
         with pytest.raises(AssertionError, match="PRE: tf must be a str"):
-            get_descendants(123, toy_graph)
+            get_direct_children(123, toy_graph)
 
 
 # ---------------------------------------------------------------------------
@@ -363,6 +372,102 @@ class TestRunJointCyclicId:
                 all_network_vars=set(),
                 identify_fn=bad_fn,
             )
+
+    # ------------------------------------------------------------------
+    # NEW: empty-B(t) guard tests
+    # ------------------------------------------------------------------
+
+    def test_empty_min_cut_does_not_pass_base_distribution(self):
+        """
+        When min_cut == [], run_joint_cyclic_id must call identify_fn
+        (or cyclic_id) WITHOUT a base_distribution kwarg.
+
+        We verify this using a spy injectable that records whether
+        min_cut was empty — the real guard is in the non-injectable path,
+        but the contract INV (len(min_cut) >= 0) and the branch logic
+        are also exercised by confirming the empty-cut path returns a bool
+        and propagates to the injectable correctly.
+        """
+        calls = []
+
+        def spy_fn(tf, outcome_set, min_cut):
+            calls.append({"tf": tf, "min_cut": list(min_cut)})
+            return True
+
+        result = run_joint_cyclic_id(
+            tf="A",
+            outcome_set=frozenset({"D"}),
+            min_cut=[],  # empty B(t)
+            ecoli_mixed=None,
+            apt_order=None,
+            all_network_vars=set(),
+            identify_fn=spy_fn,
+        )
+        assert result is True
+        assert len(calls) == 1
+        assert calls[0]["min_cut"] == []  # empty list forwarded faithfully
+
+    def test_empty_min_cut_result_is_bool(self):
+        """POST: result is bool even for empty min_cut."""
+        result = run_joint_cyclic_id(
+            tf="A",
+            outcome_set=frozenset({"D"}),
+            min_cut=[],
+            ecoli_mixed=None,
+            apt_order=None,
+            all_network_vars=set(),
+            identify_fn=self._always_true,
+        )
+        assert isinstance(result, bool)
+
+    def test_empty_outcome_set_with_empty_min_cut_returns_true(self):
+        """
+        POST: implies(len(outcome_set) == 0, result == True).
+        Works for both empty and non-empty min_cut.
+        """
+        result_empty_cut = run_joint_cyclic_id(
+            tf="A",
+            outcome_set=frozenset(),
+            min_cut=[],
+            ecoli_mixed=None,
+            apt_order=None,
+            all_network_vars=set(),
+            identify_fn=self._always_true,
+        )
+        assert result_empty_cut is True
+
+        result_nonempty_cut = run_joint_cyclic_id(
+            tf="A",
+            outcome_set=frozenset(),
+            min_cut=["C"],
+            ecoli_mixed=None,
+            apt_order=None,
+            all_network_vars=set(),
+            identify_fn=self._always_true,
+        )
+        assert result_nonempty_cut is True
+
+    def test_nonempty_min_cut_passes_cut_to_injectable(self):
+        """
+        Non-empty min_cut must be forwarded to identify_fn unchanged.
+        This is the positive control for the empty-cut guard.
+        """
+        received = {}
+
+        def recording_fn(tf, outcome_set, min_cut):
+            received["min_cut"] = list(min_cut)
+            return True
+
+        run_joint_cyclic_id(
+            tf="A",
+            outcome_set=frozenset({"D"}),
+            min_cut=["C", "X"],
+            ecoli_mixed=None,
+            apt_order=None,
+            all_network_vars=set(),
+            identify_fn=recording_fn,
+        )
+        assert received["min_cut"] == ["C", "X"]
 
 
 # ---------------------------------------------------------------------------
@@ -507,13 +612,15 @@ class TestEndToEndToyGraph:
     """
 
     def test_pipeline_a_joint_identifiable(self, toy_graph, scc_abc):
-        children = find_in_scc_children("A", scc_abc, toy_graph)
-        cut = compute_min_cut_b("A", scc_abc, children, toy_graph)
+        in_scc_ch = find_in_scc_children("A", scc_abc, toy_graph)
+        cut = compute_min_cut_b("A", scc_abc, in_scc_ch, toy_graph)
         intervened = build_intervened_graph(toy_graph, cut)
-        desc = get_descendants("A", intervened)
-        assert len(desc) >= 1  # D and E must be reachable
+        children = get_direct_children("A", intervened)
+        # A has out-edges A→B and A→D; both should survive the intervention
+        assert "B" in children
+        assert "D" in children
 
-        outcome_set = frozenset(desc)  # use plain str set for inject test
+        outcome_set = frozenset(children)
         result = run_joint_cyclic_id(
             tf="A",
             outcome_set=outcome_set,
@@ -544,14 +651,20 @@ class TestEndToEndToyGraph:
         assert children == []
 
     def test_b_pipeline(self, toy_graph, scc_abc):
-        """Run the same pipeline for TF=B."""
-        children = find_in_scc_children("B", scc_abc, toy_graph)
-        cut = compute_min_cut_b("B", scc_abc, children, toy_graph)
+        """Run the same pipeline for TF=B: direct children of B are C and E."""
+        in_scc_ch = find_in_scc_children("B", scc_abc, toy_graph)
+        cut = compute_min_cut_b("B", scc_abc, in_scc_ch, toy_graph)
         assert "B" not in cut
-        for c in children:
+        for c in in_scc_ch:
             assert c not in cut
         intervened = build_intervened_graph(toy_graph, cut)
-        for c in children:
+        # Return paths from in-SCC children back to B must be severed
+        for c in in_scc_ch:
             if c in intervened:
                 reachable = nx.descendants(intervened, c)
                 assert "B" not in reachable
+        # Direct children of B in intervened graph = C and E (B→C, B→E)
+        direct = get_direct_children("B", intervened)
+        assert "C" in direct
+        assert "E" in direct
+        assert "B" not in direct

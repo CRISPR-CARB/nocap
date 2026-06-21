@@ -9,7 +9,7 @@ corresponding TF entry from the manifest produced by ``scc_perturb_prepare.py``.
 For the assigned TF *t*:
   1. Build the intervened graph  do(B(t))  by removing all in-edges to every
      node in B(t) = task["min_cut"].
-  2. Compute O(t) = descendants of t in the post-intervention graph.
+  2. Compute O(t) = direct children of t in the post-intervention graph.
   3. Issue **one** joint ``cyclic_id`` call:
        cyclic_id(interventions={t}, outcomes=O(t), base_distribution=do(B(t)))
   4. If the joint call raises ``Unidentifiable`` and ``--per-gene-on-failure``
@@ -38,69 +38,7 @@ import sys
 
 import networkx as nx
 
-sys.path.insert(0, os.path.dirname(__file__))
-
-
-# ---------------------------------------------------------------------------
-# Core helpers (injectable for testing)
-# ---------------------------------------------------------------------------
-
-
-def build_intervened_graph(graph, min_cut: list):
-    """
-    Return a copy of *graph* with all in-edges to every node in *min_cut*
-    removed (hard intervention do(B(t))).
-
-    axiomander:
-        ensures:
-            all(result.in_degree(n) == 0 for n in min_cut if n in result.nodes())
-            result.number_of_nodes() == graph.number_of_nodes()
-        modifies:
-            none
-    """
-    # --- PRE ---
-    assert isinstance(min_cut, list), "PRE: min_cut must be a list"
-
-    intervened = graph.copy()
-    for node in min_cut:
-        if node in intervened:
-            in_edges = list(intervened.in_edges(node))
-            intervened.remove_edges_from(in_edges)
-
-    # --- POST ---
-    for node in min_cut:
-        if node in intervened:
-            assert intervened.in_degree(node) == 0, (
-                f"POST: node {node!r} must have in-degree 0 after intervention"
-            )
-    return intervened
-
-
-def get_descendants(tf: str, intervened_graph) -> list:
-    """
-    Return the sorted list of descendants of *tf* in *intervened_graph*
-    (nodes reachable from *tf* via directed edges, excluding *tf* itself).
-
-    axiomander:
-        ensures:
-            tf not in result
-            result == sorted(result)
-            all(isinstance(g, str) for g in result)
-        modifies:
-            none
-    """
-    # --- PRE ---
-    assert isinstance(tf, str), "PRE: tf must be a str"
-
-    if tf not in intervened_graph:
-        return []
-
-    desc = sorted(nx.descendants(intervened_graph, tf))
-
-    # --- POST ---
-    assert isinstance(desc, list), "POST: result must be a list"
-    assert tf not in desc, "POST: tf must not be in its own descendants"
-    return desc
+from nocap.scc_perturb import build_intervened_graph, get_direct_children  # noqa: F401
 
 
 def run_joint_cyclic_id(
@@ -116,12 +54,17 @@ def run_joint_cyclic_id(
     Issue one joint ``cyclic_id`` call for ``do(tf)`` over *outcome_set*
     under base distribution ``do(B(t))`` = ``P[{B(t)}](...)``.
 
+    When *min_cut* is empty (B(t) = ∅), the query is issued without a base
+    distribution — an empty perturbation set is the plain observational
+    distribution, not ``P[∅](V)``, which would be a malformed expression.
+
     Returns True if jointly identifiable, False otherwise.
 
     Args:
         tf:              TF to intervene on
-        outcome_set:     set of Variable objects (post-intervention descendants)
-        min_cut:         B(t) node list (used as base distribution perturbation)
+        outcome_set:     set of Variable objects (post-intervention direct children)
+        min_cut:         B(t) node list (used as base distribution perturbation).
+                         An empty list means no background perturbation is applied.
         ecoli_mixed:     NxMixedGraph
         apt_order:       topological ordering
         all_network_vars: set of all Variable objects in the network
@@ -151,16 +94,29 @@ def run_joint_cyclic_id(
     from y0.algorithm.identify.utils import Unidentifiable
     from y0.dsl import P, Variable
 
-    base_dist_vars = {Variable(n) for n in min_cut}
+    # INV: empty min_cut must NOT produce a P[∅](V) base distribution.
+    # An empty background perturbation is the plain observational distribution.
+    assert len(min_cut) >= 0, "INV: min_cut length must be non-negative"
 
     try:
-        cyclic_id(
-            graph=ecoli_mixed,
-            outcomes=outcome_set,
-            interventions={Variable(tf)},
-            ordering=apt_order,
-            base_distribution=P[base_dist_vars](all_network_vars),
-        )
+        if min_cut:
+            # Non-empty B(t): query under the background perturbation do(B(t))
+            base_dist_vars = {Variable(n) for n in min_cut}
+            cyclic_id(
+                graph=ecoli_mixed,
+                outcomes=outcome_set,
+                interventions={Variable(tf)},
+                ordering=apt_order,
+                base_distribution=P[base_dist_vars](all_network_vars),
+            )
+        else:
+            # Empty B(t): plain observational query — no base_distribution wrapper
+            cyclic_id(
+                graph=ecoli_mixed,
+                outcomes=outcome_set,
+                interventions={Variable(tf)},
+                ordering=apt_order,
+            )
         identifiable = True
     except Unidentifiable:
         identifiable = False
@@ -322,35 +278,35 @@ def main():
     all_network_vars = {Variable(g) for g in network_nodes}
     print(f"[task {task_id} | {tf}] Graph loaded. Nodes: {len(network_nodes)}")
 
-    # --- Build intervened graph and compute descendants ---
+    # --- Build intervened graph and compute direct children ---
     intervened_graph = build_intervened_graph(raw_graph, min_cut)
-    descendants = get_descendants(tf, intervened_graph)
-    print(f"[task {task_id} | {tf}] Descendants in do(B(t)) graph: {len(descendants)}")
+    children = get_direct_children(tf, intervened_graph)
+    print(f"[task {task_id} | {tf}] Direct children in do(B(t)) graph: {len(children)}")
 
-    if not descendants:
-        print(f"[task {task_id} | {tf}] No descendants — writing empty shard.")
+    if not children:
+        print(f"[task {task_id} | {tf}] No children — writing empty shard.")
         shard = {
             "tf": tf,
             "min_cut": min_cut,
             "scc_size": scc_size,
             "in_scc_children": in_scc_children,
-            "n_descendants": 0,
+            "n_children": 0,
             "outcomes": [],
             "joint_identifiable": None,
             "per_gene": {},
-            "note": "no_descendants",
+            "note": "no_children",
         }
         with open(shard_path, "w") as f:
             json.dump(shard, f, indent=2)
         sys.exit(0)
 
-    outcome_vars = {Variable(g) for g in descendants}
-    outcome_var_list = [Variable(g) for g in descendants]
+    outcome_vars = {Variable(g) for g in children}
+    outcome_var_list = [Variable(g) for g in children]
 
     # --- Joint cyclic_id call ---
     print(
         f"[task {task_id} | {tf}] Running joint cyclic_id "
-        f"(interventions={{{tf}}}, |outcomes|={len(outcome_vars)}, "
+        f"(interventions={{{tf}}}, |outcomes|={len(outcome_vars)} children, "
         f"|B(t)|={len(min_cut)})..."
     )
     joint_identifiable = run_joint_cyclic_id(
@@ -391,8 +347,8 @@ def main():
         "min_cut": min_cut,
         "scc_size": scc_size,
         "in_scc_children": in_scc_children,
-        "n_descendants": len(descendants),
-        "outcomes": sorted(descendants),
+        "n_children": len(children),
+        "outcomes": sorted(children),
         "joint_identifiable": joint_identifiable,
         "per_gene": per_gene,
         "note": "",
