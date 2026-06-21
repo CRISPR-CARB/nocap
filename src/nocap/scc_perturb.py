@@ -450,6 +450,102 @@ def residual_scc_analysis(
 # ---------------------------------------------------------------------------
 
 
+def verify_cut_complete(
+    tf: str,
+    in_scc_children: list,
+    min_cut: list,
+    graph: nx.DiGraph,
+) -> dict:
+    """
+    Verify that ``do(B(t))`` severs **every** return path from any in-SCC child
+    of *tf* back to *tf*.
+
+    Under Interpretation A, ``compute_min_cut_b`` excludes *tf* and its direct
+    in-SCC children from B(t).  For short cycles (e.g. a 2-cycle ``t ↔ c``),
+    no valid intermediate node exists on the return path ``c → t``, so the
+    computed B(t) may be incomplete.  This function detects such failures.
+
+    Parameters
+    ----------
+    tf:
+        The TF gene name.
+    in_scc_children:
+        List of *tf*'s direct children that are in the same SCC (from
+        ``find_in_scc_children``).  These are the nodes whose return paths
+        must be severed.
+    min_cut:
+        B(t) — the list of nodes to intervene on.
+    graph:
+        The full directed graph (pre-intervention).
+
+    Returns
+    -------
+    dict with keys:
+        ``complete``             – bool: True iff NO in-SCC child can reach
+                                   *tf* in the post-intervention graph.
+        ``surviving_children``   – list of in-SCC children that can still
+                                   reach *tf* after ``do(B(t))``; empty
+                                   when ``complete=True``.
+        ``tf_still_cyclic``      – bool: True iff *tf* sits in a non-trivial
+                                   SCC of the post-intervention graph (i.e.
+                                   the cut failed to break *tf*'s own loop).
+
+    axiomander:
+        ensures:
+            result["complete"] == (len(result["surviving_children"]) == 0)
+            isinstance(result["tf_still_cyclic"], bool)
+            isinstance(result["complete"], bool)
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(tf, str), "PRE: tf must be a str"
+    assert isinstance(in_scc_children, list), "PRE: in_scc_children must be a list"
+    assert isinstance(min_cut, list), "PRE: min_cut must be a list"
+
+    g_do = build_intervened_graph(graph, min_cut)
+
+    # Check which in-SCC children can still reach tf
+    surviving: list = []
+    for c in in_scc_children:
+        if c == tf:
+            continue
+        if c in g_do and tf in g_do:
+            try:
+                if nx.has_path(g_do, c, tf):
+                    surviving.append(c)
+            except nx.NetworkXError:
+                pass
+
+    complete = len(surviving) == 0
+
+    # Check whether tf itself is in a non-trivial SCC of g_do
+    tf_cyclic = False
+    if tf in g_do:
+        for scc in nx.strongly_connected_components(g_do):
+            if tf in scc and len(scc) >= 2:
+                tf_cyclic = True
+                break
+
+    result = {
+        "complete": complete,
+        "surviving_children": sorted(surviving),
+        "tf_still_cyclic": tf_cyclic,
+    }
+
+    # --- POST ---
+    assert result["complete"] == (len(result["surviving_children"]) == 0), (
+        "POST: complete must equal (no surviving children)"
+    )
+    assert isinstance(result["tf_still_cyclic"], bool), (
+        "POST: tf_still_cyclic must be bool"
+    )
+    assert isinstance(result["complete"], bool), (
+        "POST: complete must be bool"
+    )
+    return result
+
+
 def residual_cluster_size_distribution(analysis_result: dict) -> dict:
     """
     Summarise the size distribution of residual clusters from the output of
