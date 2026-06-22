@@ -4,7 +4,7 @@ Subcommands
 -----------
 prepare     List all directed edges in a GraphML file, shard them into JSON
             files, and write a manifest.
-classify    Classify all edges in one shard under the σ-single-door criterion.
+classify    Classify all edges in one shard under the sigma-single-door criterion.
 preprocess  Run the greedy intervention rescue optimizer on the full graph.
 
 Usage
@@ -33,11 +33,8 @@ Usage
 from __future__ import annotations
 
 import argparse
-import json
-import os
 import sys
 from pathlib import Path
-
 
 # ---------------------------------------------------------------------------
 # Graph loading helper
@@ -93,8 +90,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         json.dump(manifest, f, indent=2)
 
     print(
-        f"prepare: {len(edges)} edges → {len(shard_ids)} shards "
-        f"(size {shard_size}) in {shard_dir}",
+        f"prepare: {len(edges)} edges → {len(shard_ids)} shards (size {shard_size}) in {shard_dir}",
         file=sys.stderr,
     )
 
@@ -210,7 +206,7 @@ def cmd_preprocess(args: argparse.Namespace) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="σ-separation single-door edge classifier (scatter worker)",
+        description="sigma-separation single-door edge classifier (scatter worker)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     sub = parser.add_subparsers(dest="subcommand", required=True)

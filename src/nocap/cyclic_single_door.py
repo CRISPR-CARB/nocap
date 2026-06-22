@@ -65,7 +65,6 @@ efficient total effect estimation via adjustment in causal linear models.
 from __future__ import annotations
 
 import networkx as nx
-
 from y0.algorithm.separation.sigma_extension import sigma_extension
 from y0.algorithm.separation.sigma_single_door import find_sigma_single_door_set
 from y0.dsl import Variable
@@ -74,11 +73,11 @@ from y0.graph import NxMixedGraph
 from nocap.scc_perturb import build_intervened_graph, compute_min_cut_b, find_in_scc_children
 
 __all__ = [
-    "nx_digraph_to_y0",
-    "same_scc",
     "classify_edge",
     "evaluate_all_edges",
     "maximize_identifiable_edges",
+    "nx_digraph_to_y0",
+    "same_scc",
 ]
 
 # ---------------------------------------------------------------------------
@@ -176,9 +175,7 @@ def same_scc(graph: nx.DiGraph, u: object, v: object) -> bool:
 
     # Use condensation-based SCC lookup for O(V+E) amortised cost.
     # For a single call, nx.has_path in both directions is simpler.
-    result = bool(
-        nx.has_path(graph, u, v) and nx.has_path(graph, v, u)
-    )
+    result = bool(nx.has_path(graph, u, v) and nx.has_path(graph, v, u))
 
     # --- POST ---
     assert isinstance(result, bool), "POST: result must be bool"
@@ -250,7 +247,7 @@ def classify_edge(
     cause_var = Variable(cause)
     effect_var = Variable(effect)
 
-    # Build σ-extension if not provided
+    # Build sigma-extension if not provided
     g_sigma: NxMixedGraph = (
         precomputed_extension if precomputed_extension is not None else sigma_extension(g_y0)
     )
@@ -338,7 +335,7 @@ def evaluate_all_edges(
     if not edges:
         return []
 
-    # Build y0 representation and σ-extension once
+    # Build y0 representation and sigma-extension once
     g_y0 = nx_digraph_to_y0(graph)
     g_sigma = sigma_extension(g_y0)
 
@@ -359,6 +356,28 @@ def evaluate_all_edges(
         "POST: all statuses must be valid"
     )
     return results
+
+
+# ---------------------------------------------------------------------------
+# _candidate_pool (module-level helper for maximize_identifiable_edges)
+# ---------------------------------------------------------------------------
+
+
+def _candidate_pool(g: nx.DiGraph) -> set:
+    """Return all nodes that appear in any SCC's min-cut B(t)."""
+    candidates: set = set()
+    sccs = list(nx.strongly_connected_components(g))
+    for scc in sccs:
+        if len(scc) <= 1:
+            continue
+        scc_frozen = frozenset(scc)
+        for tf in scc:
+            in_scc_ch = find_in_scc_children(tf, scc_frozen, g)
+            if not in_scc_ch:
+                continue
+            cut = compute_min_cut_b(tf, scc_frozen, in_scc_ch, g)
+            candidates.update(cut)
+    return candidates
 
 
 # ---------------------------------------------------------------------------
@@ -412,23 +431,6 @@ def maximize_identifiable_edges(
     # --- PRE ---
     assert isinstance(graph, nx.DiGraph), "PRE: graph must be an nx.DiGraph"
     assert isinstance(k, int) and k >= 0, "PRE: k must be a non-negative int"
-
-    # Collect candidate intervention nodes from min-cut pools across all SCCs
-    def _candidate_pool(g: nx.DiGraph) -> set:
-        """Return all nodes that appear in any SCC's min-cut B(t)."""
-        candidates: set = set()
-        sccs = list(nx.strongly_connected_components(g))
-        for scc in sccs:
-            if len(scc) <= 1:
-                continue
-            scc_frozen = frozenset(scc)
-            for tf in scc:
-                in_scc_ch = find_in_scc_children(tf, scc_frozen, g)
-                if not in_scc_ch:
-                    continue
-                cut = compute_min_cut_b(tf, scc_frozen, in_scc_ch, g)
-                candidates.update(cut)
-        return candidates
 
     current_graph = graph.copy()
     chosen_nodes: list[str] = []

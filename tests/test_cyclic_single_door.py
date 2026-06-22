@@ -29,7 +29,6 @@ from nocap.cyclic_single_door import (
     same_scc,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -57,7 +56,7 @@ def _two_cycle() -> nx.DiGraph:
 
 
 def _three_cycle_with_dag_edge() -> nx.DiGraph:
-    """A -> B -> C -> A (SCC), plus D -> A (DAG edge into SCC).
+    """Build a 3-cycle A->B->C->A (SCC) plus a DAG edge D->A into the SCC.
 
     Edges:
       A->B, B->C, C->A  (SCC)
@@ -86,11 +85,15 @@ def _rescue_graph() -> nx.DiGraph:
       A -> E            (A->E: A in SCC, E outside — identifiable)
     """
     g = nx.DiGraph()
-    g.add_edges_from([
-        ("A", "B"), ("B", "C"), ("C", "A"),  # SCC
-        ("D", "A"),                            # into SCC
-        ("A", "E"),                            # out of SCC
-    ])
+    g.add_edges_from(
+        [
+            ("A", "B"),
+            ("B", "C"),
+            ("C", "A"),  # SCC
+            ("D", "A"),  # into SCC
+            ("A", "E"),  # out of SCC
+        ]
+    )
     return g
 
 
@@ -292,9 +295,7 @@ def test_rescue_monotone_curve():
     result = maximize_identifiable_edges(g, k=10)
     curve = result["curve"]
     for i in range(1, len(curve)):
-        assert curve[i][1] >= curve[i - 1][1], (
-            f"Curve must be non-decreasing: {curve}"
-        )
+        assert curve[i][1] >= curve[i - 1][1], f"Curve must be non-decreasing: {curve}"
 
 
 def test_rescue_two_cycle_improves():
