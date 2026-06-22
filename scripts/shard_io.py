@@ -25,7 +25,6 @@ Production functions carry plain ``assert`` PRE/INV/POST guards and an
 """
 
 import json
-import os
 import sys
 
 
@@ -58,9 +57,7 @@ def load_first_json_object(path: str) -> dict:
             none
     """
     # --- PRE ---
-    assert isinstance(path, str) and len(path) > 0, (
-        "PRE: path must be a non-empty string"
-    )
+    assert isinstance(path, str) and len(path) > 0, "PRE: path must be a non-empty string"
 
     with open(path) as f:
         raw = f.read()
@@ -104,7 +101,7 @@ def load_first_json_object(path: str) -> dict:
             if depth == 0 and first_brace is not None:
                 # Found the end of the first balanced object
                 candidate = raw[first_brace : i + 1]
-                trailing = raw[i + 1:].strip()
+                trailing = raw[i + 1 :].strip()
                 if trailing:
                     print(
                         f"WARNING: shard_io: {path!r} has trailing content after "
@@ -120,9 +117,7 @@ def load_first_json_object(path: str) -> dict:
                         f"First balanced object in {path!r} is not valid JSON: {exc}"
                     ) from exc
                 if not isinstance(obj, dict):
-                    raise ValueError(
-                        f"First JSON object in {path!r} is not a dict"
-                    )
+                    raise ValueError(f"First JSON object in {path!r} is not a dict")
                 # --- POST (slow path) ---
                 assert isinstance(obj, dict), "POST: result must be a dict"
                 assert "tf" in obj, "POST: result must have 'tf' key"
@@ -146,9 +141,7 @@ def repair_shard_inplace(path: str) -> bool:
             path   # overwrites the file if repair needed
     """
     # --- PRE ---
-    assert isinstance(path, str) and len(path) > 0, (
-        "PRE: path must be a non-empty string"
-    )
+    assert isinstance(path, str) and len(path) > 0, "PRE: path must be a non-empty string"
 
     with open(path) as f:
         raw = f.read()

@@ -38,7 +38,7 @@ import sys
 
 import networkx as nx
 
-from nocap.scc_perturb import build_intervened_graph, get_direct_children  # noqa: F401
+from nocap.scc_perturb import build_intervened_graph, get_direct_children
 
 
 def run_joint_cyclic_id(
@@ -80,9 +80,7 @@ def run_joint_cyclic_id(
     """
     # --- PRE ---
     assert isinstance(tf, str), "PRE: tf must be a str"
-    assert isinstance(outcome_set, (set, frozenset)), (
-        "PRE: outcome_set must be a set or frozenset"
-    )
+    assert isinstance(outcome_set, set | frozenset), "PRE: outcome_set must be a set or frozenset"
     assert isinstance(min_cut, list), "PRE: min_cut must be a list"
 
     if identify_fn is not None:
@@ -153,8 +151,6 @@ def run_per_gene_cyclic_id(
     assert isinstance(outcome_vars, list), "PRE: outcome_vars must be a list"
     assert isinstance(min_cut, list), "PRE: min_cut must be a list"
 
-    from y0.dsl import Variable
-
     results: dict = {}
     for var in outcome_vars:
         gene = var.name if hasattr(var, "name") else str(var)
@@ -183,9 +179,7 @@ def run_per_gene_cyclic_id(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="SCC-perturbation worker (one SLURM array task)"
-    )
+    parser = argparse.ArgumentParser(description="SCC-perturbation worker (one SLURM array task)")
     parser.add_argument("--manifest", required=True, help="Path to scc_perturb_job.json")
     parser.add_argument(
         "--shards-dir",
@@ -226,9 +220,7 @@ def main():
         task_id = int(env_id)
 
     n_tasks = args.n_tasks
-    assert 0 <= task_id < n_tasks, (
-        f"task_id {task_id} out of range [0, {n_tasks})"
-    )
+    assert 0 <= task_id < n_tasks, f"task_id {task_id} out of range [0, {n_tasks})"
 
     # --- Load manifest ---
     manifest_path = os.path.abspath(args.manifest)
@@ -237,9 +229,7 @@ def main():
         manifest = json.load(f)
 
     tasks = manifest["tasks"]
-    assert 0 <= task_id < len(tasks), (
-        f"task_id {task_id} out of range for {len(tasks)} tasks"
-    )
+    assert 0 <= task_id < len(tasks), f"task_id {task_id} out of range for {len(tasks)} tasks"
     task = tasks[task_id]
 
     tf = task["tf"]
@@ -317,9 +307,7 @@ def main():
         apt_order=apt_order,
         all_network_vars=all_network_vars,
     )
-    print(
-        f"[task {task_id} | {tf}] Joint identifiable: {joint_identifiable}"
-    )
+    print(f"[task {task_id} | {tf}] Joint identifiable: {joint_identifiable}")
 
     # --- Optional per-gene fallback ---
     per_gene: dict = {}
@@ -337,9 +325,7 @@ def main():
             all_network_vars=all_network_vars,
         )
         n_id = sum(1 for v in per_gene.values() if v)
-        print(
-            f"[task {task_id} | {tf}] Per-gene: {n_id}/{len(per_gene)} identifiable"
-        )
+        print(f"[task {task_id} | {tf}] Per-gene: {n_id}/{len(per_gene)} identifiable")
 
     # --- Write shard ---
     shard = {

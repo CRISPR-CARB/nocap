@@ -40,7 +40,7 @@ def load_valid_genes_adorned(supptable_path, network_nodes):
     # --- PRECONDITIONS ---
     assert isinstance(supptable_path, str), "PRE: supptable_path must be a str"
     assert os.path.isfile(supptable_path), f"PRE: file must exist: {supptable_path}"
-    assert isinstance(network_nodes, (set, frozenset)), "PRE: network_nodes must be a set"
+    assert isinstance(network_nodes, set | frozenset), "PRE: network_nodes must be a set"
 
     # --- BODY (identical to production) ---
     csv_genes = set()
@@ -53,10 +53,12 @@ def load_valid_genes_adorned(supptable_path, network_nodes):
             if "off" not in name.lower() and "AAV" not in name:
                 csv_genes.add(name)
                 # LOOP INVARIANT: no "off" or "AAV" in csv_genes so far
-                assert all("off" not in g.lower() for g in csv_genes), \
+                assert all("off" not in g.lower() for g in csv_genes), (
                     "INV: csv_genes must never contain 'off' names"
-                assert all("AAV" not in g for g in csv_genes), \
+                )
+                assert all("AAV" not in g for g in csv_genes), (
                     "INV: csv_genes must never contain 'AAV' names"
+                )
 
     valid = csv_genes & network_nodes
 
@@ -64,10 +66,10 @@ def load_valid_genes_adorned(supptable_path, network_nodes):
     assert isinstance(valid, set), "POST: result must be a set"
     assert valid <= set(network_nodes), "POST: result must be a subset of network_nodes"
     assert valid <= csv_genes, "POST: result must be a subset of filtered CSV genes"
-    assert all("off" not in g.lower() for g in valid), \
+    assert all("off" not in g.lower() for g in valid), (
         "POST: result must not contain any 'off' gene"
-    assert all("AAV" not in g for g in valid), \
-        "POST: result must not contain any 'AAV' gene"
+    )
+    assert all("AAV" not in g for g in valid), "POST: result must not contain any 'AAV' gene"
 
     return valid
 
@@ -75,12 +77,11 @@ def load_valid_genes_adorned(supptable_path, network_nodes):
 def build_baseline_queries_adorned(ecoli_graph, valid_genes):
     """build_baseline_queries with explicit assert-based contracts."""
     # --- PRECONDITIONS ---
-    assert isinstance(valid_genes, (set, frozenset)), \
-        "PRE: valid_genes must be a set"
-    assert hasattr(ecoli_graph, "successors"), \
+    assert isinstance(valid_genes, set | frozenset), "PRE: valid_genes must be a set"
+    assert hasattr(ecoli_graph, "successors"), (
         "PRE: ecoli_graph must be a directed graph with .successors()"
-    assert hasattr(ecoli_graph, "has_edge"), \
-        "PRE: ecoli_graph must support .has_edge()"
+    )
+    assert hasattr(ecoli_graph, "has_edge"), "PRE: ecoli_graph must support .has_edge()"
 
     # --- BODY ---
     pairs = []
@@ -92,29 +93,29 @@ def build_baseline_queries_adorned(ecoli_graph, valid_genes):
                 pairs.append((gene, target))
                 # LOOP INVARIANT: last appended pair satisfies all output contracts
                 src, tgt = pairs[-1]
-                assert src != tgt, \
-                    f"INV: self-loop must never be appended: ({src}, {tgt})"
-                assert src in valid_genes, \
-                    f"INV: src must be in valid_genes: {src}"
-                assert tgt in valid_genes, \
-                    f"INV: tgt must be in valid_genes: {tgt}"
-                assert ecoli_graph.has_edge(src, tgt), \
+                assert src != tgt, f"INV: self-loop must never be appended: ({src}, {tgt})"
+                assert src in valid_genes, f"INV: src must be in valid_genes: {src}"
+                assert tgt in valid_genes, f"INV: tgt must be in valid_genes: {tgt}"
+                assert ecoli_graph.has_edge(src, tgt), (
                     f"INV: appended pair must be a real edge: ({src}, {tgt})"
+                )
 
     # --- POSTCONDITIONS ---
     assert isinstance(pairs, list), "POST: result must be a list"
-    assert len(pairs) <= ecoli_graph.number_of_edges(), \
+    assert len(pairs) <= ecoli_graph.number_of_edges(), (
         "POST: result length must not exceed number of graph edges"
-    assert len(pairs) == len(set(pairs)), \
-        "POST: result must not contain duplicate pairs"
+    )
+    assert len(pairs) == len(set(pairs)), "POST: result must not contain duplicate pairs"
     for src, tgt in pairs:
-        assert isinstance(src, str) and isinstance(tgt, str), \
+        assert isinstance(src, str) and isinstance(tgt, str), (
             f"POST: each pair must be (str, str), got ({type(src)}, {type(tgt)})"
+        )
         assert src != tgt, f"POST: no self-loops allowed: ({src}, {tgt})"
         assert src in valid_genes, f"POST: src must be in valid_genes: {src}"
         assert tgt in valid_genes, f"POST: tgt must be in valid_genes: {tgt}"
-        assert ecoli_graph.has_edge(src, tgt), \
+        assert ecoli_graph.has_edge(src, tgt), (
             f"POST: every pair must be a real graph edge: ({src}, {tgt})"
+        )
 
     return pairs
 
@@ -158,7 +159,7 @@ class TestLoadValidGenesPreconditions:
             load_valid_genes_adorned(str(csv_path), ["geneA"])
 
     def test_pre_accepts_frozenset(self, tmp_path):
-        """frozenset is a valid network_nodes type."""
+        """Frozenset is a valid network_nodes type."""
         csv_path = tmp_path / "s.csv"
         _write_supptable(csv_path, ["geneA"])
         result = load_valid_genes_adorned(str(csv_path), frozenset({"geneA"}))
@@ -236,7 +237,7 @@ class TestBuildBaselineQueriesPreconditions:
             build_baseline_queries_adorned(G, ["A", "B"])
 
     def test_pre_accepts_frozenset(self):
-        """frozenset is a valid valid_genes type."""
+        """Frozenset is a valid valid_genes type."""
         G = nx.DiGraph()
         G.add_edge("A", "B")
         result = build_baseline_queries_adorned(G, frozenset({"A", "B"}))

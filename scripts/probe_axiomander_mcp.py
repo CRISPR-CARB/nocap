@@ -27,9 +27,16 @@ env["PATH"] = "/opt/homebrew/bin:/Users/zuck016/.opam/default/bin:/usr/bin:/bin:
 # 2. notifications/initialized (no id — notification, should be silently ignored)
 # 3. tools/list (with id=2)
 messages = [
-    {"jsonrpc": "2.0", "id": 1, "method": "initialize",
-     "params": {"protocolVersion": "2024-11-05", "capabilities": {},
-                "clientInfo": {"name": "cline", "version": "3.0"}}},
+    {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {"name": "cline", "version": "3.0"},
+        },
+    },
     {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}},
     {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
 ]

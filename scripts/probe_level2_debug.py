@@ -1,5 +1,4 @@
 """Debug probe: print full result for scale_intercept with different hints."""
-import sys
 
 SOURCE_L2 = '''
 def scale_intercept(intercept: int, factor: int) -> int:
@@ -28,6 +27,6 @@ if __name__ == "__main__":
         level = getattr(result, "level", None)
         detail = (getattr(result, "error_detail", "") or "")[:120]
         status = "PROVED  " if proved else "UNPROVED"
-        print(f"  hint={str(hint):12s}  {status}  [{level}]  {detail}")
+        print(f"  hint={hint!s:12s}  {status}  [{level}]  {detail}")
         if proved:
             break

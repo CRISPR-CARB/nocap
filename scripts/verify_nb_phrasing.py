@@ -1,6 +1,6 @@
 """Verify all phrasing fixes were applied to the notebook."""
+
 import json
-from pathlib import Path
 
 nb = json.load(open("notebooks/Ecoli_Analysis_Notebooks/SCC_Perturbation_Analysis.ipynb"))
 
@@ -19,11 +19,11 @@ else:
 
 # 2. Spot-check key corrected phrases
 checks = [
-    (0,  "identifiable from the background interventional distribution"),
-    (0,  "P(Y | do(t))` for the direct children"),
-    (0,  "3. Tests whether the target query `P(Y | do(t))`"),
-    (7,  "cyclic_id` with minimum in-edge cut"),
-    (7,  "minimum in-edge cut"),
+    (0, "identifiable from the background interventional distribution"),
+    (0, "P(Y | do(t))` for the direct children"),
+    (0, "3. Tests whether the target query `P(Y | do(t))`"),
+    (7, "cyclic_id` with minimum in-edge cut"),
+    (7, "minimum in-edge cut"),
     (22, "cannot express\n`P(Y | do(t))` as a functional of the background"),
     (22, "background distribution `P(V | do(B(t)))` is sufficient"),
     (22, "joint query `P(Y\u2081,\u2026,Y\u2099 | do(t))` is not identifiable from"),

@@ -1,4 +1,4 @@
-"""
+r"""
 perturbation_optimizer.py
 =========================
 Greedy submodular optimizer for perturbation panel design.
@@ -80,16 +80,13 @@ def load_coverage_matrix(path: str) -> tuple[list[str], list[str], dict[str, lis
             matrix[cand] = vals
             # LOOP INVARIANT: every row so far has the right length
             assert len(matrix[cand]) == len(queries), (
-                f"INV: row for {cand!r} has {len(matrix[cand])} values, "
-                f"expected {len(queries)}"
+                f"INV: row for {cand!r} has {len(matrix[cand])} values, expected {len(queries)}"
             )
 
     # --- POSTCONDITIONS ---
     assert isinstance(candidates, list), "POST: candidates must be a list"
     assert isinstance(queries, list), "POST: queries must be a list"
-    assert set(matrix.keys()) == set(candidates), (
-        "POST: matrix keys must equal set(candidates)"
-    )
+    assert set(matrix.keys()) == set(candidates), "POST: matrix keys must equal set(candidates)"
     for cand in candidates:
         assert len(matrix[cand]) == len(queries), (
             f"POST: row for {cand!r} must have len == len(queries)"
@@ -148,10 +145,8 @@ def greedy_max_coverage(
     # --- PRECONDITIONS ---
     assert isinstance(candidates, list), "PRE: candidates must be a list"
     assert isinstance(queries, list), "PRE: queries must be a list"
-    assert isinstance(budget_k, int) and budget_k >= 0, (
-        "PRE: budget_k must be a non-negative int"
-    )
-    assert intervenable is None or isinstance(intervenable, (set, frozenset)), (
+    assert isinstance(budget_k, int) and budget_k >= 0, "PRE: budget_k must be a non-negative int"
+    assert intervenable is None or isinstance(intervenable, set | frozenset), (
         "PRE: intervenable must be None or a set"
     )
     for c in candidates:
@@ -210,9 +205,7 @@ def greedy_max_coverage(
         "POST: len(result) must be <= min(budget_k, len(pool))"
     )
     selected_tfs = [tf for tf, _, _ in selected]
-    assert len(selected_tfs) == len(set(selected_tfs)), (
-        "POST: selected TFs must be distinct"
-    )
+    assert len(selected_tfs) == len(set(selected_tfs)), "POST: selected TFs must be distinct"
     for tf, gain, cumulative in selected:
         assert isinstance(tf, str), "POST: each tf must be a str"
         assert isinstance(gain, int) and gain >= 1, (
@@ -223,9 +216,7 @@ def greedy_max_coverage(
         )
     # cumulative is non-decreasing
     cumulatives = [c for _, _, c in selected]
-    assert cumulatives == sorted(cumulatives), (
-        "POST: cumulative_coverage must be non-decreasing"
-    )
+    assert cumulatives == sorted(cumulatives), "POST: cumulative_coverage must be non-decreasing"
 
     return selected
 
@@ -260,7 +251,7 @@ def greedy_min_set_cover(
     # --- PRECONDITIONS ---
     assert isinstance(candidates, list), "PRE: candidates must be a list"
     assert isinstance(queries, list), "PRE: queries must be a list"
-    assert intervenable is None or isinstance(intervenable, (set, frozenset)), (
+    assert intervenable is None or isinstance(intervenable, set | frozenset), (
         "PRE: intervenable must be None or a set"
     )
     for c in candidates:
@@ -270,7 +261,7 @@ def greedy_min_set_cover(
         )
 
     pool = [c for c in candidates if intervenable is None or c in intervenable]
-    n_queries = len(queries)  # noqa: F841 — kept for clarity
+    n_queries = len(queries)
 
     # Only try to cover queries that are resolvable by at least one TF
     resolvable: set[int] = set()
@@ -316,9 +307,7 @@ def greedy_min_set_cover(
     # --- POSTCONDITIONS ---
     assert isinstance(selected, list), "POST: result must be a list"
     selected_tfs = [tf for tf, _, _ in selected]
-    assert len(selected_tfs) == len(set(selected_tfs)), (
-        "POST: selected TFs must be distinct"
-    )
+    assert len(selected_tfs) == len(set(selected_tfs)), "POST: selected TFs must be distinct"
     for tf, gain, cumulative in selected:
         assert isinstance(tf, str), "POST: each tf must be a str"
         assert isinstance(gain, int) and gain >= 1, (
@@ -328,9 +317,7 @@ def greedy_min_set_cover(
             "POST: cumulative must be a positive int"
         )
     cumulatives = [c for _, _, c in selected]
-    assert cumulatives == sorted(cumulatives), (
-        "POST: cumulative_coverage must be non-decreasing"
-    )
+    assert cumulatives == sorted(cumulatives), "POST: cumulative_coverage must be non-decreasing"
     if selected and resolvable:
         assert selected[-1][2] == len(resolvable), (
             "POST: final cumulative must equal len(resolvable)"
@@ -364,17 +351,13 @@ def build_marginal_gain_curve(
         POST: len(result) == len(greedy steps taken) + 1
     """
     # --- PRECONDITIONS ---
-    assert isinstance(max_k, int) and max_k >= 0, (
-        "PRE: max_k must be a non-negative int"
-    )
-    assert isinstance(queries, list) and len(queries) > 0, (
-        "PRE: queries must be a non-empty list"
-    )
+    assert isinstance(max_k, int) and max_k >= 0, "PRE: max_k must be a non-negative int"
+    assert isinstance(queries, list) and len(queries) > 0, "PRE: queries must be a non-empty list"
 
     results = greedy_max_coverage(candidates, queries, matrix, max_k, intervenable)
     n_queries = len(queries)
     curve: list[tuple[int, int, float]] = [(0, 0, 0.0)]
-    for step_idx, (tf, gain, cumulative) in enumerate(results):  # noqa: B007
+    for step_idx, (tf, gain, cumulative) in enumerate(results):
         curve.append((step_idx + 1, cumulative, cumulative / n_queries))
 
     # --- POSTCONDITIONS ---
@@ -382,9 +365,7 @@ def build_marginal_gain_curve(
     ks = [k for k, _, _ in curve]
     assert ks == list(range(len(curve))), "POST: k values must be 0, 1, 2, ..."
     cumulatives = [c for _, c, _ in curve]
-    assert cumulatives == sorted(cumulatives), (
-        "POST: cumulative values must be non-decreasing"
-    )
+    assert cumulatives == sorted(cumulatives), "POST: cumulative values must be non-decreasing"
     for _, _, frac in curve:
         assert 0.0 <= frac <= 1.0, f"POST: fraction {frac} must be in [0.0, 1.0]"
 
@@ -466,9 +447,7 @@ def cycle_breaking_score(node: str, graph) -> int:
             count += 1
 
     # --- POSTCONDITION ---
-    assert isinstance(count, int) and count >= 0, (
-        "POST: result must be a non-negative int"
-    )
+    assert isinstance(count, int) and count >= 0, "POST: result must be a non-negative int"
     return count
 
 
@@ -508,9 +487,7 @@ def rank_candidates_by_cycle_score(
 
     # --- PRECONDITIONS ---
     assert isinstance(candidates, list), "PRE: candidates must be a list"
-    assert hasattr(graph, "number_of_nodes"), (
-        "PRE: graph must have a .number_of_nodes() method"
-    )
+    assert hasattr(graph, "number_of_nodes"), "PRE: graph must have a .number_of_nodes() method"
     assert isinstance(scc_fallback_threshold, int) and scc_fallback_threshold >= 1, (
         "PRE: scc_fallback_threshold must be a positive int"
     )
@@ -537,12 +514,8 @@ def rank_candidates_by_cycle_score(
 
     # --- POSTCONDITIONS ---
     assert isinstance(result, list), "POST: result must be a list"
-    assert len(result) == len(candidates), (
-        "POST: result must have the same length as candidates"
-    )
-    assert set(result) == set(candidates), (
-        "POST: result must be a permutation of candidates"
-    )
+    assert len(result) == len(candidates), "POST: result must have the same length as candidates"
+    assert set(result) == set(candidates), "POST: result must be a permutation of candidates"
 
     return result
 
@@ -622,10 +595,8 @@ def set_cycle_break_score(candidate_set: "set | frozenset", graph) -> int:
         modifies:
             none
     """
-    import networkx as nx
-
     # --- PRE ---
-    assert isinstance(candidate_set, (set, frozenset)), (
+    assert isinstance(candidate_set, set | frozenset), (
         "PRE: candidate_set must be a set or frozenset"
     )
     assert hasattr(graph, "nodes"), "PRE: graph must have a .nodes() method"
@@ -644,9 +615,7 @@ def set_cycle_break_score(candidate_set: "set | frozenset", graph) -> int:
     score = before - after
 
     # --- POST ---
-    assert isinstance(score, int) and score >= 0, (
-        "POST: score must be a non-negative int"
-    )
+    assert isinstance(score, int) and score >= 0, "POST: score must be a non-negative int"
     return score
 
 

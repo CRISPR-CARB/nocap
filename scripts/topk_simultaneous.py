@@ -122,9 +122,7 @@ def build_query_resolvers(
 
     # --- POST ---
     assert isinstance(resolvers, dict), "POST: result must be a dict"
-    assert len(resolvers) == len(queries), (
-        "POST: result must have one entry per query"
-    )
+    assert len(resolvers) == len(queries), "POST: result must have one entry per query"
     return resolvers
 
 
@@ -154,7 +152,7 @@ def union_lower_bound(
             none
     """
     # --- PRE ---
-    assert isinstance(candidate_set, (set, frozenset)), (
+    assert isinstance(candidate_set, set | frozenset), (
         "PRE: candidate_set must be a set or frozenset"
     )
     assert isinstance(queries, list), "PRE: queries must be a list"
@@ -162,14 +160,13 @@ def union_lower_bound(
     assert isinstance(resolvers, dict), "PRE: resolvers must be a dict"
 
     resolved_by_union = sum(
-        1 for qi in range(len(queries))
+        1
+        for qi in range(len(queries))
         if any(c in resolvers.get(qi, frozenset()) for c in candidate_set)
     )
 
     # --- POST ---
-    assert 0 <= resolved_by_union <= len(queries), (
-        "POST: result must be in [0, len(queries)]"
-    )
+    assert 0 <= resolved_by_union <= len(queries), "POST: result must be in [0, len(queries)]"
     return resolved_by_union
 
 
@@ -207,16 +204,14 @@ def optimistic_upper_bound(
             none
     """
     # --- PRE ---
-    assert isinstance(current_set, (set, frozenset)), (
-        "PRE: current_set must be a set or frozenset"
-    )
+    assert isinstance(current_set, set | frozenset), "PRE: current_set must be a set or frozenset"
     assert isinstance(pool, list), "PRE: pool must be a list"
     assert isinstance(remaining_budget, int) and remaining_budget >= 0, (
         "PRE: remaining_budget must be a non-negative int"
     )
     assert isinstance(queries, list), "PRE: queries must be a list"
     assert isinstance(resolvers, dict), "PRE: resolvers must be a dict"
-    assert isinstance(already_resolved_qi, (set, frozenset)), (
+    assert isinstance(already_resolved_qi, set | frozenset), (
         "PRE: already_resolved_qi must be a set or frozenset"
     )
 
@@ -225,8 +220,10 @@ def optimistic_upper_bound(
 
     # per-candidate singleton gain on still-unresolved queries
     gains = sorted(
-        (sum(1 for qi in still_unresolved if c in resolvers.get(qi, frozenset()))
-         for c in available),
+        (
+            sum(1 for qi in still_unresolved if c in resolvers.get(qi, frozenset()))
+            for c in available
+        ),
         reverse=True,
     )
 
@@ -234,9 +231,7 @@ def optimistic_upper_bound(
     result = len(already_resolved_qi) + optimistic_extra
 
     # --- POST ---
-    assert result >= len(already_resolved_qi), (
-        "POST: bound must be >= already resolved"
-    )
+    assert result >= len(already_resolved_qi), "POST: bound must be >= already resolved"
     return min(result, len(queries))
 
 
@@ -284,7 +279,7 @@ def evaluate_perturbation_set(
     # --- PRE ---
     assert isinstance(tf1, str), "PRE: tf1 must be a str"
     assert isinstance(outcome, str), "PRE: outcome must be a str"
-    assert isinstance(candidate_set, (set, frozenset)), (
+    assert isinstance(candidate_set, set | frozenset), (
         "PRE: candidate_set must be a set or frozenset"
     )
 
@@ -355,7 +350,7 @@ def score_candidate_set(
             none
     """
     # --- PRE ---
-    assert isinstance(candidate_set, (set, frozenset)), (
+    assert isinstance(candidate_set, set | frozenset), (
         "PRE: candidate_set must be a set or frozenset"
     )
     assert isinstance(query_list, list), "PRE: query_list must be a list"
@@ -368,15 +363,11 @@ def score_candidate_set(
             resolved += 1
             continue
         # Slow path: joint cyclic_id check
-        if evaluate_perturbation_set(
-            tf1, outcome, candidate_set, graph, apt_order, identify_fn
-        ):
+        if evaluate_perturbation_set(tf1, outcome, candidate_set, graph, apt_order, identify_fn):
             resolved += 1
 
     # --- POST ---
-    assert 0 <= resolved <= len(query_list), (
-        "POST: result must be in [0, len(query_list)]"
-    )
+    assert 0 <= resolved <= len(query_list), "POST: result must be in [0, len(query_list)]"
     return resolved
 
 
@@ -426,11 +417,9 @@ def greedy_topk(
     assert isinstance(candidate_cap, int) and candidate_cap >= 1, (
         "PRE: candidate_cap must be a positive int"
     )
-    assert isinstance(beam_width, int) and beam_width >= 1, (
-        "PRE: beam_width must be a positive int"
-    )
+    assert isinstance(beam_width, int) and beam_width >= 1, "PRE: beam_width must be a positive int"
 
-    from perturbation_optimizer import set_cycle_break_score, rank_candidates_by_cycle_score
+    from perturbation_optimizer import rank_candidates_by_cycle_score, set_cycle_break_score
 
     # --- Step 1: build per-query resolver map ---
     resolvers = build_query_resolvers(candidates, queries, matrix)
@@ -474,8 +463,7 @@ def greedy_topk(
                 # Upper bound check (branch-and-bound):
                 # prune only if we CANNOT beat the current best (strict <)
                 ub = optimistic_upper_bound(
-                    new_set, pool, remaining_budget,
-                    queries, resolvers, current_resolved_qi
+                    new_set, pool, remaining_budget, queries, resolvers, current_resolved_qi
                 )
                 if ub < best_score:
                     continue  # pruned
@@ -487,12 +475,12 @@ def greedy_topk(
 
                 # Track newly resolved indices for the next beam state
                 new_resolved_qi = current_resolved_qi | {
-                    qi for qi in range(len(query_list))
-                    if (qi not in current_resolved_qi) and
-                       evaluate_perturbation_set(
-                           query_list[qi][0], query_list[qi][1],
-                           new_set, graph, apt_order, identify_fn
-                       )
+                    qi
+                    for qi in range(len(query_list))
+                    if (qi not in current_resolved_qi)
+                    and evaluate_perturbation_set(
+                        query_list[qi][0], query_list[qi][1], new_set, graph, apt_order, identify_fn
+                    )
                 }
 
                 next_beam_candidates.append((score, new_set, new_resolved_qi, cand))
@@ -500,7 +488,7 @@ def greedy_topk(
                 if score > best_score:
                     best_score = score
                     best_set = new_set
-                    best_steps = list(best_steps) + [(cand, score)]
+                    best_steps = [*list(best_steps), (cand, score)]
 
         if not next_beam_candidates:
             break
@@ -569,7 +557,7 @@ def exhaustive_topk(
     assert isinstance(k, int) and k >= 1, "PRE: k must be a positive int"
     assert isinstance(top_n, int) and top_n >= 1, "PRE: top_n must be a positive int"
 
-    from perturbation_optimizer import set_cycle_break_score, rank_candidates_by_cycle_score
+    from perturbation_optimizer import rank_candidates_by_cycle_score, set_cycle_break_score
 
     resolvers = build_query_resolvers(candidates, queries, matrix)
 
@@ -587,10 +575,7 @@ def exhaustive_topk(
         total_combos = total_combos * (len(pool) - i) // (i + 1)
     print(f"  Exhaustive search: C({len(pool)},{k}) = {total_combos} sets")
     if total_combos > 500_000:
-        print(
-            f"  WARNING: {total_combos} sets is large. "
-            "Consider --mode greedy or a smaller pool."
-        )
+        print(f"  WARNING: {total_combos} sets is large. Consider --mode greedy or a smaller pool.")
 
     results: list = []
     for combo in itertools.combinations(pool, k):
@@ -628,10 +613,16 @@ def write_topk_csv(path: str, ranked: list, n_queries: int, mode: str):
 
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            "rank", "perturbation_set", "scc_mass_broken",
-            "queries_resolved", "pct_resolved", "mode",
-        ])
+        writer.writerow(
+            [
+                "rank",
+                "perturbation_set",
+                "scc_mass_broken",
+                "queries_resolved",
+                "pct_resolved",
+                "mode",
+            ]
+        )
         for rank, (pset, scc_break, score) in enumerate(ranked, start=1):
             pset_str = "+".join(sorted(pset))
             pct = score / n_queries * 100 if n_queries > 0 else 0.0
@@ -684,46 +675,50 @@ def main():
         description="Find top-k simultaneous perturbations maximizing identifiable queries"
     )
     parser.add_argument(
-        "--matrix", required=True,
-        help="Path to coverage_matrix.csv (from coverage_reduce.py)"
+        "--matrix", required=True, help="Path to coverage_matrix.csv (from coverage_reduce.py)"
     )
     parser.add_argument(
-        "--graphml", required=True,
-        help="Path to network .graphml file (for SCC-break scoring)"
+        "--graphml", required=True, help="Path to network .graphml file (for SCC-break scoring)"
     )
     parser.add_argument(
-        "--k", type=int, default=5,
-        help="Maximum perturbation set size (default: 5)"
+        "--k", type=int, default=5, help="Maximum perturbation set size (default: 5)"
     )
     parser.add_argument(
-        "--mode", choices=["greedy", "exhaustive"], default="greedy",
-        help="Search mode: greedy (default) or exhaustive (only k=2 / small pools)"
+        "--mode",
+        choices=["greedy", "exhaustive"],
+        default="greedy",
+        help="Search mode: greedy (default) or exhaustive (only k=2 / small pools)",
     )
     parser.add_argument(
-        "--beam-width", type=int, default=5,
-        help="Beam width for greedy mode (default: 5)"
+        "--beam-width", type=int, default=5, help="Beam width for greedy mode (default: 5)"
     )
     parser.add_argument(
-        "--candidate-cap", type=int, default=50,
-        help="Number of SCC-top candidates to consider per greedy step (default: 50)"
+        "--candidate-cap",
+        type=int,
+        default=50,
+        help="Number of SCC-top candidates to consider per greedy step (default: 50)",
     )
     parser.add_argument(
-        "--top-n", type=int, default=20,
-        help="Top-n sets to report in exhaustive mode (default: 20)"
+        "--top-n",
+        type=int,
+        default=20,
+        help="Top-n sets to report in exhaustive mode (default: 20)",
     )
     parser.add_argument(
-        "--require-singleton-gain", dest="require_singleton_gain",
-        action="store_true", default=True,
-        help="Restrict to candidates with >=1 individual query resolved (default: on)"
+        "--require-singleton-gain",
+        dest="require_singleton_gain",
+        action="store_true",
+        default=True,
+        help="Restrict to candidates with >=1 individual query resolved (default: on)",
     )
     parser.add_argument(
-        "--no-require-singleton-gain", dest="require_singleton_gain",
+        "--no-require-singleton-gain",
+        dest="require_singleton_gain",
         action="store_false",
-        help="Include zero-individual-gain candidates (synergy exploration)"
+        help="Include zero-individual-gain candidates (synergy exploration)",
     )
     parser.add_argument(
-        "--output-dir", default=".",
-        help="Directory for output CSV (default: current directory)"
+        "--output-dir", default=".", help="Directory for output CSV (default: current directory)"
     )
     args = parser.parse_args()
 
@@ -732,6 +727,7 @@ def main():
     # --- Load coverage matrix ---
     print(f"Loading coverage matrix: {args.matrix}")
     from perturbation_optimizer import load_coverage_matrix
+
     candidates, queries, matrix = load_coverage_matrix(args.matrix)
     n_queries = len(queries)
     print(f"  Candidates: {len(candidates)}, Queries: {n_queries}")
@@ -745,12 +741,13 @@ def main():
 
     # Count baseline (greedy union) for reference
     from perturbation_optimizer import greedy_max_coverage
+
     baseline = greedy_max_coverage(candidates, queries, matrix, args.k)
     baseline_score = baseline[-1][2] if baseline else 0
     baseline_tfs = [tf for tf, _, _ in baseline]
     print(
         f"  Greedy-union baseline (k={args.k}): {baseline_score}/{n_queries} queries "
-        f"({baseline_score/n_queries*100:.1f}%) via {baseline_tfs}"
+        f"({baseline_score / n_queries * 100:.1f}%) via {baseline_tfs}"
     )
 
     # --- Load graph ---
@@ -759,6 +756,7 @@ def main():
     print(f"  Nodes: {nx_graph.number_of_nodes()}, Edges: {nx_graph.number_of_edges()}")
 
     from perturbation_optimizer import scc_mass as _scc_mass
+
     print(f"  SCC mass (before any intervention): {_scc_mass(nx_graph)}")
 
     # --- Run search ---

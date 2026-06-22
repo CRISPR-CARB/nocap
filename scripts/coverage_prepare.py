@@ -1,4 +1,4 @@
-"""
+r"""
 coverage_prepare.py
 ===================
 Serial preparation step for the parallelised coverage-matrix pipeline.
@@ -100,7 +100,9 @@ def main():
     # --- Phase 1: identify baseline unidentifiable queries ---
     n_workers = args.n_workers
     print(f"Running Phase 1 (baseline identifiability, {n_workers} worker(s))...")
-    identifiable, unidentifiable = run_phase1(ecoli_mixed, query_pairs, apt_order, n_workers=n_workers)
+    identifiable, unidentifiable = run_phase1(
+        ecoli_mixed, query_pairs, apt_order, n_workers=n_workers
+    )
     print(f"  Identifiable:   {len(identifiable)}")
     print(f"  Unidentifiable: {len(unidentifiable)}")
 
@@ -131,8 +133,7 @@ def main():
     print(f"  Total pairs to eval:    {len(unidentifiable) * len(candidates)}")
     print(f"\nArray size: {len(unidentifiable)}")
     print(
-        f"Submit with: sbatch --array=0-{len(unidentifiable) - 1} "
-        "scripts/slurm/submit_coverage.sh"
+        f"Submit with: sbatch --array=0-{len(unidentifiable) - 1} scripts/slurm/submit_coverage.sh"
     )
 
 

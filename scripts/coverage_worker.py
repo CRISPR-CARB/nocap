@@ -1,4 +1,4 @@
-"""
+r"""
 coverage_worker.py
 ==================
 SLURM array task for the parallelised coverage-matrix pipeline.
@@ -101,9 +101,7 @@ def evaluate_query(
     assert isinstance(rows, list), "POST: result must be a list"
     assert all(len(r) == 4 for r in rows), "POST: every row has 4 elements"
     _expected = sum(
-        1
-        for c in candidates
-        if c != tf1 and c != outcome and (tf1, c, outcome) not in completed
+        1 for c in candidates if c != tf1 and c != outcome and (tf1, c, outcome) not in completed
     )
     assert len(rows) == _expected, (
         "POST: row count must equal eligible (non-self, not-already-done) candidates"
@@ -113,9 +111,7 @@ def evaluate_query(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Coverage-matrix worker (one SLURM array task)"
-    )
+    parser = argparse.ArgumentParser(description="Coverage-matrix worker (one SLURM array task)")
     parser.add_argument("--manifest", required=True, help="Path to coverage_job.json")
     parser.add_argument(
         "--shards-dir",
@@ -147,9 +143,7 @@ def main():
         task_id = int(env_id)
 
     n_tasks = args.n_tasks
-    assert task_id >= 0 and task_id < n_tasks, (
-        f"task_id {task_id} out of range [0, {n_tasks})"
-    )
+    assert task_id >= 0 and task_id < n_tasks, f"task_id {task_id} out of range [0, {n_tasks})"
 
     # --- Load manifest ---
     manifest_path = os.path.abspath(args.manifest)
@@ -168,8 +162,7 @@ def main():
     my_query_indices = assign_work(n_queries, task_id, n_tasks)
     my_queries = [unidentifiable[i] for i in my_query_indices]
     print(
-        f"[task {task_id}/{n_tasks}] Assigned {len(my_queries)} queries: "
-        f"indices {my_query_indices}"
+        f"[task {task_id}/{n_tasks}] Assigned {len(my_queries)} queries: indices {my_query_indices}"
     )
 
     if not my_queries:
@@ -237,9 +230,7 @@ def main():
     with open(shard_path, "w") as f:
         json.dump({"rows": rows, "completed": [list(k) for k in completed]}, f)
 
-    print(
-        f"[task {task_id}] Done. {len(rows)} rows written to {shard_path}"
-    )
+    print(f"[task {task_id}] Done. {len(rows)} rows written to {shard_path}")
 
 
 if __name__ == "__main__":

@@ -35,7 +35,6 @@ from nocap.scc_perturb import (
 )
 from scripts.scc_perturb_worker import run_joint_cyclic_id, run_per_gene_cyclic_id
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -49,30 +48,39 @@ def toy_graph():
       A→D, B→E        (DAG leaves)
     """
     g = nx.DiGraph()
-    g.add_edges_from([
-        ("A", "B"), ("B", "C"), ("C", "A"),  # cycle
-        ("A", "D"), ("B", "E"),               # out-of-SCC descendants
-    ])
+    g.add_edges_from(
+        [
+            ("A", "B"),
+            ("B", "C"),
+            ("C", "A"),  # cycle
+            ("A", "D"),
+            ("B", "E"),  # out-of-SCC descendants
+        ]
+    )
     return g
 
 
 @pytest.fixture()
 def scc_abc():
+    """Return the SCC {A, B, C} as a frozenset."""
     return frozenset({"A", "B", "C"})
 
 
 @pytest.fixture()
 def in_scc_children_a(toy_graph, scc_abc):
+    """Return the in-SCC children of A in the toy graph."""
     return find_in_scc_children("A", scc_abc, toy_graph)
 
 
 @pytest.fixture()
 def min_cut_a(toy_graph, scc_abc, in_scc_children_a):
+    """Return the minimum cut B(A) for TF=A in the toy graph."""
     return compute_min_cut_b("A", scc_abc, in_scc_children_a, toy_graph)
 
 
 @pytest.fixture()
 def intervened_graph_a(toy_graph, min_cut_a):
+    """Return the intervened graph after applying do(B(A))."""
     return build_intervened_graph(toy_graph, min_cut_a)
 
 
@@ -82,23 +90,30 @@ def intervened_graph_a(toy_graph, min_cut_a):
 
 
 class TestFindInSccChildren:
+    """Tests for find_in_scc_children."""
+
     def test_a_has_b_as_in_scc_child(self, toy_graph, scc_abc):
+        """POST: B is a direct in-SCC child of A (A→B, B in SCC)."""
         children = find_in_scc_children("A", scc_abc, toy_graph)
         assert "B" in children
 
     def test_a_does_not_have_d_as_in_scc_child(self, toy_graph, scc_abc):
+        """POST: D is not in the SCC so it is not an in-SCC child of A."""
         children = find_in_scc_children("A", scc_abc, toy_graph)
         assert "D" not in children
 
     def test_no_self_loops_in_result(self, toy_graph, scc_abc):
+        """POST: tf itself is never returned as its own in-SCC child."""
         children = find_in_scc_children("A", scc_abc, toy_graph)
         assert "A" not in children
 
     def test_result_is_list(self, toy_graph, scc_abc):
+        """POST: result is a list."""
         children = find_in_scc_children("A", scc_abc, toy_graph)
         assert isinstance(children, list)
 
     def test_all_children_in_scc(self, toy_graph, scc_abc):
+        """POST: every returned child is a member of the SCC."""
         children = find_in_scc_children("A", scc_abc, toy_graph)
         assert all(c in scc_abc for c in children)
 
@@ -108,10 +123,12 @@ class TestFindInSccChildren:
         assert children == []
 
     def test_pre_tf_must_be_str(self, toy_graph, scc_abc):
+        """PRE: tf must be a str — int raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: tf must be a str"):
             find_in_scc_children(123, scc_abc, toy_graph)
 
     def test_pre_scc_nodes_must_be_set(self, toy_graph):
+        """PRE: scc_nodes must be a set or frozenset — list raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: scc_nodes must be a set or frozenset"):
             find_in_scc_children("A", ["A", "B", "C"], toy_graph)
 
@@ -122,17 +139,23 @@ class TestFindInSccChildren:
 
 
 class TestComputeMinCutB:
+    """Tests for compute_min_cut_b."""
+
     def test_cut_excludes_tf(self, min_cut_a):
+        """POST: the TF itself is never in the cut set."""
         assert "A" not in min_cut_a
 
     def test_cut_excludes_direct_children(self, min_cut_a, in_scc_children_a):
+        """POST: direct in-SCC children are excluded from the cut."""
         for c in in_scc_children_a:
             assert c not in min_cut_a
 
     def test_cut_nodes_are_in_scc(self, min_cut_a, scc_abc):
+        """POST: every cut node is a member of the SCC."""
         assert all(n in scc_abc for n in min_cut_a)
 
     def test_cut_is_list(self, min_cut_a):
+        """POST: result is a list."""
         assert isinstance(min_cut_a, list)
 
     def test_cut_is_nonempty_for_a(self, min_cut_a):
@@ -149,10 +172,12 @@ class TestComputeMinCutB:
         assert all(n in scc_abc for n in cut_b)
 
     def test_empty_in_scc_children_gives_empty_cut(self, toy_graph, scc_abc):
+        """POST: no in-SCC children → empty cut."""
         cut = compute_min_cut_b("A", scc_abc, [], toy_graph)
         assert cut == []
 
     def test_trivial_scc_gives_empty_cut(self, toy_graph):
+        """POST: singleton SCC → empty cut (nothing to sever)."""
         cut = compute_min_cut_b("D", frozenset({"D"}), ["E"], toy_graph)
         assert cut == []
 
@@ -166,14 +191,17 @@ class TestComputeMinCutB:
             )
 
     def test_pre_tf_must_be_str(self, toy_graph, scc_abc):
+        """PRE: tf must be a str — int raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: tf must be a str"):
             compute_min_cut_b(42, scc_abc, [], toy_graph)
 
     def test_pre_scc_nodes_must_be_set(self, toy_graph):
+        """PRE: scc_nodes must be a set or frozenset — list raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: scc_nodes must be a set or frozenset"):
             compute_min_cut_b("A", ["A", "B", "C"], [], toy_graph)
 
     def test_pre_in_scc_children_must_be_list(self, toy_graph, scc_abc):
+        """PRE: in_scc_children must be a list — set raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: in_scc_children must be a list"):
             compute_min_cut_b("A", scc_abc, {"B"}, toy_graph)
 
@@ -184,26 +212,33 @@ class TestComputeMinCutB:
 
 
 class TestBuildIntervenedGraph:
+    """Tests for build_intervened_graph."""
+
     def test_cut_nodes_have_zero_in_degree(self, toy_graph, min_cut_a, intervened_graph_a):
+        """POST: every cut node has in-degree 0 in the intervened graph."""
         for n in min_cut_a:
             assert intervened_graph_a.in_degree(n) == 0, (
                 f"Node {n} should have in-degree 0 after intervention"
             )
 
     def test_original_graph_not_mutated(self, toy_graph, min_cut_a):
+        """POST: the original graph is not mutated by the intervention."""
         original_edges = set(toy_graph.edges())
         _ = build_intervened_graph(toy_graph, min_cut_a)
         assert set(toy_graph.edges()) == original_edges
 
     def test_empty_cut_leaves_graph_unchanged(self, toy_graph):
+        """POST: empty cut → intervened graph has same edges as original."""
         intervened = build_intervened_graph(toy_graph, [])
         assert set(intervened.edges()) == set(toy_graph.edges())
 
     def test_intervened_is_different_object(self, toy_graph, min_cut_a):
+        """POST: intervened graph is a new object, not the original."""
         intervened = build_intervened_graph(toy_graph, min_cut_a)
         assert intervened is not toy_graph
 
     def test_pre_perturb_set_must_be_list(self, toy_graph):
+        """PRE: perturb_set must be a list — set raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: perturb_set must be a list"):
             build_intervened_graph(toy_graph, {"C"})
 
@@ -214,6 +249,8 @@ class TestBuildIntervenedGraph:
 
 
 class TestGetDirectChildren:
+    """Tests for get_direct_children."""
+
     def test_a_children_include_b_and_d(self, intervened_graph_a):
         """A has direct out-edges A→B and A→D; both must appear."""
         children = get_direct_children("A", intervened_graph_a)
@@ -226,19 +263,23 @@ class TestGetDirectChildren:
         assert "E" not in children
 
     def test_a_not_in_own_children(self, intervened_graph_a):
+        """POST: tf is never returned as its own direct child."""
         children = get_direct_children("A", intervened_graph_a)
         assert "A" not in children
 
     def test_result_is_sorted_list(self, intervened_graph_a):
+        """POST: result is a sorted list."""
         children = get_direct_children("A", intervened_graph_a)
         assert isinstance(children, list)
         assert children == sorted(children)
 
     def test_unknown_node_returns_empty(self, intervened_graph_a):
+        """POST: unknown node returns empty list."""
         children = get_direct_children("Z", intervened_graph_a)
         assert children == []
 
     def test_leaf_node_has_no_children(self, toy_graph):
+        """POST: leaf node D has no direct children."""
         intervened = build_intervened_graph(toy_graph, [])
         children = get_direct_children("D", intervened)
         assert children == []
@@ -247,11 +288,10 @@ class TestGetDirectChildren:
         """Every result node must be a direct out-neighbour of A."""
         children = get_direct_children("A", intervened_graph_a)
         for c in children:
-            assert intervened_graph_a.has_edge("A", c), (
-                f"{c} in result but A→{c} edge missing"
-            )
+            assert intervened_graph_a.has_edge("A", c), f"{c} in result but A→{c} edge missing"
 
     def test_pre_tf_must_be_str(self, toy_graph):
+        """PRE: tf must be a str — int raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: tf must be a str"):
             get_direct_children(123, toy_graph)
 
@@ -262,20 +302,25 @@ class TestGetDirectChildren:
 
 
 class TestRunJointCyclicId:
+    """Tests for run_joint_cyclic_id with injectable identify_fn."""
+
     def _always_true(self, tf, outcome_set, min_cut):
+        """Injectable that always returns True."""
         return True
 
     def _always_false(self, tf, outcome_set, min_cut):
+        """Injectable that always returns False."""
         return False
 
     def _check_inputs(self, tf, outcome_set, min_cut):
         """Injectable that validates the inputs it receives."""
         assert isinstance(tf, str)
-        assert isinstance(outcome_set, (set, frozenset))
+        assert isinstance(outcome_set, set | frozenset)
         assert isinstance(min_cut, list)
         return True
 
     def test_injectable_true(self):
+        """POST: result is True when identify_fn always returns True."""
         result = run_joint_cyclic_id(
             tf="A",
             outcome_set=frozenset({"D", "E"}),
@@ -288,6 +333,7 @@ class TestRunJointCyclicId:
         assert result is True
 
     def test_injectable_false(self):
+        """POST: result is False when identify_fn always returns False."""
         result = run_joint_cyclic_id(
             tf="A",
             outcome_set=frozenset({"D", "E"}),
@@ -300,6 +346,7 @@ class TestRunJointCyclicId:
         assert result is False
 
     def test_injectable_receives_correct_types(self):
+        """POST: identify_fn receives (str, set/frozenset, list) arguments."""
         run_joint_cyclic_id(
             tf="A",
             outcome_set=frozenset({"D"}),
@@ -311,6 +358,7 @@ class TestRunJointCyclicId:
         )
 
     def test_result_is_bool(self):
+        """POST: result is always a bool."""
         result = run_joint_cyclic_id(
             tf="A",
             outcome_set=frozenset(),
@@ -323,6 +371,7 @@ class TestRunJointCyclicId:
         assert isinstance(result, bool)
 
     def test_pre_tf_must_be_str(self):
+        """PRE: tf must be a str — int raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: tf must be a str"):
             run_joint_cyclic_id(
                 tf=42,
@@ -335,6 +384,7 @@ class TestRunJointCyclicId:
             )
 
     def test_pre_outcome_set_must_be_set(self):
+        """PRE: outcome_set must be a set or frozenset — list raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: outcome_set must be a set or frozenset"):
             run_joint_cyclic_id(
                 tf="A",
@@ -347,6 +397,7 @@ class TestRunJointCyclicId:
             )
 
     def test_pre_min_cut_must_be_list(self):
+        """PRE: min_cut must be a list — set raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: min_cut must be a list"):
             run_joint_cyclic_id(
                 tf="A",
@@ -359,7 +410,10 @@ class TestRunJointCyclicId:
             )
 
     def test_injectable_non_bool_fires_post(self):
+        """POST: identify_fn returning non-bool fires the postcondition guard."""
+
         def bad_fn(tf, outcome_set, min_cut):
+            """Injectable that returns a non-bool to trigger the POST guard."""
             return "yes"  # not bool
 
         with pytest.raises(AssertionError, match="POST: identify_fn must return bool"):
@@ -391,6 +445,7 @@ class TestRunJointCyclicId:
         calls = []
 
         def spy_fn(tf, outcome_set, min_cut):
+            """Spy injectable that records calls and returns True."""
             calls.append({"tf": tf, "min_cut": list(min_cut)})
             return True
 
@@ -455,6 +510,7 @@ class TestRunJointCyclicId:
         received = {}
 
         def recording_fn(tf, outcome_set, min_cut):
+            """Capture min_cut and return True."""
             received["min_cut"] = list(min_cut)
             return True
 
@@ -483,19 +539,25 @@ class TestRunPerGeneCyclicId:
     """
 
     class FakeVar:
+        """Minimal Variable-like stub for testing without importing y0."""
+
         def __init__(self, name):
+            """Store the variable name."""
             self.name = name
 
         def __repr__(self):
             return self.name
 
     def _always_true(self, tf, outcome_set, min_cut):
+        """Injectable that always returns True."""
         return True
 
     def _always_false(self, tf, outcome_set, min_cut):
+        """Injectable that always returns False."""
         return False
 
     def test_returns_dict_keyed_by_gene(self):
+        """POST: result is a dict keyed by gene name."""
         vars_ = [self.FakeVar("D"), self.FakeVar("E")]
         result = run_per_gene_cyclic_id(
             tf="A",
@@ -510,6 +572,7 @@ class TestRunPerGeneCyclicId:
         assert set(result.keys()) == {"D", "E"}
 
     def test_all_true_when_injectable_returns_true(self):
+        """POST: all values are True when identify_fn always returns True."""
         vars_ = [self.FakeVar("D"), self.FakeVar("E")]
         result = run_per_gene_cyclic_id(
             tf="A",
@@ -523,6 +586,7 @@ class TestRunPerGeneCyclicId:
         assert all(v is True for v in result.values())
 
     def test_all_false_when_injectable_returns_false(self):
+        """POST: all values are False when identify_fn always returns False."""
         vars_ = [self.FakeVar("D"), self.FakeVar("E")]
         result = run_per_gene_cyclic_id(
             tf="A",
@@ -536,6 +600,7 @@ class TestRunPerGeneCyclicId:
         assert all(v is False for v in result.values())
 
     def test_length_matches_outcome_vars(self):
+        """POST: len(result) == len(outcome_vars)."""
         vars_ = [self.FakeVar(f"gene_{i}") for i in range(5)]
         result = run_per_gene_cyclic_id(
             tf="A",
@@ -549,6 +614,7 @@ class TestRunPerGeneCyclicId:
         assert len(result) == 5
 
     def test_empty_outcome_vars_gives_empty_dict(self):
+        """POST: empty outcome_vars → empty dict."""
         result = run_per_gene_cyclic_id(
             tf="A",
             outcome_vars=[],
@@ -561,6 +627,7 @@ class TestRunPerGeneCyclicId:
         assert result == {}
 
     def test_pre_tf_must_be_str(self):
+        """PRE: tf must be a str — int raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: tf must be a str"):
             run_per_gene_cyclic_id(
                 tf=99,
@@ -573,6 +640,7 @@ class TestRunPerGeneCyclicId:
             )
 
     def test_pre_outcome_vars_must_be_list(self):
+        """PRE: outcome_vars must be a list — set raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: outcome_vars must be a list"):
             run_per_gene_cyclic_id(
                 tf="A",
@@ -585,6 +653,7 @@ class TestRunPerGeneCyclicId:
             )
 
     def test_pre_min_cut_must_be_list(self):
+        """PRE: min_cut must be a list — set raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: min_cut must be a list"):
             run_per_gene_cyclic_id(
                 tf="A",
@@ -612,6 +681,7 @@ class TestEndToEndToyGraph:
     """
 
     def test_pipeline_a_joint_identifiable(self, toy_graph, scc_abc):
+        """Full pipeline for TF=A returns True with always-true injectable."""
         in_scc_ch = find_in_scc_children("A", scc_abc, toy_graph)
         cut = compute_min_cut_b("A", scc_abc, in_scc_ch, toy_graph)
         intervened = build_intervened_graph(toy_graph, cut)
@@ -640,9 +710,7 @@ class TestEndToEndToyGraph:
         for c in children:
             if c in intervened:
                 reachable = nx.descendants(intervened, c)
-                assert "A" not in reachable, (
-                    f"Child {c} can still reach A after do({cut})"
-                )
+                assert "A" not in reachable, f"Child {c} can still reach A after do({cut})"
 
     def test_dag_tf_has_empty_in_scc_children(self, toy_graph):
         """D is a leaf — it has no in-SCC children (singleton SCC)."""

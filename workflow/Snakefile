@@ -1,0 +1,160 @@
+"""Snakemake workflow for σ-separation single-door edge classification.
+
+Rules
+-----
+prepare   : list all directed edges, shard into JSON files (shard_size edges each)
+classify  : scatter — classify one shard (calls cyclic_single_door_classify.py)
+gather    : merge all shard results into a single CSV + summary JSON
+preprocess: (optional) greedy intervention rescue — maximize_identifiable_edges
+
+Usage (local)
+-------------
+    snakemake --cores 4 --configfile workflow/config.yaml
+
+Usage (SLURM via snakemake --slurm executor)
+--------------------------------------------
+    snakemake --profile workflow/profiles/slurm --configfile workflow/config.yaml
+
+Configuration keys (workflow/config.yaml)
+-----------------------------------------
+    graphml     : path to the input GraphML file
+    supptable   : path to supplementary table CSV (optional, for metadata join)
+    shard_size  : edges per shard (default 500)
+    k           : greedy rescue budget (default 10)
+    outdir      : output directory (default results/cyclic_single_door)
+"""
+
+from pathlib import Path
+
+configfile: "workflow/config.yaml"
+
+# ---------------------------------------------------------------------------
+# Derived paths
+# ---------------------------------------------------------------------------
+
+OUTDIR      = Path(config.get("outdir", "results/cyclic_single_door"))
+SHARD_DIR   = OUTDIR / "shards"
+GRAPHML     = config["graphml"]
+SHARD_SIZE  = int(config.get("shard_size", 500))
+K           = int(config.get("k", 10))
+
+# ---------------------------------------------------------------------------
+# Helper: determine shard IDs after prepare runs
+# ---------------------------------------------------------------------------
+
+checkpoint prepare:
+    """List all directed edges and shard them into JSON files."""
+    input:
+        graphml = GRAPHML,
+    output:
+        shard_dir = directory(str(SHARD_DIR)),
+        manifest  = str(OUTDIR / "shard_manifest.json"),
+    params:
+        shard_size = SHARD_SIZE,
+    resources:
+        mem_mb  = 4000,
+        runtime = 30,
+    shell:
+        """
+        python scripts/cyclic_single_door_classify.py prepare \
+            --graphml {input.graphml} \
+            --shard-dir {output.shard_dir} \
+            --shard-size {params.shard_size} \
+            --manifest {output.manifest}
+        """
+
+
+def _shard_ids(wildcards):
+    """Return list of shard IDs after the prepare checkpoint completes."""
+    import json
+    manifest_path = checkpoints.prepare.get(**wildcards).output.manifest
+    with open(manifest_path) as f:
+        manifest = json.load(f)
+    return manifest["shard_ids"]
+
+
+# ---------------------------------------------------------------------------
+# classify — scatter: one job per shard
+# ---------------------------------------------------------------------------
+
+rule classify:
+    """Classify all edges in one shard under the sigma-single-door criterion."""
+    input:
+        graphml = GRAPHML,
+        shard   = str(SHARD_DIR / "shard_{shard_id}.json"),
+    output:
+        result  = str(OUTDIR / "classified" / "shard_{shard_id}.json"),
+    resources:
+        mem_mb  = 8000,
+        runtime = 120,
+    shell:
+        """
+        python scripts/cyclic_single_door_classify.py classify \
+            --graphml {input.graphml} \
+            --shard {input.shard} \
+            --output {output.result}
+        """
+
+
+# ---------------------------------------------------------------------------
+# gather — merge all classified shards
+# ---------------------------------------------------------------------------
+
+rule gather:
+    """Merge all classified shard results into a single CSV and summary JSON."""
+    input:
+        results = lambda wildcards: expand(
+            str(OUTDIR / "classified" / "shard_{shard_id}.json"),
+            shard_id=_shard_ids(wildcards),
+        ),
+    output:
+        csv     = str(OUTDIR / "classification_results.csv"),
+        summary = str(OUTDIR / "classification_summary.json"),
+    resources:
+        mem_mb  = 4000,
+        runtime = 30,
+    shell:
+        """
+        python scripts/cyclic_single_door_gather.py \
+            --input-dir {OUTDIR}/classified \
+            --output-csv {output.csv} \
+            --output-summary {output.summary}
+        """
+
+
+# ---------------------------------------------------------------------------
+# preprocess — greedy intervention rescue (optional)
+# ---------------------------------------------------------------------------
+
+rule preprocess:
+    """Greedy rescue: maximize identifiable edges via up to k interventions."""
+    input:
+        graphml = GRAPHML,
+    output:
+        rescue_csv    = str(OUTDIR / "rescue_curve.csv"),
+        rescue_json   = str(OUTDIR / "rescue_result.json"),
+    params:
+        k = K,
+    resources:
+        mem_mb  = 8000,
+        runtime = 300,
+    shell:
+        """
+        python scripts/cyclic_single_door_classify.py preprocess \
+            --graphml {input.graphml} \
+            --k {params.k} \
+            --output-csv {output.rescue_csv} \
+            --output-json {output.rescue_json}
+        """
+
+
+# ---------------------------------------------------------------------------
+# Default target: full classification pipeline
+# ---------------------------------------------------------------------------
+
+rule all:
+    """Run the full classification pipeline (prepare → classify → gather)."""
+    default_target: True
+    input:
+        rules.gather.output.csv,
+        rules.gather.output.summary,

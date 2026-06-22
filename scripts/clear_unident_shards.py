@@ -17,6 +17,7 @@ Usage:
 Options:
     --dry-run   Print what would be deleted without actually deleting.
 """
+
 import argparse
 import json
 import os
@@ -25,20 +26,31 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from shard_io import load_first_json_object
 
-MANIFEST = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), "..",
-    "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_job.json"
-))
-SHARDS_DIR = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), "..",
-    "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_shards"
-))
+MANIFEST = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "notebooks",
+        "Ecoli_Analysis_Notebooks",
+        "scc_perturb_job.json",
+    )
+)
+SHARDS_DIR = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "notebooks",
+        "Ecoli_Analysis_Notebooks",
+        "scc_perturb_shards",
+    )
+)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Print deletions without performing them.")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print deletions without performing them."
+    )
     args = parser.parse_args()
 
     with open(MANIFEST) as f:
@@ -91,7 +103,9 @@ def main() -> None:
             print(f"  Already absent: {os.path.basename(path)}")
 
     print()
-    print(f"Done. {len(to_delete)} shards cleared. Ready for SLURM resubmit with PER_GENE_ON_FAILURE=1.")
+    print(
+        f"Done. {len(to_delete)} shards cleared. Ready for SLURM resubmit with PER_GENE_ON_FAILURE=1."
+    )
 
 
 if __name__ == "__main__":

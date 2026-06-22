@@ -23,12 +23,13 @@ from __future__ import annotations
 
 import json
 import os
+
 import networkx as nx
+
 from nocap.scc_perturb import (
     build_intervened_graph,
-    get_direct_children,
-    residual_scc_analysis,
     residual_cluster_size_distribution,
+    residual_scc_analysis,
 )
 
 MANIFEST = "notebooks/Ecoli_Analysis_Notebooks/scc_perturb_job.json"
@@ -47,7 +48,7 @@ tasks = {t["tf"]: t for t in manifest["tasks"]}
 shards = {}
 for fn in os.listdir(SHARDS_DIR):
     if fn.startswith("scc_perturb_shard_") and fn.endswith(".json"):
-        tf = fn[len("scc_perturb_shard_"):-5]
+        tf = fn[len("scc_perturb_shard_") : -5]
         with open(os.path.join(SHARDS_DIR, fn)) as f:
             shards[tf] = json.load(f)
 
@@ -84,7 +85,9 @@ for tf, shard in sorted(shards.items()):
         for c in reaching[:3]:
             try:
                 path = nx.shortest_path(g_do, c, tf)
-                print(f"    Path {c}->...->tf: {path[:6]}{'...' if len(path)>6 else ''} (len={len(path)})")
+                print(
+                    f"    Path {c}->...->tf: {path[:6]}{'...' if len(path) > 6 else ''} (len={len(path)})"
+                )
             except nx.NetworkXNoPath:
                 pass
 
@@ -106,8 +109,10 @@ for tf in check2_violators:
     dist = residual_cluster_size_distribution(analysis)
 
     print(f"\n  {tf}: joint=True, n_children={len(children)}, |B(t)|={len(min_cut)}")
-    print(f"    tf_still_cyclic={analysis['tf_still_cyclic']}, "
-          f"cut_verified={analysis['cut_verified']}")
+    print(
+        f"    tf_still_cyclic={analysis['tf_still_cyclic']}, "
+        f"cut_verified={analysis['cut_verified']}"
+    )
     print(f"    n_residual_clusters={dist['n_clusters']}, sizes={dist['sizes']}")
     for i, cluster in enumerate(analysis["residual_clusters"]):
         members = sorted(cluster)
@@ -132,8 +137,10 @@ for tf in check1_violators:
 
     print(f"\n  {tf}: joint=False, n_children={len(children)}, |B(t)|={len(min_cut)}")
     print(f"    in_scc_children: {task['in_scc_children']}")
-    print(f"    tf_still_cyclic={analysis['tf_still_cyclic']}, "
-          f"cut_verified={analysis['cut_verified']}")
+    print(
+        f"    tf_still_cyclic={analysis['tf_still_cyclic']}, "
+        f"cut_verified={analysis['cut_verified']}"
+    )
     print(f"    n_residual_clusters={len(analysis['residual_clusters'])}")
     print(f"    children_cyclic:  {analysis['children_cyclic']}")
     print(f"    children_acyclic: {analysis['children_acyclic']}")
@@ -152,6 +159,8 @@ for tf in check1_violators:
     if tf in node_to_scc:
         tf_scc_id = node_to_scc[tf]
         tf_scc = [scc for scc in sccs if tf in scc][0]
-        children_in_tf_scc = [c for c in children if c in node_to_scc and node_to_scc[c] == tf_scc_id]
+        children_in_tf_scc = [
+            c for c in children if c in node_to_scc and node_to_scc[c] == tf_scc_id
+        ]
         print(f"    SCC containing tf has {len(tf_scc)} nodes")
         print(f"    Children in same SCC as tf: {sorted(children_in_tf_scc)}")

@@ -45,9 +45,7 @@ def load_shards(shards_dir: str) -> list:
             none
     """
     # --- PRE ---
-    assert isinstance(shards_dir, str) and shards_dir, (
-        "PRE: shards_dir must be a non-empty str"
-    )
+    assert isinstance(shards_dir, str) and shards_dir, "PRE: shards_dir must be a non-empty str"
 
     pattern = os.path.join(shards_dir, "scc_perturb_shard_*.json")
     shard_files = sorted(glob.glob(pattern))
@@ -56,9 +54,11 @@ def load_shards(shards_dir: str) -> list:
     for path in shard_files:
         with open(path) as f:
             shards.append(json.load(f))
-        print(f"  {os.path.basename(path)}: tf={shards[-1].get('tf', '?')}, "
-              f"joint={shards[-1].get('joint_identifiable', '?')}, "
-              f"n_children={shards[-1].get('n_children', '?')}")
+        print(
+            f"  {os.path.basename(path)}: tf={shards[-1].get('tf', '?')}, "
+            f"joint={shards[-1].get('joint_identifiable', '?')}, "
+            f"n_children={shards[-1].get('n_children', '?')}"
+        )
 
     # --- POST ---
     assert isinstance(shards, list), "POST: result must be a list"
@@ -85,9 +85,7 @@ def merge_and_write(
     # --- PRE ---
     assert isinstance(shards, list), "PRE: shards must be a list"
     assert isinstance(manifest, dict), "PRE: manifest must be a dict"
-    assert isinstance(output_path, str) and output_path, (
-        "PRE: output_path must be a non-empty str"
-    )
+    assert isinstance(output_path, str) and output_path, "PRE: output_path must be a non-empty str"
 
     # Check for duplicate TFs (shouldn't happen but guard)
     tfs_seen: set = set()
@@ -104,17 +102,19 @@ def merge_and_write(
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
     with open(output_path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            "tf",
-            "scc_size",
-            "min_cut_size",
-            "min_cut_nodes",
-            "n_children",
-            "joint_identifiable",
-            "n_per_gene_identifiable",
-            "pct_per_gene_identifiable",
-            "note",
-        ])
+        writer.writerow(
+            [
+                "tf",
+                "scc_size",
+                "min_cut_size",
+                "min_cut_nodes",
+                "n_children",
+                "joint_identifiable",
+                "n_per_gene_identifiable",
+                "pct_per_gene_identifiable",
+                "note",
+            ]
+        )
         for shard in deduped:
             tf = shard.get("tf", "")
             scc_size = shard.get("scc_size", 0)
@@ -127,25 +127,25 @@ def merge_and_write(
             n_per_gene = sum(1 for v in per_gene.values() if v)
             pct = n_per_gene / n_children * 100 if n_children > 0 and per_gene else ""
 
-            writer.writerow([
-                tf,
-                scc_size,
-                len(min_cut),
-                "+".join(sorted(min_cut)),
-                n_children,
-                joint_id,
-                n_per_gene if per_gene else "",
-                f"{pct:.1f}" if pct != "" else "",
-                note,
-            ])
+            writer.writerow(
+                [
+                    tf,
+                    scc_size,
+                    len(min_cut),
+                    "+".join(sorted(min_cut)),
+                    n_children,
+                    joint_id,
+                    n_per_gene if per_gene else "",
+                    f"{pct:.1f}" if pct != "" else "",
+                    note,
+                ]
+            )
 
     print(f"\nCSV written to: {output_path}")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Merge SCC-perturbation shards into final CSV"
-    )
+    parser = argparse.ArgumentParser(description="Merge SCC-perturbation shards into final CSV")
     parser.add_argument("--manifest", required=True, help="Path to scc_perturb_job.json")
     parser.add_argument(
         "--shards-dir",
@@ -174,7 +174,9 @@ def main():
         sys.exit(1)
     print(f"Found {len(shard_files)} shard file(s) (expected {n_tasks}).")
     if len(shard_files) < n_tasks:
-        print(f"WARNING: Only {len(shard_files)}/{n_tasks} shards found — some tasks may not have completed.")
+        print(
+            f"WARNING: Only {len(shard_files)}/{n_tasks} shards found — some tasks may not have completed."
+        )
 
     print("Loading shards...")
     shards = load_shards(args.shards_dir)
@@ -184,15 +186,9 @@ def main():
     merge_and_write(shards, manifest, output_path)
 
     # --- Summary ---
-    joint_id_count = sum(
-        1 for s in shards if s.get("joint_identifiable") is True
-    )
-    joint_unid_count = sum(
-        1 for s in shards if s.get("joint_identifiable") is False
-    )
-    no_desc_count = sum(
-        1 for s in shards if s.get("note") == "no_children"
-    )
+    joint_id_count = sum(1 for s in shards if s.get("joint_identifiable") is True)
+    joint_unid_count = sum(1 for s in shards if s.get("joint_identifiable") is False)
+    no_desc_count = sum(1 for s in shards if s.get("note") == "no_children")
     dag_tfs = manifest.get("dag_tfs", [])
 
     print("\n--- SCC Perturbation Results Summary ---")

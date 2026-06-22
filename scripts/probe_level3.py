@@ -1,6 +1,6 @@
 """Probe Level 1 (bootstrap_ATE) and Level 3 (oracle) verification."""
+
 import os
-import sys
 
 SOURCE_BOOTSTRAP = '''
 def bootstrap_ATE(n_iterations: int) -> int:

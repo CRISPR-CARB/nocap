@@ -1,4 +1,4 @@
-"""
+r"""
 build_coverage_matrix.py
 ========================
 Builds a boolean coverage matrix M[candidate_tf][query] where:
@@ -52,7 +52,6 @@ from coverage_common import (
     rows_to_matrix,
     run_phase1,
 )
-
 
 # ---------------------------------------------------------------------------
 # Main

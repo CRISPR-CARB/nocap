@@ -2,6 +2,7 @@
 Apply targeted text fixes to SCC_Perturbation_Analysis.ipynb.
 Operates directly on parsed notebook cells (avoids raw JSON escape issues).
 """
+
 import json
 from pathlib import Path
 
@@ -60,20 +61,20 @@ fixes = [
 
 changed = 0
 for cell_idx, old, new in fixes:
-    cell = nb['cells'][cell_idx]
-    src = cell['source']
-    joined = ''.join(src)
+    cell = nb["cells"][cell_idx]
+    src = cell["source"]
+    joined = "".join(src)
     if old in joined:
         joined = joined.replace(old, new, 1)
         # Re-split on newlines, preserving them
         lines = joined.splitlines(keepends=True)
-        cell['source'] = lines
+        cell["source"] = lines
         changed += 1
         print(f"  Fixed cell {cell_idx}: {old[:60]!r}...")
     else:
         print(f"  WARNING: not found in cell {cell_idx}: {old[:60]!r}...")
 
-with open(NB, 'w') as f:
+with open(NB, "w") as f:
     json.dump(nb, f, indent=1, ensure_ascii=False)
 
 # Validate

@@ -59,8 +59,7 @@ import networkx as nx
 sys.path.insert(0, os.path.dirname(__file__))
 from coverage_common import load_valid_genes
 
-from nocap.scc_perturb import compute_min_cut_b, find_in_scc_children  # noqa: F401
-
+from nocap.scc_perturb import compute_min_cut_b, find_in_scc_children
 
 # ---------------------------------------------------------------------------
 # Main
@@ -139,14 +138,16 @@ def main():
 
         min_cut = compute_min_cut_b(tf, scc_nodes, in_scc_children, graph)
 
-        tasks.append({
-            "tf": tf,
-            "scc_size": len(scc_nodes),
-            "scc_nodes": sorted(scc_nodes),
-            "in_scc_children": sorted(in_scc_children),
-            "min_cut": min_cut,
-            "in_scc": True,
-        })
+        tasks.append(
+            {
+                "tf": tf,
+                "scc_size": len(scc_nodes),
+                "scc_nodes": sorted(scc_nodes),
+                "in_scc_children": sorted(in_scc_children),
+                "min_cut": min_cut,
+                "in_scc": True,
+            }
+        )
 
     print(f"\n  TFs requiring SCC perturbation: {len(tasks)}")
     print(f"  TFs already in DAG (no perturbation needed): {len(dag_tfs)}")
@@ -154,8 +155,10 @@ def main():
     # --- Summary stats ---
     if tasks:
         cut_sizes = [len(t["min_cut"]) for t in tasks]
-        print(f"  |B(t)| min={min(cut_sizes)}  max={max(cut_sizes)}  "
-              f"mean={sum(cut_sizes)/len(cut_sizes):.1f}")
+        print(
+            f"  |B(t)| min={min(cut_sizes)}  max={max(cut_sizes)}  "
+            f"mean={sum(cut_sizes) / len(cut_sizes):.1f}"
+        )
         zero_cut = sum(1 for s in cut_sizes if s == 0)
         if zero_cut:
             print(f"  WARNING: {zero_cut} TF(s) have |B(t)|=0 (SCC may be trivially separable)")
@@ -179,7 +182,7 @@ def main():
             f"\nSubmit with:\n"
             f"  bash scripts/slurm/submit_scc_perturb.sh\n"
             f"or manually:\n"
-            f"  sbatch --array=0-{len(tasks)-1} ..."
+            f"  sbatch --array=0-{len(tasks) - 1} ..."
         )
     else:
         print("No TFs require SCC perturbation — nothing to submit.")

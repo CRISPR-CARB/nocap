@@ -45,7 +45,7 @@ from build_coverage_matrix import build_baseline_queries, load_valid_genes
 # Gene names: short uppercase ASCII identifiers (no 'off' or 'AAV' by default)
 gene_name = st.from_regex(r"[A-Z][A-Z0-9]{0,5}", fullmatch=True)
 
-# A frozenset of clean gene names (1–12 genes)
+# A frozenset of clean gene names (1-12 genes)
 gene_set = st.frozensets(gene_name, min_size=1, max_size=12)
 
 # Gene names that may include "off"/"AAV" variants
@@ -88,9 +88,7 @@ def digraph_with_valid_genes(draw):
         )
     )
     G.add_edges_from(edges)
-    valid = draw(
-        st.frozensets(st.sampled_from(node_list), min_size=0, max_size=len(node_list))
-    )
+    valid = draw(st.frozensets(st.sampled_from(node_list), min_size=0, max_size=len(node_list)))
     return G, set(valid)
 
 
@@ -170,9 +168,7 @@ def test_load_valid_genes_returns_set(csv_genes, network_nodes):
 @settings(max_examples=200)
 def test_load_valid_genes_larger_network_never_shrinks_result(csv_genes, network_nodes):
     """Adding more nodes to network_nodes can only grow (never shrink) the result."""
-    clean_csv = frozenset(
-        g for g in csv_genes if "off" not in g.lower() and "AAV" not in g
-    )
+    clean_csv = frozenset(g for g in csv_genes if "off" not in g.lower() and "AAV" not in g)
     small_network = set(network_nodes)
     extra = clean_csv - small_network
     large_network = small_network | extra
@@ -183,9 +179,7 @@ def test_load_valid_genes_larger_network_never_shrinks_result(csv_genes, network
         result_small = load_valid_genes(csv_path, small_network)
         result_large = load_valid_genes(csv_path, large_network)
 
-    assert result_small <= result_large, (
-        "Larger network should produce a superset of results"
-    )
+    assert result_small <= result_large, "Larger network should produce a superset of results"
 
 
 # ---------------------------------------------------------------------------
@@ -261,9 +255,7 @@ class TestBuildBaselineQueriesProperties:
         result_sub = build_baseline_queries(G, subset)
         full_set = set(result_full)
         for pair in result_sub:
-            assert pair in full_set, (
-                f"Pair {pair} in subset result but not in full result"
-            )
+            assert pair in full_set, f"Pair {pair} in subset result but not in full result"
 
     @given(digraph_with_valid_genes())
     @settings(max_examples=300)

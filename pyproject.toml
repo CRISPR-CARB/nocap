@@ -6,8 +6,6 @@ build-backend = "setuptools.build_meta"
 [tool.uv]
 package = true
 
-[tool.uv.sources]
-y0 = { git = "https://github.com/y0-causal-inference/y0.git", branch = "final-changes-to-line-23-cyclic-id" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -41,6 +39,10 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "src/nocap/version.py" = ["S603", "S607"]
+# scc_perturb.py and cyclic_single_door.py use assert-based axiomander contracts
+# (PRE/POST) and intentional en-dash separators in Returns dict documentation.
+"src/nocap/scc_perturb.py" = ["S101", "RUF002"]
+"src/nocap/cyclic_single_door.py" = ["S101", "RUF002", "D301"]
 "docs/source/conf.py" = ["ERA001", "D100", "F821"]
 "notebooks/**" = [
     "T201",  # print
@@ -66,7 +68,7 @@ ignore = [
 ]
 # Tests: allow assert statements, uppercase CPD variable names, missing docstrings,
 # bare except-pass patterns, assert False idiom, and dict() constructor
-"tests/**/*.py" = ["S101", "N806", "N802", "N803", "D101", "D102", "D103", "D205", "D400", "B011", "B007", "S110", "C408", "C414", "RUF005", "RUF059"]
+"tests/**/*.py" = ["S101", "N806", "N802", "N803", "D101", "D102", "D103", "D205", "D400", "B011", "B007", "S110", "C408", "C414", "RUF005", "RUF059", "S108"]
 # Scripts: dev/analysis scripts — allow print, top-level imports after code,
 # assert, security-adjacent patterns, naming conventions, and comprehension style
 "scripts/**/*.py" = [
@@ -99,6 +101,24 @@ ignore = [
     "D401",  # first line should be in imperative mood
     "D400",  # first line should end with period
     "D205",  # 1 blank line required between summary and description
+    "D301",  # use r""" for backslashes in docstrings (CLI usage examples)
+    "D414",  # section has no content (note sections in module docstrings)
+    "S603",  # subprocess call with untrusted input (intentional in CLI scripts)
+    "S110",  # try-except-pass (intentional fallback patterns)
+]
+"notebooks/**/*.ipynb" = [
+    "E701",  # multiple statements on one line (colon) — common in notebook one-liners
+    "E702",  # multiple statements on one line (semicolon) — common in notebook one-liners
+    "S603",  # subprocess call with untrusted input (intentional in notebook cells)
+    "S607",  # starting a process with a partial executable path (intentional in notebooks)
+    "RUF003", # ambiguous unicode in comments (e.g. × in axis labels)
+    "RUF046", # unnecessary int() cast (cosmetic in notebook lambdas)
+    "RUF059", # unpacked variable not used (fig, ax = plt.subplots() pattern)
+    "T201",  # print statements are intentional in notebooks
+    "E402",  # module-level imports not at top
+    "S101",  # assert in notebooks
+    "D100",  # missing docstring in public module
+    "D103",  # missing docstring in public function
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -136,7 +156,7 @@ dependencies = [
     "sympy",
     "torch",
     "tqdm",
-    "y0",
+    "y0 @ git+https://github.com/y0-causal-inference/y0.git@402-add-%CF%83-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -156,7 +176,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
 
@@ -179,6 +198,13 @@ docs = [
     "sphinx-rtd-theme",
     "sphinx_automodapi",
 ]
+# Snakemake workflow dependencies (scatter-gather SLURM pipeline).
+# Install with: pip install "nocap[workflow]"
+# or:           uv pip install "nocap[workflow]"
+workflow = [
+    "snakemake>=8.0",
+    "snakemake-executor-plugin-slurm>=0.5",
+]
 
 [project.scripts]
 nocap = "nocap.cli:main"
@@ -186,6 +212,7 @@ nocap = "nocap.cli:main"
 [dependency-groups]
 dev = [
     "docstr-coverage>=2.3.2",
+    "tox-uv>=1.25",
 ]
 
 ##########################

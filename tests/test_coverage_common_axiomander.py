@@ -1,4 +1,4 @@
-"""
+r"""
 tests/test_coverage_common_axiomander.py
 =========================================
 Axiomander-style contract tests for scripts/coverage_common.py pure helpers:
@@ -29,7 +29,6 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from coverage_common import assign_work, merge_shards, rows_to_matrix
-
 
 # ---------------------------------------------------------------------------
 # Adorned versions with explicit inline assert contracts
@@ -70,7 +69,7 @@ def merge_shards_adorned(shard_list: list) -> list:
         assert isinstance(shard, list), "INV: each shard must be a list"
         for row in shard:
             # LOOP INVARIANT: each row is a 4-element sequence
-            assert isinstance(row, (list, tuple)) and len(row) == 4, (
+            assert isinstance(row, list | tuple) and len(row) == 4, (
                 "INV: each row must be a 4-element list/tuple"
             )
             key = (row[0], row[1], row[2])
@@ -96,21 +95,19 @@ def rows_to_matrix_adorned(rows: list, query_labels: list) -> tuple:
     lookup: dict = {}
     for row in rows:
         # LOOP INVARIANT: each row is a 4-element sequence
-        assert isinstance(row, (list, tuple)) and len(row) == 4, (
+        assert isinstance(row, list | tuple) and len(row) == 4, (
             "INV: each row must be a 4-element list/tuple"
         )
         tf1, candidate, outcome, found = row
         label = f"{tf1}->{outcome}"
         lookup[(candidate, label)] = bool(found)
 
-    candidate_set = sorted(set(r[1] for r in rows))
+    candidate_set = sorted({r[1] for r in rows})
 
     # --- POSTCONDITIONS ---
     assert isinstance(candidate_set, list), "POST: candidate_set must be a list"
     assert isinstance(lookup, dict), "POST: lookup must be a dict"
-    assert all(isinstance(c, str) for c in candidate_set), (
-        "POST: all candidates must be str"
-    )
+    assert all(isinstance(c, str) for c in candidate_set), "POST: all candidates must be str"
     assert candidate_set == sorted(candidate_set), "POST: candidate_set is sorted"
 
     return candidate_set, query_labels, lookup
@@ -125,30 +122,37 @@ class TestAssignWorkPreconditions:
     """Verify that precondition violations raise AssertionError."""
 
     def test_pre_n_queries_must_be_int(self):
+        """PRE: n_queries must be int — float raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_queries must be int"):
             assign_work_adorned(5.0, 0, 1)
 
     def test_pre_n_tasks_must_be_int(self):
+        """PRE: n_tasks must be int — float raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_tasks must be int"):
             assign_work_adorned(5, 0, 1.0)
 
     def test_pre_task_id_must_be_int(self):
+        """PRE: task_id must be int — float raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: task_id must be int"):
             assign_work_adorned(5, 0.0, 1)
 
     def test_pre_n_queries_non_negative(self):
+        """PRE: n_queries >= 0 — negative value raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_queries >= 0"):
             assign_work_adorned(-1, 0, 1)
 
     def test_pre_n_tasks_at_least_one(self):
+        """PRE: n_tasks >= 1 — zero raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_tasks >= 1"):
             assign_work_adorned(5, 0, 0)
 
     def test_pre_task_id_non_negative(self):
+        """PRE: task_id >= 0 — negative raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: task_id >= 0"):
             assign_work_adorned(5, -1, 2)
 
     def test_pre_task_id_less_than_n_tasks(self):
+        """PRE: task_id < n_tasks — equal value raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: task_id < n_tasks"):
             assign_work_adorned(5, 3, 3)
 
@@ -167,13 +171,16 @@ class TestAssignWorkPostconditions:
     """Verify postconditions hold on valid inputs."""
 
     def test_post_result_is_list(self):
+        """POST: result is a list."""
         assert isinstance(assign_work_adorned(5, 0, 1), list)
 
     def test_post_all_indices_in_range(self):
+        """POST: all indices are in [0, n_queries)."""
         result = assign_work_adorned(10, 2, 4)
         assert all(0 <= i < 10 for i in result)
 
     def test_post_all_indices_are_int(self):
+        """POST: all indices are int."""
         result = assign_work_adorned(7, 0, 3)
         assert all(isinstance(i, int) for i in result)
 
@@ -192,14 +199,17 @@ class TestMergeShardsPreconditions:
     """Verify that precondition violations raise AssertionError."""
 
     def test_pre_shard_list_must_be_list(self):
+        """PRE: shard_list must be a list — None raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: shard_list must be a list"):
             merge_shards_adorned(None)
 
     def test_pre_shard_list_tuple_rejected(self):
+        """PRE: shard_list must be a list — tuple raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: shard_list must be a list"):
             merge_shards_adorned(())
 
     def test_pre_valid_empty_list_succeeds(self):
+        """Valid empty list does not raise."""
         assert merge_shards_adorned([]) == []
 
 
@@ -236,14 +246,17 @@ class TestMergeShardsPostconditions:
     """Verify postconditions hold on valid inputs."""
 
     def test_post_result_is_list(self):
+        """POST: result is a list."""
         assert isinstance(merge_shards_adorned([]), list)
 
     def test_post_all_rows_have_four_elements(self):
+        """POST: every row has exactly 4 elements."""
         shards = [[["tf1", "c1", "o1", True], ["tf1", "c2", "o1", False]]]
         result = merge_shards_adorned(shards)
         assert all(len(r) == 4 for r in result)
 
     def test_post_no_duplicate_keys(self):
+        """POST: no duplicate (tf1, candidate, outcome) keys in result."""
         shards = [
             [["A", "B", "C", True]],
             [["A", "B", "C", False]],  # duplicate key
@@ -253,6 +266,7 @@ class TestMergeShardsPostconditions:
         assert len(keys) == len(set(keys))
 
     def test_post_agrees_with_production(self):
+        """Adorned version returns same value as production merge_shards."""
         shards = [
             [["tf1", "c1", "o1", True], ["tf1", "c2", "o1", False]],
             [["tf2", "c1", "o2", True]],
@@ -269,14 +283,17 @@ class TestRowsToMatrixPreconditions:
     """Verify that precondition violations raise AssertionError."""
 
     def test_pre_rows_must_be_list(self):
+        """PRE: rows must be a list — None raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: rows must be a list"):
             rows_to_matrix_adorned(None, [])
 
     def test_pre_query_labels_must_be_list(self):
+        """PRE: query_labels must be a list — None raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: query_labels must be a list"):
             rows_to_matrix_adorned([], None)
 
     def test_pre_valid_empty_inputs_succeed(self):
+        """Valid empty inputs do not raise."""
         result = rows_to_matrix_adorned([], [])
         assert result == ([], [], {})
 
@@ -309,10 +326,12 @@ class TestRowsToMatrixPostconditions:
     """Verify postconditions hold on valid inputs."""
 
     def test_post_result_is_tuple(self):
+        """POST: result is a 3-tuple."""
         result = rows_to_matrix_adorned([], [])
         assert isinstance(result, tuple) and len(result) == 3
 
     def test_post_candidate_set_is_sorted(self):
+        """POST: candidate_set is sorted."""
         rows = [
             ["tf1", "zebra", "out1", True],
             ["tf1", "alpha", "out1", False],
@@ -321,15 +340,18 @@ class TestRowsToMatrixPostconditions:
         assert candidate_set == sorted(candidate_set)
 
     def test_post_all_candidates_are_str(self):
+        """POST: all candidates are str."""
         rows = [["tf1", "cand1", "out1", True]]
         candidate_set, _, _ = rows_to_matrix_adorned(rows, ["tf1->out1"])
         assert all(isinstance(c, str) for c in candidate_set)
 
     def test_post_lookup_is_dict(self):
+        """POST: lookup is a dict."""
         _, _, lookup = rows_to_matrix_adorned([], [])
         assert isinstance(lookup, dict)
 
     def test_post_agrees_with_production(self):
+        """Adorned version returns same candidate_set and lookup as production rows_to_matrix."""
         rows = [
             ["tf1", "cand1", "out1", True],
             ["tf1", "cand2", "out1", False],
