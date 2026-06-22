@@ -7,17 +7,16 @@ current shard status (missing / joint_identifiable / per_gene filled).
 Usage:
     uv run python scripts/list_scc_tasks.py 2>&1 | tail -60
 """
+
 import json
 import os
 import sys
 
 MANIFEST = os.path.join(
-    os.path.dirname(__file__), "..",
-    "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_job.json"
+    os.path.dirname(__file__), "..", "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_job.json"
 )
 SHARDS_DIR = os.path.join(
-    os.path.dirname(__file__), "..",
-    "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_shards"
+    os.path.dirname(__file__), "..", "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_shards"
 )
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -28,7 +27,9 @@ with open(MANIFEST) as f:
 
 tasks = manifest["tasks"]
 print(f"Manifest: {len(tasks)} tasks")
-print(f"{'idx':>4}  {'tf':<12}  {'|B(t)|':>6}  {'scc_sz':>6}  {'shard':>8}  {'joint_id':>10}  {'per_gene_n':>10}  {'n_children':>10}")
+print(
+    f"{'idx':>4}  {'tf':<12}  {'|B(t)|':>6}  {'scc_sz':>6}  {'shard':>8}  {'joint_id':>10}  {'per_gene_n':>10}  {'n_children':>10}"
+)
 print("-" * 80)
 
 missing = []
@@ -57,8 +58,12 @@ for i, t in enumerate(tasks):
             joint = "-"
             pg_n = "-"
             nc = "-"
-    print(f"{i:>4}  {tf:<12}  {len(t['min_cut']):>6}  {t['scc_size']:>6}  {status:>8}  {joint:>10}  {pg_n:>10}  {nc:>10}")
+    print(
+        f"{i:>4}  {tf:<12}  {len(t['min_cut']):>6}  {t['scc_size']:>6}  {status:>8}  {joint:>10}  {pg_n:>10}  {nc:>10}"
+    )
 
 print()
 print(f"Missing shards ({len(missing)}): {[tf for _, tf in missing]}")
-print(f"Joint=False, per_gene empty ({len(unident_no_pergene)}): {[tf for _, tf in unident_no_pergene]}")
+print(
+    f"Joint=False, per_gene empty ({len(unident_no_pergene)}): {[tf for _, tf in unident_no_pergene]}"
+)

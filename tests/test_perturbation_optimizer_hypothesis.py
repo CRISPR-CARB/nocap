@@ -94,9 +94,7 @@ def coverage_matrix_no_budget(draw, min_cands=1, max_cands=8, min_queries=1, max
 @st.composite
 def digraph_with_candidates(draw, min_nodes=2, max_nodes=8):
     """Generate a DiGraph and a list of candidate node names."""
-    node_names = draw(
-        st.lists(tf_name, min_size=min_nodes, max_size=max_nodes, unique=True)
-    )
+    node_names = draw(st.lists(tf_name, min_size=min_nodes, max_size=max_nodes, unique=True))
     G = nx.DiGraph()
     G.add_nodes_from(node_names)
     possible = [(u, v) for u in node_names for v in node_names if u != v]

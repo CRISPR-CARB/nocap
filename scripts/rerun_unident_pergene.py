@@ -16,6 +16,7 @@ Run with:
 Ordered by n_children ascending so fast tasks finish first and output
 is visible quickly.
 """
+
 import json
 import os
 import subprocess
@@ -25,13 +26,17 @@ sys.path.insert(0, os.path.dirname(__file__))
 from shard_io import load_first_json_object
 
 MANIFEST = os.path.join(
-    os.path.dirname(__file__), "..",
-    "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_job.json"
+    os.path.dirname(__file__), "..", "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_job.json"
 )
-SHARDS_DIR = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), "..",
-    "notebooks", "Ecoli_Analysis_Notebooks", "scc_perturb_shards"
-))
+SHARDS_DIR = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "notebooks",
+        "Ecoli_Analysis_Notebooks",
+        "scc_perturb_shards",
+    )
+)
 WORKER = os.path.join(os.path.dirname(__file__), "scc_perturb_worker.py")
 
 with open(MANIFEST) as f:
@@ -43,6 +48,7 @@ n_tasks = len(tasks)
 # -----------------------------------------------------------------------
 # Identify which tasks need re-running
 # -----------------------------------------------------------------------
+
 
 def needs_rerun(task_idx: int, task: dict) -> bool:
     tf = task["tf"]
@@ -69,9 +75,7 @@ def child_count(task_idx: int, task: dict) -> int:
     return 9999
 
 
-to_rerun = [
-    (i, t) for i, t in enumerate(tasks) if needs_rerun(i, t)
-]
+to_rerun = [(i, t) for i, t in enumerate(tasks) if needs_rerun(i, t)]
 to_rerun.sort(key=lambda x: child_count(x[0], x[1]))
 
 print(f"Tasks needing per-gene re-run: {len(to_rerun)}")
@@ -101,14 +105,19 @@ for i, task in to_rerun:
     print(f"[{tf}] Running worker (task {i})...")
     result = subprocess.run(
         [
-            python_exe, WORKER,
-            "--manifest", os.path.abspath(MANIFEST),
-            "--shards-dir", SHARDS_DIR,
-            "--n-tasks", str(n_tasks),
-            "--task-id", str(i),
+            python_exe,
+            WORKER,
+            "--manifest",
+            os.path.abspath(MANIFEST),
+            "--shards-dir",
+            SHARDS_DIR,
+            "--n-tasks",
+            str(n_tasks),
+            "--task-id",
+            str(i),
             "--per-gene-on-failure",
         ],
-        capture_output=False,   # let stdout/stderr flow to terminal
+        capture_output=False,  # let stdout/stderr flow to terminal
         check=False,
     )
     if result.returncode != 0:
@@ -119,7 +128,9 @@ for i, task in to_rerun:
             s = load_first_json_object(shard_path)
             pg = s.get("per_gene", {})
             n_id = sum(1 for v in pg.values() if v)
-            print(f"[{tf}] Done: joint={s.get('joint_identifiable')}  per_gene={n_id}/{len(pg)} identifiable")
+            print(
+                f"[{tf}] Done: joint={s.get('joint_identifiable')}  per_gene={n_id}/{len(pg)} identifiable"
+            )
         except Exception as e:
             print(f"[{tf}] Shard written but could not verify: {e}", file=sys.stderr)
     print()

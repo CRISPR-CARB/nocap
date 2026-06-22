@@ -166,9 +166,7 @@ def rows_to_matrix(rows: list, query_labels: list) -> tuple:
     # --- POST ---
     assert isinstance(candidate_set, list), "POST: candidate_set must be a list"
     assert isinstance(lookup, dict), "POST: lookup must be a dict"
-    assert all(isinstance(c, str) for c in candidate_set), (
-        "POST: all candidates must be str"
-    )
+    assert all(isinstance(c, str) for c in candidate_set), "POST: all candidates must be str"
     # candidate_set is sorted
     assert candidate_set == sorted(candidate_set), "POST: candidate_set is sorted"
 
@@ -218,9 +216,7 @@ def load_valid_genes(supptable_path: str, network_nodes: set) -> set:
     assert all("off" not in g.lower() for g in valid), (
         "POST: result must not contain any 'off' gene"
     )
-    assert all("AAV" not in g for g in valid), (
-        "POST: result must not contain any 'AAV' gene"
-    )
+    assert all("AAV" not in g for g in valid), "POST: result must not contain any 'AAV' gene"
 
     print(f"  Experimental genes in CSV: {len(csv_genes)}")
     print(f"  Valid genes in network:    {len(valid)}")
@@ -244,12 +240,8 @@ def build_baseline_queries(ecoli_graph, valid_genes: set) -> list:
             none
     """
     # --- PRE ---
-    assert isinstance(valid_genes, set | frozenset), (
-        "PRE: valid_genes must be a set or frozenset"
-    )
-    assert hasattr(ecoli_graph, "successors"), (
-        "PRE: ecoli_graph must support .successors()"
-    )
+    assert isinstance(valid_genes, set | frozenset), "PRE: valid_genes must be a set or frozenset"
+    assert hasattr(ecoli_graph, "successors"), "PRE: ecoli_graph must support .successors()"
 
     pairs: list = []
     for gene in valid_genes:
@@ -295,7 +287,9 @@ def _phase1_classify_one(pair):
     from y0.dsl import Variable
 
     assert _worker_graph is not None, "worker graph not initialised — missing initializer call"
-    assert _worker_apt_order is not None, "worker apt_order not initialised — missing initializer call"
+    assert _worker_apt_order is not None, (
+        "worker apt_order not initialised — missing initializer call"
+    )
 
     intervention, outcome = pair
     try:
@@ -316,7 +310,8 @@ def _phase1_classify_one(pair):
 
 try:
     from tqdm import tqdm as _tqdm
-except ImportError:  # pragma: no cover – tqdm is a listed dependency
+except ImportError:  # pragma: no cover - tqdm is a listed dependency
+
     def _tqdm(iterable, **kwargs):  # type: ignore[misc]
         """No-op passthrough used when tqdm is unavailable."""
         return iterable
@@ -416,9 +411,7 @@ def get_candidate_tfs(ecoli_graph, valid_genes: set) -> list:
     from perturbation_optimizer import rank_candidates_by_cycle_score
 
     # --- PRE ---
-    assert isinstance(valid_genes, set | frozenset), (
-        "PRE: valid_genes must be a set or frozenset"
-    )
+    assert isinstance(valid_genes, set | frozenset), "PRE: valid_genes must be a set or frozenset"
 
     raw = [n for n in ecoli_graph.nodes() if ecoli_graph.out_degree(n) >= 1]
     print(f"  Candidate TFs (out-degree >= 1): {len(raw)}")

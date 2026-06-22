@@ -107,9 +107,7 @@ def rows_to_matrix_adorned(rows: list, query_labels: list) -> tuple:
     # --- POSTCONDITIONS ---
     assert isinstance(candidate_set, list), "POST: candidate_set must be a list"
     assert isinstance(lookup, dict), "POST: lookup must be a dict"
-    assert all(isinstance(c, str) for c in candidate_set), (
-        "POST: all candidates must be str"
-    )
+    assert all(isinstance(c, str) for c in candidate_set), "POST: all candidates must be str"
     assert candidate_set == sorted(candidate_set), "POST: candidate_set is sorted"
 
     return candidate_set, query_labels, lookup

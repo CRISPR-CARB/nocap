@@ -13,21 +13,21 @@ Contract coverage
 
 from __future__ import annotations
 
-import pytest
 import networkx as nx
+import pytest
 
 from nocap.scc_perturb import (
-    residual_scc_analysis,
     residual_cluster_size_distribution,
+    residual_scc_analysis,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers — tiny synthetic graphs
 # ---------------------------------------------------------------------------
 
+
 def _linear_dag() -> nx.DiGraph:
-    """t -> a -> b -> c   (no cycles)."""
+    """T -> a -> b -> c   (no cycles)."""
     g = nx.DiGraph()
     g.add_edges_from([("t", "a"), ("a", "b"), ("b", "c")])
     return g
@@ -35,35 +35,47 @@ def _linear_dag() -> nx.DiGraph:
 
 def _one_residual_cluster() -> nx.DiGraph:
     """
-    t -> a, t -> b, t -> c
+    T -> a, t -> b, t -> c
     a <-> b  (cycle between two children; c is acyclic)
     No return path to t.
     """
     g = nx.DiGraph()
-    g.add_edges_from([
-        ("t", "a"), ("t", "b"), ("t", "c"),
-        ("a", "b"), ("b", "a"),          # a<->b residual cycle
-    ])
+    g.add_edges_from(
+        [
+            ("t", "a"),
+            ("t", "b"),
+            ("t", "c"),
+            ("a", "b"),
+            ("b", "a"),  # a<->b residual cycle
+        ]
+    )
     return g
 
 
 def _two_residual_clusters() -> nx.DiGraph:
     """
-    t -> a, t -> b, t -> c, t -> d
+    T -> a, t -> b, t -> c, t -> d
     a <-> b  (cluster 1)
     c <-> d  (cluster 2)
     """
     g = nx.DiGraph()
-    g.add_edges_from([
-        ("t", "a"), ("t", "b"), ("t", "c"), ("t", "d"),
-        ("a", "b"), ("b", "a"),
-        ("c", "d"), ("d", "c"),
-    ])
+    g.add_edges_from(
+        [
+            ("t", "a"),
+            ("t", "b"),
+            ("t", "c"),
+            ("t", "d"),
+            ("a", "b"),
+            ("b", "a"),
+            ("c", "d"),
+            ("d", "c"),
+        ]
+    )
     return g
 
 
 def _single_child_graph() -> nx.DiGraph:
-    """t -> a only."""
+    """T -> a only."""
     g = nx.DiGraph()
     g.add_edges_from([("t", "a")])
     return g
@@ -72,6 +84,7 @@ def _single_child_graph() -> nx.DiGraph:
 # ---------------------------------------------------------------------------
 # residual_scc_analysis — structural invariants (POST verification)
 # ---------------------------------------------------------------------------
+
 
 class TestResidualSccAnalysisPostInvariants:
     def test_all_children_classified_linear(self):
@@ -128,6 +141,7 @@ class TestResidualSccAnalysisPostInvariants:
 # residual_cluster_size_distribution — PRE violations
 # ---------------------------------------------------------------------------
 
+
 class TestResidualClusterSizeDistributionPreViolations:
     def test_non_dict_raises(self):
         with pytest.raises(AssertionError, match="PRE"):
@@ -142,8 +156,11 @@ class TestResidualClusterSizeDistributionPreViolations:
 # residual_cluster_size_distribution — POST invariants
 # ---------------------------------------------------------------------------
 
+
 class TestResidualClusterSizeDistributionPostInvariants:
-    def _run(self, graph: nx.DiGraph, children: list, min_cut: list = []) -> dict:
+    def _run(self, graph: nx.DiGraph, children: list, min_cut: list | None = None) -> dict:
+        if min_cut is None:
+            min_cut = []
         analysis = residual_scc_analysis("t", children, min_cut, graph)
         return residual_cluster_size_distribution(analysis)
 
@@ -159,7 +176,7 @@ class TestResidualClusterSizeDistributionPostInvariants:
         dist = self._run(_one_residual_cluster(), ["a", "b", "c"])
         assert dist["has_residual_cluster"] is True
         assert dist["n_clusters"] == 1
-        assert dist["sizes"] == [2]          # cluster {a, b} has 2 children
+        assert dist["sizes"] == [2]  # cluster {a, b} has 2 children
         assert dist["max_size"] == 2
         assert dist["total_children_in_clusters"] == 2
 
@@ -209,6 +226,6 @@ class TestResidualClusterSizeDistributionPostInvariants:
         assert dist["n_clusters"] == 0
 
     def test_sizes_are_sorted(self):
-        """sizes list must be non-decreasing."""
+        """Sizes list must be non-decreasing."""
         dist = self._run(_two_residual_clusters(), ["a", "b", "c", "d"])
         assert dist["sizes"] == sorted(dist["sizes"])

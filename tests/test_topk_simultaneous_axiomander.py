@@ -26,24 +26,24 @@ Conventions
 - identify_fn signature: (tf1: str, outcome: str, effective_set: frozenset) -> bool
 """
 
-import sys
 import os
+import sys
+
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 import networkx as nx
+from perturbation_optimizer import scc_mass, set_cycle_break_score
 from topk_simultaneous import (
     build_query_resolvers,
-    union_lower_bound,
-    optimistic_upper_bound,
     evaluate_perturbation_set,
-    score_candidate_set,
-    greedy_topk,
     exhaustive_topk,
+    greedy_topk,
+    optimistic_upper_bound,
+    score_candidate_set,
+    union_lower_bound,
 )
-from perturbation_optimizer import scc_mass, set_cycle_break_score
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -86,7 +86,7 @@ def always_true_identify(tf1, outcome, effective_set):
 
 
 def identify_by_set_size(tf1, outcome, effective_set):
-    """Identifiable iff the effective set is non-empty."""
+    """Return True iff the effective set is non-empty."""
     return len(effective_set) >= 1
 
 
@@ -180,34 +180,24 @@ class TestOptimisticUpperBound:
 
     def test_pre_current_set_must_be_set(self):
         with pytest.raises(AssertionError, match="PRE"):
-            optimistic_upper_bound(
-                ["A"], CANDIDATES, 2, QUERIES, self.resolvers, set()
-            )
+            optimistic_upper_bound(["A"], CANDIDATES, 2, QUERIES, self.resolvers, set())
 
     def test_pre_remaining_budget_non_negative(self):
         with pytest.raises(AssertionError, match="PRE"):
-            optimistic_upper_bound(
-                set(), CANDIDATES, -1, QUERIES, self.resolvers, set()
-            )
+            optimistic_upper_bound(set(), CANDIDATES, -1, QUERIES, self.resolvers, set())
 
     def test_bound_at_least_already_resolved(self):
         already = {0}  # q0 already resolved
-        ub = optimistic_upper_bound(
-            {"A"}, CANDIDATES, 2, QUERIES, self.resolvers, already
-        )
+        ub = optimistic_upper_bound({"A"}, CANDIDATES, 2, QUERIES, self.resolvers, already)
         assert ub >= len(already)
 
     def test_bound_at_most_n_queries(self):
-        ub = optimistic_upper_bound(
-            set(), CANDIDATES, 5, QUERIES, self.resolvers, set()
-        )
+        ub = optimistic_upper_bound(set(), CANDIDATES, 5, QUERIES, self.resolvers, set())
         assert ub <= len(QUERIES)
 
     def test_budget_zero_equals_already_resolved(self):
         already = {0, 1}
-        ub = optimistic_upper_bound(
-            {"A"}, CANDIDATES, 0, QUERIES, self.resolvers, already
-        )
+        ub = optimistic_upper_bound({"A"}, CANDIDATES, 0, QUERIES, self.resolvers, already)
         assert ub == len(already)
 
     def test_full_pool_budget_equals_all_resolvable(self):
@@ -244,9 +234,7 @@ class TestEvaluatePerturbationSet:
         assert result is False
 
     def test_always_true_returns_true(self):
-        result = evaluate_perturbation_set(
-            "tf1", "out1", {"A"}, None, None, always_true_identify
-        )
+        result = evaluate_perturbation_set("tf1", "out1", {"A"}, None, None, always_true_identify)
         assert result is True
 
     def test_self_pair_tf1_excluded(self):
@@ -376,7 +364,7 @@ class TestSccMass:
 
     def test_two_separate_cycles(self):
         g = nx.DiGraph()
-        g.add_edges_from([("A", "B"), ("B", "A")])   # 2-cycle
+        g.add_edges_from([("A", "B"), ("B", "A")])  # 2-cycle
         g.add_edges_from([("C", "D"), ("D", "E"), ("E", "C")])  # 3-cycle
         assert scc_mass(g) == 5
 
@@ -451,9 +439,7 @@ class TestGreedyTopk:
 
     def test_k1_greedy_resolves_at_least_best_singleton(self):
         """Greedy k=1 must be at least as good as the best singleton."""
-        best_singleton = max(
-            sum(MATRIX[c]) for c in CANDIDATES if c != "D"
-        )  # A or B: 2 each
+        best_singleton = max(sum(MATRIX[c]) for c in CANDIDATES if c != "D")  # A or B: 2 each
         best_set, scc_break, score, steps = greedy_topk(
             query_list=self.query_list,
             candidates=self.candidates,
@@ -648,6 +634,4 @@ class TestNegative:
             return "yes"  # not a bool
 
         with pytest.raises(AssertionError, match="POST"):
-            evaluate_perturbation_set(
-                "tf1", "out1", {"A"}, None, None, bad_identify
-            )
+            evaluate_perturbation_set("tf1", "out1", {"A"}, None, None, bad_identify)

@@ -96,9 +96,7 @@ def evaluate_query_adorned(
     assert isinstance(rows, list), "POST: result must be a list"
     assert all(len(r) == 4 for r in rows), "POST: every row has 4 elements"
     _expected = sum(
-        1
-        for c in candidates
-        if c != tf1 and c != outcome and (tf1, c, outcome) not in completed
+        1 for c in candidates if c != tf1 and c != outcome and (tf1, c, outcome) not in completed
     )
     assert len(rows) == _expected, (
         "POST: row count must equal eligible (non-self, not-already-done) candidates"
@@ -210,7 +208,10 @@ class TestEvaluateQueryRowCountPostcondition:
     def test_found_flag_reflects_identify_fn(self):
         """The found flag mirrors the return value of identify_fn."""
         rows = evaluate_query_adorned(
-            "tf1", "out", ["c1", "c2"], set(),
+            "tf1",
+            "out",
+            ["c1", "c2"],
+            set(),
             identify_fn=lambda t, c, o: c == "c1",
         )
         assert len(rows) == 2
@@ -219,7 +220,7 @@ class TestEvaluateQueryRowCountPostcondition:
         assert found_map["c2"] is False
 
     def test_completed_key_uses_tf1_candidate_outcome(self):
-        """completed keys are (tf1, candidate, outcome) — not (outcome, candidate, tf1)."""
+        """Completed keys are (tf1, candidate, outcome) — not (outcome, candidate, tf1)."""
         candidates = ["c1"]
         # Wrong-order key should NOT suppress the candidate
         completed_wrong_order = {("out", "c1", "tf1")}

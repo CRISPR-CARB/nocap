@@ -47,10 +47,9 @@ import sys
 import networkx as nx
 
 from nocap.scc_perturb import (
-    residual_scc_analysis,
     residual_cluster_size_distribution,
+    residual_scc_analysis,
 )
-
 
 # ---------------------------------------------------------------------------
 # helpers
@@ -84,9 +83,7 @@ def write_csv(path: str, rows: list, fieldnames: list) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Phase A: residual-SCC falsification experiment"
-    )
+    parser = argparse.ArgumentParser(description="Phase A: residual-SCC falsification experiment")
     parser.add_argument(
         "--manifest",
         default="notebooks/Ecoli_Analysis_Notebooks/scc_perturb_job.json",
@@ -132,8 +129,8 @@ def main() -> None:
     n_null_joint = 0  # joint_identifiable == None (unexpected per our reasoning)
 
     # Falsification tracking
-    violations_check1: list = []   # unidentifiable + no residual cluster
-    violations_check2: list = []   # identifiable + has residual cluster
+    violations_check1: list = []  # unidentifiable + no residual cluster
+    violations_check2: list = []  # identifiable + has residual cluster
 
     for task in tasks:
         tf: str = task["tf"]
@@ -165,8 +162,10 @@ def main() -> None:
         children: list = shard.get("outcomes", [])
         n_children: int = shard.get("n_children", len(children))
 
-        print(f"  {tf}: joint_identifiable={joint_identifiable}, "
-              f"n_children={n_children}, |B(t)|={len(min_cut)}")
+        print(
+            f"  {tf}: joint_identifiable={joint_identifiable}, "
+            f"n_children={n_children}, |B(t)|={len(min_cut)}"
+        )
 
         # --- Run residual_scc_analysis ---
         analysis = residual_scc_analysis(
@@ -200,32 +199,36 @@ def main() -> None:
                 violations_check1.append(tf)
 
         # --- Summary row ---
-        summary_rows.append({
-            "tf": tf,
-            "scc_size": task.get("scc_size", ""),
-            "joint_identifiable": joint_identifiable,
-            "n_children": n_children,
-            "n_cyclic_children": n_cyclic_children,
-            "n_acyclic_children": n_acyclic_children,
-            "has_residual_cluster": has_residual,
-            "n_residual_clusters": n_clusters,
-            "residual_cluster_sizes": str(cluster_sizes),
-            "max_cluster_size": max_cluster,
-            "n_children_in_clusters": n_in_clusters,
-            "min_cut": str(min_cut),
-            "n_min_cut": len(min_cut),
-            "cut_verified": cut_verified,
-            "tf_still_cyclic": tf_still_cyclic,
-        })
+        summary_rows.append(
+            {
+                "tf": tf,
+                "scc_size": task.get("scc_size", ""),
+                "joint_identifiable": joint_identifiable,
+                "n_children": n_children,
+                "n_cyclic_children": n_cyclic_children,
+                "n_acyclic_children": n_acyclic_children,
+                "has_residual_cluster": has_residual,
+                "n_residual_clusters": n_clusters,
+                "residual_cluster_sizes": str(cluster_sizes),
+                "max_cluster_size": max_cluster,
+                "n_children_in_clusters": n_in_clusters,
+                "min_cut": str(min_cut),
+                "n_min_cut": len(min_cut),
+                "cut_verified": cut_verified,
+                "tf_still_cyclic": tf_still_cyclic,
+            }
+        )
 
         # --- Cluster size rows (long format) ---
         for i, sz in enumerate(cluster_sizes):
-            cluster_size_rows.append({
-                "tf": tf,
-                "joint_identifiable": joint_identifiable,
-                "cluster_index": i,
-                "n_children_in_cluster": sz,
-            })
+            cluster_size_rows.append(
+                {
+                    "tf": tf,
+                    "joint_identifiable": joint_identifiable,
+                    "cluster_index": i,
+                    "n_children_in_cluster": sz,
+                }
+            )
 
     # ---------------------------------------------------------------------------
     # Write CSVs
@@ -237,13 +240,21 @@ def main() -> None:
         summary_path,
         summary_rows,
         [
-            "tf", "scc_size", "joint_identifiable",
-            "n_children", "n_cyclic_children", "n_acyclic_children",
-            "has_residual_cluster", "n_residual_clusters",
-            "residual_cluster_sizes", "max_cluster_size",
+            "tf",
+            "scc_size",
+            "joint_identifiable",
+            "n_children",
+            "n_cyclic_children",
+            "n_acyclic_children",
+            "has_residual_cluster",
+            "n_residual_clusters",
+            "residual_cluster_sizes",
+            "max_cluster_size",
             "n_children_in_clusters",
-            "min_cut", "n_min_cut",
-            "cut_verified", "tf_still_cyclic",
+            "min_cut",
+            "n_min_cut",
+            "cut_verified",
+            "tf_still_cyclic",
         ],
     )
     write_csv(
@@ -251,7 +262,7 @@ def main() -> None:
         cluster_size_rows,
         ["tf", "joint_identifiable", "cluster_index", "n_children_in_cluster"],
     )
-    print(f"\nCSVs written:")
+    print("\nCSVs written:")
     print(f"  {summary_path}")
     print(f"  {cluster_path}")
 
@@ -261,7 +272,7 @@ def main() -> None:
     print("\n" + "=" * 70)
     print("PHASE A RESULTS: RESIDUAL-SCC FALSIFICATION TEST")
     print("=" * 70)
-    print(f"\nCohort summary:")
+    print("\nCohort summary:")
     print(f"  TFs with shards processed:  {len(summary_rows)}")
     print(f"  Jointly IDENTIFIABLE:        {n_identifiable}")
     print(f"  Jointly UNIDENTIFIABLE:      {n_unidentifiable}")
@@ -269,13 +280,21 @@ def main() -> None:
         print(f"  Missing shards (skipped):    {n_no_shard}")
 
     # 2x2 grid
-    ident_has    = sum(1 for r in summary_rows if r["joint_identifiable"] and r["has_residual_cluster"])
-    ident_nohas  = sum(1 for r in summary_rows if r["joint_identifiable"] and not r["has_residual_cluster"])
-    unid_has     = sum(1 for r in summary_rows if not r["joint_identifiable"] and r["has_residual_cluster"])
-    unid_nohas   = sum(1 for r in summary_rows if not r["joint_identifiable"] and not r["has_residual_cluster"])
+    ident_has = sum(
+        1 for r in summary_rows if r["joint_identifiable"] and r["has_residual_cluster"]
+    )
+    ident_nohas = sum(
+        1 for r in summary_rows if r["joint_identifiable"] and not r["has_residual_cluster"]
+    )
+    unid_has = sum(
+        1 for r in summary_rows if not r["joint_identifiable"] and r["has_residual_cluster"]
+    )
+    unid_nohas = sum(
+        1 for r in summary_rows if not r["joint_identifiable"] and not r["has_residual_cluster"]
+    )
 
     print()
-    print(f"  Falsification grid (N per cell):")
+    print("  Falsification grid (N per cell):")
     print(f"  {'':30s}  {'UNIDENTIFIABLE':>16s}  {'IDENTIFIABLE':>14s}")
     print(f"  {'HAS residual cluster':30s}  {'consistent':>16s}  {'VIOLATION(Chk2)':>14s}")
     print(f"  {'':30s}  {unid_has:>16d}  {ident_has:>14d}")
@@ -287,9 +306,11 @@ def main() -> None:
     if violations_check1:
         for v in violations_check1:
             row = next(r for r in summary_rows if r["tf"] == v)
-            print(f"    VIOLATION: {v}  "
-                  f"(n_children={row['n_children']}, "
-                  f"n_residual_clusters={row['n_residual_clusters']})")
+            print(
+                f"    VIOLATION: {v}  "
+                f"(n_children={row['n_children']}, "
+                f"n_residual_clusters={row['n_residual_clusters']})"
+            )
     else:
         print("    None — Check 1 HOLDS")
 
@@ -298,10 +319,12 @@ def main() -> None:
     if violations_check2:
         for v in violations_check2:
             row = next(r for r in summary_rows if r["tf"] == v)
-            print(f"    VIOLATION: {v}  "
-                  f"(n_children={row['n_children']}, "
-                  f"n_residual_clusters={row['n_residual_clusters']}, "
-                  f"sizes={row['residual_cluster_sizes']})")
+            print(
+                f"    VIOLATION: {v}  "
+                f"(n_children={row['n_children']}, "
+                f"n_residual_clusters={row['n_residual_clusters']}, "
+                f"sizes={row['residual_cluster_sizes']})"
+            )
     else:
         print("    None — Check 2 HOLDS")
 

@@ -29,9 +29,7 @@ from coverage_common import merge_shards, rows_to_matrix
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Merge coverage-matrix shards into final CSV"
-    )
+    parser = argparse.ArgumentParser(description="Merge coverage-matrix shards into final CSV")
     parser.add_argument("--manifest", required=True, help="Path to coverage_job.json")
     parser.add_argument(
         "--shards-dir",

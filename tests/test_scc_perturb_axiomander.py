@@ -35,7 +35,6 @@ from nocap.scc_perturb import (
 )
 from scripts.scc_perturb_worker import run_joint_cyclic_id, run_per_gene_cyclic_id
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -49,10 +48,15 @@ def toy_graph():
       A→D, B→E        (DAG leaves)
     """
     g = nx.DiGraph()
-    g.add_edges_from([
-        ("A", "B"), ("B", "C"), ("C", "A"),  # cycle
-        ("A", "D"), ("B", "E"),               # out-of-SCC descendants
-    ])
+    g.add_edges_from(
+        [
+            ("A", "B"),
+            ("B", "C"),
+            ("C", "A"),  # cycle
+            ("A", "D"),
+            ("B", "E"),  # out-of-SCC descendants
+        ]
+    )
     return g
 
 
@@ -247,9 +251,7 @@ class TestGetDirectChildren:
         """Every result node must be a direct out-neighbour of A."""
         children = get_direct_children("A", intervened_graph_a)
         for c in children:
-            assert intervened_graph_a.has_edge("A", c), (
-                f"{c} in result but A→{c} edge missing"
-            )
+            assert intervened_graph_a.has_edge("A", c), f"{c} in result but A→{c} edge missing"
 
     def test_pre_tf_must_be_str(self, toy_graph):
         with pytest.raises(AssertionError, match="PRE: tf must be a str"):
@@ -271,7 +273,7 @@ class TestRunJointCyclicId:
     def _check_inputs(self, tf, outcome_set, min_cut):
         """Injectable that validates the inputs it receives."""
         assert isinstance(tf, str)
-        assert isinstance(outcome_set, (set, frozenset))
+        assert isinstance(outcome_set, set | frozenset)
         assert isinstance(min_cut, list)
         return True
 
@@ -483,7 +485,10 @@ class TestRunPerGeneCyclicId:
     """
 
     class FakeVar:
+        """Minimal Variable-like stub for testing without importing y0."""
+
         def __init__(self, name):
+            """Store the variable name."""
             self.name = name
 
         def __repr__(self):
@@ -640,9 +645,7 @@ class TestEndToEndToyGraph:
         for c in children:
             if c in intervened:
                 reachable = nx.descendants(intervened, c)
-                assert "A" not in reachable, (
-                    f"Child {c} can still reach A after do({cut})"
-                )
+                assert "A" not in reachable, f"Child {c} can still reach A after do({cut})"
 
     def test_dag_tf_has_empty_in_scc_children(self, toy_graph):
         """D is a leaf — it has no in-SCC children (singleton SCC)."""
