@@ -39,9 +39,10 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "src/nocap/version.py" = ["S603", "S607"]
-# scc_perturb.py uses assert-based axiomander contracts (PRE/POST) and
-# intentional en-dash separators in Returns dict documentation.
+# scc_perturb.py and cyclic_single_door.py use assert-based axiomander contracts
+# (PRE/POST) and intentional en-dash separators in Returns dict documentation.
 "src/nocap/scc_perturb.py" = ["S101", "RUF002"]
+"src/nocap/cyclic_single_door.py" = ["S101", "RUF002", "D301"]
 "docs/source/conf.py" = ["ERA001", "D100", "F821"]
 "notebooks/**" = [
     "T201",  # print
@@ -196,6 +197,13 @@ docs = [
     "sphinx-click",
     "sphinx-rtd-theme",
     "sphinx_automodapi",
+]
+# Snakemake workflow dependencies (scatter-gather SLURM pipeline).
+# Install with: pip install "nocap[workflow]"
+# or:           uv pip install "nocap[workflow]"
+workflow = [
+    "snakemake>=8.0",
+    "snakemake-executor-plugin-slurm>=0.5",
 ]
 
 [project.scripts]

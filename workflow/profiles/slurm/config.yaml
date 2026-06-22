@@ -1,0 +1,39 @@
+# workflow/profiles/slurm/config.yaml
+# Snakemake SLURM executor profile for the cyclic single-door workflow.
+#
+# Usage:
+#   snakemake --profile workflow/profiles/slurm --configfile workflow/config.yaml
+#
+# Requires snakemake-executor-plugin-slurm:
+#   pip install snakemake-executor-plugin-slurm
+#   (or: uv add --optional workflow snakemake-executor-plugin-slurm)
+
+executor: slurm
+
+# Default SLURM submission options (overridden per-rule via resources:)
+default-resources:
+  slurm_account: crispr_carb
+  slurm_partition: slurm
+  mem_mb: 4000
+  runtime: 60          # minutes
+  nodes: 1
+  tasks: 1
+  cpus_per_task: 1
+
+# Retry failed jobs up to 2 times before giving up
+retries: 2
+
+# Keep going with independent jobs if one fails
+keep-going: true
+
+# Print shell commands before executing
+printshellcmds: true
+
+# Rerun incomplete output files (handles shard corruption / partial writes)
+rerun-incomplete: true
+
+# Number of jobs to submit simultaneously
+jobs: 200
+
+# Latency wait: seconds to wait for output files to appear on shared filesystem
+latency-wait: 60
