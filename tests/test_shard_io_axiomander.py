@@ -57,6 +57,8 @@ def _write_temp(content: str) -> str:
 
 
 class TestLoadFirstJsonObject:
+    """Tests for load_first_json_object."""
+
     def test_clean_shard_roundtrips(self):
         """A well-formed single JSON object is returned unchanged."""
         path = _write_temp(json.dumps(_CLEAN_OBJECT, indent=2))
@@ -189,6 +191,8 @@ class TestLoadFirstJsonObject:
 
 
 class TestRepairShardInplace:
+    """Tests for the repair_shard_inplace() function."""
+
     def test_clean_file_returns_false(self):
         """A file that needs no repair must return False."""
         path = _write_temp(json.dumps(_CLEAN_OBJECT, indent=2))
@@ -265,6 +269,7 @@ class TestGlnGRegression:
 
     @pytest.fixture(autouse=True)
     def require_shard(self):
+        """Skip the test if the real glnG shard file is not present."""
         if not os.path.isfile(self.SHARD_PATH):
             pytest.skip("glnG shard not found — skipping regression test")
 

@@ -114,18 +114,22 @@ class TestEvaluateQueryPreconditions:
     """Precondition violations must raise AssertionError with PRE: prefix."""
 
     def test_pre_tf1_must_be_str(self):
+        """PRE: tf1 must be str — non-str raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: tf1 must be str"):
             evaluate_query_adorned(123, "out", ["c1"], set())
 
     def test_pre_outcome_must_be_str(self):
+        """PRE: outcome must be str — None raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: outcome must be str"):
             evaluate_query_adorned("tf1", None, ["c1"], set())
 
     def test_pre_candidates_must_be_list(self):
+        """PRE: candidates must be a list — tuple raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: candidates must be a list"):
             evaluate_query_adorned("tf1", "out", ("c1",), set())
 
     def test_pre_completed_must_be_set(self):
+        """PRE: completed must be a set — list raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: completed must be a set"):
             evaluate_query_adorned("tf1", "out", ["c1"], [])
 
@@ -253,6 +257,7 @@ class TestEvaluateQueryRowCountGuardFires:
         """
 
         def broken(tf1, outcome, candidates, completed, identify_fn=None):
+            """Broken variant that appends phantom rows to trigger the POST guard."""
             # Replicate the pre-check
             assert isinstance(tf1, str), "PRE: tf1 must be str"
             assert isinstance(outcome, str), "PRE: outcome must be str"
@@ -299,6 +304,7 @@ class TestEvaluateQueryRowCountGuardFires:
         """Under-producing rows also triggers the guard."""
 
         def missing_row_adorned(tf1, outcome, candidates, completed):
+            """Broken variant that drops the last row to trigger the POST guard."""
             assert isinstance(tf1, str), "PRE: tf1 must be str"
             assert isinstance(outcome, str), "PRE: outcome must be str"
             assert isinstance(candidates, list), "PRE: candidates must be a list"

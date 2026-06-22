@@ -87,19 +87,24 @@ def _single_child_graph() -> nx.DiGraph:
 
 
 class TestResidualSccAnalysisPostInvariants:
+    """POST invariants for residual_scc_analysis on synthetic graphs."""
+
     def test_all_children_classified_linear(self):
+        """POST: every child appears in exactly one of children_cyclic / children_acyclic."""
         g = _linear_dag()
         children = ["a", "b", "c"]
         r = residual_scc_analysis("t", children, [], g)
         assert len(r["children_cyclic"]) + len(r["children_acyclic"]) == len(children)
 
     def test_no_residual_clusters_in_linear_dag(self):
+        """POST: a pure DAG has no residual clusters."""
         g = _linear_dag()
         children = ["a", "b", "c"]
         r = residual_scc_analysis("t", children, [], g)
         assert r["residual_clusters"] == []
 
     def test_one_residual_cluster_detected(self):
+        """POST: a->b->a cycle among children produces exactly one residual cluster."""
         g = _one_residual_cluster()
         children = ["a", "b", "c"]
         r = residual_scc_analysis("t", children, [], g)
@@ -108,28 +113,33 @@ class TestResidualSccAnalysisPostInvariants:
         assert cluster == frozenset({"a", "b"})
 
     def test_acyclic_child_not_in_cluster(self):
+        """POST: acyclic child c is not placed in any residual cluster."""
         g = _one_residual_cluster()
         children = ["a", "b", "c"]
         r = residual_scc_analysis("t", children, [], g)
         assert "c" in r["children_acyclic"]
 
     def test_two_residual_clusters_detected(self):
+        """POST: two independent 2-cycles among children produce two clusters."""
         g = _two_residual_clusters()
         children = ["a", "b", "c", "d"]
         r = residual_scc_analysis("t", children, [], g)
         assert len(r["residual_clusters"]) == 2
 
     def test_cut_verified_is_bool(self):
+        """POST: cut_verified field is a bool."""
         g = _linear_dag()
         r = residual_scc_analysis("t", ["a"], [], g)
         assert isinstance(r["cut_verified"], bool)
 
     def test_tf_still_cyclic_is_bool(self):
+        """POST: tf_still_cyclic field is a bool."""
         g = _linear_dag()
         r = residual_scc_analysis("t", ["a"], [], g)
         assert isinstance(r["tf_still_cyclic"], bool)
 
     def test_empty_children_no_clusters(self):
+        """POST: empty children list produces empty cluster and child lists."""
         g = _linear_dag()
         r = residual_scc_analysis("t", [], [], g)
         assert r["residual_clusters"] == []
@@ -143,11 +153,15 @@ class TestResidualSccAnalysisPostInvariants:
 
 
 class TestResidualClusterSizeDistributionPreViolations:
+    """PRE violations for residual_cluster_size_distribution."""
+
     def test_non_dict_raises(self):
+        """PRE: analysis must be a dict — string raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE"):
             residual_cluster_size_distribution("not a dict")  # type: ignore[arg-type]
 
     def test_missing_key_raises(self):
+        """PRE: analysis must contain 'residual_clusters' key."""
         with pytest.raises(AssertionError, match="PRE"):
             residual_cluster_size_distribution({"other_key": []})
 
@@ -158,13 +172,17 @@ class TestResidualClusterSizeDistributionPreViolations:
 
 
 class TestResidualClusterSizeDistributionPostInvariants:
+    """POST invariants for residual_cluster_size_distribution."""
+
     def _run(self, graph: nx.DiGraph, children: list, min_cut: list | None = None) -> dict:
+        """Run residual_scc_analysis then residual_cluster_size_distribution."""
         if min_cut is None:
             min_cut = []
         analysis = residual_scc_analysis("t", children, min_cut, graph)
         return residual_cluster_size_distribution(analysis)
 
     def test_no_clusters_has_residual_false(self):
+        """POST: linear DAG → has_residual_cluster=False, all counts zero."""
         dist = self._run(_linear_dag(), ["a", "b", "c"])
         assert dist["has_residual_cluster"] is False
         assert dist["n_clusters"] == 0
@@ -173,6 +191,7 @@ class TestResidualClusterSizeDistributionPostInvariants:
         assert dist["total_children_in_clusters"] == 0
 
     def test_one_cluster_correct_size(self):
+        """POST: one 2-cycle → n_clusters=1, sizes=[2], max_size=2."""
         dist = self._run(_one_residual_cluster(), ["a", "b", "c"])
         assert dist["has_residual_cluster"] is True
         assert dist["n_clusters"] == 1
@@ -181,6 +200,7 @@ class TestResidualClusterSizeDistributionPostInvariants:
         assert dist["total_children_in_clusters"] == 2
 
     def test_two_clusters_correct_sizes(self):
+        """POST: two 2-cycles → n_clusters=2, sizes=[2,2], total=4."""
         dist = self._run(_two_residual_clusters(), ["a", "b", "c", "d"])
         assert dist["has_residual_cluster"] is True
         assert dist["n_clusters"] == 2
@@ -189,6 +209,7 @@ class TestResidualClusterSizeDistributionPostInvariants:
         assert dist["total_children_in_clusters"] == 4
 
     def test_n_clusters_equals_len_sizes(self):
+        """POST: n_clusters == len(sizes) for all test graphs."""
         for graph, children in [
             (_linear_dag(), ["a", "b", "c"]),
             (_one_residual_cluster(), ["a", "b", "c"]),
@@ -200,6 +221,7 @@ class TestResidualClusterSizeDistributionPostInvariants:
             )
 
     def test_has_residual_cluster_matches_n_clusters(self):
+        """POST: has_residual_cluster iff n_clusters >= 1."""
         for graph, children in [
             (_linear_dag(), ["a", "b", "c"]),
             (_one_residual_cluster(), ["a", "b", "c"]),
@@ -208,14 +230,17 @@ class TestResidualClusterSizeDistributionPostInvariants:
             assert dist["has_residual_cluster"] == (dist["n_clusters"] >= 1)
 
     def test_max_size_zero_when_no_clusters(self):
+        """POST: max_size == 0 when there are no clusters."""
         dist = self._run(_linear_dag(), ["a", "b", "c"])
         assert dist["max_size"] == 0
 
     def test_max_size_ge_2_when_clusters_present(self):
+        """POST: max_size >= 2 when at least one cluster exists."""
         dist = self._run(_one_residual_cluster(), ["a", "b", "c"])
         assert dist["max_size"] >= 2
 
     def test_total_equals_sum_of_sizes(self):
+        """POST: total_children_in_clusters == sum(sizes)."""
         dist = self._run(_two_residual_clusters(), ["a", "b", "c", "d"])
         assert dist["total_children_in_clusters"] == sum(dist["sizes"])
 

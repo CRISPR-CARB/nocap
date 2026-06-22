@@ -486,14 +486,8 @@ def residual_cluster_size_distribution(analysis_result: dict) -> dict:
     }
 
     # --- POST ---
-    assert result["n_clusters"] == len(result["sizes"]), "POST: n_clusters must equal len(sizes)"
-    assert isinstance(result["has_residual_cluster"], bool), (
-        "POST: has_residual_cluster must be bool"
-    )
-    assert result["has_residual_cluster"] == (result["n_clusters"] >= 1), (
-        "POST: has_residual_cluster must match n_clusters >= 1"
-    )
-    assert result["total_children_in_clusters"] == sum(result["sizes"]), (
-        "POST: total_children_in_clusters must equal sum(sizes)"
-    )
+    assert n_clusters == len(sizes), "POST: n_clusters must equal len(sizes)"
+    assert isinstance(has_cluster, bool), "POST: has_residual_cluster must be bool"
+    assert has_cluster == (n_clusters >= 1), "POST: has_residual_cluster must match n_clusters >= 1"
+    assert total_in_clusters == sum(sizes), "POST: total_children_in_clusters must equal sum(sizes)"
     return result
