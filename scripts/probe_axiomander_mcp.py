@@ -42,7 +42,7 @@ print(f"Sending {len(messages)} messages (initialize, notifications/initialized,
 print()
 
 try:
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S603
         [PYTHON, "-m", "axiomander.oracle.mcp_server"],
         input=stdin_bytes,
         capture_output=True,

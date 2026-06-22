@@ -33,8 +33,8 @@ Production scripts are dependency-free (no axiomander import).
 import concurrent.futures
 import csv
 import os
-import sys as _sys
 import os as _os
+import sys as _sys
 
 _sys.path.insert(0, _os.path.dirname(__file__))
 
@@ -109,7 +109,7 @@ def merge_shards(shard_list: list) -> list:
         # INV: shard is a list of rows
         assert isinstance(shard, list), "INV: each shard must be a list"
         for row in shard:
-            assert isinstance(row, (list, tuple)) and len(row) == 4, (
+            assert isinstance(row, list | tuple) and len(row) == 4, (
                 "INV: each row must be a 4-element list/tuple"
             )
             key = (row[0], row[1], row[2])
@@ -154,7 +154,7 @@ def rows_to_matrix(rows: list, query_labels: list) -> tuple:
     lookup: dict = {}
     for row in rows:
         # INV: each row is a 4-element sequence
-        assert isinstance(row, (list, tuple)) and len(row) == 4, (
+        assert isinstance(row, list | tuple) and len(row) == 4, (
             "INV: each row must be a 4-element list/tuple"
         )
         tf1, candidate, outcome, found = row
@@ -198,7 +198,7 @@ def load_valid_genes(supptable_path: str, network_nodes: set) -> set:
     assert isinstance(supptable_path, str), "PRE: supptable_path must be str"
     assert len(supptable_path) > 0, "PRE: supptable_path must be non-empty"
     assert os.path.isfile(supptable_path), f"PRE: file must exist: {supptable_path}"
-    assert isinstance(network_nodes, (set, frozenset)), (
+    assert isinstance(network_nodes, set | frozenset), (
         "PRE: network_nodes must be a set or frozenset"
     )
 
@@ -244,7 +244,7 @@ def build_baseline_queries(ecoli_graph, valid_genes: set) -> list:
             none
     """
     # --- PRE ---
-    assert isinstance(valid_genes, (set, frozenset)), (
+    assert isinstance(valid_genes, set | frozenset), (
         "PRE: valid_genes must be a set or frozenset"
     )
     assert hasattr(ecoli_graph, "successors"), (
@@ -416,7 +416,7 @@ def get_candidate_tfs(ecoli_graph, valid_genes: set) -> list:
     from perturbation_optimizer import rank_candidates_by_cycle_score
 
     # --- PRE ---
-    assert isinstance(valid_genes, (set, frozenset)), (
+    assert isinstance(valid_genes, set | frozenset), (
         "PRE: valid_genes must be a set or frozenset"
     )
 

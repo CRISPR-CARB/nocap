@@ -1,6 +1,5 @@
 """Check opam for ATP packages needed by coq-hammer (Level 2)."""
 import subprocess
-import sys
 
 result = subprocess.run(
     ["/opt/homebrew/bin/opam", "list"],
@@ -13,9 +12,9 @@ result = subprocess.run(
     },
 )
 lines = result.stdout.splitlines()
-atp_lines = [l for l in lines if any(k in l.lower() for k in ["z3", "eprover", "vampire", "cvc4", "cvc5", "alt-ergo"])]
+atp_lines = [line for line in lines if any(k in line.lower() for k in ["z3", "eprover", "vampire", "cvc4", "cvc5", "alt-ergo"])]
 print("ATP-related opam packages:")
-for l in atp_lines:
-    print(" ", l)
+for line in atp_lines:
+    print(" ", line)
 if not atp_lines:
     print("  (none found)")

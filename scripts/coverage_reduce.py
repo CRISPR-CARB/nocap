@@ -1,4 +1,4 @@
-"""
+r"""
 coverage_reduce.py
 ==================
 Final step of the parallelised coverage-matrix pipeline.

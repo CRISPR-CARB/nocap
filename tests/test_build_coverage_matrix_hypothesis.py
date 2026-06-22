@@ -45,7 +45,7 @@ from build_coverage_matrix import build_baseline_queries, load_valid_genes
 # Gene names: short uppercase ASCII identifiers (no 'off' or 'AAV' by default)
 gene_name = st.from_regex(r"[A-Z][A-Z0-9]{0,5}", fullmatch=True)
 
-# A frozenset of clean gene names (1–12 genes)
+# A frozenset of clean gene names (1-12 genes)
 gene_set = st.frozensets(gene_name, min_size=1, max_size=12)
 
 # Gene names that may include "off"/"AAV" variants

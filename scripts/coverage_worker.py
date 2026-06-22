@@ -1,4 +1,4 @@
-"""
+r"""
 coverage_worker.py
 ==================
 SLURM array task for the parallelised coverage-matrix pipeline.

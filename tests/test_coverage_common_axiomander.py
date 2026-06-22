@@ -1,4 +1,4 @@
-"""
+r"""
 tests/test_coverage_common_axiomander.py
 =========================================
 Axiomander-style contract tests for scripts/coverage_common.py pure helpers:
@@ -29,7 +29,6 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from coverage_common import assign_work, merge_shards, rows_to_matrix
-
 
 # ---------------------------------------------------------------------------
 # Adorned versions with explicit inline assert contracts
@@ -70,7 +69,7 @@ def merge_shards_adorned(shard_list: list) -> list:
         assert isinstance(shard, list), "INV: each shard must be a list"
         for row in shard:
             # LOOP INVARIANT: each row is a 4-element sequence
-            assert isinstance(row, (list, tuple)) and len(row) == 4, (
+            assert isinstance(row, list | tuple) and len(row) == 4, (
                 "INV: each row must be a 4-element list/tuple"
             )
             key = (row[0], row[1], row[2])
@@ -96,14 +95,14 @@ def rows_to_matrix_adorned(rows: list, query_labels: list) -> tuple:
     lookup: dict = {}
     for row in rows:
         # LOOP INVARIANT: each row is a 4-element sequence
-        assert isinstance(row, (list, tuple)) and len(row) == 4, (
+        assert isinstance(row, list | tuple) and len(row) == 4, (
             "INV: each row must be a 4-element list/tuple"
         )
         tf1, candidate, outcome, found = row
         label = f"{tf1}->{outcome}"
         lookup[(candidate, label)] = bool(found)
 
-    candidate_set = sorted(set(r[1] for r in rows))
+    candidate_set = sorted({r[1] for r in rows})
 
     # --- POSTCONDITIONS ---
     assert isinstance(candidate_set, list), "POST: candidate_set must be a list"

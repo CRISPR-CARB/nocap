@@ -84,7 +84,7 @@ def coverage_matrix_strategy(draw, min_cands=1, max_cands=8, min_queries=1, max_
 
 @st.composite
 def coverage_matrix_no_budget(draw, min_cands=1, max_cands=8, min_queries=1, max_queries=8):
-    """Same as coverage_matrix_strategy but without budget_k."""
+    """Generate coverage matrix data without a budget_k constraint."""
     cands, queries, matrix, _ = draw(
         coverage_matrix_strategy(min_cands, max_cands, min_queries, max_queries)
     )

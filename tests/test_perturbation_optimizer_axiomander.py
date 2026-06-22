@@ -39,7 +39,7 @@ from perturbation_optimizer import (
 
 def _matrix(cands, queries, coverage):
     """Build a matrix dict from a list-of-lists of bools."""
-    return {c: list(row) for c, row in zip(cands, coverage)}
+    return {c: list(row) for c, row in zip(cands, coverage, strict=False)}
 
 
 # Simple 3-candidate, 4-query matrix
@@ -165,13 +165,13 @@ class TestGreedyMaxCoveragePostconditions:
         assert result == []
 
     def test_post_intervenable_restricts_pool(self):
-        """intervenable restricts which candidates can be selected."""
+        """Intervenable restricts which candidates can be selected."""
         result = greedy_max_coverage(CANDS3, QUERIES4, MATRIX3, 3, intervenable={"C"})
         tfs = [tf for tf, _, _ in result]
         assert all(tf in {"C"} for tf in tfs)
 
     def test_post_accepts_frozenset_intervenable(self):
-        """frozenset is accepted for intervenable."""
+        """Frozenset is accepted for intervenable."""
         result = greedy_max_coverage(CANDS3, QUERIES4, MATRIX3, 3, intervenable=frozenset({"A", "B"}))
         tfs = [tf for tf, _, _ in result]
         assert all(tf in {"A", "B"} for tf in tfs)
@@ -282,7 +282,7 @@ class TestBuildMarginalGainCurvePostconditions:
         assert curve[0] == (0, 0, 0.0)
 
     def test_post_k_values_are_sequential(self):
-        """k values are 0, 1, 2, ..."""
+        """K values are 0, 1, 2, ..."""
         curve = build_marginal_gain_curve(CANDS3, QUERIES4, MATRIX3, 3)
         ks = [k for k, _, _ in curve]
         assert ks == list(range(len(curve)))
@@ -462,9 +462,7 @@ class TestLoopInvariants:
             assert cumulatives[i] > cumulatives[i - 1]
 
     def test_inv_greedy_min_set_cover_unresolved_shrinks(self):
-        """
-        Each min-set-cover step must strictly reduce unresolved queries.
-        """
+        """Each min-set-cover step must strictly reduce unresolved queries."""
         result = greedy_min_set_cover(CANDS3, QUERIES4, MATRIX3)
         cumulatives = [c for _, _, c in result]
         for i in range(1, len(cumulatives)):

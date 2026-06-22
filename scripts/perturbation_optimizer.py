@@ -1,4 +1,4 @@
-"""
+r"""
 perturbation_optimizer.py
 =========================
 Greedy submodular optimizer for perturbation panel design.
@@ -151,7 +151,7 @@ def greedy_max_coverage(
     assert isinstance(budget_k, int) and budget_k >= 0, (
         "PRE: budget_k must be a non-negative int"
     )
-    assert intervenable is None or isinstance(intervenable, (set, frozenset)), (
+    assert intervenable is None or isinstance(intervenable, set | frozenset), (
         "PRE: intervenable must be None or a set"
     )
     for c in candidates:
@@ -260,7 +260,7 @@ def greedy_min_set_cover(
     # --- PRECONDITIONS ---
     assert isinstance(candidates, list), "PRE: candidates must be a list"
     assert isinstance(queries, list), "PRE: queries must be a list"
-    assert intervenable is None or isinstance(intervenable, (set, frozenset)), (
+    assert intervenable is None or isinstance(intervenable, set | frozenset), (
         "PRE: intervenable must be None or a set"
     )
     for c in candidates:
@@ -270,7 +270,7 @@ def greedy_min_set_cover(
         )
 
     pool = [c for c in candidates if intervenable is None or c in intervenable]
-    n_queries = len(queries)  # noqa: F841 — kept for clarity
+    n_queries = len(queries)
 
     # Only try to cover queries that are resolvable by at least one TF
     resolvable: set[int] = set()
@@ -374,7 +374,7 @@ def build_marginal_gain_curve(
     results = greedy_max_coverage(candidates, queries, matrix, max_k, intervenable)
     n_queries = len(queries)
     curve: list[tuple[int, int, float]] = [(0, 0, 0.0)]
-    for step_idx, (tf, gain, cumulative) in enumerate(results):  # noqa: B007
+    for step_idx, (tf, gain, cumulative) in enumerate(results):
         curve.append((step_idx + 1, cumulative, cumulative / n_queries))
 
     # --- POSTCONDITIONS ---

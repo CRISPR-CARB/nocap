@@ -1,4 +1,4 @@
-"""
+r"""
 coverage_prepare.py
 ===================
 Serial preparation step for the parallelised coverage-matrix pipeline.

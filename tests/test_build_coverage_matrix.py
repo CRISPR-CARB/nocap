@@ -15,13 +15,11 @@ import os
 import sys
 
 import networkx as nx
-import pytest
 
 # Make scripts/ importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from build_coverage_matrix import build_baseline_queries, load_valid_genes
-
 
 # ---------------------------------------------------------------------------
 # Smoke test: module-level imports (cyclic_id, NxMixedGraph, etc.)

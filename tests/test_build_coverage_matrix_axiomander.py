@@ -40,7 +40,7 @@ def load_valid_genes_adorned(supptable_path, network_nodes):
     # --- PRECONDITIONS ---
     assert isinstance(supptable_path, str), "PRE: supptable_path must be a str"
     assert os.path.isfile(supptable_path), f"PRE: file must exist: {supptable_path}"
-    assert isinstance(network_nodes, (set, frozenset)), "PRE: network_nodes must be a set"
+    assert isinstance(network_nodes, set | frozenset), "PRE: network_nodes must be a set"
 
     # --- BODY (identical to production) ---
     csv_genes = set()
@@ -75,7 +75,7 @@ def load_valid_genes_adorned(supptable_path, network_nodes):
 def build_baseline_queries_adorned(ecoli_graph, valid_genes):
     """build_baseline_queries with explicit assert-based contracts."""
     # --- PRECONDITIONS ---
-    assert isinstance(valid_genes, (set, frozenset)), \
+    assert isinstance(valid_genes, set | frozenset), \
         "PRE: valid_genes must be a set"
     assert hasattr(ecoli_graph, "successors"), \
         "PRE: ecoli_graph must be a directed graph with .successors()"
@@ -158,7 +158,7 @@ class TestLoadValidGenesPreconditions:
             load_valid_genes_adorned(str(csv_path), ["geneA"])
 
     def test_pre_accepts_frozenset(self, tmp_path):
-        """frozenset is a valid network_nodes type."""
+        """Frozenset is a valid network_nodes type."""
         csv_path = tmp_path / "s.csv"
         _write_supptable(csv_path, ["geneA"])
         result = load_valid_genes_adorned(str(csv_path), frozenset({"geneA"}))
@@ -236,7 +236,7 @@ class TestBuildBaselineQueriesPreconditions:
             build_baseline_queries_adorned(G, ["A", "B"])
 
     def test_pre_accepts_frozenset(self):
-        """frozenset is a valid valid_genes type."""
+        """Frozenset is a valid valid_genes type."""
         G = nx.DiGraph()
         G.add_edge("A", "B")
         result = build_baseline_queries_adorned(G, frozenset({"A", "B"}))

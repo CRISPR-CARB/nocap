@@ -16,12 +16,9 @@ Contract / negative tests are in test_coverage_common_axiomander.py.
 import os
 import sys
 
-import pytest
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from coverage_common import assign_work, merge_shards, rows_to_matrix
-
 
 # ---------------------------------------------------------------------------
 # assign_work
@@ -209,7 +206,7 @@ class TestRowsToMatrix:
         assert lookup[("cand1", "tf1->out1")] is False
 
     def test_multiple_queries_multiple_candidates(self):
-        """Matrix with 2 queries × 2 candidates has 4 lookup entries."""
+        """Matrix with 2 queries x 2 candidates has 4 lookup entries."""
         rows = [
             ["tf1", "cand1", "out1", True],
             ["tf1", "cand2", "out1", False],
