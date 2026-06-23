@@ -11,8 +11,9 @@ graphml: "notebooks/Ecoli_Analysis_Notebooks/ecoli_full_network_no_small_rna.gra
 # Path to supplementary table CSV (used for metadata join in gather step)
 supptable: "notebooks/Ecoli_Analysis_Notebooks/supptable1.csv"
 
-# Number of edges per shard (scatter granularity)
-shard_size: 500
+# Number of shards (scatter granularity) = number of free SLURM nodes at submission time.
+# Each shard becomes one classify job.  Set to ceil(n_edges / n_shards) edges per shard.
+n_shards: 179
 
 # Greedy rescue budget: max number of hard interventions to try
 k: 10

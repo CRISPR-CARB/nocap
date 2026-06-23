@@ -57,21 +57,68 @@ def _load_graph(graphml_path: str):
 # ---------------------------------------------------------------------------
 
 
+def _split_into_n_shards(
+    edges: list, n_shards: int
+) -> list[list]:
+    """Split *edges* into exactly *n_shards* near-equal contiguous chunks.
+
+    Uses array_split-style division: the first ``r`` shards receive ``q + 1``
+    edges and the remaining shards receive ``q`` edges, where
+    ``q, r = divmod(len(edges), n_shards)``.  Empty shards are never emitted
+    (so the actual count may be less than *n_shards* when
+    *n_shards* > *len(edges)*).
+
+    PRE: n_shards >= 1
+    PRE: len(edges) >= 0
+    POST: len(result) == min(n_shards, len(edges)) or len(edges) == 0
+    POST: sum(len(c) for c in result) == len(edges)
+    """
+    assert n_shards >= 1, "PRE: n_shards must be >= 1"
+    assert len(edges) >= 0, "PRE: edges list must be non-negative length"
+
+    n = len(edges)
+    if n == 0:
+        result: list[list] = []
+        assert len(result) == 0, "POST: empty input yields no shards"
+        assert sum(len(c) for c in result) == 0, "POST: total edges preserved"
+        return result
+
+    actual_shards = min(n_shards, n)
+    q, r = divmod(n, actual_shards)
+    chunks: list[list] = []
+    start = 0
+    for i in range(actual_shards):
+        size = q + 1 if i < r else q
+        chunks.append(edges[start : start + size])
+        start += size
+
+    assert len(chunks) == actual_shards, "POST: correct shard count"
+    assert sum(len(c) for c in chunks) == n, "POST: all edges accounted for"
+    return chunks
+
+
 def cmd_prepare(args: argparse.Namespace) -> None:
     """Shard all directed edges into JSON files and write a manifest."""
     import json
 
     g = _load_graph(args.graphml)
     edges = list(g.edges())
-    shard_size = args.shard_size
+
+    # Resolve sharding strategy: --n-shards takes priority over --shard-size.
+    if args.n_shards is not None:
+        chunks = _split_into_n_shards(edges, args.n_shards)
+    else:
+        shard_size = args.shard_size
+        chunks = [
+            edges[i : i + shard_size] for i in range(0, len(edges), shard_size)
+        ]
 
     shard_dir = Path(args.shard_dir)
     shard_dir.mkdir(parents=True, exist_ok=True)
 
     shard_ids: list[str] = []
-    for i in range(0, len(edges), shard_size):
-        chunk = edges[i : i + shard_size]
-        shard_id = str(i // shard_size)
+    for idx, chunk in enumerate(chunks):
+        shard_id = str(idx)
         shard_path = shard_dir / f"shard_{shard_id}.json"
         with open(shard_path, "w") as f:
             json.dump({"shard_id": shard_id, "edges": [[u, v] for u, v in chunk]}, f)
@@ -79,9 +126,8 @@ def cmd_prepare(args: argparse.Namespace) -> None:
 
     manifest = {
         "graphml": args.graphml,
-        "shard_size": shard_size,
-        "n_edges": len(edges),
         "n_shards": len(shard_ids),
+        "n_edges": len(edges),
         "shard_ids": shard_ids,
     }
     manifest_path = Path(args.manifest)
@@ -90,7 +136,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         json.dump(manifest, f, indent=2)
 
     print(
-        f"prepare: {len(edges)} edges → {len(shard_ids)} shards (size {shard_size}) in {shard_dir}",
+        f"prepare: {len(edges)} edges → {len(shard_ids)} shards in {shard_dir}",
         file=sys.stderr,
     )
 
@@ -215,7 +261,18 @@ def _build_parser() -> argparse.ArgumentParser:
     p_prep = sub.add_parser("prepare", help="Shard edges into JSON files")
     p_prep.add_argument("--graphml", required=True, help="Input GraphML file")
     p_prep.add_argument("--shard-dir", required=True, help="Output shard directory")
-    p_prep.add_argument("--shard-size", type=int, default=500, help="Edges per shard")
+    p_prep.add_argument(
+        "--n-shards",
+        type=int,
+        default=None,
+        help="Number of shards (takes priority over --shard-size)",
+    )
+    p_prep.add_argument(
+        "--shard-size",
+        type=int,
+        default=500,
+        help="Edges per shard (fallback when --n-shards is not given)",
+    )
     p_prep.add_argument("--manifest", required=True, help="Output manifest JSON path")
 
     # --- classify ---

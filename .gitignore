@@ -910,3 +910,9 @@ git-commit-message.md
 
 # Axiomander proof cache (local, machine-specific)
 .axiomander/
+
+# uv package cache (kept on project filesystem for hardlink support across SLURM nodes)
+.uv-cache/
+
+# Snakemake workflow outputs
+results/

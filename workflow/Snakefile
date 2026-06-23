@@ -19,7 +19,8 @@ Configuration keys (workflow/config.yaml)
 -----------------------------------------
     graphml     : path to the input GraphML file
     supptable   : path to supplementary table CSV (optional, for metadata join)
-    shard_size  : edges per shard (default 500)
+    n_shards    : number of scatter shards = number of SLURM nodes to use (default 179)
+    shard_size  : edges per shard — fallback when n_shards is not set (default 500)
     k           : greedy rescue budget (default 10)
     outdir      : output directory (default results/cyclic_single_door)
 """
@@ -35,8 +36,21 @@ configfile: "workflow/config.yaml"
 OUTDIR      = Path(config.get("outdir", "results/cyclic_single_door"))
 SHARD_DIR   = OUTDIR / "shards"
 GRAPHML     = config["graphml"]
+N_SHARDS    = int(config["n_shards"]) if "n_shards" in config else None
 SHARD_SIZE  = int(config.get("shard_size", 500))
 K           = int(config.get("k", 10))
+
+# Absolute path to the repository root (this file lives in workflow/, so
+# basedir == workflow/ and its parent is the repo root).  Passed to every
+# shell block so `cd {REPO_ROOT}` makes relative paths and uv work
+# correctly on SLURM nodes that may launch jobs from an arbitrary CWD.
+REPO_ROOT   = Path(workflow.basedir).parent
+
+# uv cache directory on the same filesystem as the project so that uv can use
+# hardlinks instead of copies when installing into the project venv.  Without
+# this, uv falls back to full copies when the default ~/.cache/uv is on a
+# different filesystem (e.g. NFS home on /people vs. project on /qfs).
+UV_CACHE    = REPO_ROOT / ".uv-cache"
 
 # ---------------------------------------------------------------------------
 # Helper: determine shard IDs after prepare runs
@@ -50,18 +64,27 @@ checkpoint prepare:
         shard_dir = directory(str(SHARD_DIR)),
         manifest  = str(OUTDIR / "shard_manifest.json"),
     params:
+        n_shards   = N_SHARDS,
         shard_size = SHARD_SIZE,
     resources:
         mem_mb  = 4000,
         runtime = 30,
-    shell:
-        """
-        python scripts/cyclic_single_door_classify.py prepare \
-            --graphml {input.graphml} \
-            --shard-dir {output.shard_dir} \
-            --shard-size {params.shard_size} \
-            --manifest {output.manifest}
-        """
+    run:
+        import subprocess, sys
+        cmd = [
+            "uv", "run", "python",
+            "scripts/cyclic_single_door_classify.py", "prepare",
+            "--graphml", input.graphml,
+            "--shard-dir", output.shard_dir,
+            "--manifest", output.manifest,
+        ]
+        if params.n_shards is not None:
+            cmd += ["--n-shards", str(params.n_shards)]
+        else:
+            cmd += ["--shard-size", str(params.shard_size)]
+        env = dict(__import__("os").environ)
+        env["UV_CACHE_DIR"] = str(UV_CACHE)
+        subprocess.run(cmd, check=True, cwd=str(REPO_ROOT), env=env)
 
 
 def _shard_ids(wildcards):
@@ -86,10 +109,12 @@ rule classify:
         result  = str(OUTDIR / "classified" / "shard_{shard_id}.json"),
     resources:
         mem_mb  = 8000,
-        runtime = 120,
+        runtime = 720,
     shell:
         """
-        python scripts/cyclic_single_door_classify.py classify \
+        export UV_CACHE_DIR={UV_CACHE}
+        cd {REPO_ROOT} && \
+        uv run python scripts/cyclic_single_door_classify.py classify \
             --graphml {input.graphml} \
             --shard {input.shard} \
             --output {output.result}
@@ -115,7 +140,9 @@ rule gather:
         runtime = 30,
     shell:
         """
-        python scripts/cyclic_single_door_gather.py \
+        export UV_CACHE_DIR={UV_CACHE}
+        cd {REPO_ROOT} && \
+        uv run python scripts/cyclic_single_door_gather.py \
             --input-dir {OUTDIR}/classified \
             --output-csv {output.csv} \
             --output-summary {output.summary}
@@ -140,7 +167,9 @@ rule preprocess:
         runtime = 300,
     shell:
         """
-        python scripts/cyclic_single_door_classify.py preprocess \
+        export UV_CACHE_DIR={UV_CACHE}
+        cd {REPO_ROOT} && \
+        uv run python scripts/cyclic_single_door_classify.py preprocess \
             --graphml {input.graphml} \
             --k {params.k} \
             --output-csv {output.rescue_csv} \

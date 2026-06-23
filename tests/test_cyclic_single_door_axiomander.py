@@ -298,3 +298,96 @@ class TestMaximizeIdentifiableEdgesContracts:
         g = _chain()
         with pytest.raises((AssertionError, TypeError)):
             maximize_identifiable_edges(g, k=1.5)  # type: ignore[arg-type]
+
+
+# ---------------------------------------------------------------------------
+# _split_into_n_shards contracts
+# ---------------------------------------------------------------------------
+
+import sys
+import os as _os
+sys.path.insert(0, _os.path.join(_os.path.dirname(__file__), "..", "scripts"))
+from cyclic_single_door_classify import _split_into_n_shards  # noqa: E402
+
+
+class TestSplitIntoNShardsContracts:
+    """POST: exact shard count; full edge coverage; PRE violations raise AssertionError."""
+
+    def _edges(self, n: int) -> list[tuple[str, str]]:
+        return [(str(i), str(i + 1)) for i in range(n)]
+
+    # --- POST: exact shard count ---
+
+    def test_post_exact_shard_count(self):
+        """POST: len(result) == n_shards when n_edges >= n_shards."""
+        edges = self._edges(100)
+        chunks = _split_into_n_shards(edges, 10)
+        assert len(chunks) == 10, "POST: correct shard count"
+
+    def test_post_shard_count_capped_at_edge_count(self):
+        """POST: len(result) == n_edges when n_shards > n_edges (no empty shards)."""
+        edges = self._edges(5)
+        chunks = _split_into_n_shards(edges, 20)
+        assert len(chunks) == 5, "POST: capped at edge count"
+
+    def test_post_single_shard(self):
+        """POST: n_shards == 1 yields one chunk containing all edges."""
+        edges = self._edges(50)
+        chunks = _split_into_n_shards(edges, 1)
+        assert len(chunks) == 1
+        assert len(chunks[0]) == 50
+
+    def test_post_n_shards_equals_n_edges(self):
+        """POST: n_shards == n_edges yields one edge per shard."""
+        edges = self._edges(8)
+        chunks = _split_into_n_shards(edges, 8)
+        assert len(chunks) == 8
+        assert all(len(c) == 1 for c in chunks)
+
+    # --- POST: full edge coverage ---
+
+    def test_post_all_edges_covered(self):
+        """POST: union of all shards == original edges (no drops)."""
+        edges = self._edges(100)
+        chunks = _split_into_n_shards(edges, 7)
+        flat = [e for chunk in chunks for e in chunk]
+        assert flat == edges, "POST: no edges dropped or reordered"
+
+    def test_post_total_edge_count_preserved(self):
+        """POST: sum(len(c) for c in result) == len(edges)."""
+        for n, s in [(1, 1), (10, 3), (100, 179), (9501, 179)]:
+            edges = self._edges(n)
+            chunks = _split_into_n_shards(edges, s)
+            assert sum(len(c) for c in chunks) == n, (
+                f"POST: total edges preserved for n={n}, s={s}"
+            )
+
+    def test_post_no_empty_shards(self):
+        """POST: all shards are non-empty."""
+        edges = self._edges(50)
+        chunks = _split_into_n_shards(edges, 179)
+        assert all(len(c) > 0 for c in chunks), "POST: no empty shards emitted"
+
+    def test_post_near_equal_sizes(self):
+        """POST: max chunk size - min chunk size <= 1 (near-equal division)."""
+        edges = self._edges(100)
+        chunks = _split_into_n_shards(edges, 7)
+        sizes = [len(c) for c in chunks]
+        assert max(sizes) - min(sizes) <= 1, "POST: near-equal chunk sizes"
+
+    def test_post_empty_input(self):
+        """POST: empty edge list yields no shards."""
+        chunks = _split_into_n_shards([], 10)
+        assert chunks == [], "POST: empty input yields empty result"
+
+    # --- PRE violations ---
+
+    def test_pre_n_shards_zero(self):
+        """PRE: n_shards must be >= 1."""
+        with pytest.raises(AssertionError, match="PRE"):
+            _split_into_n_shards(self._edges(5), 0)
+
+    def test_pre_n_shards_negative(self):
+        """PRE: n_shards must be >= 1."""
+        with pytest.raises(AssertionError, match="PRE"):
+            _split_into_n_shards(self._edges(5), -3)
