@@ -9,7 +9,6 @@ Programmatically updates the SCC_Perturbation_Analysis.ipynb notebook:
 5. Add Future Work section (§10) before References
 """
 import json
-import re
 from pathlib import Path
 
 NB_PATH = Path(__file__).parent.parent / "notebooks/Ecoli_Analysis_Notebooks/SCC_Perturbation_Analysis.ipynb"

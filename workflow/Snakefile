@@ -109,7 +109,7 @@ rule classify:
         result  = str(OUTDIR / "classified" / "shard_{shard_id}.json"),
     resources:
         mem_mb  = 8000,
-        runtime = 720,
+        runtime = 120,   # 2 h; actual observed max is ~1 h, giving 2× safety margin
     shell:
         """
         export UV_CACHE_DIR={UV_CACHE}

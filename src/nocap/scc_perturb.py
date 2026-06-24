@@ -522,6 +522,173 @@ def verify_cut_complete(
     return result
 
 
+# ---------------------------------------------------------------------------
+# min_scc_break_set
+# ---------------------------------------------------------------------------
+
+
+def min_scc_break_set(
+    cause: str,
+    effect: str,
+    graph: nx.DiGraph,
+) -> dict:
+    """Compute the minimum vertex-intervention set B that makes cause->effect
+    single-door identifiable by breaking the residual SCC.
+
+    The single-door criterion applied to edge cause->effect:
+
+    1. Build G' = G - {cause->effect}  (the direct edge is removed).
+    2. If cause and effect fall into **different** SCCs of G':
+       the O-adjustment already identifies the edge; no intervention needed.
+       Returns ``needs_intervention=False``, ``break_set=[]``.
+    3. If they are still in the **same** SCC of G':
+       find the minimum vertex cut B that, when ``do(B)`` is applied (in-edges
+       to B removed) on G', severs every **return path effect ⇝ cause** within
+       the shared SCC.  After ``do(B)``, cause and effect will be in different
+       SCCs, enabling identification.
+       B excludes ``{cause, effect}`` themselves.
+       Cut is found via a super-source over effect's in-SCC successors → sink
+       cause, node-split max-flow (``networkx.minimum_node_cut``).
+
+    Parameters
+    ----------
+    cause, effect:
+        Source and target of the directed edge being studied.  Both must be
+        nodes in *graph* and the edge ``cause->effect`` must exist.
+    graph:
+        The full directed graph (not mutated).
+
+    Returns
+    -------
+    dict with keys:
+        ``same_scc_after_removal``  – bool: cause & effect same SCC in G'
+        ``needs_intervention``      – bool: True iff same SCC (B needed)
+        ``break_set``               – sorted list of nodes in B (empty if not needed)
+        ``break_size``              – int: len(break_set)
+        ``cut_verified``            – bool: after do(B) on G', cause & effect
+                                      are in different SCCs
+
+    axiomander:
+        requires:
+            graph.has_edge(cause, effect)
+            isinstance(cause, str)
+            isinstance(effect, str)
+        ensures:
+            cause not in result["break_set"]
+            effect not in result["break_set"]
+            result["break_size"] == len(result["break_set"])
+            result["needs_intervention"] == result["same_scc_after_removal"]
+            implies(not result["needs_intervention"], result["break_size"] == 0)
+            implies(result["cut_verified"], not result["needs_intervention"] or result["break_size"] >= 0)
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(cause, str) and isinstance(effect, str), (
+        "PRE: cause and effect must be strings"
+    )
+    assert graph.has_edge(cause, effect), (
+        f"PRE: edge {cause!r}->{effect!r} must exist in graph"
+    )
+
+    # Step 1: G' = G - {cause->effect}
+    g_prime = graph.copy()
+    g_prime.remove_edge(cause, effect)
+
+    # Step 2: check same-SCC in G'
+    sccs = list(nx.strongly_connected_components(g_prime))
+    scc_map: dict[str, int] = {}
+    for cid, comp in enumerate(sccs):
+        for n in comp:
+            scc_map[n] = cid
+
+    cause_scc = scc_map.get(cause, -1)
+    effect_scc = scc_map.get(effect, -2)
+    same_scc = (cause_scc == effect_scc) and (cause_scc != -1)
+
+    if not same_scc:
+        result = {
+            "same_scc_after_removal": False,
+            "needs_intervention": False,
+            "break_set": [],
+            "break_size": 0,
+            "cut_verified": True,  # trivially: already separated
+        }
+        # --- POST ---
+        assert cause not in result["break_set"], "POST: cause not in break_set"
+        assert effect not in result["break_set"], "POST: effect not in break_set"
+        assert result["break_size"] == 0, "POST: break_size must be 0 when not needed"
+        return result
+
+    # Step 3: same SCC — find min vertex cut to sever effect ⇝ cause
+    # Restrict to the SCC subgraph in G'
+    shared_scc_nodes: set[str] = set(sccs[cause_scc])
+    forbidden: set[str] = {cause, effect}
+
+    # In-SCC successors of effect (start of all return paths)
+    effect_in_scc_succs = [
+        n for n in g_prime.successors(effect)
+        if n in shared_scc_nodes and n != effect
+    ]
+
+    break_set_nodes: set[str] = set()
+
+    if effect_in_scc_succs:
+        # Build SCC subgraph of G' and add super-source
+        scc_sub: nx.DiGraph = g_prime.subgraph(shared_scc_nodes).copy()  # type: ignore[assignment]
+        aux = scc_sub.copy()
+        super_src = "__BREAK_SUPER_SRC__"
+        aux.add_node(super_src)
+        for succ in effect_in_scc_succs:
+            aux.add_edge(super_src, succ)
+
+        try:
+            raw_cut: set = set(nx.minimum_node_cut(aux, s=super_src, t=cause))
+            cut_nodes: set = raw_cut - {super_src}
+            # Guard: forbidden nodes must not appear in the cut
+            if cut_nodes & forbidden:
+                # Fallback: all in-SCC predecessors of cause except forbidden
+                cut_nodes = {
+                    n for n in scc_sub.predecessors(cause)
+                    if n not in forbidden
+                }
+        except (nx.NetworkXError, nx.NetworkXNoPath):
+            cut_nodes = set()
+
+        break_set_nodes = cut_nodes
+    # else: effect has no in-SCC successors — no return path exists, cut is empty
+
+    break_set = sorted(break_set_nodes)
+
+    # Verify: after do(break_set) on G', cause and effect are in different SCCs
+    g_do_prime = build_intervened_graph(g_prime, break_set)
+    sccs_after = list(nx.strongly_connected_components(g_do_prime))
+    scc_map_after: dict[str, int] = {}
+    for cid, comp in enumerate(sccs_after):
+        for n in comp:
+            scc_map_after[n] = cid
+
+    cause_scc_after = scc_map_after.get(cause, -1)
+    effect_scc_after = scc_map_after.get(effect, -2)
+    cut_verified = (cause_scc_after != effect_scc_after) or (cause_scc_after == -1)
+
+    result = {
+        "same_scc_after_removal": True,
+        "needs_intervention": True,
+        "break_set": break_set,
+        "break_size": len(break_set),
+        "cut_verified": cut_verified,
+    }
+
+    # --- POST ---
+    assert cause not in result["break_set"], "POST: cause must not be in break_set"
+    assert effect not in result["break_set"], "POST: effect must not be in break_set"
+    assert result["break_size"] == len(result["break_set"]), (
+        "POST: break_size must equal len(break_set)"
+    )
+    return result
+
+
 def residual_cluster_size_distribution(analysis_result: dict) -> dict:
     """
     Summarise the size distribution of residual clusters from ``residual_scc_analysis``.

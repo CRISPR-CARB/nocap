@@ -42,9 +42,9 @@ OUTPUT_CSV = "notebooks/Ecoli_Analysis_Notebooks/scc_three_state_classification.
 # ---------------------------------------------------------------------------
 try:
     from nocap.scc_perturb import (
-        verify_cut_complete,
-        residual_scc_analysis,
         residual_cluster_size_distribution,
+        residual_scc_analysis,
+        verify_cut_complete,
     )
 except ImportError as exc:
     sys.exit(
@@ -123,14 +123,7 @@ for tf in sorted(shards.keys()):
 
     # Console output
     surv_str = str(surviving[:3]) + ("..." if len(surviving) > 3 else "") if surviving else "[]"
-    print("{:<10}  {:<14}  {:<14}  {:<12}  {:<10}  {}".format(
-        tf,
-        state,
-        str(joint_identifiable),
-        str(cut_complete),
-        str(tf_still_cyclic),
-        surv_str,
-    ))
+    print(f"{tf:<10}  {state:<14}  {joint_identifiable!s:<14}  {cut_complete!s:<12}  {tf_still_cyclic!s:<10}  {surv_str}")
 
     rows.append({
         "tf": tf,
@@ -152,6 +145,7 @@ for tf in sorted(shards.keys()):
 # Summary
 # ---------------------------------------------------------------------------
 from collections import Counter
+
 state_counts = Counter(r["state"] for r in rows)
 print("\n--- 3-state summary ---")
 for s in ["identifiable", "unidentifiable", "cut_incomplete"]:

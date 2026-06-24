@@ -35,11 +35,10 @@ Two structural patterns are covered:
 
 from __future__ import annotations
 
-import pytest
 import networkx as nx
+import pytest
 
 from nocap.scc_perturb import verify_cut_complete
-
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -11,12 +11,17 @@
 executor: slurm
 
 # Default SLURM submission options (overridden per-rule via resources:)
+#
+# IMPORTANT: do NOT set nodes: here.  Requesting nodes: 1 causes the SLURM
+# executor plugin to book an entire compute node (e.g. 64 CPUs) even though
+# every rule only needs cpus_per_task: 1.  Omitting nodes: lets Slurm infer
+# the node count from cpus_per_task, so each job consumes exactly 1 CPU from
+# the GrpTRESMins budget instead of 64.
 default-resources:
   slurm_account: crispr_carb
   slurm_partition: slurm
   mem_mb: 4000
-  runtime: 60          # minutes
-  nodes: 1
+  runtime: 60          # minutes; overridden per-rule in the Snakefile
   tasks: 1
   cpus_per_task: 1
 

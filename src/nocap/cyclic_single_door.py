@@ -64,6 +64,9 @@ efficient total effect estimation via adjustment in causal linear models.
 
 from __future__ import annotations
 
+import signal
+from contextlib import contextmanager
+
 import networkx as nx
 from y0.algorithm.separation.sigma_extension import sigma_extension
 from y0.algorithm.separation.sigma_single_door import find_sigma_single_door_set
@@ -79,6 +82,44 @@ __all__ = [
     "nx_digraph_to_y0",
     "same_scc",
 ]
+
+# ---------------------------------------------------------------------------
+# Per-edge timeout helper (POSIX signal.alarm; no-op on non-POSIX)
+# ---------------------------------------------------------------------------
+
+
+class _EdgeTimeout(Exception):
+    """Raised when a per-edge classification exceeds the timeout budget."""
+
+
+@contextmanager
+def _timeout_context(seconds: int):
+    """Context manager that raises _EdgeTimeout after *seconds* seconds.
+
+    Uses POSIX ``signal.SIGALRM``.  On Windows or in a non-main thread the
+    context manager is a no-op (the alarm call is silently skipped).
+
+    PRE: seconds > 0
+    """
+    assert seconds > 0, "PRE: timeout must be a positive number of seconds"
+
+    have_alarm = hasattr(signal, "SIGALRM")
+    old_handler = None
+
+    if have_alarm:
+        def _handler(signum, frame):  # noqa: ANN001
+            raise _EdgeTimeout
+
+        old_handler = signal.signal(signal.SIGALRM, _handler)
+        signal.alarm(seconds)
+
+    try:
+        yield
+    finally:
+        if have_alarm:
+            signal.alarm(0)
+            if old_handler is not None:
+                signal.signal(signal.SIGALRM, old_handler)
 
 # ---------------------------------------------------------------------------
 # nx_digraph_to_y0
@@ -298,6 +339,7 @@ def evaluate_all_edges(
     graph: nx.DiGraph,
     *,
     restrict_edges: list[tuple[str, str]] | None = None,
+    timeout_seconds: int | None = None,
 ) -> list[dict]:
     r"""Classify every directed edge in *graph* under the σ-single-door criterion.
 
@@ -311,22 +353,32 @@ def evaluate_all_edges(
     restrict_edges:
         If provided, only classify these (cause, effect) pairs.  Each pair
         must be a directed edge in *graph*.
+    timeout_seconds:
+        If provided, each individual edge classification is capped at this
+        many seconds (POSIX ``signal.SIGALRM``).  Edges that exceed the
+        timeout are recorded with ``status="timeout"`` and
+        ``adjustment_set=None``.  Pass ``None`` (default) to disable.
 
     Returns
     -------
     list[dict]
         One dict per edge (see :func:`classify_edge` for the dict schema),
         in the order the edges are iterated (or in *restrict_edges* order).
+        When *timeout_seconds* is set, timed-out edges additionally carry
+        ``"timed_out": True``.
 
     axiomander:
         ensures:
             len(result) == len(restrict_edges) if restrict_edges is not None else graph.number_of_edges()
-            all(r["status"] in ("identifiable", "unidentifiable") for r in result)
+            all(r["status"] in ("identifiable", "unidentifiable", "timeout") for r in result)
         modifies:
             none
     """
     # --- PRE ---
     assert isinstance(graph, nx.DiGraph), "PRE: graph must be an nx.DiGraph"
+    assert timeout_seconds is None or (
+        isinstance(timeout_seconds, int) and timeout_seconds > 0
+    ), "PRE: timeout_seconds must be None or a positive int"
 
     edges: list[tuple[str, str]] = (
         list(restrict_edges) if restrict_edges is not None else list(graph.edges())
@@ -341,20 +393,40 @@ def evaluate_all_edges(
 
     results = []
     for cause, effect in edges:
-        row = classify_edge(
-            graph,
-            cause,
-            effect,
-            precomputed_extension=g_sigma,
-            precomputed_y0=g_y0,
-        )
+        if timeout_seconds is not None:
+            try:
+                with _timeout_context(timeout_seconds):
+                    row = classify_edge(
+                        graph,
+                        cause,
+                        effect,
+                        precomputed_extension=g_sigma,
+                        precomputed_y0=g_y0,
+                    )
+            except _EdgeTimeout:
+                row = {
+                    "cause": cause,
+                    "effect": effect,
+                    "status": "timeout",
+                    "adjustment_set": None,
+                    "same_scc": same_scc(graph, cause, effect),
+                    "timed_out": True,
+                }
+        else:
+            row = classify_edge(
+                graph,
+                cause,
+                effect,
+                precomputed_extension=g_sigma,
+                precomputed_y0=g_y0,
+            )
         results.append(row)
 
     # --- POST ---
     assert isinstance(results, list), "POST: result must be a list"
-    assert all(r["status"] in ("identifiable", "unidentifiable") for r in results), (
-        "POST: all statuses must be valid"
-    )
+    assert all(
+        r["status"] in ("identifiable", "unidentifiable", "timeout") for r in results
+    ), "POST: all statuses must be valid"
     return results
 
 

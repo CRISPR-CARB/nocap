@@ -61,27 +61,30 @@ def main() -> None:
     csv_path = Path(args.output_csv)
     csv_path.parent.mkdir(parents=True, exist_ok=True)
 
-    fieldnames = ["cause", "effect", "status", "adjustment_set", "same_scc"]
+    fieldnames = ["cause", "effect", "status", "adjustment_set", "same_scc", "timed_out"]
     with open(csv_path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         for row in all_rows:
             # adjustment_set is a list (from JSON) or None; join for CSV
             adj = row.get("adjustment_set")
-            row_out = dict(row)
-            row_out["adjustment_set"] = "|".join(adj) if adj is not None else ""
+            row_out = {k: row.get(k) for k in fieldnames}
+            row_out["adjustment_set"] = "|".join(sorted(adj)) if adj is not None else ""
+            row_out["timed_out"] = row.get("timed_out", False)
             writer.writerow(row_out)
 
     # Compute summary statistics
     n_total = len(all_rows)
     n_identifiable = sum(1 for r in all_rows if r["status"] == "identifiable")
-    n_unidentifiable = n_total - n_identifiable
+    n_unidentifiable = sum(1 for r in all_rows if r["status"] == "unidentifiable")
+    n_timeout = sum(1 for r in all_rows if r["status"] == "timeout")
     n_same_scc = sum(1 for r in all_rows if r.get("same_scc") is True)
 
     summary = {
         "n_edges": n_total,
         "n_identifiable": n_identifiable,
         "n_unidentifiable": n_unidentifiable,
+        "n_timeout": n_timeout,
         "pct_identifiable": round(100.0 * n_identifiable / n_total, 2) if n_total > 0 else 0.0,
         "n_same_scc": n_same_scc,
         "n_shards": len(shard_files),
