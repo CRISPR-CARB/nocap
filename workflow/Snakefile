@@ -108,8 +108,8 @@ rule classify:
     output:
         result  = str(OUTDIR / "classified" / "shard_{shard_id}.json"),
     resources:
-        mem_mb  = 8000,
-        runtime = 120,   # 2 h; actual observed max is ~1 h, giving 2× safety margin
+        mem_mb  = 4000,   # same as prepare/gather; fast O-set has no large intermediates
+        runtime = 30,     # 30 min; generous margin for sigma-extension + 500 edges/shard
     shell:
         """
         export UV_CACHE_DIR={UV_CACHE}

@@ -13,7 +13,9 @@ supptable: "notebooks/Ecoli_Analysis_Notebooks/supptable1.csv"
 
 # Number of shards (scatter granularity) = number of free SLURM nodes at submission time.
 # Each shard becomes one classify job.  Set to ceil(n_edges / n_shards) edges per shard.
-n_shards: 179
+# Reduced from 179→50 for the fast O-set rerun (fewer larger jobs, less SLURM overhead).
+# Override on the command line if more parallelism is available: --config n_shards=179
+n_shards: 50
 
 # Greedy rescue budget: max number of hard interventions to try
 k: 10

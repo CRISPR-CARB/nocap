@@ -4342,7 +4342,7 @@ wheels = [
 [[package]]
 name = "y0"
 version = "0.2.12.dev0"
-source = { git = "https://github.com/y0-causal-inference/y0.git?rev=402-add-%25CF%2583-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs#a0a0990ec0cdeb2ade366d45ba04170cd3d03269" }
+source = { git = "https://github.com/y0-causal-inference/y0.git?rev=402-add-%25CF%2583-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs#b8d48ee5efc1cae5081b0706aa5c79de913437b9" }
 dependencies = [
     { name = "click" },
     { name = "more-click" },
