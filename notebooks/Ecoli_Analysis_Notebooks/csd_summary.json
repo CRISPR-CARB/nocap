@@ -1,9 +1,9 @@
 {
   "n_edges": 9211,
-  "n_identifiable": 1439,
-  "n_unidentifiable": 330,
-  "n_timeout": 7442,
-  "pct_identifiable": 15.62,
+  "n_identifiable": 2535,
+  "n_unidentifiable": 6676,
+  "n_timeout": 0,
+  "pct_identifiable": 27.52,
   "n_same_scc": 519,
-  "n_shards": 1843
+  "n_shards": 50
 }
