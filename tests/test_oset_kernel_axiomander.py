@@ -272,24 +272,30 @@ class TestOsetNonNegativeSizeAxiomander:
     """Tests for oset_non_negative_size — PROVED by Axiomander at level1."""
 
     def test_pre_n_parents_negative_raises(self) -> None:
+        """PRE: n_parents < 0 raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_parents >= 0"):
             oset_non_negative_size(n_parents=-1, n_forbidden=0)
 
     def test_pre_n_forbidden_negative_raises(self) -> None:
+        """PRE: n_forbidden < 0 raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_forbidden >= 0"):
             oset_non_negative_size(n_parents=5, n_forbidden=-1)
 
     def test_pre_forbidden_exceeds_parents_raises(self) -> None:
+        """PRE: n_forbidden > n_parents raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_parents >= n_forbidden"):
             oset_non_negative_size(n_parents=3, n_forbidden=5)
 
     def test_zero_forbidden(self) -> None:
+        """POST: no forbidden nodes → O-set size equals n_parents."""
         assert oset_non_negative_size(n_parents=5, n_forbidden=0) == 5
 
     def test_all_forbidden(self) -> None:
+        """POST: all parents forbidden → O-set size is 0."""
         assert oset_non_negative_size(n_parents=4, n_forbidden=4) == 0
 
     def test_partial_forbidden(self) -> None:
+        """POST: partial forbidden → O-set size equals n_parents - n_forbidden."""
         assert oset_non_negative_size(n_parents=10, n_forbidden=3) == 7
 
 
@@ -297,14 +303,17 @@ class TestForbiddenIncludesCauseAxiomander:
     """Tests for forbidden_includes_cause — PROVED by Axiomander at level1."""
 
     def test_pre_no_causal_nodes_raises(self) -> None:
+        """PRE: n_causal_nodes == 0 raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_causal_nodes >= 1"):
             forbidden_includes_cause(n_causal_nodes=0, n_desc_causal=0, cause_counted=1)
 
     def test_pre_desc_less_than_cn_raises(self) -> None:
+        """PRE: n_desc_causal < n_causal_nodes raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_desc_causal >= n_causal_nodes"):
             forbidden_includes_cause(n_causal_nodes=3, n_desc_causal=2, cause_counted=1)
 
     def test_pre_cause_not_one_raises(self) -> None:
+        """PRE: cause_counted != 1 raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: cause_counted == 1"):
             forbidden_includes_cause(n_causal_nodes=1, n_desc_causal=1, cause_counted=0)
 
@@ -315,6 +324,7 @@ class TestForbiddenIncludesCauseAxiomander:
         assert result >= 2
 
     def test_larger_case(self) -> None:
+        """POST: forbidden = n_desc_causal + cause_counted = 7 + 1 = 8."""
         result = forbidden_includes_cause(n_causal_nodes=3, n_desc_causal=7, cause_counted=1)
         assert result == 8
         assert result >= 4  # >= n_causal_nodes + 1
@@ -324,28 +334,34 @@ class TestCauseAlwaysExcludedAxiomander:
     """Tests for cause_always_excluded_from_oset — PROVED by Axiomander at level1."""
 
     def test_pre_no_parents_raises(self) -> None:
+        """PRE: n_parents_of_cn == 0 raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_parents_of_cn >= 1"):
             cause_always_excluded_from_oset(n_parents_of_cn=0, n_forbidden=1)
 
     def test_pre_no_forbidden_raises(self) -> None:
+        """PRE: n_forbidden == 0 raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_forbidden >= 1"):
             cause_always_excluded_from_oset(n_parents_of_cn=5, n_forbidden=0)
 
     def test_pre_forbidden_exceeds_parents_raises(self) -> None:
+        """PRE: n_forbidden > n_parents_of_cn raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: n_forbidden <= n_parents_of_cn"):
             cause_always_excluded_from_oset(n_parents_of_cn=3, n_forbidden=5)
 
     def test_one_parent_one_forbidden(self) -> None:
+        """POST: 1 parent, 1 forbidden → O-set size is 0 (cause excluded)."""
         result = cause_always_excluded_from_oset(n_parents_of_cn=1, n_forbidden=1)
         assert result == 0
         assert result < 1
 
     def test_many_parents_one_forbidden(self) -> None:
+        """POST: 10 parents, 1 forbidden → O-set size is 9 (strictly less than parents)."""
         result = cause_always_excluded_from_oset(n_parents_of_cn=10, n_forbidden=1)
         assert result == 9
         assert result < 10
 
     def test_result_strictly_less_than_parents(self) -> None:
+        """POST: result < n_parents_of_cn for all valid inputs (cause always excluded)."""
         for n in range(1, 8):
             result = cause_always_excluded_from_oset(n_parents_of_cn=n, n_forbidden=n)
             assert result == 0
@@ -361,6 +377,7 @@ class TestCausalNodesKernelAxiomander:
     """Negative tests: verify that PRE violations raise AssertionError."""
 
     def test_cause_not_in_desc_cause_raises(self) -> None:
+        """PRE: cause not in desc_cause raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: cause in desc_cause"):
             causal_nodes_kernel(
                 desc_cause={2, 3},  # cause=1 not in desc_cause
@@ -370,6 +387,7 @@ class TestCausalNodesKernelAxiomander:
             )
 
     def test_effect_not_in_anc_effect_raises(self) -> None:
+        """PRE: effect not in anc_effect raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: effect in anc_effect"):
             causal_nodes_kernel(
                 desc_cause={1, 2, 3},
@@ -404,6 +422,7 @@ class TestForbiddenKernelAxiomander:
     """Negative tests: verify that PRE violations raise AssertionError."""
 
     def test_cause_not_in_causal_nodes_raises(self) -> None:
+        """PRE: cause not in causal_nodes raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: cause in causal_nodes"):
             forbidden_kernel(
                 causal_nodes={2, 3},  # cause=1 not in causal_nodes
@@ -412,6 +431,7 @@ class TestForbiddenKernelAxiomander:
             )
 
     def test_causal_node_missing_from_desc_map_raises(self) -> None:
+        """PRE: causal node missing from desc_map raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: all causal nodes in desc_map"):
             forbidden_kernel(
                 causal_nodes={1, 2, 3},
@@ -420,6 +440,7 @@ class TestForbiddenKernelAxiomander:
             )
 
     def test_cause_always_in_result(self) -> None:
+        """POST: cause is always in the forbidden set."""
         result = forbidden_kernel(
             causal_nodes={1, 2},
             desc_map={1: {1, 3}, 2: {2, 4}},
@@ -429,6 +450,7 @@ class TestForbiddenKernelAxiomander:
         assert {1, 2} <= result  # causal nodes are forbidden
 
     def test_descendants_included(self) -> None:
+        """POST: all descendants of causal nodes are included in forbidden."""
         result = forbidden_kernel(
             causal_nodes={1, 2},
             desc_map={1: {1, 5, 6}, 2: {2, 7}},
@@ -441,6 +463,7 @@ class TestOsetKernelAxiomander:
     """Negative tests: verify that PRE violations raise AssertionError."""
 
     def test_causal_node_missing_from_pa_map_raises(self) -> None:
+        """PRE: causal node missing from pa_map raises AssertionError."""
         with pytest.raises(AssertionError, match="PRE: all causal nodes in pa_map"):
             oset_kernel(
                 causal_nodes={1, 2, 3},
@@ -450,6 +473,7 @@ class TestOsetKernelAxiomander:
             )
 
     def test_result_excludes_forbidden(self) -> None:
+        """POST: forbidden nodes are excluded from the O-set."""
         result = oset_kernel(
             causal_nodes={1, 2},
             forbidden={1, 2, 3},
@@ -464,6 +488,7 @@ class TestOsetKernelAxiomander:
         assert 3 not in result  # forbidden excluded
 
     def test_returns_none_when_oset_contains_desc_effect(self) -> None:
+        """POST: returns None when O-set candidate contains a descendant of effect."""
         result = oset_kernel(
             causal_nodes={1, 2},
             forbidden={1, 2},
@@ -473,6 +498,7 @@ class TestOsetKernelAxiomander:
         assert result is None
 
     def test_empty_oset_when_all_parents_forbidden(self) -> None:
+        """POST: empty frozenset when all parents of causal nodes are forbidden."""
         result = oset_kernel(
             causal_nodes={1, 2},
             forbidden={0, 1, 2, 3, 4, 5},  # everything forbidden
@@ -486,6 +512,7 @@ class TestPbdFirstHopsKernelAxiomander:
     """Negative tests: verify POST conditions hold."""
 
     def test_result_subset_of_successors(self) -> None:
+        """POST: result is the intersection of successors and can_reach_effect."""
         result = pbd_first_hops_kernel(
             successors_cause={2, 3, 4},
             can_reach_effect={3, 4, 5},
@@ -495,6 +522,7 @@ class TestPbdFirstHopsKernelAxiomander:
         assert result <= {3, 4, 5}
 
     def test_empty_when_no_overlap(self) -> None:
+        """POST: empty set when successors and can_reach_effect are disjoint."""
         result = pbd_first_hops_kernel(
             successors_cause={1, 2},
             can_reach_effect={3, 4},
@@ -502,6 +530,7 @@ class TestPbdFirstHopsKernelAxiomander:
         assert result == set()
 
     def test_all_successors_when_all_can_reach(self) -> None:
+        """POST: all successors returned when all can reach the effect."""
         result = pbd_first_hops_kernel(
             successors_cause={2, 3},
             can_reach_effect={2, 3, 4},
@@ -509,6 +538,7 @@ class TestPbdFirstHopsKernelAxiomander:
         assert result == {2, 3}
 
     def test_empty_successors(self) -> None:
+        """POST: empty set when cause has no successors."""
         result = pbd_first_hops_kernel(
             successors_cause=set(),
             can_reach_effect={1, 2, 3},
@@ -538,6 +568,7 @@ class TestOsetPipelineIntegration:
         cause: int,
         effect: int,
     ) -> frozenset[int] | None:
+        """Run the full O-set kernel pipeline: cn → forb → oset."""
         cn = causal_nodes_kernel(desc_cause, anc_effect, cause, effect)
         forb = forbidden_kernel(cn, desc_map, cause)
         return oset_kernel(cn, forb, pa_map, desc_effect)

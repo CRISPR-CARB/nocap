@@ -75,7 +75,10 @@ def _larger_cyclic_graph() -> nx.DiGraph:
 
 
 class TestEnumerateTfs:
+    """Tests for _enumerate_tfs: out-degree filter and sort order."""
+
     def test_chain_graph(self):
+        """A and B have out-degree >= 1 in A->B->C; C is a sink and excluded."""
         G = _chain_graph()
         tfs = srb._enumerate_tfs(G)
         # A->B, B->C; A and B have out-degree>=1; C has out-degree=0
@@ -84,23 +87,27 @@ class TestEnumerateTfs:
         assert "C" not in tfs
 
     def test_sorted(self):
+        """POST: result is sorted lexicographically."""
         G = _triangle_graph()
         tfs = srb._enumerate_tfs(G)
         assert tfs == sorted(tfs)
 
     def test_all_have_out_degree_ge1(self):
+        """POST: every returned TF has out-degree >= 1."""
         G = _larger_cyclic_graph()
         tfs = srb._enumerate_tfs(G)
         for t in tfs:
             assert G.out_degree(t) >= 1, f"{t} should have out-degree >= 1"
 
     def test_no_sink_nodes(self):
+        """POST: sink node C (out-degree 0) is never returned."""
         G = _chain_graph()
         tfs = srb._enumerate_tfs(G)
         # C is a sink; must not appear
         assert "C" not in tfs
 
     def test_empty_graph(self):
+        """POST: empty graph returns empty list."""
         G = nx.DiGraph()
         assert srb._enumerate_tfs(G) == []
 
@@ -111,7 +118,10 @@ class TestEnumerateTfs:
 
 
 class TestClassifyTfs:
+    """Tests for _classify_tfs: singleton vs non-trivial SCC split."""
+
     def test_chain_all_identifiable(self):
+        """No cycles in chain graph → all TFs are identifiable, none unidentifiable."""
         G = _chain_graph()
         tfs = srb._enumerate_tfs(G)
         id_, unid = srb._classify_tfs(G, tfs)
@@ -120,6 +130,7 @@ class TestClassifyTfs:
         assert set(id_) == set(tfs)
 
     def test_triangle_tfs_unidentifiable(self):
+        """A, B, C in the 3-cycle are unidentifiable; D (singleton) is identifiable."""
         G = _triangle_graph()
         tfs = srb._enumerate_tfs(G)
         id_, unid = srb._classify_tfs(G, tfs)
@@ -130,12 +141,14 @@ class TestClassifyTfs:
         assert "D" in id_
 
     def test_count_partition(self):
+        """POST: len(identifiable) + len(unidentifiable) == len(tfs)."""
         G = _larger_cyclic_graph()
         tfs = srb._enumerate_tfs(G)
         id_, unid = srb._classify_tfs(G, tfs)
         assert len(id_) + len(unid) == len(tfs)
 
     def test_two_cycle_both_unidentifiable(self):
+        """A and B in the 2-cycle are unidentifiable; C (singleton) is identifiable."""
         G = _two_cycle_graph()
         tfs = srb._enumerate_tfs(G)
         id_, unid = srb._classify_tfs(G, tfs)
@@ -151,7 +164,10 @@ class TestClassifyTfs:
 
 
 class TestBuildDoSccInfo:
+    """Tests for _build_do_scc_info: SCC map and sizes after do-intervention."""
+
     def test_empty_perturbation_triangle(self):
+        """Without perturbation, A/B/C share one SCC of size 3."""
         G = _triangle_graph()
         scc_map, scc_sizes = srb._build_do_scc_info(G, frozenset())
         # A, B, C all in same SCC
@@ -159,6 +175,7 @@ class TestBuildDoSccInfo:
         assert scc_sizes[scc_map["A"]] == 3
 
     def test_breaking_triangle_by_perturbing_C(self):
+        """Perturbing C removes B->C; the 3-cycle dissolves into three singletons."""
         G = _triangle_graph()
         # Perturb C: remove B->C. Cycle A->B->C->A is broken.
         scc_map, scc_sizes = srb._build_do_scc_info(G, frozenset(["C"]))
@@ -168,17 +185,20 @@ class TestBuildDoSccInfo:
         assert scc_sizes[scc_map["C"]] == 1
 
     def test_all_nodes_covered(self):
+        """POST: every node in the graph appears in scc_map."""
         G = _triangle_graph()
         scc_map, scc_sizes = srb._build_do_scc_info(G, frozenset())
         for node in G.nodes():
             assert node in scc_map
 
     def test_requires_frozenset(self):
+        """PRE: perturb_set must be a frozenset — plain set raises AssertionError."""
         G = _triangle_graph()
         with pytest.raises(AssertionError, match="PRE"):
             srb._build_do_scc_info(G, {"A"})
 
     def test_two_cycle_broken_by_one_gene(self):
+        """Perturbing B in A<->B removes A->B; A and B become separate singletons."""
         G = _two_cycle_graph()
         # Perturb B: remove A->B. Only B->A remains.
         scc_map, scc_sizes = srb._build_do_scc_info(G, frozenset(["B"]))
@@ -194,18 +214,23 @@ class TestBuildDoSccInfo:
 
 
 class TestIsSingletonScc:
+    """Tests for _is_singleton_scc: singleton vs cyclic distinction."""
+
     def test_singleton_returns_true(self):
+        """POST: node in an SCC of size 1 returns True."""
         # scc_id 0 has size 1
         scc_map = {"A": 0, "B": 1}
         scc_sizes = {0: 1, 1: 2}
         assert srb._is_singleton_scc("A", scc_map, scc_sizes) is True
 
     def test_non_trivial_returns_false(self):
+        """POST: node in an SCC of size 2 returns False."""
         scc_map = {"A": 0, "B": 0}
         scc_sizes = {0: 2}
         assert srb._is_singleton_scc("A", scc_map, scc_sizes) is False
 
     def test_absent_node_returns_true(self):
+        """POST: node absent from scc_map is treated as trivially isolated (True)."""
         # Node not in graph is trivially isolated
         assert srb._is_singleton_scc("MISSING", {}, {}) is True
 
@@ -216,6 +241,8 @@ class TestIsSingletonScc:
 
 
 class TestBuildCandidatePool:
+    """Tests for _build_candidate_pool: uses compute_min_cut_b, returns a set."""
+
     def test_triangle_pool_non_empty(self):
         """Triangle A->B->C->A: each TF's B(t) is the intermediate node."""
         G = _triangle_graph()
@@ -235,6 +262,7 @@ class TestBuildCandidatePool:
         assert pool == set()
 
     def test_returns_set(self):
+        """POST: result is always a set."""
         G = _triangle_graph()
         _, unid = srb._classify_tfs(G, srb._enumerate_tfs(G))
         pool = srb._build_candidate_pool(G, unid)
@@ -247,6 +275,8 @@ class TestBuildCandidatePool:
 
 
 class TestGreedyBank:
+    """Tests for _greedy_bank: n/k postcondition, monotone coverage, preconditions."""
+
     def _simple_setup(self):
         """Triangle graph with A,B,C unidentifiable. Pool = {A,B,C}."""
         G = _triangle_graph()
@@ -255,17 +285,20 @@ class TestGreedyBank:
         return G, unid, pool
 
     def test_returns_n_sets(self):
+        """POST: len(bank) == n."""
         G, unid, pool = self._simple_setup()
         bank = srb._greedy_bank(G, unid, pool, n=3, k=2, verbose=False)
         assert len(bank) == 3
 
     def test_set_index_1based(self):
+        """POST: set_index is 1-based (first entry == 1, second == 2)."""
         G, unid, pool = self._simple_setup()
         bank = srb._greedy_bank(G, unid, pool, n=2, k=1, verbose=False)
         assert bank[0]["set_index"] == 1
         assert bank[1]["set_index"] == 2
 
     def test_coverage_monotone(self):
+        """POST: proxy_covered_cumulative is non-decreasing across sets."""
         G, unid, pool = self._simple_setup()
         bank = srb._greedy_bank(G, unid, pool, n=5, k=2, verbose=False)
         cumulative = [item["proxy_covered_cumulative"] for item in bank]
@@ -273,6 +306,7 @@ class TestGreedyBank:
             assert cumulative[i + 1] >= cumulative[i], "Coverage must be non-decreasing"
 
     def test_genes_in_pool(self):
+        """POST: every chosen gene is a member of the candidate pool."""
         G, unid, pool = self._simple_setup()
         bank = srb._greedy_bank(G, unid, pool, n=2, k=2, verbose=False)
         for item in bank:
@@ -280,6 +314,7 @@ class TestGreedyBank:
                 assert gene in pool, f"Chosen gene {gene!r} not in pool"
 
     def test_empty_pool_returns_empty_genes(self):
+        """POST: empty pool produces n entries each with genes == []."""
         G = _triangle_graph()
         _, unid = srb._classify_tfs(G, srb._enumerate_tfs(G))
         bank = srb._greedy_bank(G, unid, set(), n=2, k=2, verbose=False)
@@ -288,11 +323,13 @@ class TestGreedyBank:
             assert item["genes"] == []
 
     def test_precondition_n_zero(self):
+        """PRE: n must be >= 1 — n=0 raises AssertionError."""
         G, unid, pool = self._simple_setup()
         with pytest.raises(AssertionError, match="PRE"):
             srb._greedy_bank(G, unid, pool, n=0, k=1, verbose=False)
 
     def test_precondition_k_zero(self):
+        """PRE: k must be >= 1 — k=0 raises AssertionError."""
         G, unid, pool = self._simple_setup()
         with pytest.raises(AssertionError, match="PRE"):
             srb._greedy_bank(G, unid, pool, n=1, k=0, verbose=False)
@@ -322,7 +359,10 @@ class TestGreedyBank:
 
 
 class TestScorePerTf:
+    """Tests for _score_per_tf: recovered flag, recovered_by_set, scc_size."""
+
     def test_recovered_count_matches_bank(self):
+        """POST: sum(recovered) == bank[-1]['proxy_covered_cumulative']."""
         G = _triangle_graph()
         _, unid = srb._classify_tfs(G, srb._enumerate_tfs(G))
         pool = srb._build_candidate_pool(G, unid)
@@ -332,6 +372,7 @@ class TestScorePerTf:
         assert n_recovered == bank[-1]["proxy_covered_cumulative"]
 
     def test_recovered_by_set_valid(self):
+        """POST: recovered_by_set is always a valid set_index from the bank."""
         G = _triangle_graph()
         _, unid = srb._classify_tfs(G, srb._enumerate_tfs(G))
         pool = srb._build_candidate_pool(G, unid)
@@ -343,6 +384,7 @@ class TestScorePerTf:
                 assert e["recovered_by_set"] in valid_set_indices
 
     def test_scc_size_reported(self):
+        """POST: scc_size == 3 for all TFs in the triangle 3-cycle."""
         G = _triangle_graph()
         _, unid = srb._classify_tfs(G, srb._enumerate_tfs(G))
         pool = srb._build_candidate_pool(G, unid)
@@ -353,12 +395,14 @@ class TestScorePerTf:
             assert e["scc_size"] == 3
 
     def test_precondition_empty_bank(self):
+        """PRE: bank must be non-empty — empty list raises AssertionError."""
         G = _triangle_graph()
         _, unid = srb._classify_tfs(G, srb._enumerate_tfs(G))
         with pytest.raises(AssertionError, match="PRE"):
             srb._score_per_tf(unid, [], G)
 
     def test_precondition_empty_targets(self):
+        """PRE: targets must be non-empty — empty list raises AssertionError."""
         G = _triangle_graph()
         bank = [
             {
@@ -378,6 +422,8 @@ class TestScorePerTf:
 
 
 class TestIntegration:
+    """Integration tests: full pipeline on small cyclic graphs."""
+
     def test_larger_cyclic_bank(self):
         """
         _larger_cyclic_graph has SCC1={A,B,C} and SCC2={X,Y}.
@@ -401,6 +447,16 @@ class TestIntegration:
         for i in range(len(cumulative) - 1):
             assert cumulative[i + 1] >= cumulative[i]
 
+    def test_no_perturbation_leaves_tfs_cyclic(self):
+        """POST: without perturbation, A/B/C remain in the same non-trivial SCC."""
+        G = _triangle_graph()
+        scc_map, scc_sizes = srb._build_do_scc_info(G, frozenset())
+        # A, B, C are still in the same non-trivial SCC
+        assert srb._is_singleton_scc("A", scc_map, scc_sizes) is False
+        assert srb._is_singleton_scc("B", scc_map, scc_sizes) is False
+        assert srb._is_singleton_scc("C", scc_map, scc_sizes) is False
+
+
     def test_break_recovers_tf_in_cycle(self):
         """
         In the triangle A->B->C->A, perturbing C removes C's in-edges (B->C).
@@ -413,10 +469,3 @@ class TestIntegration:
         assert srb._is_singleton_scc("B", scc_map, scc_sizes) is True
         assert srb._is_singleton_scc("C", scc_map, scc_sizes) is True
 
-    def test_no_perturbation_leaves_tfs_cyclic(self):
-        G = _triangle_graph()
-        scc_map, scc_sizes = srb._build_do_scc_info(G, frozenset())
-        # A, B, C are still in the same non-trivial SCC
-        assert srb._is_singleton_scc("A", scc_map, scc_sizes) is False
-        assert srb._is_singleton_scc("B", scc_map, scc_sizes) is False
-        assert srb._is_singleton_scc("C", scc_map, scc_sizes) is False

@@ -546,6 +546,7 @@ class TestRunPerGeneCyclicId:
             self.name = name
 
         def __repr__(self):
+            """Return the variable name as its string representation."""
             return self.name
 
     def _always_true(self, tf, outcome_set, min_cut):

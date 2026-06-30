@@ -904,9 +904,11 @@ notebooks/results_csv_files/*.csv
 
 # Git commit messages
 git-commit-message.md
+PR_MESSAGE.md
 
 # AI assistance rules
 .clinerules
+docs/plans
 
 # Axiomander proof cache (local, machine-specific)
 .axiomander/

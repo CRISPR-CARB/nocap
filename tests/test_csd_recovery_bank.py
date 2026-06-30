@@ -115,30 +115,35 @@ def _proxy_neq_exact_graph() -> nx.DiGraph:
 
 
 class TestBuildDoSccMap:
+    """Tests for _build_do_scc_map: SCC assignment under do-interventions."""
+
     def test_every_node_assigned(self):
+        """Every node in the graph must appear as a key in the returned SCC map."""
         G = _tiny_graph_triangle()
         scc_map = crb._build_do_scc_map(G, frozenset())
         for node in G.nodes():
             assert node in scc_map
 
     def test_triangle_all_same_scc(self):
+        """Without intervention, A/B/C form one SCC; D is separate."""
         G = _tiny_graph_triangle()
         scc_map = crb._build_do_scc_map(G, frozenset())
         assert scc_map["A"] == scc_map["B"] == scc_map["C"]
         assert scc_map["D"] != scc_map["A"]
 
     def test_do_breaks_cycle(self):
+        """Perturbing C removes its in-edges, breaking the A->B->C->A cycle."""
         G = _tiny_graph_triangle()
         # Perturbing C breaks C->A, so the cycle A->B->C->A is severed
         scc_map = crb._build_do_scc_map(G, frozenset(["C"]))
         # A,B,C can no longer form a cycle since C's in-edge (B->C) is removed
         # C->A still exists. A->B exists. But B->C is removed.
-        # So A->B, C->A remain. SCCs: {A,C} (C->A, no path back), actually:
-        # A->B->? (B->C removed), C->A. Reachability: A->B (stop), C->A->B.
+        # So A->B->? (B->C removed), C->A. Reachability: A->B (stop), C->A->B.
         # SCCs: A,B,C are all singletons since no cycles remain.
         assert scc_map["A"] != scc_map["B"] or scc_map["B"] != scc_map["C"]
 
     def test_requires_frozenset(self):
+        """Passing a plain set instead of frozenset raises AssertionError(PRE)."""
         G = _tiny_graph_triangle()
         with pytest.raises(AssertionError, match="PRE"):
             crb._build_do_scc_map(G, {"A"})  # set not frozenset
@@ -150,21 +155,27 @@ class TestBuildDoSccMap:
 
 
 class TestProxyRecovered:
+    """Tests for _proxy_recovered: SCC-map-based recovery check."""
+
     def test_same_scc_not_recovered(self):
+        """Cause and effect in the same SCC means the edge is not yet recovered."""
         # Both in SCC 0
         scc_map = {"A": 0, "B": 0}
         assert crb._proxy_recovered("A", "B", scc_map) is False
 
     def test_different_scc_recovered(self):
+        """Cause and effect in different SCCs means the edge is recovered."""
         scc_map = {"A": 0, "B": 1}
         assert crb._proxy_recovered("A", "B", scc_map) is True
 
     def test_missing_cause_recovered(self):
+        """A missing cause node gets a unique sentinel SCC id, so it differs from effect."""
         # Missing node gets -1 vs -2 -> different
         scc_map = {"B": 1}
         assert crb._proxy_recovered("MISSING", "B", scc_map) is True
 
     def test_both_missing_recovered(self):
+        """Two missing nodes get distinct sentinel ids, so they are considered recovered."""
         # -1 != -2
         assert crb._proxy_recovered("X", "Y", {}) is True
 
@@ -175,6 +186,8 @@ class TestProxyRecovered:
 
 
 class TestExactRecovered:
+    """Tests for _exact_recovered: edge-removal-based recovery check."""
+
     def test_triangle_no_intervention(self):
         """A->B->C->A: remove A->B, A and B still in same SCC (B->C->A)."""
         G = _tiny_graph_triangle()
@@ -225,13 +238,17 @@ class TestExactRecovered:
 
 
 class TestGreedyBank:
+    """Tests for _greedy_bank: greedy perturbation set selection."""
+
     def _simple_targets(self):
+        """Return two simple same-SCC targets for use in greedy bank tests."""
         return [
             {"cause": "A", "effect": "B", "same_scc": True},
             {"cause": "B", "effect": "C", "same_scc": True},
         ]
 
     def test_returns_n_sets(self):
+        """_greedy_bank returns exactly n perturbation sets."""
         G = _tiny_graph_triangle()
         targets = self._simple_targets()
         pool = {"C", "A"}
@@ -239,6 +256,7 @@ class TestGreedyBank:
         assert len(bank) == 3
 
     def test_set_index_1based(self):
+        """set_index in the returned bank is 1-based."""
         G = _tiny_graph_triangle()
         targets = self._simple_targets()
         pool = {"C"}
@@ -247,6 +265,7 @@ class TestGreedyBank:
         assert bank[1]["set_index"] == 2
 
     def test_coverage_monotone(self):
+        """Cumulative proxy coverage must be non-decreasing across the bank."""
         G = _tiny_graph_triangle()
         targets = self._simple_targets()
         pool = {"C", "A", "B"}
@@ -256,6 +275,7 @@ class TestGreedyBank:
             assert cumulative[i + 1] >= cumulative[i], "Coverage must be non-decreasing"
 
     def test_genes_in_pool(self):
+        """Every gene chosen by the greedy algorithm must come from the candidate pool."""
         G = _tiny_graph_triangle()
         targets = self._simple_targets()
         pool = {"C", "A", "B"}
@@ -265,6 +285,7 @@ class TestGreedyBank:
                 assert gene in pool, f"Chosen gene {gene!r} not in pool"
 
     def test_empty_pool_returns_empty_sets(self):
+        """With an empty candidate pool, each bank entry has an empty genes list."""
         G = _tiny_graph_triangle()
         targets = self._simple_targets()
         pool: set = set()
@@ -276,6 +297,7 @@ class TestGreedyBank:
             assert item["genes"] == [] or len(item["genes"]) == 0
 
     def test_precondition_n_zero(self):
+        """Passing n=0 raises AssertionError(PRE)."""
         G = _tiny_graph_triangle()
         with pytest.raises(AssertionError, match="PRE"):
             crb._greedy_bank(
@@ -283,6 +305,7 @@ class TestGreedyBank:
             )
 
     def test_precondition_k_zero(self):
+        """Passing k=0 raises AssertionError(PRE)."""
         G = _tiny_graph_triangle()
         with pytest.raises(AssertionError, match="PRE"):
             crb._greedy_bank(
@@ -296,7 +319,10 @@ class TestGreedyBank:
 
 
 class TestExactVerifyBank:
+    """Tests for _exact_verify_bank: exact recovery verification of a greedy bank."""
+
     def test_postcondition_n_recovered_matches(self):
+        """The count of recovered edges in edge_results matches exact_covered_cumulative."""
         G = _tiny_graph_triangle()
         targets = [
             {"cause": "A", "effect": "B", "same_scc": True},
@@ -315,6 +341,7 @@ class TestExactVerifyBank:
         assert n_recovered_counted == bank_exact[-1]["exact_covered_cumulative"]
 
     def test_empty_genes_set_contributes_zero(self):
+        """A bank entry with an empty genes list recovers zero edges exactly."""
         G = _tiny_graph_triangle()
         targets = [{"cause": "A", "effect": "B", "same_scc": True}]
         bank = [
@@ -331,7 +358,10 @@ class TestExactVerifyBank:
 
 
 class TestLoadTargets:
+    """Tests for _load_targets: CSV parsing of unidentifiable edge targets."""
+
     def test_basic(self, tmp_path):
+        """Only rows with status='unidentifiable' are returned as targets."""
         p = tmp_path / "clf.csv"
         p.write_text(
             "cause,effect,status,same_scc,timed_out\n"
@@ -345,6 +375,7 @@ class TestLoadTargets:
         assert targets[1] == {"cause": "E", "effect": "F", "same_scc": False}
 
     def test_empty_unidentifiable_raises(self, tmp_path):
+        """A CSV with no unidentifiable rows raises AssertionError(POST)."""
         p = tmp_path / "clf.csv"
         p.write_text("cause,effect,status,same_scc\nA,B,identifiable,False\n")
         with pytest.raises(AssertionError, match="POST"):
@@ -352,7 +383,10 @@ class TestLoadTargets:
 
 
 class TestLoadCandidatePool:
+    """Tests for _load_candidate_pool: CSV parsing of break-set candidates."""
+
     def test_basic(self, tmp_path):
+        """Genes from all non-empty break sets are collected into the pool."""
         p = tmp_path / "break.csv"
         p.write_text(
             "cause,effect,min_break_set,min_break_size\n"
@@ -369,5 +403,6 @@ class TestLoadCandidatePool:
         assert edge_to_bs[("E", "F")] == frozenset()
 
     def test_missing_file_raises(self, tmp_path):
+        """Passing a path to a non-existent file raises AssertionError(PRE)."""
         with pytest.raises(AssertionError, match="PRE"):
             crb._load_candidate_pool(str(tmp_path / "nonexistent.csv"))

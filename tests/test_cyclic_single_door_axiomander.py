@@ -28,18 +28,21 @@ from nocap.cyclic_single_door import (
 
 
 def _chain() -> nx.DiGraph:
+    """Build Z->X->Y (pure DAG, no cycles)."""
     g = nx.DiGraph()
     g.add_edges_from([("Z", "X"), ("X", "Y")])
     return g
 
 
 def _cycle() -> nx.DiGraph:
+    """Build X<->Y (2-cycle)."""
     g = nx.DiGraph()
     g.add_edges_from([("X", "Y"), ("Y", "X")])
     return g
 
 
 def _three_cycle() -> nx.DiGraph:
+    """Build A->B->C->A (3-cycle) plus D->A (external DAG edge)."""
     g = nx.DiGraph()
     g.add_edges_from([("A", "B"), ("B", "C"), ("C", "A"), ("D", "A")])
     return g
@@ -315,6 +318,7 @@ class TestSplitIntoNShardsContracts:
     """POST: exact shard count; full edge coverage; PRE violations raise AssertionError."""
 
     def _edges(self, n: int) -> list[tuple[str, str]]:
+        """Return n sequential string edges (0->1, 1->2, ..., (n-1)->n)."""
         return [(str(i), str(i + 1)) for i in range(n)]
 
     # --- POST: exact shard count ---

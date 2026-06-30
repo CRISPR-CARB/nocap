@@ -84,6 +84,7 @@ _SIMPLE_DAG_GRAPHML = """\
 
 
 def _write_graphml(tmp_path: Path, content: str = _TINY_GRAPHML) -> Path:
+    """Write GraphML content to a temp file and return its Path."""
     p = tmp_path / "test_graph.graphml"
     p.write_text(content)
     return p
@@ -277,6 +278,7 @@ def test_cmd_classify_timeout_recorded_not_crash(tmp_path):
 
     # Monkeypatch evaluate_all_edges to always return a timeout row
     def _fake_evaluate(g, restrict_edges=None, timeout_seconds=None):
+        """Return a single timeout row for the first edge in restrict_edges."""
         u, v = (restrict_edges or list(g.edges()))[0]
         return [
             {
@@ -359,6 +361,7 @@ def test_cmd_classify_resumes_from_partial(tmp_path):
     call_log: list[tuple] = []
 
     def _fake_evaluate(g, restrict_edges=None, timeout_seconds=None):
+        """Return a single identified row for the first edge in restrict_edges."""
         u, v = (restrict_edges or [])[0]
         call_log.append((u, v))
         return [

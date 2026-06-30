@@ -126,6 +126,7 @@ def build_baseline_queries_adorned(ecoli_graph, valid_genes):
 
 
 def _write_supptable(path, rows):
+    """Write a minimal supptable CSV with a 'Perturbation Name' column."""
     with open(path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["Perturbation Name"])
         writer.writeheader()

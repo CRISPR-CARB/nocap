@@ -79,36 +79,43 @@ class TestNoInterventionNeeded:
     """Removing A→D splits cause(A) and effect(D) into different SCCs."""
 
     def test_needs_intervention_false(self):
+        """needs_intervention is False when cause and effect land in different SCCs after edge removal."""
         g = _make_simple_dag()
         result = min_scc_break_set("A", "D", g)
         assert result["needs_intervention"] is False
 
     def test_same_scc_after_removal_false(self):
+        """same_scc_after_removal is False: D is a leaf with no path back to A."""
         g = _make_simple_dag()
         result = min_scc_break_set("A", "D", g)
         assert result["same_scc_after_removal"] is False
 
     def test_break_set_empty(self):
+        """break_set is empty when no intervention is needed."""
         g = _make_simple_dag()
         result = min_scc_break_set("A", "D", g)
         assert result["break_set"] == []
 
     def test_break_size_zero(self):
+        """break_size is 0 when no vertex cut is required."""
         g = _make_simple_dag()
         result = min_scc_break_set("A", "D", g)
         assert result["break_size"] == 0
 
     def test_cut_verified_true(self):
+        """cut_verified is True even for the trivial (empty) cut."""
         g = _make_simple_dag()
         result = min_scc_break_set("A", "D", g)
         assert result["cut_verified"] is True
 
     def test_cause_not_in_break_set(self):
+        """The cause node A must never appear in the break set."""
         g = _make_simple_dag()
         result = min_scc_break_set("A", "D", g)
         assert "A" not in result["break_set"]
 
     def test_effect_not_in_break_set(self):
+        """The effect node D must never appear in the break set."""
         g = _make_simple_dag()
         result = min_scc_break_set("A", "D", g)
         assert "D" not in result["break_set"]
@@ -123,11 +130,13 @@ class TestSizeTwoCut:
     """Two return paths require a size-2 vertex cut."""
 
     def test_needs_intervention_true(self):
+        """needs_intervention is True when A and D remain in the same SCC after edge removal."""
         g = _make_two_return_paths()
         result = min_scc_break_set("A", "D", g)
         assert result["needs_intervention"] is True
 
     def test_same_scc_after_removal_true(self):
+        """same_scc_after_removal is True: forward path A→B→C→D keeps them in the same SCC."""
         g = _make_two_return_paths()
         result = min_scc_break_set("A", "D", g)
         assert result["same_scc_after_removal"] is True
@@ -147,16 +156,19 @@ class TestSizeTwoCut:
         assert result["break_size"] == 2
 
     def test_cause_not_in_break_set(self):
+        """The cause node A must never appear in the break set."""
         g = _make_two_return_paths()
         result = min_scc_break_set("A", "D", g)
         assert "A" not in result["break_set"]
 
     def test_effect_not_in_break_set(self):
+        """The effect node D must never appear in the break set."""
         g = _make_two_return_paths()
         result = min_scc_break_set("A", "D", g)
         assert "D" not in result["break_set"]
 
     def test_cut_verified(self):
+        """cut_verified is True: removing E and F disconnects all return paths from D to A."""
         g = _make_two_return_paths()
         result = min_scc_break_set("A", "D", g)
         assert result["cut_verified"] is True
@@ -176,6 +188,7 @@ class TestSizeTwoCut:
         assert "F" in bs, f"F must be in break_set to cut return path 2 (D→F→A), got {bs}"
 
     def test_break_set_sorted(self):
+        """break_set is returned in sorted order."""
         g = _make_two_return_paths()
         result = min_scc_break_set("A", "D", g)
         assert result["break_set"] == sorted(result["break_set"])
@@ -187,13 +200,17 @@ class TestSizeTwoCut:
 
 
 class TestPreconditions:
+    """Verify that PRE-condition assertions fire for invalid inputs."""
+
     def test_missing_edge_raises(self):
+        """Passing a cause/effect pair with no edge in the graph raises AssertionError(PRE)."""
         g = nx.DiGraph()
         g.add_edge("X", "Y")
         with pytest.raises(AssertionError, match="PRE"):
             min_scc_break_set("X", "Z", g)
 
     def test_non_string_cause_raises(self):
+        """Passing non-string node labels raises AssertionError(PRE)."""
         g = nx.DiGraph()
         g.add_edge(1, 2)
         with pytest.raises(AssertionError, match="PRE"):
@@ -206,13 +223,17 @@ class TestPreconditions:
 
 
 class TestIdempotency:
+    """Verify that repeated calls produce identical results and do not mutate the graph."""
+
     def test_repeated_call_same_result(self):
+        """Two consecutive calls with the same graph and edge return identical dicts."""
         g = _make_two_return_paths()
         r1 = min_scc_break_set("A", "D", g)
         r2 = min_scc_break_set("A", "D", g)
         assert r1 == r2
 
     def test_graph_not_mutated(self):
+        """min_scc_break_set must not add or remove edges from the input graph."""
         g = _make_two_return_paths()
         edges_before = set(g.edges())
         min_scc_break_set("A", "D", g)
