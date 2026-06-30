@@ -45,6 +45,32 @@ MANIFEST="${OUTDIR}/rescue_manifest.json"
 mkdir -p "${LOG_DIR}" "${RESCUE_SHARDS_DIR}" "${RESCUE_CLASSIFIED_DIR}"
 
 # ---------------------------------------------------------------------------
+# Step 0: Auto-select shard size based on currently idle nodes
+# ---------------------------------------------------------------------------
+# Goal: keep every idle node busy with exactly BATCH_SIZE shards running in
+# parallel, so total wall time ≈ time-per-shard regardless of job count.
+# shard_size = max(1, ceil(n_unidentifiable / (N_IDLE_NODES × BATCH_SIZE)))
+# This is recalculated each time from live sinfo output.
+BATCH_SIZE=64
+N_IDLE_NODES=$(sinfo -p slurm -t idle -o "%n" -h 2>/dev/null | wc -l | tr -d ' ')
+N_IDLE_NODES=$(( N_IDLE_NODES > 0 ? N_IDLE_NODES : 1 ))
+# Count unidentifiable edges in the CSV to size the shards
+N_UNIDENT=$(awk -F',' 'NR>1 && $3=="unidentifiable" {c++} END {print c+0}' "${RESULTS_CSV}")
+# shard_size = ceil(N_UNIDENT / (N_IDLE_NODES * BATCH_SIZE)), floor at 1
+SHARD_SIZE=$(python3 -c "
+import math
+n = ${N_UNIDENT}; nodes = ${N_IDLE_NODES}; batch = ${BATCH_SIZE}
+print(max(1, math.ceil(n / (nodes * batch))))
+")
+
+echo "=== Step 0: Auto-sizing shards ==="
+echo "  Idle nodes      : ${N_IDLE_NODES}"
+echo "  Unidentifiable  : ${N_UNIDENT}"
+echo "  Batch size      : ${BATCH_SIZE} shards/node"
+echo "  => shard size   : ${SHARD_SIZE} edge(s)/shard"
+echo ""
+
+# ---------------------------------------------------------------------------
 # Step 1: Prepare shards (idempotent — skips if manifest already present)
 # ---------------------------------------------------------------------------
 if [[ ! -f "${MANIFEST}" ]]; then
@@ -53,7 +79,7 @@ if [[ ! -f "${MANIFEST}" ]]; then
         --results-csv "${RESULTS_CSV}" \
         --shard-dir "${RESCUE_SHARDS_DIR}" \
         --manifest "${MANIFEST}" \
-        --shard-size 50
+        --shard-size "${SHARD_SIZE}"
 else
     echo "=== Step 1: Manifest already exists at ${MANIFEST}, skipping prepare ==="
 fi
@@ -92,9 +118,8 @@ if [[ "${N_PENDING}" -eq 0 ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Step 3: Split into per-node batches (64 shards / node)
+# Step 3: Split into per-node batches (BATCH_SIZE shards / node)
 # ---------------------------------------------------------------------------
-BATCH_SIZE=64
 N_NODES=$(( (N_PENDING + BATCH_SIZE - 1) / BATCH_SIZE ))
 
 echo "  Batches (nodes): ${N_NODES}  (${BATCH_SIZE} shards/node)"

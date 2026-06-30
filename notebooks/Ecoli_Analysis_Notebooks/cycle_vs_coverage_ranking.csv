@@ -1,0 +1,16 @@
+Rank,By cycle score,Cycle score,By coverage count,Coverage count
+1,yjjQ,67,rpoD,5
+2,ydiP,67,lrp,2
+3,ydeO,67,slyA,1
+4,stpA,67,rpoH,1
+5,cra,67,rpoS,1
+6,cpxR,67,dnaA,1
+7,sutR,67,exuR,1
+8,argP,67,yjjQ,0
+9,argR,67,ydiP,0
+10,torR,67,ydeO,0
+11,arcA,67,stpA,0
+12,slyA,67,cra,0
+13,sdiA,67,cpxR,0
+14,rutR,67,sutR,0
+15,rstA,67,argP,0

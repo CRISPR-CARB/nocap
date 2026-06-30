@@ -1,0 +1,95 @@
+{
+  "n_unidentifiable": 6676,
+  "n_rescuable": 6400,
+  "pct_rescuable": 95.87,
+  "cause_counts": {
+    "self_loop": 174,
+    "two_cycle": 70,
+    "same_scc_long": 247,
+    "cross_scc_blocked": 6157,
+    "scc_edge_dissolved": 28
+  },
+  "top_rescue_nodes": [
+    {
+      "node": "rpoD",
+      "count": 1862
+    },
+    {
+      "node": "crp",
+      "count": 642
+    },
+    {
+      "node": "fliZ",
+      "count": 452
+    },
+    {
+      "node": "nac",
+      "count": 418
+    },
+    {
+      "node": "lrp",
+      "count": 406
+    },
+    {
+      "node": "rpoS",
+      "count": 359
+    },
+    {
+      "node": "fnr",
+      "count": 336
+    },
+    {
+      "node": "fur",
+      "count": 322
+    },
+    {
+      "node": "fis",
+      "count": 290
+    },
+    {
+      "node": "rpoH",
+      "count": 279
+    },
+    {
+      "node": "gadE",
+      "count": 249
+    },
+    {
+      "node": "hns",
+      "count": 242
+    },
+    {
+      "node": "ihfA",
+      "count": 227
+    },
+    {
+      "node": "ihfB",
+      "count": 227
+    },
+    {
+      "node": "arcA",
+      "count": 218
+    },
+    {
+      "node": "dksA",
+      "count": 177
+    },
+    {
+      "node": "rpoN",
+      "count": 157
+    },
+    {
+      "node": "cpxR",
+      "count": 133
+    },
+    {
+      "node": "rpoE",
+      "count": 126
+    },
+    {
+      "node": "yjjQ",
+      "count": 104
+    }
+  ],
+  "n_shards": 6676
+}

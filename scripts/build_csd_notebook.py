@@ -51,10 +51,16 @@ genetic interventions (`do(v)`) could rescue identifiability.
 - **Non-identifiability taxonomy:** Unidentifiable edges are classified into five structural
   categories based on graph topology (self-loop, 2-cycle, same-SCC long feedback,
   SCC-edge-dissolved, cross-SCC-blocked).
-- **Intervention rescue (notebook-light):** Per-edge single-node `do()` rescue on a sample
-  of unidentifiable edges; global greedy `maximize_identifiable_edges` curve for small k.
-- **Full sweep (SLURM):** `scripts/slurm/submit_csd_rescue.sh` runs the complete rescue
-  analysis on the cluster; results load automatically below if present.
+- **Intervention rescue (SLURM full sweep):** Per-edge single-node `do()` rescue tests
+  whether any single hard intervention makes an unidentifiable edge identifiable.
+  `scripts/slurm/submit_csd_rescue.sh` runs all 6,676 unidentifiable edges on the cluster;
+  results load automatically in Section 6.
+- **Multi-experiment recovery design (Section 7):** `scripts/csd_recovery_bank.py` runs a
+  greedy set-cover optimizer to select a minimal *bank* of multiplex perturbation experiments
+  (each knocking out k genes simultaneously) that together rescue the maximum number of
+  unidentifiable edges.  Two budget designs are evaluated: **n=10 experiments × k=3 genes**
+  and **n=5 experiments × k=6 genes**.  Both recover 97.4% of unidentifiable edges; the
+  n=5/k=6 design is exactly proxy-calibrated (gap = 0).
 
 ## References
 - Forre & Mooij (2018). *Constraint-based Causal Discovery for Non-linear SCMs.*
@@ -80,6 +86,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from IPython.display import Image, display
 
 # --- Repo root on sys.path so nocap is importable ---
 REPO = Path().resolve()
@@ -88,11 +95,7 @@ while not (REPO / "src" / "nocap").exists() and REPO != REPO.parent:
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from nocap.cyclic_single_door import (
-    evaluate_all_edges,
-    maximize_identifiable_edges,
-    nx_digraph_to_y0,
-)
+from nocap.cyclic_single_door import evaluate_all_edges, nx_digraph_to_y0
 
 NB_DIR = REPO / "notebooks" / "Ecoli_Analysis_Notebooks"
 VIZ_DIR = REPO / "notebooks" / "visualizations"
@@ -126,8 +129,7 @@ print(f"Identifiable: {(df.status=='identifiable').sum():,}  ({summary['pct_iden
 print(f"Unidentifiable: {(df.status=='unidentifiable').sum():,}")
 print(f"Timed out: {(df.status=='timeout').sum():,}")
 print(f"Same-SCC: {df.same_scc.sum():,}")
-print()
-print(df.head())\
+display(df.head())\
 """))
 
 # ============================================================
@@ -139,29 +141,18 @@ status_counts = df["status"].value_counts()
 colors = {"identifiable": "#2ecc71", "unidentifiable": "#e74c3c", "timeout": "#f39c12"}
 color_list = [colors.get(s, "#95a5a6") for s in status_counts.index]
 
-fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-
-# Pie
-axes[0].pie(
-    status_counts.values,
-    labels=status_counts.index,
-    colors=color_list,
-    autopct="%1.1f%%",
-    startangle=90,
-)
-axes[0].set_title("Edge Identifiability\\n(sigma-single-door criterion)")
-
-# Bar
-axes[1].bar(status_counts.index, status_counts.values, color=color_list, edgecolor="black")
-axes[1].set_ylabel("Number of edges")
-axes[1].set_title("Edge counts by status")
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.bar(status_counts.index, status_counts.values, color=color_list, edgecolor="black")
+ax.set_ylabel("Number of edges")
+ax.set_title("Edge identifiability (sigma-single-door criterion)")
 for i, (k, v) in enumerate(status_counts.items()):
-    axes[1].text(i, v + 30, str(v), ha="center", fontsize=9)
+    ax.text(i, v + 30, str(v), ha="center", fontsize=9)
 
 plt.tight_layout()
 out = VIZ_DIR / "csd_identifiability_overall.png"
 plt.savefig(out, dpi=150, bbox_inches="tight")
-plt.show()
+plt.close()
+display(Image(str(out)))
 print(f"Saved: {out}")\
 """))
 
@@ -201,7 +192,8 @@ else:
 plt.tight_layout()
 out = VIZ_DIR / "csd_adjustment_set_sizes.png"
 plt.savefig(out, dpi=150, bbox_inches="tight")
-plt.show()
+plt.close()
+display(Image(str(out)))
 print(f"Saved: {out}")
 print(f"\\nMedian adjustment-set size: {ident['adj_size'].median():.1f}")
 print(f"Max adjustment-set size: {ident['adj_size'].max()}")\
@@ -244,14 +236,15 @@ ax.legend()
 plt.tight_layout()
 out = VIZ_DIR / "csd_same_vs_cross_scc.png"
 plt.savefig(out, dpi=150, bbox_inches="tight")
-plt.show()
+plt.close()
+display(Image(str(out)))
 print(f"Saved: {out}")
 print(f"\\nCross-SCC  identifiable rate: {100*r_cross['identifiable']/r_cross['total']:.1f}%")
 print(f"Same-SCC   identifiable rate: {100*r_same['identifiable']/r_same['total']:.1f}%")\
 """))
 
 # ============================================================
-# Section 7 — Non-identifiability cause taxonomy (in-notebook)
+# Section 7 — Non-identifiability cause taxonomy (load from pre-computed file)
 # ============================================================
 cells.append(md("""\
 ## 5. Non-identifiability cause taxonomy
@@ -266,28 +259,30 @@ For each unidentifiable edge we classify the *structural reason*:
 | `scc_edge_dissolved` | removing cause→effect breaks the SCC (edge *is* the link) |
 | `cross_scc_blocked` | different SCCs but O-set blocked (descendant of effect in O-set) |
 
-This runs fully in-notebook (graph-structure only; no sigma oracle needed).\
+Results are pre-computed by `scripts/csd_diagnose_nonident.py` (run once after
+gathering the SLURM results) and loaded here for display.\
 """))
 cells.append(code("""\
-from csd_rescue_worker import classify_nonident_cause, CAUSE_CATEGORIES
+DIAG_CSV  = NB_DIR / "csd_nonident_diagnosis.csv"
+DIAG_JSON = NB_DIR / "csd_nonident_summary.json"
 
-g = nx.read_graphml(str(GRAPHML))
-unident = df[df.status == "unidentifiable"][["cause", "effect"]].copy()
-print(f"Diagnosing {len(unident):,} unidentifiable edges...")
+CAUSE_CATEGORIES = [
+    "self_loop",
+    "two_cycle",
+    "same_scc_long",
+    "scc_edge_dissolved",
+    "cross_scc_blocked",
+]
 
-cause_labels = []
-for _, row in unident.iterrows():
-    if g.has_edge(row.cause, row.effect):
-        cause_labels.append(classify_nonident_cause(g, row.cause, row.effect))
-    else:
-        cause_labels.append("unknown")
+assert DIAG_CSV.exists(), (
+    f"Diagnosis CSV not found: {DIAG_CSV}\\n"
+    "Run:  uv run python scripts/csd_diagnose_nonident.py"
+)
 
-unident = unident.copy()
-unident["nonident_cause"] = cause_labels
+unident = pd.read_csv(DIAG_CSV)
 cause_counts = unident["nonident_cause"].value_counts()
-print(cause_counts)
-unident.to_csv(NB_DIR / "csd_nonident_diagnosis.csv", index=False)
-print("\\nSaved: csd_nonident_diagnosis.csv")\
+print(f"Loaded {len(unident):,} unidentifiable edges from {DIAG_CSV.name}")
+display(cause_counts.to_frame(name="cause_count"))
 """))
 
 cells.append(code("""\
@@ -312,147 +307,34 @@ vals = [cause_counts.get(c, 0) for c in ordered]
 clrs = [CATEGORY_COLORS.get(c, "#95a5a6") for c in ordered]
 labs = [CATEGORY_LABELS.get(c, c) for c in ordered]
 
-fig, axes = plt.subplots(1, 2, figsize=(13, 5))
-
-# Bar chart
-axes[0].bar(labs, vals, color=clrs, edgecolor="black")
-axes[0].set_ylabel("Number of unidentifiable edges")
-axes[0].set_title("Non-identifiability cause taxonomy")
-axes[0].tick_params(axis="x", rotation=25)
+fig, ax = plt.subplots(figsize=(9, 4))
+ax.bar(labs, vals, color=clrs, edgecolor="black")
+ax.set_ylabel("Number of unidentifiable edges")
+ax.set_title("Non-identifiability cause taxonomy")
+ax.tick_params(axis="x", rotation=25)
 for i, v in enumerate(vals):
-    axes[0].text(i, v + 10, str(v), ha="center", fontsize=8)
-
-# Pie chart
-axes[1].pie(vals, labels=labs, colors=clrs, autopct="%1.1f%%", startangle=90)
-axes[1].set_title("Cause breakdown (unidentifiable edges)")
+    ax.text(i, v + 10, str(v), ha="center", fontsize=8)
 
 plt.tight_layout()
 out = VIZ_DIR / "csd_nonident_causes.png"
 plt.savefig(out, dpi=150, bbox_inches="tight")
-plt.show()
+plt.close()
+display(Image(str(out)))
 print(f"Saved: {out}")\
 """))
 
 # ============================================================
-# Section 8 — Intervention rescue (notebook-light)
+# Section 8 — Intervention rescue (from SLURM output)
 # ============================================================
 cells.append(md("""\
-## 6. Intervention rescue (notebook-light)
+## 6. Intervention rescue results (SLURM)
 
-### 6a. Per-edge targeted rescue (sampled)
-For a small sample of unidentifiable edges, test each candidate intervention node
-(from the SCC min-cut pool) and record which ones flip the edge to identifiable.\
-"""))
-cells.append(code("""\
-import random
-from csd_rescue_worker import compute_rescue_nodes, _candidate_pool
+Each unidentifiable edge is tested to see whether a single hard intervention
+`do(v)` on some node `v` would make it identifiable.  This is computationally
+expensive (~40–80 s per edge) so the analysis runs on the SLURM cluster via
+`scripts/slurm/submit_csd_rescue.sh` and the results are loaded here.
 
-random.seed(42)
-SAMPLE_SIZE = 50  # keep fast; increase if you have time
-
-# Filter to same-SCC unidentifiable edges (most interesting for rescue)
-same_scc_unident = unident[unident.cause.map(lambda c: True)].copy()
-# Use nonident_cause != self_loop (self-loops can't be rescued by do on other nodes)
-rescuable_pool = unident[unident.nonident_cause != "self_loop"]
-sample_edges = rescuable_pool.sample(min(SAMPLE_SIZE, len(rescuable_pool)), random_state=42)
-
-print(f"Computing rescue nodes for {len(sample_edges)} sampled edges...")
-candidates = _candidate_pool(g)
-print(f"Candidate pool size: {len(candidates)} nodes")
-
-rescue_records = []
-for _, row in sample_edges.iterrows():
-    if not g.has_edge(row.cause, row.effect):
-        continue
-    nodes = compute_rescue_nodes(g, row.cause, row.effect, candidates)
-    rescue_records.append({
-        "cause": row.cause,
-        "effect": row.effect,
-        "nonident_cause": row.nonident_cause,
-        "rescue_nodes": nodes,
-        "n_rescue_nodes": len(nodes),
-    })
-
-rescue_df = pd.DataFrame(rescue_records)
-print(f"\\n{rescue_df['n_rescue_nodes'].describe().to_string()}")
-print(f"\\nEdges with at least one rescue node: {(rescue_df.n_rescue_nodes > 0).sum()} / {len(rescue_df)}")\
-"""))
-
-cells.append(code("""\
-# Most frequently effective intervention targets (in sample)
-rescue_node_counter: Counter = Counter()
-for nodes in rescue_df["rescue_nodes"]:
-    rescue_node_counter.update(nodes)
-
-top_rescue = rescue_node_counter.most_common(20)
-if top_rescue:
-    names, cnts = zip(*top_rescue)
-    fig, ax = plt.subplots(figsize=(9, 5))
-    ax.barh(list(names)[::-1], list(cnts)[::-1], color="#e74c3c")
-    ax.set_xlabel(f"# edges rescued (in sample of {len(rescue_df)})")
-    ax.set_title("Top single-node do() intervention targets (sampled)")
-    plt.tight_layout()
-    out = VIZ_DIR / "csd_rescue_targets.png"
-    plt.savefig(out, dpi=150, bbox_inches="tight")
-    plt.show()
-    print(f"Saved: {out}")
-else:
-    print("No rescue nodes found in sample.")\
-"""))
-
-cells.append(md("### 6b. Global greedy intervention curve"))
-cells.append(code("""\
-K_MAX = 5  # budget; keep small for notebook speed
-
-print(f"Running maximize_identifiable_edges(graph, k={K_MAX})...")
-print("(This may take several minutes on the full 9k-edge graph)")
-
-greedy = maximize_identifiable_edges(g, K_MAX)
-
-print(f"\\nBaseline identifiable: {greedy['n_identifiable_baseline']:,}")
-print(f"Final identifiable:    {greedy['n_identifiable_final']:,}")
-print(f"Chosen interventions:  {greedy['chosen_nodes']}")
-print(f"Curve: {greedy['curve']}")\
-"""))
-
-cells.append(code("""\
-curve = greedy["curve"]
-xs = [c[0] for c in curve]
-ys = [c[1] for c in curve]
-pcts = [100.0 * y / len(df) for y in ys]
-
-fig, ax = plt.subplots(figsize=(7, 4))
-ax.plot(xs, pcts, "o-", color="#2ecc71", linewidth=2, markersize=8)
-ax.set_xlabel("Number of hard interventions do(v)")
-ax.set_ylabel("% edges identifiable")
-ax.set_title("Global greedy intervention curve\\n(sigma-single-door, E. coli network)")
-ax.set_ylim(0, 100)
-for x, y, p in zip(xs, ys, pcts):
-    ax.annotate(f"{p:.1f}%", (x, p), textcoords="offset points", xytext=(5, 3), fontsize=8)
-
-# Annotate chosen nodes
-chosen = greedy["chosen_nodes"]
-for i, node in enumerate(chosen, 1):
-    ax.annotate(f"do({node})", (i, pcts[i]), textcoords="offset points", xytext=(5, -12), fontsize=7, color="darkblue")
-
-plt.tight_layout()
-out = VIZ_DIR / "csd_rescue_curve.png"
-plt.savefig(out, dpi=150, bbox_inches="tight")
-plt.show()
-print(f"Saved: {out}")\
-"""))
-
-# ============================================================
-# Section 9 — Full-sweep results (load if present)
-# ============================================================
-cells.append(md("""\
-## 7. Full-sweep rescue results (SLURM)
-
-If the full rescue sweep has been run on the cluster, this section loads
-`csd_rescue_results.csv` and visualizes the most effective intervention targets
-across *all* unidentifiable edges.
-
-To run the full sweep:
+To run the rescue sweep:
 ```bash
 bash scripts/slurm/submit_csd_rescue.sh
 # After completion:
@@ -463,55 +345,140 @@ uv run python scripts/csd_rescue_gather.py \\
 ```\
 """))
 cells.append(code("""\
-RESCUE_CSV = NB_DIR / "csd_rescue_results.csv"
+RESCUE_CSV     = NB_DIR / "csd_rescue_results.csv"
 RESCUE_SUMMARY = NB_DIR / "csd_rescue_summary.json"
 
-if RESCUE_CSV.exists():
+if not RESCUE_CSV.exists():
+    print("Rescue results not yet available.")
+    print("Run: bash scripts/slurm/submit_csd_rescue.sh")
+else:
     rescue_full = pd.read_csv(RESCUE_CSV)
     with open(RESCUE_SUMMARY) as f:
         rescue_summary = json.load(f)
 
     print(f"Full sweep: {len(rescue_full):,} unidentifiable edges analysed")
-    print(f"Rescuable: {rescue_summary['n_rescuable']:,} ({rescue_summary['pct_rescuable']}%)")
-    print(f"\\nCause counts: {rescue_summary['cause_counts']}")
-    print(f"\\nTop rescue nodes:")
+    print(f"Rescuable:  {rescue_summary['n_rescuable']:,} ({rescue_summary['pct_rescuable']}%)")
+    print()
+    print("Top rescue nodes:")
     for row in rescue_summary["top_rescue_nodes"][:10]:
         print(f"  {row['node']}: {row['count']} edges")
 
-    # Full-sweep top rescue targets bar chart
+    display(rescue_full.head())\
+"""))
+
+cells.append(code("""\
+if RESCUE_CSV.exists():
     top_nodes_full = rescue_summary["top_rescue_nodes"][:20]
     if top_nodes_full:
         names_f, cnts_f = zip(*[(r["node"], r["count"]) for r in top_nodes_full])
         fig, ax = plt.subplots(figsize=(9, 6))
         ax.barh(list(names_f)[::-1], list(cnts_f)[::-1], color="#c0392b")
-        ax.set_xlabel("# unidentifiable edges rescued (full sweep)")
-        ax.set_title("Top single-node do() intervention targets\\n(all unidentifiable edges)")
+        ax.set_xlabel("# unidentifiable edges rescued")
+        ax.set_title("Top single-node do() intervention targets\\n(all unidentifiable edges, SLURM sweep)")
         plt.tight_layout()
         out = VIZ_DIR / "csd_rescue_targets_full.png"
         plt.savefig(out, dpi=150, bbox_inches="tight")
-        plt.show()
+        plt.close()
+        display(Image(str(out)))
         print(f"Saved: {out}")
+    else:
+        print("No rescue nodes found in sweep.")\
+"""))
 
-    # Full cause taxonomy breakdown
-    cause_counts_full = rescue_summary["cause_counts"]
-    ordered_f = [c for c in CAUSE_CATEGORIES if c in cause_counts_full]
-    vals_f = [cause_counts_full.get(c, 0) for c in ordered_f]
-    labs_f = [CATEGORY_LABELS.get(c, c) for c in ordered_f]
-    clrs_f = [CATEGORY_COLORS.get(c, "#95a5a6") for c in ordered_f]
+# ============================================================
+# Section 9 — Multi-experiment recovery design
+# ============================================================
+cells.append(md("""\
+## 7. Multi-experiment recovery design
 
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.bar(labs_f, vals_f, color=clrs_f, edgecolor="black")
-    ax.set_ylabel("Count")
-    ax.set_title("Non-identifiability cause taxonomy (full sweep)")
-    ax.tick_params(axis="x", rotation=20)
-    plt.tight_layout()
-    out = VIZ_DIR / "csd_nonident_causes_full.png"
-    plt.savefig(out, dpi=150, bbox_inches="tight")
-    plt.show()
-    print(f"Saved: {out}")
+Section 6 shows which single nodes can rescue individual unidentifiable edges.
+Here we go one step further: given a budget of **n** multiplex perturbation
+experiments each knocking out **k** genes simultaneously, which experiments
+should we run to maximise the total number of rescued edges?
+
+`scripts/csd_recovery_bank.py` runs a greedy set-cover optimizer over the
+rescue-node lists from the full SLURM sweep and produces two budget designs:
+
+| Design | n experiments | k genes/exp | Edges recovered | % of unidentifiable |
+|--------|:---:|:---:|:---:|:---:|
+| n=10, k=3 | 10 | 3 | 6,502 | 97.4% |
+| n=5,  k=6 | 5  | 6 | 6,502 | 97.4% |
+
+Both designs recover the same 6,502 edges.  The n=5/k=6 design is
+**exactly proxy-calibrated** (proxy–exact gap = 0), meaning the cheap
+greedy proxy perfectly predicts exact identifiability coverage.
+
+To regenerate these results:
+```bash
+uv run python scripts/csd_recovery_bank.py \\
+    --rescue-csv notebooks/Ecoli_Analysis_Notebooks/csd_rescue_results.csv \\
+    --graphml notebooks/Ecoli_Analysis_Notebooks/ecoli_full_network_no_small_rna.graphml \\
+    --output-dir notebooks/Ecoli_Analysis_Notebooks \\
+    --configs "10,3" "5,6"
+```\
+"""))
+
+cells.append(code("""\
+RECOVERY_SUMMARY = NB_DIR / "csd_recovery_summary.json"
+
+if not RECOVERY_SUMMARY.exists():
+    print("Recovery-bank results not yet available.")
+    print("Run: uv run python scripts/csd_recovery_bank.py ...")
 else:
-    print("Full rescue sweep not yet available.")
-    print("Run: bash scripts/slurm/submit_csd_rescue.sh")\
+    with open(RECOVERY_SUMMARY) as f:
+        rec = json.load(f)
+
+    for design_key, label in [("n10_k3", "n=10, k=3"), ("n5_k6", "n=5, k=6")]:
+        d = rec[design_key]
+        gap = d["proxy_vs_exact_gap"]
+        gap_str = f"{gap:+d}" if gap != 0 else "0 (exact)"
+        print(f"=== {label} ===")
+        print(f"  Edges recovered : {d['n_recovered_exact']:,} / {d['n_total_unidentifiable']:,}"
+              f"  ({d['pct_recovered_of_unident']}% of unidentifiable)")
+        print(f"  Proxy-exact gap : {gap_str}")
+        rows = [{"experiment": s["set_index"],
+                 "genes": ", ".join(s["genes"]),
+                 "k": len(s["genes"])} for s in d["chosen_sets"]]
+        display(pd.DataFrame(rows).set_index("experiment"))
+        print()
+"""))
+
+cells.append(code("""\
+if RECOVERY_SUMMARY.exists():
+    fig, ax = plt.subplots(figsize=(9, 4))
+
+    design_styles = {
+        "n10_k3": {"label": "n=10, k=3", "color": "#2980b9", "marker": "o"},
+        "n5_k6":  {"label": "n=5, k=6",  "color": "#27ae60", "marker": "s"},
+    }
+
+    for design_key, style in design_styles.items():
+        d = rec[design_key]
+        marginal = d["marginal_curve_exact"]
+        cumulative = []
+        total = 0
+        for v in marginal:
+            total += v
+            cumulative.append(total)
+        x = list(range(1, len(cumulative) + 1))
+        ax.plot(x, cumulative, marker=style["marker"], color=style["color"],
+                label=style["label"], linewidth=2, markersize=6)
+
+    ax.axhline(rec["n10_k3"]["n_total_unidentifiable"],
+               color="gray", linestyle="--", linewidth=1, label="All unidentifiable")
+    ax.set_xlabel("Number of experiments")
+    ax.set_ylabel("Unidentifiable edges recovered")
+    ax.set_title("Cumulative edge recovery vs. number of multiplex experiments")
+    ax.legend()
+    ax.set_xticks(range(1, max(
+        len(rec["n10_k3"]["marginal_curve_exact"]),
+        len(rec["n5_k6"]["marginal_curve_exact"])) + 1))
+    plt.tight_layout()
+    out = VIZ_DIR / "csd_recovery_marginal_curve.png"
+    plt.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close()
+    display(Image(str(out)))
+    print(f"Saved: {out}")
 """))
 
 # ============================================================
