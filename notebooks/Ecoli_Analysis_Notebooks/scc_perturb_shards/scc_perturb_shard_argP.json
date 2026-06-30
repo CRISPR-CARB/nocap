@@ -1,0 +1,30 @@
+{
+  "tf": "argP",
+  "min_cut": [
+    "phoB"
+  ],
+  "scc_size": 68,
+  "in_scc_children": [
+    "dnaA"
+  ],
+  "n_children": 14,
+  "outcomes": [
+    "argO",
+    "asd",
+    "dapB",
+    "dapD",
+    "dnaA",
+    "dnaN",
+    "gdhA",
+    "lysA",
+    "lysC",
+    "lysP",
+    "nrdA",
+    "nrdB",
+    "recF",
+    "yfaE"
+  ],
+  "joint_identifiable": true,
+  "per_gene": {},
+  "note": ""
+}

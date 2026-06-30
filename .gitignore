@@ -898,4 +898,23 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,python,jupyternotebooks,jetbrains,pycharm,vim,emacs,visualstudiocode,visualstudio
 
-scratch/
+# large csv files from analysis
+notebooks/results_csv_files/*.csv
+
+
+# Git commit messages
+git-commit-message.md
+PR_MESSAGE.md
+
+# AI assistance rules
+.clinerules
+docs/plans
+
+# Axiomander proof cache (local, machine-specific)
+.axiomander/
+
+# uv package cache (kept on project filesystem for hardlink support across SLURM nodes)
+.uv-cache/
+
+# Snakemake workflow outputs
+results/

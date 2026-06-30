@@ -1,0 +1,6 @@
+Rank,Candidate TF,Marginal gain,Cumulative resolved,% of resolvable
+1,rpoD,5,5,50.0%
+2,lrp,2,7,70.0%
+3,dnaA,1,8,80.0%
+4,exuR,1,9,90.0%
+5,rpoS,1,10,100.0%

@@ -1,9 +1,9 @@
 """Test functions for the scm module."""
 
-import pytest
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 
 # import numpy as np
 import sympy as sy
@@ -12,9 +12,6 @@ from pgmpy.models import LinearGaussianBayesianNetwork
 
 # import y0
 from y0.graph import NxMixedGraph
-
-from nocap.scm import bootstrap_ATE
-from nocap.scm import perform_soft_intervention_lgbn
 
 from nocap import (
     convert_to_eqn_array_latex,
@@ -31,10 +28,12 @@ from nocap import (
     read_dag_file,
 )
 from nocap.scm import (
+    bootstrap_ATE,
     compile_lgbn_from_lscm,
     create_dag_from_lscm,
     create_lgbn_from_dag,
     fit_model,
+    perform_soft_intervention_lgbn,
     simulate_data_with_outliers,
 )
 
@@ -46,7 +45,7 @@ def test_basic_conversion():
     # Test basic conversion
     daggity_string = "dag { A -> B; B -> C; C -> A; }"
     expected_dot = "digraph { A -> B; B -> C; C -> A; }"
-    assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
+    assert dagitty_to_dot(daggity_string) == expected_dot
 
 
 def test_with_latent_variables():
@@ -54,7 +53,7 @@ def test_with_latent_variables():
     # Test conversion with the 'latent' keyword
     daggity_string = "dag { latent, A -> B; B -> C; C -> A; }"
     expected_dot = 'digraph { observed="no", A -> B; B -> C; C -> A; }'
-    assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
+    assert dagitty_to_dot(daggity_string) == expected_dot
 
 
 def test_with_outcome_variables():
@@ -62,7 +61,7 @@ def test_with_outcome_variables():
     # Test conversion with the 'outcome' keyword
     daggity_string = "dag { outcome, A -> B; B -> C; C -> A; }"
     expected_dot = "digraph { A -> B; B -> C; C -> A; }"
-    assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
+    assert dagitty_to_dot(daggity_string) == expected_dot
 
 
 def test_with_adjusted_variables():
@@ -70,7 +69,7 @@ def test_with_adjusted_variables():
     # Test conversion with the 'adjusted' keyword
     daggity_string = "dag { adjusted, A -> B; B -> C; C -> A; }"
     expected_dot = "digraph { A -> B; B -> C; C -> A; }"
-    assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
+    assert dagitty_to_dot(daggity_string) == expected_dot
 
 
 def test_with_exposure_keyword():
@@ -78,33 +77,31 @@ def test_with_exposure_keyword():
     # Test conversion with the 'exposure' keyword
     daggity_string = "dag { exposure, A -> B; B -> C; C -> A; }"
     expected_dot = "digraph { A -> B; B -> C; C -> A; }"
-    assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
+    assert dagitty_to_dot(daggity_string) == expected_dot
 
 
 def test_with_combined_keywords():
     """Test conversion of daggity to dot format with combined keywords."""
     # Test conversion with the 'latent', 'adjusted', 'outcome', and 'exposure' keywords
-    daggity_string = (
-        "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> A; }"
-    )
+    daggity_string = "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> A; }"
     expected_dot = 'digraph { observed="no", A -> B; B -> C; C -> A; }'
-    assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
+    assert dagitty_to_dot(daggity_string) == expected_dot
 
 
 def test_with_empty_input():
     """Test conversion of daggity to dot format with an empty string."""
     daggity_string = ""
     expected_dot = ""
-    assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
+    assert dagitty_to_dot(daggity_string) == expected_dot
 
 
 def test_with_complex_graph_structure():
     """Test conversion of daggity to dot format with a complex graph structure."""
-    daggity_string = "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> D; D -> A; E -> F; G; }"
-    expected_dot = (
-        'digraph { observed="no", A -> B; B -> C; C -> D; D -> A; E -> F; G; }'
+    daggity_string = (
+        "dag { latent, adjusted, outcome, exposure, A -> B; B -> C; C -> D; D -> A; E -> F; G; }"
     )
-    assert dagitty_to_dot(daggity_string) == expected_dot  # noqa: S101
+    expected_dot = 'digraph { observed="no", A -> B; B -> C; C -> D; D -> A; E -> F; G; }'
+    assert dagitty_to_dot(daggity_string) == expected_dot
 
 
 def test_read_dag_file_success():
@@ -112,7 +109,7 @@ def test_read_dag_file_success():
     fpath = "./tests/test.dag"
     expected = 'dag {\n"Z" -> "Y"\n}'
     actual = read_dag_file(fpath)
-    assert expected == actual  # noqa: S101
+    assert expected == actual
 
 
 def test_read_dag_file_io_error():
@@ -120,7 +117,7 @@ def test_read_dag_file_io_error():
     fpath = "./tests/non_existant_graph.dag"
     expected = None  # should return None w/ file IO error
     actual = read_dag_file(fpath)
-    assert expected == actual  # noqa: S101
+    assert expected == actual
 
 
 # TODO: update test to use fixture
@@ -129,9 +126,9 @@ def test_dagitty_to_mixed_graph():
 
     def mixed_graphs_equal(graph1: NxMixedGraph, graph2: NxMixedGraph) -> bool:
         """Test if two mixed graphs are equal."""
-        if nx.utils.graphs_equal(
-            graph1.undirected, graph2.undirected
-        ) and nx.utils.graphs_equal(graph1.directed, graph2.directed):
+        if nx.utils.graphs_equal(graph1.undirected, graph2.undirected) and nx.utils.graphs_equal(
+            graph1.directed, graph2.directed
+        ):
             return True
         else:
             return False
@@ -150,7 +147,7 @@ def test_dagitty_to_mixed_graph():
     graph_fname = "./tests/frontdoor_backdoor.dag"
     mixed_graph1 = dagitty_to_mixed_graph(graph_str)
     mixed_graph2 = dagitty_to_mixed_graph(graph_fname)
-    assert mixed_graphs_equal(mixed_graph1, mixed_graph2) is True  # noqa: S101
+    assert mixed_graphs_equal(mixed_graph1, mixed_graph2) is True
 
 
 def test_dagitty_to_digraph():
@@ -169,7 +166,7 @@ def test_dagitty_to_digraph():
     graph_fname = "./tests/frontdoor_backdoor.dag"
     mixed_graph1 = dagitty_to_digraph(graph_str)
     mixed_graph2 = dagitty_to_digraph(graph_fname)
-    assert nx.utils.graphs_equal(mixed_graph1, mixed_graph2) is True  # noqa: S101
+    assert nx.utils.graphs_equal(mixed_graph1, mixed_graph2) is True
 
 
 def test_generate_lscm_from_dag():
@@ -178,14 +175,12 @@ def test_generate_lscm_from_dag():
     graph.add_edges_from([("A", "B"), ("B", "C")])
     expected_equations = {
         sy.Symbol("A"): sy.Symbol("epsilon_A"),
-        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A")
-        + sy.Symbol("epsilon_B"),
-        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B")
-        + sy.Symbol("epsilon_C"),
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
+        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B") + sy.Symbol("epsilon_C"),
     }
     actual_equations = generate_lscm_from_dag(graph)
     for node in expected_equations:  # symbolic equality
-        assert sy.simplify(actual_equations[node] - expected_equations[node]) == 0  # noqa: S101
+        assert sy.simplify(actual_equations[node] - expected_equations[node]) == 0
 
 
 def test_generate_lscm_from_mixed_graph():
@@ -198,12 +193,11 @@ def test_generate_lscm_from_mixed_graph():
         sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A")
         + sy.Symbol("epsilon_B")
         + sy.Symbol("gamma_A_<->B"),
-        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B")
-        + sy.Symbol("epsilon_C"),
+        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B") + sy.Symbol("epsilon_C"),
     }
     actual_equations = generate_lscm_from_mixed_graph(graph)
     for node in expected_equations:  # symbolic equality
-        assert sy.simplify(actual_equations[node] - expected_equations[node]) == 0  # noqa: S101
+        assert sy.simplify(actual_equations[node] - expected_equations[node]) == 0
 
 
 def test_get_symbols_from_bi_edges():
@@ -216,7 +210,7 @@ def test_get_symbols_from_bi_edges():
     }
     actual_symbols = get_symbols_from_bi_edges(graph)
     # print(type(list(actual_symbols.keys())[0][0]))
-    assert actual_symbols == expected_symbols  # noqa: S101
+    assert actual_symbols == expected_symbols
 
 
 def test_get_symbols_from_di_edges():
@@ -230,7 +224,7 @@ def test_get_symbols_from_di_edges():
     }
     actual_symbols = get_symbols_from_di_edges(graph)
     # print(type(list(actual_symbols.keys())[0][0]))
-    assert actual_symbols == expected_symbols  # noqa: S101
+    assert actual_symbols == expected_symbols
 
 
 def test_get_symbols_from_nodes():
@@ -244,7 +238,7 @@ def test_get_symbols_from_nodes():
         "C": sy.Symbol("epsilon_C"),
     }
     actual_symbols = get_symbols_from_nodes(graph)
-    assert actual_symbols == expected_symbols  # noqa: S101
+    assert actual_symbols == expected_symbols
 
 
 def test_evaluate_lscm():
@@ -258,9 +252,9 @@ def test_evaluate_lscm():
     beta_symbols = get_symbols_from_di_edges(graph)
     gamma_symbols = get_symbols_from_bi_edges(graph)
 
-    epsilon_values = {epsilon: 1.0 for epsilon in epsilon_symbols.values()}
-    beta_values = {beta: 1.0 for beta in beta_symbols.values()}
-    gamma_values = {gamma: 1.0 for gamma in gamma_symbols.values()}
+    epsilon_values = dict.fromkeys(epsilon_symbols.values(), 1.0)
+    beta_values = dict.fromkeys(beta_symbols.values(), 1.0)
+    gamma_values = dict.fromkeys(gamma_symbols.values(), 1.0)
 
     param_dict = {**epsilon_values, **beta_values, **gamma_values}
 
@@ -273,9 +267,9 @@ def test_evaluate_lscm():
     # Use a numerical tolerance for comparison
     tolerance = 1e-9
     for key in expected_symbols.keys():
-        assert (  # noqa: S101
-            abs(float(actual_symbols[key]) - float(expected_symbols[key])) < tolerance
-        ), f"Values for {key} are not equal within tolerance."  # noqa: S101
+        assert abs(float(actual_symbols[key]) - float(expected_symbols[key])) < tolerance, (
+            f"Values for {key} are not equal within tolerance."
+        )
 
 
 def test_convert_to_latex():
@@ -284,11 +278,9 @@ def test_convert_to_latex():
     edges = [("A", "B")]
     graph = NxMixedGraph.from_str_edges(directed=edges)
     lscm_dict = generate_lscm_from_mixed_graph(graph)
-    expected = (
-        r"$$A = \epsilon_{A}$$" + "\n " + r"$$B = A \beta_{A ->B} + \epsilon_{B}$$"
-    )
+    expected = r"$$A = \epsilon_{A}$$" + "\n " + r"$$B = A \beta_{A ->B} + \epsilon_{B}$$"
     actual = convert_to_latex(lscm_dict)
-    assert actual == expected  # noqa: S101
+    assert actual == expected
 
 
 def test_convert_to_eqn_array_latex():
@@ -299,12 +291,11 @@ def test_convert_to_eqn_array_latex():
     lscm_dict = generate_lscm_from_mixed_graph(graph)
     expected = r"$$ \begin{array}{rcl}A &=& \epsilon_{A}\\ B &=& A \beta_{A ->B} + \epsilon_{B}\end{array}$$"
     actual = convert_to_eqn_array_latex(lscm_dict)
-    assert actual == expected  # noqa: S101
+    assert actual == expected
 
 
 def test_create_lgbn_from_dag_simple():
     """Test create_lgbn_from_dag with a simple DAG."""
-
     # Simple DAG: A -> B
     dag = nx.DiGraph()
     dag.add_edge("A", "B")
@@ -327,7 +318,6 @@ def test_create_lgbn_from_dag_simple():
 
 def test_create_lgbn_from_dag_disconnected():
     """Test create_lgbn_from_dag with a disconnected DAG."""
-
     dag = nx.DiGraph()
     dag.add_nodes_from(["A", "B", "C"])
     model = create_lgbn_from_dag(dag)
@@ -349,7 +339,6 @@ def test_create_lgbn_from_dag_cycle_raises():
 
 def test_simulate_data_with_outliers_basic():
     """Test simulate_data_with_outliers returns correct shape and non-negative values."""
-
     # Simple DAG: A -> B
     dag = nx.DiGraph()
     dag.add_edge("A", "B")
@@ -383,7 +372,6 @@ def test_simulate_data_with_outliers_basic():
 
 def test_simulate_data_with_outliers_invalid_backend():
     """Test simulate_data_with_outliers raises ValueError for unsupported backend."""
-
     dag = nx.DiGraph()
     dag.add_edge("A", "B")
     try:
@@ -395,7 +383,6 @@ def test_simulate_data_with_outliers_invalid_backend():
 
 def test_simulate_data_with_outliers_type_check():
     """Test simulate_data_with_outliers raises AssertionError for wrong model type."""
-
     # Not a DiGraph
     not_a_dag = {"A": ["B"]}
     try:
@@ -417,9 +404,7 @@ def test_fit_model_pgmpy_basic():
         }
     )
 
-    model = fit_model(
-        LinearGaussianBayesianNetwork(dag), data, backend="pgmpy", method="mle"
-    )
+    model = fit_model(LinearGaussianBayesianNetwork(dag), data, backend="pgmpy")
     # Model should be a LinearGaussianBayesianNetwork
     assert isinstance(model, LinearGaussianBayesianNetwork)
     # Model should have the correct nodes and edges
@@ -475,12 +460,10 @@ def test_fit_model_invalid_backend():
 
 def test_compile_lgbn_from_lscm_simple():
     """Test compile_lgbn_from_lscm with a simple LSCM."""
-
     # LSCM for A -> B
     lscm = {
         sy.Symbol("A"): sy.Symbol("epsilon_A"),
-        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A")
-        + sy.Symbol("epsilon_B"),
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
     }
     model = compile_lgbn_from_lscm(lscm)
     assert isinstance(model, LinearGaussianBayesianNetwork)
@@ -491,7 +474,6 @@ def test_compile_lgbn_from_lscm_simple():
 
 def test_compile_lgbn_from_lscm_disconnected():
     """Test compile_lgbn_from_lscm with a disconnected LSCM."""
-
     lscm = {
         sy.Symbol("A"): sy.Symbol("epsilon_A"),
         sy.Symbol("B"): sy.Symbol("epsilon_B"),
@@ -508,10 +490,8 @@ def test_create_dag_from_lscm_simple():
     """Test create_dag_from_lscm with a simple LSCM (A -> B -> C)."""
     lscm = {
         sy.Symbol("A"): sy.Symbol("epsilon_A"),
-        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A")
-        + sy.Symbol("epsilon_B"),
-        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B")
-        + sy.Symbol("epsilon_C"),
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B"),
+        sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B") + sy.Symbol("epsilon_C"),
     }
     dag = create_dag_from_lscm(lscm)
     assert isinstance(dag, nx.DiGraph)
@@ -537,9 +517,7 @@ def test_create_dag_from_lscm_ignores_non_parent_terms():
     """Test create_dag_from_lscm ignores terms that are not parent multiplications."""
     lscm = {
         sy.Symbol("A"): sy.Symbol("epsilon_A") + 2,
-        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A")
-        + sy.Symbol("epsilon_B")
-        + 3,
+        sy.Symbol("B"): sy.Symbol("beta_A_->B") * sy.Symbol("A") + sy.Symbol("epsilon_B") + 3,
     }
     dag = create_dag_from_lscm(lscm)
     assert set(dag.nodes()) == {"A", "B"}
@@ -660,7 +638,6 @@ def test_create_lgbn_from_dag_cycle():
 
 def test_bootstrap_ATE_basic():
     """Test bootstrap_ATE returns correct observed ATE and confidence interval shape."""
-
     # Create simple control and intervention data
     data_control = pd.DataFrame({"Y": [1, 2, 3, 4, 5]})
     data_intervention = pd.DataFrame({"Y": [2, 3, 4, 5, 6]})
@@ -686,7 +663,6 @@ def test_bootstrap_ATE_basic():
 
 def test_bootstrap_ATE_zero_difference():
     """Test bootstrap_ATE when there is no difference between groups."""
-
     data_control = pd.DataFrame({"Y": [1, 2, 3, 4, 5]})
     data_intervention = pd.DataFrame({"Y": [1, 2, 3, 4, 5]})
 
@@ -704,7 +680,6 @@ def test_bootstrap_ATE_zero_difference():
 
 def test_bootstrap_ATE_handles_different_lengths():
     """Test bootstrap_ATE works with different sample sizes."""
-
     data_control = pd.DataFrame({"Y": [1, 2, 3]})
     data_intervention = pd.DataFrame({"Y": [10, 11, 12, 13, 14]})
 
@@ -723,7 +698,6 @@ def test_bootstrap_ATE_handles_different_lengths():
 
 def test_bootstrap_ATE_invalid_column_raises():
     """Test bootstrap_ATE raises KeyError if outcome_variable is missing."""
-
     data_control = pd.DataFrame({"Y": [1, 2, 3]})
     data_intervention = pd.DataFrame({"Z": [4, 5, 6]})
 
@@ -738,7 +712,6 @@ def test_bootstrap_ATE_invalid_column_raises():
 
 def test_bootstrap_ATE_empty_data():
     """Test bootstrap_ATE raises error on empty data."""
-
     data_control = pd.DataFrame({"Y": []})
     data_intervention = pd.DataFrame({"Y": []})
 

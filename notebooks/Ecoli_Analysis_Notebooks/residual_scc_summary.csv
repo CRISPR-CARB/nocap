@@ -1,0 +1,19 @@
+tf,scc_size,joint_identifiable,n_children,n_cyclic_children,n_acyclic_children,has_residual_cluster,n_residual_clusters,residual_cluster_sizes,max_cluster_size,n_children_in_clusters,min_cut,n_min_cut,cut_verified,tf_still_cyclic
+arcA,68,False,230,7,223,True,1,[7],7,7,['rpoD'],1,False,True
+argP,68,True,14,1,13,False,0,[],0,0,['phoB'],1,True,False
+argR,68,False,62,2,60,True,1,[2],2,2,"['arcA', 'rpoD']",2,False,True
+cpxR,68,True,121,7,114,True,2,"[2, 5]",5,7,"['rpoD', 'rpoS']",2,True,False
+cra,68,True,78,4,74,True,2,"[2, 2]",2,4,"['phoB', 'rpoH']",2,True,False
+crp,68,False,558,29,529,True,7,"[2, 2, 2, 2, 2, 2, 16]",16,28,"['cra', 'rpoD']",2,False,True
+fnr,68,False,319,4,315,True,1,[3],3,3,"['fur', 'ihfA', 'ihfB', 'rpoD']",4,False,True
+gadE,68,False,37,3,34,True,1,[3],3,3,"['arcA', 'crp', 'evgA', 'fliZ', 'hns', 'nac', 'phoP', 'rpoD', 'rpoS', 'torR', 'ydeO']",11,False,True
+glnG,68,True,48,2,46,True,1,[2],2,2,"['crp', 'fis', 'fur', 'rpoD', 'rpoN']",5,True,False
+hns,68,False,223,25,198,True,3,"[2, 2, 21]",21,25,"['fis', 'rpoD']",2,False,True
+lrp,68,False,360,9,351,True,1,[7],7,7,"['gadE', 'hns', 'rpoD']",3,False,True
+marA,3,False,55,2,53,True,1,[2],2,2,[],0,False,True
+marR,3,False,2,1,1,False,0,[],0,0,['rob'],1,False,True
+phoB,68,True,60,3,57,True,1,[3],3,3,"['nac', 'rpoD']",2,True,False
+rpoH,68,False,172,3,169,True,1,[2],2,2,"['cpxR', 'crp', 'cytR', 'dnaA', 'ihfA', 'ihfB', 'rpoE', 'rpoN', 'rpoS', 'zraR']",10,False,True
+rpoS,68,False,328,16,312,True,2,"[2, 14]",14,16,"['arcA', 'crp', 'dksA', 'fur', 'mqsA', 'rpoD', 'torR']",7,False,True
+torR,68,True,20,3,17,True,1,[3],3,3,['rpoD'],1,True,False
+uxuR,2,False,10,1,9,False,0,[],0,0,[],0,False,True

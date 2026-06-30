@@ -1,0 +1,21 @@
+{
+  "tf": "marR",
+  "min_cut": [
+    "rob"
+  ],
+  "scc_size": 3,
+  "in_scc_children": [
+    "marA"
+  ],
+  "n_children": 2,
+  "outcomes": [
+    "marA",
+    "marB"
+  ],
+  "joint_identifiable": false,
+  "per_gene": {
+    "marA": false,
+    "marB": false
+  },
+  "note": ""
+}

@@ -1,15 +1,248 @@
 # See https://setuptools.readthedocs.io/en/latest/build_meta.html
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.black]
+[tool.uv]
+package = true
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
 line-length = 100
-target-version = ["py310", "py311"]
+extend-include = ["*.ipynb"]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 100
-include_trailing_comma = true
-reverse_relative = true
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules
+extend-select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "C90", # mccabe
+    "I",   # isort
+    "UP",  # pyupgrade
+    "D",   # pydocstyle
+    "B",   # bugbear
+    "S",   # bandit
+    "T20", # print
+    "N",   # pep8 naming
+    "RUF", # ruff rules
+    "C4",  # comprehensions
+]
+ignore = [
+    "D105", # Missing docstring in magic method
+    "E203", # Black conflicts with the following
+    "E501",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/nocap/version.py" = ["S603", "S607"]
+# scc_perturb.py and cyclic_single_door.py use assert-based axiomander contracts
+# (PRE/POST) and intentional en-dash separators in Returns dict documentation.
+"src/nocap/scc_perturb.py" = ["S101", "RUF002"]
+"src/nocap/cyclic_single_door.py" = ["S101", "RUF002", "D301"]
+"docs/source/conf.py" = ["ERA001", "D100", "F821"]
+"notebooks/**" = [
+    "T201",  # print
+    "S101",  # assert
+    "N811", "N802", "N803", "N806", "N807", "N816",  # naming
+    "E402",  # imports not at top
+    "E712",  # comparison to True/False
+    "E722",  # bare except
+    "W291", "W293",  # trailing whitespace
+    "D100", "D101", "D102", "D103", "D205", "D400", "D401",  # docstrings
+    "B007",  # loop variable not used
+    "B018",  # useless expression
+    "B905",  # zip without strict= (notebook zip calls are exploratory)
+    "C408",  # unnecessary dict()
+    "C401",  # unnecessary generator
+    "S311",  # random not for crypto
+    "S112",  # try-except-continue
+    "RUF001", "RUF015",  # ruff style
+    "F811",  # redefinition of unused name
+    "F841",  # local variable assigned but never used
+    "B006",  # mutable default argument
+    "C414",  # unnecessary list() within sorted()
+    "C901",  # function too complex
+]
+# Tests: allow assert statements, uppercase CPD variable names, missing docstrings,
+# bare except-pass patterns, assert False idiom, and dict() constructor
+"tests/**/*.py" = ["S101", "N806", "N802", "N803", "D101", "D102", "D103", "D205", "D400", "B011", "B007", "S110", "C408", "C414", "RUF005", "RUF059", "S108"]
+# Scripts: dev/analysis scripts — allow print, top-level imports after code,
+# assert, security-adjacent patterns, naming conventions, and comprehension style
+"scripts/**/*.py" = [
+    "T201",  # print statements are intentional in CLI scripts
+    "E402",  # module-level imports not at top (sys.path manipulation)
+    "S101",  # assert in scripts
+    "S311",  # random not for crypto
+    "S112",  # try-except-continue
+    "B007",  # loop variable not used
+    "B905",  # zip without strict
+    "N806",  # variable in function should be lowercase
+    "N807",  # function name should not start with get
+    "N816",  # mixed-case variable in global scope
+    "N817",  # CamelCase imported as acronym
+    "N803",  # argument name should be lowercase
+    "C408",  # unnecessary dict() call
+    "C401",  # unnecessary generator
+    "C901",  # complex function
+    "RUF001", # ambiguous unicode
+    "RUF015", # prefer next()
+    "RUF059", # unpacked variable not used
+    "E712",  # comparison to True/False
+    "E722",  # bare except
+    "W291",  # trailing whitespace (handled by formatter)
+    "W293",  # whitespace before comment
+    "F811",  # redefinition of unused name
+    "F841",  # local variable assigned but never used
+    "D100",  # missing docstring in public module
+    "D103",  # missing docstring in public function
+    "D401",  # first line should be in imperative mood
+    "D400",  # first line should end with period
+    "D205",  # 1 blank line required between summary and description
+    "D301",  # use r""" for backslashes in docstrings (CLI usage examples)
+    "D414",  # section has no content (note sections in module docstrings)
+    "S603",  # subprocess call with untrusted input (intentional in CLI scripts)
+    "S110",  # try-except-pass (intentional fallback patterns)
+]
+"notebooks/**/*.ipynb" = [
+    "E701",  # multiple statements on one line (colon) — common in notebook one-liners
+    "E702",  # multiple statements on one line (semicolon) — common in notebook one-liners
+    "S603",  # subprocess call with untrusted input (intentional in notebook cells)
+    "S607",  # starting a process with a partial executable path (intentional in notebooks)
+    "RUF003", # ambiguous unicode in comments (e.g. × in axis labels)
+    "RUF046", # unnecessary int() cast (cosmetic in notebook lambdas)
+    "RUF059", # unpacked variable not used (fig, ax = plt.subplots() pattern)
+    "T201",  # print statements are intentional in notebooks
+    "E402",  # module-level imports not at top
+    "S101",  # assert in notebooks
+    "D100",  # missing docstring in public module
+    "D103",  # missing docstring in public function
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.isort]
+relative-imports-order = "closest-to-furthest"
+known-third-party = ["tqdm"]
+known-first-party = ["nocap", "tests"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[project]
+name = "nocap"
+version = "0.1.0"
+description = "Network Optimization and Causal Analysis of Petrurb-seq"
+authors = [
+    {name = "August George", email = "30163079+augeorge@users.noreply.github.com"},
+    {name = "August George", email = "august.george@pnnl.gov"},
+]
+dependencies = [
+    "click",
+    "jupyter",
+    "more_click",
+    "more_itertools",
+    "networkx",
+    "numpy",
+    "pandas",
+    "pgmpy",
+    "plotly",
+    "pydot==2.0.0",
+    "seaborn",
+    "semopy>=2.3.11",
+    "sympy",
+    "torch",
+    "tqdm",
+    "y0 @ git+https://github.com/y0-causal-inference/y0.git@402-add-%CF%83-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["snekpack", "cookiecutter"]
+maintainers = [
+    {name = "August George", email = "august.george@pnnl.gov"},
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Environment :: Console",
+    "Framework :: Pytest",
+    "Framework :: Sphinx",
+    "Framework :: tox",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/crispr-carb/nocap"
+Downloads = "https://github.com/crispr-carb/nocap/releases"
+Tracker = "https://github.com/crispr-carb/nocap/issues"
+Source = "https://github.com/crispr-carb/nocap"
+Documentation = "https://nocap.readthedocs.io"
+
+[project.optional-dependencies]
+tests = [
+    "coverage",
+    "hypothesis",
+    "pytest",
+]
+docs = [
+    "sphinx",
+    "sphinx-click",
+    "sphinx-rtd-theme",
+    "sphinx_automodapi",
+]
+# Snakemake workflow dependencies (scatter-gather SLURM pipeline).
+# Install with: pip install "nocap[workflow]"
+# or:           uv pip install "nocap[workflow]"
+workflow = [
+    "snakemake>=8.0",
+    "snakemake-executor-plugin-slurm>=0.5",
+]
+
+[project.scripts]
+nocap = "nocap.cli:main"
+
+[dependency-groups]
+dev = [
+    "docstr-coverage>=2.3.2",
+    "tox-uv>=1.25",
+]
+
+##########################
+# Coverage Configuration #
+##########################
+[tool.coverage.run]
+branch = true
+source = ["nocap"]
+omit = ["tests/*", "docs/*"]
+
+[tool.coverage.paths]
+source = [
+    "src/nocap",
+    ".tox/*/lib/python*/site-packages/nocap",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "def __str__",
+    "def __repr__",
+]
+
+######################
+# Doc8 Configuration #
+######################
+[tool.doc8]
+max-line-length = 120

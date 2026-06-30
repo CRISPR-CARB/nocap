@@ -1,0 +1,11 @@
+set_index,genes,n_genes,proxy_recovered_new,proxy_covered_cumulative
+1,"[""fliZ"", ""fur"", ""rpoH""]",3,28,28
+2,"[""gadW"", ""hns"", ""rpoD""]",3,13,41
+3,"[""arcA"", ""cpxR"", ""fis""]",3,4,45
+4,"[""cra"", ""crp"", ""rpoN""]",3,4,49
+5,"[""csrA"", ""dksA"", ""evgA""]",3,3,52
+6,"[""fnr"", ""gadE"", ""gadX""]",3,5,57
+7,"[""glnG"", ""ihfA"", ""ihfB""]",3,3,60
+8,"[""fliZ"", ""lrp"", ""nac""]",3,3,63
+9,"[""phoB"", ""rob"", ""rpoE""]",3,3,66
+10,"[""acrR"", ""adiY"", ""rpoS""]",3,1,67

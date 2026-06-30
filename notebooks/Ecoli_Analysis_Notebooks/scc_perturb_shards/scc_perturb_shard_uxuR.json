@@ -1,0 +1,35 @@
+{
+  "tf": "uxuR",
+  "min_cut": [],
+  "scc_size": 2,
+  "in_scc_children": [
+    "exuR"
+  ],
+  "n_children": 10,
+  "outcomes": [
+    "exuR",
+    "fliC",
+    "gntP",
+    "lgoD",
+    "lgoR",
+    "uidA",
+    "uidB",
+    "uidC",
+    "uxuA",
+    "uxuB"
+  ],
+  "joint_identifiable": false,
+  "per_gene": {
+    "exuR": false,
+    "fliC": true,
+    "gntP": true,
+    "lgoD": false,
+    "lgoR": false,
+    "uidA": true,
+    "uidB": true,
+    "uidC": true,
+    "uxuA": false,
+    "uxuB": false
+  },
+  "note": ""
+}

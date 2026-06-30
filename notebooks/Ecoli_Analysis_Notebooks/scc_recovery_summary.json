@@ -1,0 +1,182 @@
+{
+  "n10_k3": {
+    "n": 10,
+    "k": 3,
+    "n_total_tfs": 285,
+    "n_identifiable_baseline": 190,
+    "n_unidentifiable_baseline": 95,
+    "n_recovered": 67,
+    "n_still_unrecovered": 28,
+    "pct_recovered_of_unidentifiable": 70.53,
+    "pct_identifiable_after_recovery": 90.18,
+    "marginal_curve": [
+      28,
+      13,
+      4,
+      4,
+      3,
+      5,
+      3,
+      3,
+      3,
+      1
+    ],
+    "chosen_sets": [
+      {
+        "set_index": 1,
+        "genes": [
+          "fliZ",
+          "fur",
+          "rpoH"
+        ]
+      },
+      {
+        "set_index": 2,
+        "genes": [
+          "gadW",
+          "hns",
+          "rpoD"
+        ]
+      },
+      {
+        "set_index": 3,
+        "genes": [
+          "arcA",
+          "cpxR",
+          "fis"
+        ]
+      },
+      {
+        "set_index": 4,
+        "genes": [
+          "cra",
+          "crp",
+          "rpoN"
+        ]
+      },
+      {
+        "set_index": 5,
+        "genes": [
+          "csrA",
+          "dksA",
+          "evgA"
+        ]
+      },
+      {
+        "set_index": 6,
+        "genes": [
+          "fnr",
+          "gadE",
+          "gadX"
+        ]
+      },
+      {
+        "set_index": 7,
+        "genes": [
+          "glnG",
+          "ihfA",
+          "ihfB"
+        ]
+      },
+      {
+        "set_index": 8,
+        "genes": [
+          "fliZ",
+          "lrp",
+          "nac"
+        ]
+      },
+      {
+        "set_index": 9,
+        "genes": [
+          "phoB",
+          "rob",
+          "rpoE"
+        ]
+      },
+      {
+        "set_index": 10,
+        "genes": [
+          "acrR",
+          "adiY",
+          "rpoS"
+        ]
+      }
+    ]
+  },
+  "n5_k6": {
+    "n": 5,
+    "k": 6,
+    "n_total_tfs": 285,
+    "n_identifiable_baseline": 190,
+    "n_unidentifiable_baseline": 95,
+    "n_recovered": 67,
+    "n_still_unrecovered": 28,
+    "pct_recovered_of_unidentifiable": 70.53,
+    "pct_identifiable_after_recovery": 90.18,
+    "marginal_curve": [
+      42,
+      9,
+      8,
+      6,
+      2
+    ],
+    "chosen_sets": [
+      {
+        "set_index": 1,
+        "genes": [
+          "fliZ",
+          "fur",
+          "gadW",
+          "hns",
+          "rpoD",
+          "rpoH"
+        ]
+      },
+      {
+        "set_index": 2,
+        "genes": [
+          "arcA",
+          "cpxR",
+          "cra",
+          "fis",
+          "lrp",
+          "rpoD"
+        ]
+      },
+      {
+        "set_index": 3,
+        "genes": [
+          "csrA",
+          "evgA",
+          "fnr",
+          "gadE",
+          "gadX",
+          "glnG"
+        ]
+      },
+      {
+        "set_index": 4,
+        "genes": [
+          "ihfA",
+          "ihfB",
+          "nac",
+          "phoB",
+          "rob",
+          "rpoE"
+        ]
+      },
+      {
+        "set_index": 5,
+        "genes": [
+          "acrR",
+          "adiY",
+          "arcA",
+          "argP",
+          "rpoN",
+          "rpoS"
+        ]
+      }
+    ]
+  }
+}

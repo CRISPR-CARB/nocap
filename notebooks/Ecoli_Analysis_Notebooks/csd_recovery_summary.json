@@ -1,0 +1,188 @@
+{
+  "n10_k3": {
+    "n": 10,
+    "k": 3,
+    "n_total_unidentifiable": 6676,
+    "n_same_scc": 519,
+    "n_not_same_scc": 6157,
+    "n_universe": 9211,
+    "n_recovered_exact": 6502,
+    "pct_recovered_of_unident": 97.39,
+    "pct_recovered_of_same_scc": 66.47,
+    "pct_recovered_of_universe": 70.59,
+    "proxy_total": 6499,
+    "proxy_vs_exact_gap": -3,
+    "marginal_curve_exact": [
+      6418,
+      35,
+      24,
+      12,
+      8,
+      0,
+      0,
+      0,
+      2,
+      3
+    ],
+    "chosen_sets": [
+      {
+        "set_index": 1,
+        "genes": [
+          "gadE",
+          "gadX",
+          "rpoD"
+        ]
+      },
+      {
+        "set_index": 2,
+        "genes": [
+          "fliZ",
+          "fur",
+          "rpoH"
+        ]
+      },
+      {
+        "set_index": 3,
+        "genes": [
+          "fis",
+          "nac",
+          "rpoE"
+        ]
+      },
+      {
+        "set_index": 4,
+        "genes": [
+          "hns",
+          "marA",
+          "rpoS"
+        ]
+      },
+      {
+        "set_index": 5,
+        "genes": [
+          "argR",
+          "dksA",
+          "fnr"
+        ]
+      },
+      {
+        "set_index": 6,
+        "genes": [
+          "accA",
+          "bglJ",
+          "cra"
+        ]
+      },
+      {
+        "set_index": 7,
+        "genes": [
+          "dinJ",
+          "exuR",
+          "galR"
+        ]
+      },
+      {
+        "set_index": 8,
+        "genes": [
+          "gutM",
+          "higA",
+          "hipA"
+        ]
+      },
+      {
+        "set_index": 9,
+        "genes": [
+          "ihfA",
+          "mazE",
+          "relB"
+        ]
+      },
+      {
+        "set_index": 10,
+        "genes": [
+          "rhaR",
+          "rpoN",
+          "rpsF"
+        ]
+      }
+    ]
+  },
+  "n5_k6": {
+    "n": 5,
+    "k": 6,
+    "n_total_unidentifiable": 6676,
+    "n_same_scc": 519,
+    "n_not_same_scc": 6157,
+    "n_universe": 9211,
+    "n_recovered_exact": 6502,
+    "pct_recovered_of_unident": 97.39,
+    "pct_recovered_of_same_scc": 66.47,
+    "pct_recovered_of_universe": 70.59,
+    "proxy_total": 6502,
+    "proxy_vs_exact_gap": 0,
+    "marginal_curve_exact": [
+      6483,
+      17,
+      0,
+      0,
+      2
+    ],
+    "chosen_sets": [
+      {
+        "set_index": 1,
+        "genes": [
+          "crp",
+          "fliZ",
+          "fur",
+          "gadE",
+          "gadX",
+          "rpoD"
+        ]
+      },
+      {
+        "set_index": 2,
+        "genes": [
+          "fnr",
+          "hns",
+          "ihfA",
+          "lrp",
+          "marA",
+          "rpoE"
+        ]
+      },
+      {
+        "set_index": 3,
+        "genes": [
+          "accA",
+          "bglJ",
+          "dinJ",
+          "exuR",
+          "galR",
+          "glnG"
+        ]
+      },
+      {
+        "set_index": 4,
+        "genes": [
+          "gutM",
+          "higA",
+          "hipA",
+          "mazE",
+          "relB",
+          "rhaR"
+        ]
+      },
+      {
+        "set_index": 5,
+        "genes": [
+          "accA",
+          "accD",
+          "nac",
+          "rpoS",
+          "rpsF",
+          "yefM"
+        ]
+      }
+    ]
+  }
+}

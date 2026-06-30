@@ -1,0 +1,27 @@
+{
+  "n_unidentifiable_edges": 330,
+  "k_budget": 3,
+  "n_no_intervention_needed": 148,
+  "n_needs_intervention": 182,
+  "n_rescuable_within_k": 215,
+  "n_not_rescuable_within_k": 115,
+  "pct_rescuable": 65.15,
+  "break_size_distribution": {
+    "1": 49,
+    "0": 253,
+    "5": 4,
+    "2": 15,
+    "4": 6,
+    "3": 3
+  },
+  "nonident_cause_distribution": {
+    "self_loop": 174,
+    "two_cycle": 35,
+    "cross_scc_blocked": 99,
+    "same_scc_long": 3,
+    "scc_edge_dissolved": 19
+  },
+  "n_cut_verified": 151,
+  "n_cut_not_verified": 179,
+  "n_shards_loaded": 320
+}

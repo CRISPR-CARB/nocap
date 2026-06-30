@@ -1,0 +1,24 @@
+# workflow/config.yaml — configuration for the cyclic single-door Snakemake workflow
+#
+# Override any key on the command line:
+#   snakemake --config graphml=path/to/graph.graphml shard_size=200
+
+# --- Required ---
+# Path to the input GraphML file (directed causal graph)
+graphml: "notebooks/Ecoli_Analysis_Notebooks/ecoli_full_network_no_small_rna.graphml"
+
+# --- Optional ---
+# Path to supplementary table CSV (used for metadata join in gather step)
+supptable: "notebooks/Ecoli_Analysis_Notebooks/supptable1.csv"
+
+# Number of shards (scatter granularity) = number of free SLURM nodes at submission time.
+# Each shard becomes one classify job.  Set to ceil(n_edges / n_shards) edges per shard.
+# Reduced from 179→50 for the fast O-set rerun (fewer larger jobs, less SLURM overhead).
+# Override on the command line if more parallelism is available: --config n_shards=179
+n_shards: 50
+
+# Greedy rescue budget: max number of hard interventions to try
+k: 10
+
+# Output directory for all results
+outdir: "results/cyclic_single_door"

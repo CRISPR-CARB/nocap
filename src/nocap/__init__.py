@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Network Optimization and Causal Analysis of Perturb-seq."""
 
 from .api import *  # noqa
@@ -37,8 +35,8 @@ __all__ = [
     "dagitty_to_digraph",
     "dagitty_to_dot",
     "dagitty_to_mixed_graph",
-    "evaluate_lscm",
     "estimate_ate",
+    "evaluate_lscm",
     "fit_model",
     "generate_lscm_from_dag",
     "generate_lscm_from_mixed_graph",
