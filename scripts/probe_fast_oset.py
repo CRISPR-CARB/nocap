@@ -7,13 +7,14 @@ Checks two things:
 
 Exit code 0 = both PASS; exit code 1 = at least one FAIL.
 """
+
 from __future__ import annotations
 
 import inspect
+import re
+import shutil
 import subprocess
 import sys
-import re
-
 
 # ---------------------------------------------------------------------------
 # Check 1: locked commit == remote 402 branch tip
@@ -22,11 +23,12 @@ import re
 BRANCH = "402-add-\u03c3-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs"
 REMOTE_URL = "https://github.com/y0-causal-inference/y0.git"
 
+
 def get_remote_tip() -> str | None:
     """Fetch the remote branch tip via git ls-remote (no clone needed)."""
     try:
         result = subprocess.run(
-            ["git", "ls-remote", REMOTE_URL, f"refs/heads/{BRANCH}"],
+            [shutil.which("git") or "git", "ls-remote", REMOTE_URL, f"refs/heads/{BRANCH}"],
             capture_output=True,
             text=True,
             timeout=30,
@@ -60,9 +62,9 @@ def get_locked_commit() -> str | None:
     # Find the [[package]] block for y0 and extract the commit hash after '#'
     # in the git source URL.
     pattern = re.compile(
-        r'^name\s*=\s*"y0"\s*\n'          # name = "y0" line
-        r'.*?'                              # anything (version, etc.)
-        r'source\s*=\s*\{[^}]*y0\.git[^}]*#([0-9a-f]{40})',
+        r'^name\s*=\s*"y0"\s*\n'  # name = "y0" line
+        r".*?"  # anything (version, etc.)
+        r"source\s*=\s*\{[^}]*y0\.git[^}]*#([0-9a-f]{40})",
         re.MULTILINE | re.DOTALL,
     )
     m = pattern.search(content)
@@ -75,10 +77,12 @@ def get_locked_commit() -> str | None:
 # Check 2: all_simple_paths absent from find_sigma_single_door_set
 # ---------------------------------------------------------------------------
 
+
 def check_no_all_simple_paths() -> bool:
     """Return True if find_sigma_single_door_set does NOT use all_simple_paths."""
     try:
         from y0.algorithm.separation.sigma_single_door import find_sigma_single_door_set
+
         src = inspect.getsource(find_sigma_single_door_set)
         return "all_simple_paths" not in src
     except Exception as exc:
@@ -90,6 +94,7 @@ def check_no_all_simple_paths() -> bool:
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main() -> int:
     all_pass = True
 
@@ -99,15 +104,19 @@ def main() -> int:
     locked = get_locked_commit()
 
     if remote_tip is None:
-        print("  WARNING: could not determine remote tip (network unavailable?) — skipping commit check")
+        print(
+            "  WARNING: could not determine remote tip (network unavailable?) — skipping commit check"
+        )
     elif locked is None:
-        print("  FAIL: could not find y0 commit in uv.lock — run 'uv lock --upgrade-package y0' first")
+        print(
+            "  FAIL: could not find y0 commit in uv.lock — run 'uv lock --upgrade-package y0' first"
+        )
         all_pass = False
     elif remote_tip == locked:
         print(f"  PASS: locked commit {locked[:12]} == remote tip {remote_tip[:12]}")
     else:
         print(f"  FAIL: locked commit {locked[:12]} != remote tip {remote_tip[:12]}")
-        print(f"        Run: uv lock --upgrade-package y0 && uv sync")
+        print("        Run: uv lock --upgrade-package y0 && uv sync")
         all_pass = False
 
     # --- Check 2: no all_simple_paths ---

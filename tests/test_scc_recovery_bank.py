@@ -24,29 +24,29 @@ import pytest
 SCRIPTS_DIR = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-import scc_recovery_bank as srb
-
+import scc_recovery_bank as srb  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Tiny test graphs
 # ---------------------------------------------------------------------------
 
+
 def _chain_graph() -> nx.DiGraph:
-    """A -> B -> C (pure DAG, no cycles). All are singleton SCCs."""
+    """Build A -> B -> C (pure DAG, no cycles). All are singleton SCCs."""
     G = nx.DiGraph()
     G.add_edges_from([("A", "B"), ("B", "C")])
     return G
 
 
 def _triangle_graph() -> nx.DiGraph:
-    """A -> B -> C -> A (one 3-cycle). Plus D -> E outside."""
+    """Build A -> B -> C -> A (one 3-cycle). Plus D -> E outside."""
     G = nx.DiGraph()
     G.add_edges_from([("A", "B"), ("B", "C"), ("C", "A"), ("D", "E")])
     return G
 
 
 def _two_cycle_graph() -> nx.DiGraph:
-    """A <-> B (2-cycle). Plus C -> D (acyclic)."""
+    """Build A <-> B (2-cycle). Plus C -> D (acyclic)."""
     G = nx.DiGraph()
     G.add_edges_from([("A", "B"), ("B", "A"), ("C", "D")])
     return G
@@ -72,6 +72,7 @@ def _larger_cyclic_graph() -> nx.DiGraph:
 # ---------------------------------------------------------------------------
 # Tests: _enumerate_tfs
 # ---------------------------------------------------------------------------
+
 
 class TestEnumerateTfs:
     def test_chain_graph(self):
@@ -107,6 +108,7 @@ class TestEnumerateTfs:
 # ---------------------------------------------------------------------------
 # Tests: _classify_tfs
 # ---------------------------------------------------------------------------
+
 
 class TestClassifyTfs:
     def test_chain_all_identifiable(self):
@@ -147,6 +149,7 @@ class TestClassifyTfs:
 # Tests: _build_do_scc_info
 # ---------------------------------------------------------------------------
 
+
 class TestBuildDoSccInfo:
     def test_empty_perturbation_triangle(self):
         G = _triangle_graph()
@@ -173,7 +176,7 @@ class TestBuildDoSccInfo:
     def test_requires_frozenset(self):
         G = _triangle_graph()
         with pytest.raises(AssertionError, match="PRE"):
-            srb._build_do_scc_info(G, set(["A"]))
+            srb._build_do_scc_info(G, {"A"})
 
     def test_two_cycle_broken_by_one_gene(self):
         G = _two_cycle_graph()
@@ -188,6 +191,7 @@ class TestBuildDoSccInfo:
 # ---------------------------------------------------------------------------
 # Tests: _is_singleton_scc
 # ---------------------------------------------------------------------------
+
 
 class TestIsSingletonScc:
     def test_singleton_returns_true(self):
@@ -209,6 +213,7 @@ class TestIsSingletonScc:
 # ---------------------------------------------------------------------------
 # Tests: _build_candidate_pool
 # ---------------------------------------------------------------------------
+
 
 class TestBuildCandidatePool:
     def test_triangle_pool_non_empty(self):
@@ -239,6 +244,7 @@ class TestBuildCandidatePool:
 # ---------------------------------------------------------------------------
 # Tests: _greedy_bank
 # ---------------------------------------------------------------------------
+
 
 class TestGreedyBank:
     def _simple_setup(self):
@@ -314,6 +320,7 @@ class TestGreedyBank:
 # Tests: _score_per_tf
 # ---------------------------------------------------------------------------
 
+
 class TestScorePerTf:
     def test_recovered_count_matches_bank(self):
         G = _triangle_graph()
@@ -353,8 +360,14 @@ class TestScorePerTf:
 
     def test_precondition_empty_targets(self):
         G = _triangle_graph()
-        bank = [{"set_index": 1, "genes": ["C"], "proxy_recovered_new": 1,
-                 "proxy_covered_cumulative": 1}]
+        bank = [
+            {
+                "set_index": 1,
+                "genes": ["C"],
+                "proxy_recovered_new": 1,
+                "proxy_covered_cumulative": 1,
+            }
+        ]
         with pytest.raises(AssertionError, match="PRE"):
             srb._score_per_tf([], bank, G)
 
@@ -362,6 +375,7 @@ class TestScorePerTf:
 # ---------------------------------------------------------------------------
 # Integration test: two-SCC graph
 # ---------------------------------------------------------------------------
+
 
 class TestIntegration:
     def test_larger_cyclic_bank(self):
@@ -373,7 +387,7 @@ class TestIntegration:
         G = _larger_cyclic_graph()
         tfs = srb._enumerate_tfs(G)
         id_, unid = srb._classify_tfs(G, tfs)
-        assert "D" in id_   # D->E, singleton
+        assert "D" in id_  # D->E, singleton
         assert "A" in unid
         assert "X" in unid
 

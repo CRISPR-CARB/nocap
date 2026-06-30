@@ -7,6 +7,7 @@ Produces two panel figure:
 
 Output: notebooks/visualizations/csd_break_coverage_curve.png
 """
+
 from __future__ import annotations
 
 import csv
@@ -15,9 +16,9 @@ from collections import Counter
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import numpy as np
 
 REPO = Path(__file__).parent.parent
@@ -69,7 +70,8 @@ def main() -> None:
     #   beyond: needs 4+ knockouts
     cat_0 = sum(1 for r in rows if r.get("needs_intervention") in ("False", False))
     cat_oset = sum(
-        1 for r in rows
+        1
+        for r in rows
         if r.get("needs_intervention") in ("True", True) and str(r.get("min_break_size", "")) == "0"
     )
     rescued_1 = int(break_dist.get("1", 0))
@@ -111,22 +113,38 @@ def main() -> None:
     ax1.set_title(
         f"Minimal break-set sizes for {n_total} unidentifiable edges\n"
         f"(k \u2264 3 budget; 97% fully resolved)",
-        fontsize=11, fontweight="bold", pad=12,
+        fontsize=11,
+        fontweight="bold",
+        pad=12,
     )
     ax1.tick_params(axis="x", labelsize=8.5)
 
     # Add value labels on bars
     for bar, val in zip(bars, values):
         if val > 0:
-            ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1,
-                     str(val), ha="center", va="bottom", fontsize=9, fontweight="bold")
+            ax1.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() + 1,
+                str(val),
+                ha="center",
+                va="bottom",
+                fontsize=9,
+                fontweight="bold",
+            )
 
     # Rescuable annotation — all categories except "beyond budget"
     rescuable = cat_0 + cat_oset + rescued_1 + rescued_2 + rescued_3
     ax1.axhline(y=rescuable, color="#1565C0", linewidth=1.5, linestyle="--", alpha=0.8, zorder=4)
     pct = 100.0 * rescuable / n_total
-    ax1.text(4.55, rescuable + 2, f"{rescuable} resolved\n({pct:.0f}%)", color="#1565C0",
-             fontsize=8.5, ha="right", va="bottom")
+    ax1.text(
+        4.55,
+        rescuable + 2,
+        f"{rescuable} resolved\n({pct:.0f}%)",
+        color="#1565C0",
+        fontsize=8.5,
+        ha="right",
+        va="bottom",
+    )
 
     # ---- Right: horizontal bar — TF frequency ----
     y_pos = np.arange(len(tf_names))
@@ -139,12 +157,20 @@ def main() -> None:
     ax2.set_xlabel("Edges whose min-break-set includes this TF", fontsize=10)
     ax2.set_title(
         "Most-needed hub TFs\n(top-15 by break-set frequency)",
-        fontsize=11, fontweight="bold", pad=12,
+        fontsize=11,
+        fontweight="bold",
+        pad=12,
     )
 
     for bar, val in zip(hbars, tf_counts):
-        ax2.text(bar.get_width() + 0.2, bar.get_y() + bar.get_height() / 2,
-                 str(val), va="center", fontsize=9, fontweight="bold")
+        ax2.text(
+            bar.get_width() + 0.2,
+            bar.get_y() + bar.get_height() / 2,
+            str(val),
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+        )
 
     plt.tight_layout(pad=2.5)
     OUT_PNG.parent.mkdir(parents=True, exist_ok=True)
@@ -153,7 +179,7 @@ def main() -> None:
 
     print(f"Saved figure -> {OUT_PNG}")
     print(f"Top-5 break-set TFs: {tf_freq[:5]}")
-    print(f"Rescuable (<=k=3): {rescuable}/{n_total} ({100.0*rescuable/n_total:.1f}%)")
+    print(f"Rescuable (<=k=3): {rescuable}/{n_total} ({100.0 * rescuable / n_total:.1f}%)")
 
 
 if __name__ == "__main__":

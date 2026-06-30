@@ -25,9 +25,10 @@ def main() -> None:
     args = ap.parse_args()
 
     t0 = time.perf_counter()
-    import networkx as nx  # noqa: F401
+    import networkx as nx
 
     from nocap.cyclic_single_door import classify_edge, evaluate_all_edges  # noqa: F401
+
     t_import = time.perf_counter() - t0
     print(f"import_time_s: {t_import:.3f}")
 

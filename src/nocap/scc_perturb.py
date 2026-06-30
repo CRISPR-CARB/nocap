@@ -432,7 +432,8 @@ def verify_cut_complete(
     min_cut: list,
     graph: nx.DiGraph,
 ) -> dict:
-    """
+    """Verify that ``do(B(t))`` severs **every** return path from any in-SCC child of *tf* back to *tf*.
+
     Verify that ``do(B(t))`` severs **every** return path from any in-SCC child
     of *tf* back to *tf*.
 
@@ -510,15 +511,11 @@ def verify_cut_complete(
     }
 
     # --- POST ---
-    assert result["complete"] == (len(result["surviving_children"]) == 0), (
+    assert result["complete"] == (len(result["surviving_children"]) == 0), (  # type: ignore[arg-type]
         "POST: complete must equal (no surviving children)"
     )
-    assert isinstance(result["tf_still_cyclic"], bool), (
-        "POST: tf_still_cyclic must be bool"
-    )
-    assert isinstance(result["complete"], bool), (
-        "POST: complete must be bool"
-    )
+    assert isinstance(result["tf_still_cyclic"], bool), "POST: tf_still_cyclic must be bool"
+    assert isinstance(result["complete"], bool), "POST: complete must be bool"
     return result
 
 
@@ -532,7 +529,9 @@ def min_scc_break_set(
     effect: str,
     graph: nx.DiGraph,
 ) -> dict:
-    """Compute the minimum vertex-intervention set B that makes cause->effect
+    """Compute the minimum vertex-intervention set B that makes cause->effect single-door identifiable.
+
+    Compute the minimum vertex-intervention set B that makes cause->effect
     single-door identifiable by breaking the residual SCC.
 
     The single-door criterion applied to edge cause->effect:
@@ -587,9 +586,7 @@ def min_scc_break_set(
     assert isinstance(cause, str) and isinstance(effect, str), (
         "PRE: cause and effect must be strings"
     )
-    assert graph.has_edge(cause, effect), (
-        f"PRE: edge {cause!r}->{effect!r} must exist in graph"
-    )
+    assert graph.has_edge(cause, effect), f"PRE: edge {cause!r}->{effect!r} must exist in graph"
 
     # Step 1: G' = G - {cause->effect}
     g_prime = graph.copy()
@@ -615,8 +612,8 @@ def min_scc_break_set(
             "cut_verified": True,  # trivially: already separated
         }
         # --- POST ---
-        assert cause not in result["break_set"], "POST: cause not in break_set"
-        assert effect not in result["break_set"], "POST: effect not in break_set"
+        assert cause not in result["break_set"], "POST: cause not in break_set"  # type: ignore[operator]
+        assert effect not in result["break_set"], "POST: effect not in break_set"  # type: ignore[operator]
         assert result["break_size"] == 0, "POST: break_size must be 0 when not needed"
         return result
 
@@ -627,8 +624,7 @@ def min_scc_break_set(
 
     # In-SCC successors of effect (start of all return paths)
     effect_in_scc_succs = [
-        n for n in g_prime.successors(effect)
-        if n in shared_scc_nodes and n != effect
+        n for n in g_prime.successors(effect) if n in shared_scc_nodes and n != effect
     ]
 
     break_set_nodes: set[str] = set()
@@ -648,10 +644,7 @@ def min_scc_break_set(
             # Guard: forbidden nodes must not appear in the cut
             if cut_nodes & forbidden:
                 # Fallback: all in-SCC predecessors of cause except forbidden
-                cut_nodes = {
-                    n for n in scc_sub.predecessors(cause)
-                    if n not in forbidden
-                }
+                cut_nodes = {n for n in scc_sub.predecessors(cause) if n not in forbidden}
         except (nx.NetworkXError, nx.NetworkXNoPath):
             cut_nodes = set()
 
@@ -681,9 +674,9 @@ def min_scc_break_set(
     }
 
     # --- POST ---
-    assert cause not in result["break_set"], "POST: cause must not be in break_set"
-    assert effect not in result["break_set"], "POST: effect must not be in break_set"
-    assert result["break_size"] == len(result["break_set"]), (
+    assert cause not in result["break_set"], "POST: cause must not be in break_set"  # type: ignore[operator]
+    assert effect not in result["break_set"], "POST: effect must not be in break_set"  # type: ignore[operator]
+    assert result["break_size"] == len(result["break_set"]), (  # type: ignore[arg-type]
         "POST: break_size must equal len(break_set)"
     )
     return result

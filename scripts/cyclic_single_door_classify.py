@@ -69,9 +69,7 @@ def _load_graph(graphml_path: str):
 # ---------------------------------------------------------------------------
 
 
-def _split_into_n_shards(
-    edges: list, n_shards: int
-) -> list[list]:
+def _split_into_n_shards(edges: list, n_shards: int) -> list[list]:
     """Split *edges* into exactly *n_shards* near-equal contiguous chunks.
 
     Uses array_split-style division: the first ``r`` shards receive ``q + 1``
@@ -121,9 +119,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         chunks = _split_into_n_shards(edges, args.n_shards)
     else:
         shard_size = args.shard_size
-        chunks = [
-            edges[i : i + shard_size] for i in range(0, len(edges), shard_size)
-        ]
+        chunks = [edges[i : i + shard_size] for i in range(0, len(edges), shard_size)]
 
     shard_dir = Path(args.shard_dir)
     shard_dir.mkdir(parents=True, exist_ok=True)
@@ -170,9 +166,9 @@ def _row_to_jsonable(r: dict) -> dict:
     row = dict(r)
     if row["adjustment_set"] is not None:
         row["adjustment_set"] = sorted(row["adjustment_set"])
-    assert not any(
-        isinstance(v, frozenset) for v in row.values()
-    ), "POST: no frozenset values remain"
+    assert not any(isinstance(v, frozenset) for v in row.values()), (
+        "POST: no frozenset values remain"
+    )
     return row
 
 
@@ -200,9 +196,9 @@ def cmd_classify(args: argparse.Namespace) -> None:
     timeout_s: int | None = args.timeout if args.timeout and args.timeout > 0 else None
 
     # --- PRE ---
-    assert timeout_s is None or (
-        isinstance(timeout_s, int) and timeout_s > 0
-    ), "PRE: timeout must be None or a positive int"
+    assert timeout_s is None or (isinstance(timeout_s, int) and timeout_s > 0), (
+        "PRE: timeout must be None or a positive int"
+    )
 
     g = _load_graph(args.graphml)
 
@@ -235,9 +231,7 @@ def cmd_classify(args: argparse.Namespace) -> None:
                 except json.JSONDecodeError:
                     pass  # skip corrupt lines
 
-    remaining_edges = [
-        (u, v) for (u, v) in all_edges if (u, v) not in done_edge_keys
-    ]
+    remaining_edges = [(u, v) for (u, v) in all_edges if (u, v) not in done_edge_keys]
 
     n_total = len(all_edges)
     n_already = len(done_results)
@@ -294,9 +288,7 @@ def cmd_classify(args: argparse.Namespace) -> None:
     all_results.sort(key=lambda r: edge_order.get((r["cause"], r["effect"]), 999999))
 
     # --- POST ---
-    assert len(all_results) == n_total, (
-        f"POST: expected {n_total} results, got {len(all_results)}"
-    )
+    assert len(all_results) == n_total, f"POST: expected {n_total} results, got {len(all_results)}"
 
     with open(output_path, "w") as f:
         json.dump({"shard_id": shard_id, "results": all_results}, f)
@@ -307,8 +299,7 @@ def cmd_classify(args: argparse.Namespace) -> None:
     n_ident = sum(1 for r in all_results if r["status"] == "identifiable")
     n_timeout = sum(1 for r in all_results if r["status"] == "timeout")
     print(
-        f"classify shard {shard_id}: {n_ident}/{n_total} identifiable, "
-        f"{n_timeout} timed out",
+        f"classify shard {shard_id}: {n_ident}/{n_total} identifiable, {n_timeout} timed out",
         file=sys.stderr,
         flush=True,
     )

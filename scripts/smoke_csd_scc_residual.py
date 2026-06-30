@@ -9,9 +9,11 @@ Checks:
 Usage:
     uv run python scripts/smoke_csd_scc_residual.py
 """
+
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -63,12 +65,16 @@ if RESIDUAL_CSV.exists():
     check(n_selfloops == 174, f"174 self-loops flagged (found {n_selfloops})")
 
     non_self = df[~df["is_self_loop"]]
-    n_timeout_giant = ((non_self["status"] == "timeout") & (non_self["scc_size_before"] >= 50)).sum()
+    n_timeout_giant = (
+        (non_self["status"] == "timeout") & (non_self["scc_size_before"] >= 50)
+    ).sum()
     n_timeout_total = (non_self["status"] == "timeout").sum()
     pct = 100.0 * n_timeout_giant / n_timeout_total if n_timeout_total else 0
     check(pct > 95, f">=95% of timeouts in giant SCC (got {pct:.1f}%)")
 
-    n_ident_giant = ((non_self["status"] == "identifiable") & (non_self["scc_size_before"] >= 50)).sum()
+    n_ident_giant = (
+        (non_self["status"] == "identifiable") & (non_self["scc_size_before"] >= 50)
+    ).sum()
     check(n_ident_giant == 0, f"0 identifiable edges touch giant SCC (found {n_ident_giant})")
 
     # --- Regression guard: adjustment_set column must be present and populated ---
@@ -79,9 +85,11 @@ if RESIDUAL_CSV.exists():
     ident = df[df["status"] == "identifiable"]
     if "adjustment_set" in df.columns and len(ident) > 0:
         n_with_adj = ident["adjustment_set"].notna().sum()
-        check(n_with_adj > 0,
-              f"at least one identifiable edge has a non-null adjustment_set "
-              f"(found {n_with_adj}/{len(ident)})")
+        check(
+            n_with_adj > 0,
+            f"at least one identifiable edge has a non-null adjustment_set "
+            f"(found {n_with_adj}/{len(ident)})",
+        )
 
 # ---------------------------------------------------------------------------
 # 3. Generate the figure
@@ -137,8 +145,10 @@ print('Saved:', out)
 
 try:
     result = subprocess.run(
-        ["uv", "run", "python", str(fig_script)],
-        capture_output=True, text=True, cwd=str(REPO)
+        [shutil.which("uv") or "uv", "run", "python", str(fig_script)],
+        capture_output=True,
+        text=True,
+        cwd=str(REPO),
     )
     if result.returncode == 0:
         check(VIZ_OUT.exists(), f"PNG saved to {VIZ_OUT}")

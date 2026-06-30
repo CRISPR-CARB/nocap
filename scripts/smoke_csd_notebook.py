@@ -3,14 +3,17 @@
 Runs the non-slow sections: imports, load, summary stats, cause taxonomy.
 Skips the greedy optimizer (section 6b) which is slow.
 """
-from __future__ import annotations
-import sys, json
-from pathlib import Path
-from collections import Counter
 
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import matplotlib
 import networkx as nx
 import pandas as pd
-import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -37,8 +40,8 @@ df["same_scc"] = df["same_scc"].astype(str).str.lower().isin(["true", "1"])
 df["timed_out"] = df["timed_out"].fillna(False).astype(str).str.lower().isin(["true", "1"])
 
 print(f"Total edges: {len(df):,}")
-print(f"Identifiable: {(df.status=='identifiable').sum():,}  ({summary['pct_identifiable']}%)")
-print(f"Unidentifiable: {(df.status=='unidentifiable').sum():,}")
+print(f"Identifiable: {(df.status == 'identifiable').sum():,}  ({summary['pct_identifiable']}%)")
+print(f"Unidentifiable: {(df.status == 'unidentifiable').sum():,}")
 print(f"Same-SCC: {df.same_scc.sum():,}")
 assert len(df) > 0, "POST: df must be non-empty"
 assert (df.status == "identifiable").sum() > 0, "POST: must have identifiable edges"
@@ -48,7 +51,13 @@ status_counts = df["status"].value_counts()
 colors = {"identifiable": "#2ecc71", "unidentifiable": "#e74c3c", "timeout": "#f39c12"}
 color_list = [colors.get(s, "#95a5a6") for s in status_counts.index]
 fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-axes[0].pie(status_counts.values, labels=status_counts.index, colors=color_list, autopct="%1.1f%%", startangle=90)
+axes[0].pie(
+    status_counts.values,
+    labels=status_counts.index,
+    colors=color_list,
+    autopct="%1.1f%%",
+    startangle=90,
+)
 axes[0].set_title("Edge Identifiability\n(sigma-single-door criterion)")
 axes[1].bar(status_counts.index, status_counts.values, color=color_list, edgecolor="black")
 axes[1].set_ylabel("Number of edges")
@@ -69,13 +78,13 @@ print(f"Median adj-set size: {ident['adj_size'].median():.1f}, max: {ident['adj_
 
 # --- Section 4: Same-SCC vs Cross-SCC ---
 cross = df[~df.same_scc]
-same  = df[df.same_scc]
+same = df[df.same_scc]
 n_cross = len(cross)
-n_same  = len(same)
+n_same = len(same)
 if n_cross > 0:
-    print(f"Cross-SCC identifiable: {100*(cross.status=='identifiable').sum()/n_cross:.1f}%")
+    print(f"Cross-SCC identifiable: {100 * (cross.status == 'identifiable').sum() / n_cross:.1f}%")
 if n_same > 0:
-    print(f"Same-SCC  identifiable: {100*(same.status=='identifiable').sum()/n_same:.1f}%")
+    print(f"Same-SCC  identifiable: {100 * (same.status == 'identifiable').sum() / n_same:.1f}%")
 
 out2 = VIZ_DIR / "csd_same_vs_cross_scc.png"
 fig, ax = plt.subplots(figsize=(8, 5))
@@ -84,7 +93,14 @@ x = [0, 1]
 width = 0.25
 for i, cat in enumerate(cats):
     c_vals = [(cross.status == cat).sum(), (same.status == cat).sum()]
-    ax.bar([xi + i * width for xi in x], c_vals, width, label=cat, color=colors.get(cat, "#95a5a6"), edgecolor="black")
+    ax.bar(
+        [xi + i * width for xi in x],
+        c_vals,
+        width,
+        label=cat,
+        color=colors.get(cat, "#95a5a6"),
+        edgecolor="black",
+    )
 ax.set_xticks([xi + width for xi in x])
 ax.set_xticklabels([f"Cross-SCC\n(n={n_cross:,})", f"Same-SCC\n(n={n_same:,})"])
 ax.set_ylabel("Number of edges")
@@ -96,7 +112,7 @@ plt.close("all")
 print(f"Saved: {out2}")
 
 # --- Section 5: Cause taxonomy ---
-from csd_rescue_worker import classify_nonident_cause, CAUSE_CATEGORIES  # noqa: E402
+from csd_rescue_worker import CAUSE_CATEGORIES, classify_nonident_cause
 
 g = nx.read_graphml(str(GRAPHML))
 unident = df[df.status == "unidentifiable"][["cause", "effect"]].copy()
@@ -113,17 +129,25 @@ unident = unident.copy()
 unident["nonident_cause"] = cause_labels
 cause_counts = unident["nonident_cause"].value_counts()
 print(cause_counts.to_string())
-assert all(c in list(CAUSE_CATEGORIES) + ["unknown"] for c in cause_counts.index), "POST: all causes valid"
+assert all(c in [*list(CAUSE_CATEGORIES), "unknown"] for c in cause_counts.index), (
+    "POST: all causes valid"
+)
 
 unident.to_csv(NB_DIR / "csd_nonident_diagnosis.csv", index=False)
 
 CATEGORY_COLORS = {
-    "self_loop": "#e74c3c", "two_cycle": "#e67e22", "same_scc_long": "#f1c40f",
-    "scc_edge_dissolved": "#3498db", "cross_scc_blocked": "#9b59b6", "unknown": "#95a5a6",
+    "self_loop": "#e74c3c",
+    "two_cycle": "#e67e22",
+    "same_scc_long": "#f1c40f",
+    "scc_edge_dissolved": "#3498db",
+    "cross_scc_blocked": "#9b59b6",
+    "unknown": "#95a5a6",
 }
 CATEGORY_LABELS = {
-    "self_loop": "Self-loop", "two_cycle": "2-cycle (A->B->A)",
-    "same_scc_long": "Same-SCC, long feedback", "scc_edge_dissolved": "SCC edge dissolved",
+    "self_loop": "Self-loop",
+    "two_cycle": "2-cycle (A->B->A)",
+    "same_scc_long": "Same-SCC, long feedback",
+    "scc_edge_dissolved": "SCC edge dissolved",
     "cross_scc_blocked": "Cross-SCC blocked",
 }
 ordered = [c for c in CAUSE_CATEGORIES if c in cause_counts.index]

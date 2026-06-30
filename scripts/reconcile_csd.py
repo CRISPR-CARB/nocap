@@ -19,6 +19,7 @@ Usage
         --old notebooks/Ecoli_Analysis_Notebooks/csd_results.csv \\
         --new results/cyclic_single_door/classification_results.csv
 """
+
 from __future__ import annotations
 
 import argparse
@@ -66,7 +67,7 @@ def main() -> None:
 
     # Classify changes
     regressions: list[tuple[tuple[str, str], str, str]] = []  # (key, old_status, new_status)
-    resolved: list[tuple[tuple[str, str], str]] = []           # (key, new_status)
+    resolved: list[tuple[tuple[str, str], str]] = []  # (key, new_status)
     still_timeout: list[tuple[str, str]] = []
     missing_in_new: list[tuple[str, str]] = []
     new_in_new: list[tuple[str, str]] = []

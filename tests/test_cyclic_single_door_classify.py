@@ -21,7 +21,6 @@ import json
 import sys
 import types
 from argparse import Namespace
-from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
@@ -96,7 +95,7 @@ def _write_graphml(tmp_path: Path, content: str = _TINY_GRAPHML) -> Path:
 
 
 def test_row_to_jsonable_frozenset_converted():
-    """frozenset adjustment_set becomes a sorted list."""
+    """Frozenset adjustment_set becomes a sorted list."""
     row = {
         "cause": "X",
         "effect": "Y",
@@ -185,7 +184,7 @@ def test_split_into_n_shards_pre_violation():
 
 
 def test_cmd_prepare_creates_shards_and_manifest(tmp_path):
-    """prepare writes shard JSON files and a manifest."""
+    """Prepare writes shard JSON files and a manifest."""
     graphml = _write_graphml(tmp_path, _TINY_GRAPHML)
     shard_dir = tmp_path / "shards"
     manifest_path = tmp_path / "manifest.json"
@@ -228,8 +227,8 @@ def test_cmd_prepare_n_shards_overrides_shard_size(tmp_path):
     args = Namespace(
         graphml=str(graphml),
         shard_dir=str(shard_dir),
-        shard_size=1,      # would give 4 shards if used
-        n_shards=2,        # overrides: give exactly 2
+        shard_size=1,  # would give 4 shards if used
+        n_shards=2,  # overrides: give exactly 2
         manifest=str(manifest_path),
     )
     _classify.cmd_prepare(args)
@@ -497,24 +496,39 @@ def _write_classified_shard(classified_dir: Path, shard_id: str, results: list) 
 
 
 def test_gather_merges_shards_to_csv(tmp_path):
-    """gather produces a CSV with one row per edge across all shards."""
+    """Gather produces a CSV with one row per edge across all shards."""
     classified_dir = tmp_path / "classified"
     _write_classified_shard(
         classified_dir,
         "0",
         [
-            {"cause": "A", "effect": "B", "status": "identifiable",
-             "adjustment_set": ["Z"], "same_scc": False},
-            {"cause": "B", "effect": "C", "status": "unidentifiable",
-             "adjustment_set": None, "same_scc": True},
+            {
+                "cause": "A",
+                "effect": "B",
+                "status": "identifiable",
+                "adjustment_set": ["Z"],
+                "same_scc": False,
+            },
+            {
+                "cause": "B",
+                "effect": "C",
+                "status": "unidentifiable",
+                "adjustment_set": None,
+                "same_scc": True,
+            },
         ],
     )
     _write_classified_shard(
         classified_dir,
         "1",
         [
-            {"cause": "C", "effect": "A", "status": "unidentifiable",
-             "adjustment_set": None, "same_scc": True},
+            {
+                "cause": "C",
+                "effect": "A",
+                "status": "unidentifiable",
+                "adjustment_set": None,
+                "same_scc": True,
+            },
         ],
     )
 
@@ -522,9 +536,12 @@ def test_gather_merges_shards_to_csv(tmp_path):
     out_summary = tmp_path / "summary.json"
 
     args = [
-        "--input-dir", str(classified_dir),
-        "--output-csv", str(out_csv),
-        "--output-summary", str(out_summary),
+        "--input-dir",
+        str(classified_dir),
+        "--output-csv",
+        str(out_csv),
+        "--output-summary",
+        str(out_summary),
     ]
     with patch("sys.argv", ["gather"] + args):
         _gather.main()
@@ -549,25 +566,36 @@ def test_gather_merges_shards_to_csv(tmp_path):
 
 
 def test_gather_adjustment_set_pipe_separated(tmp_path):
-    """gather serialises adjustment_set as pipe-separated string."""
+    """Gather serialises adjustment_set as pipe-separated string."""
     classified_dir = tmp_path / "classified"
     _write_classified_shard(
         classified_dir,
         "0",
         [
-            {"cause": "X", "effect": "Y", "status": "identifiable",
-             "adjustment_set": ["Z", "W"], "same_scc": False},
+            {
+                "cause": "X",
+                "effect": "Y",
+                "status": "identifiable",
+                "adjustment_set": ["Z", "W"],
+                "same_scc": False,
+            },
         ],
     )
     out_csv = tmp_path / "out.csv"
     out_summary = tmp_path / "summary.json"
 
-    with patch("sys.argv", [
-        "gather",
-        "--input-dir", str(classified_dir),
-        "--output-csv", str(out_csv),
-        "--output-summary", str(out_summary),
-    ]):
+    with patch(
+        "sys.argv",
+        [
+            "gather",
+            "--input-dir",
+            str(classified_dir),
+            "--output-csv",
+            str(out_csv),
+            "--output-summary",
+            str(out_summary),
+        ],
+    ):
         _gather.main()
 
     rows = list(csv.DictReader(out_csv.read_text().splitlines()))
@@ -575,18 +603,24 @@ def test_gather_adjustment_set_pipe_separated(tmp_path):
 
 
 def test_gather_empty_input_exits_nonzero(tmp_path):
-    """gather exits with code 1 when no shard files are present."""
+    """Gather exits with code 1 when no shard files are present."""
     empty_dir = tmp_path / "empty"
     empty_dir.mkdir()
     out_csv = tmp_path / "out.csv"
     out_summary = tmp_path / "summary.json"
 
-    with patch("sys.argv", [
-        "gather",
-        "--input-dir", str(empty_dir),
-        "--output-csv", str(out_csv),
-        "--output-summary", str(out_summary),
-    ]):
+    with patch(
+        "sys.argv",
+        [
+            "gather",
+            "--input-dir",
+            str(empty_dir),
+            "--output-csv",
+            str(out_csv),
+            "--output-summary",
+            str(out_summary),
+        ],
+    ):
         with pytest.raises(SystemExit) as exc_info:
             _gather.main()
     assert exc_info.value.code != 0
@@ -605,24 +639,40 @@ def _make_classified_dir(tmp_path: Path) -> tuple[Path, Path]:
         classified_dir,
         "0",
         [
-            {"cause": "A", "effect": "B", "status": "identifiable",
-             "adjustment_set": ["Z"], "same_scc": False, "timed_out": False},
-            {"cause": "B", "effect": "A", "status": "unidentifiable",
-             "adjustment_set": None, "same_scc": True, "timed_out": False},
+            {
+                "cause": "A",
+                "effect": "B",
+                "status": "identifiable",
+                "adjustment_set": ["Z"],
+                "same_scc": False,
+                "timed_out": False,
+            },
+            {
+                "cause": "B",
+                "effect": "A",
+                "status": "unidentifiable",
+                "adjustment_set": None,
+                "same_scc": True,
+                "timed_out": False,
+            },
         ],
     )
     _write_classified_shard(
         classified_dir,
         "1",
         [
-            {"cause": "X", "effect": "Y", "status": "identifiable",
-             "adjustment_set": None, "same_scc": False, "timed_out": False},
+            {
+                "cause": "X",
+                "effect": "Y",
+                "status": "identifiable",
+                "adjustment_set": None,
+                "same_scc": False,
+                "timed_out": False,
+            },
         ],
     )
     manifest_path = tmp_path / "manifest.json"
-    manifest_path.write_text(
-        json.dumps({"n_shards": 2, "n_edges": 3, "shard_ids": ["0", "1"]})
-    )
+    manifest_path.write_text(json.dumps({"n_shards": 2, "n_edges": 3, "shard_ids": ["0", "1"]}))
     return classified_dir, manifest_path
 
 
@@ -631,8 +681,8 @@ def test_csd_summary_counts(tmp_path, capsys):
     classified_dir, manifest_path = _make_classified_dir(tmp_path)
     _csd_ids.cmd_summary(classified_dir, manifest_path)
     out = capsys.readouterr().out
-    assert "2" in out   # 2 identifiable
-    assert "1" in out   # 1 unidentifiable
+    assert "2" in out  # 2 identifiable
+    assert "1" in out  # 1 unidentifiable
     assert "2 / 2" in out  # shards classified / total
 
 
@@ -652,7 +702,7 @@ def test_csd_list_identifiable(tmp_path, capsys):
     classified_dir, _ = _make_classified_dir(tmp_path)
     _csd_ids.cmd_list(classified_dir, same_scc_only=False)
     out = capsys.readouterr().out
-    lines = [l for l in out.splitlines() if "->" in l]
+    lines = [ln for ln in out.splitlines() if "->" in ln]
     assert len(lines) == 2  # 2 identifiable edges
 
 
@@ -689,12 +739,12 @@ def test_csd_csv_empty_exits(tmp_path):
 
 def test_csd_identified_edges_importable():
     """Regression: csd_identified_edges.py must not have a leading-space docstring
-    that causes IndentationError at import time.  If it imports cleanly, this passes."""
+    that causes IndentationError at import time.  If it imports cleanly, this passes.
+    """
     import importlib.util as _ilu
+
     # Re-import to confirm no syntax/indent error
-    spec = _ilu.spec_from_file_location(
-        "_csd_check", _SCRIPTS / "csd_identified_edges.py"
-    )
+    spec = _ilu.spec_from_file_location("_csd_check", _SCRIPTS / "csd_identified_edges.py")
     assert spec is not None
     mod = _ilu.module_from_spec(spec)
     spec.loader.exec_module(mod)  # type: ignore[union-attr]

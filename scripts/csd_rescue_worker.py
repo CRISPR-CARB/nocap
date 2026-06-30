@@ -51,11 +51,11 @@ import networkx as nx
 _REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(_REPO / "src"))
 
-from nocap.cyclic_single_door import (  # noqa: E402
+from nocap.cyclic_single_door import (
     classify_edge,
     nx_digraph_to_y0,
 )
-from nocap.scc_perturb import (  # noqa: E402
+from nocap.scc_perturb import (
     build_intervened_graph,
     compute_min_cut_b,
     find_in_scc_children,

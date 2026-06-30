@@ -4,9 +4,9 @@ classify_scc_states.py
 Classify each SCC-experiment TF into one of three states based on freshly
 recomputed graph properties:
 
-    identifiable   – joint cyclic_id query succeeded
-    unidentifiable – joint query failed AND cut is complete (a real result)
-    cut_incomplete – do(B(t)) did NOT sever every in-SCC child→t return path
+    identifiable   - joint cyclic_id query succeeded
+    unidentifiable - joint query failed AND cut is complete (a real result)
+    cut_incomplete - do(B(t)) did NOT sever every in-SCC child->t return path
                      (Interpretation A structural limitation, e.g. 2-cycles)
 
 Writes:
@@ -47,9 +47,7 @@ try:
         verify_cut_complete,
     )
 except ImportError as exc:
-    sys.exit(
-        f"ERROR: cannot import scc_perturb — run with `uv run python ...`\n{exc}"
-    )
+    sys.exit(f"ERROR: cannot import scc_perturb — run with `uv run python ...`\n{exc}")
 
 # ---------------------------------------------------------------------------
 # Load graph
@@ -76,7 +74,7 @@ print("Loading shards ...", flush=True)
 shards: dict = {}
 for fn in os.listdir(SHARDS_DIR):
     if fn.startswith("scc_perturb_shard_") and fn.endswith(".json"):
-        tf_name = fn[len("scc_perturb_shard_"):-5]
+        tf_name = fn[len("scc_perturb_shard_") : -5]
         with open(os.path.join(SHARDS_DIR, fn)) as f:
             shards[tf_name] = json.load(f)
 print(f"  {len(shards)} shards loaded", flush=True)
@@ -86,9 +84,11 @@ print(f"  {len(shards)} shards loaded", flush=True)
 # ---------------------------------------------------------------------------
 rows = []
 
-print("\n{:<10}  {:<14}  {:<14}  {:<12}  {:<10}  {}".format(
-    "TF", "state", "joint_ident", "cut_complete", "tf_cyclic", "surviving_children"
-))
+print(
+    "\n{:<10}  {:<14}  {:<14}  {:<12}  {:<10}  {}".format(
+        "TF", "state", "joint_ident", "cut_complete", "tf_cyclic", "surviving_children"
+    )
+)
 print("-" * 90)
 
 for tf in sorted(shards.keys()):
@@ -123,23 +123,29 @@ for tf in sorted(shards.keys()):
 
     # Console output
     surv_str = str(surviving[:3]) + ("..." if len(surviving) > 3 else "") if surviving else "[]"
-    print(f"{tf:<10}  {state:<14}  {joint_identifiable!s:<14}  {cut_complete!s:<12}  {tf_still_cyclic!s:<10}  {surv_str}")
+    print(
+        f"{tf:<10}  {state:<14}  {joint_identifiable!s:<14}  {cut_complete!s:<12}  {tf_still_cyclic!s:<10}  {surv_str}"
+    )
 
-    rows.append({
-        "tf": tf,
-        "n_children": len(children),
-        "n_in_scc_children": len(in_scc_children),
-        "min_cut_size": len(min_cut),
-        "min_cut": ",".join(sorted(min_cut)),
-        "joint_identifiable": joint_identifiable,
-        "cut_complete": cut_complete,
-        "tf_still_cyclic": tf_still_cyclic,
-        "surviving_children": ",".join(surviving),
-        "n_residual_clusters": dist["n_clusters"],
-        "max_residual_cluster_size": dist["max_size"],
-        "n_pergene_identifiable": n_pergene_identifiable if n_pergene_identifiable is not None else "",
-        "state": state,
-    })
+    rows.append(
+        {
+            "tf": tf,
+            "n_children": len(children),
+            "n_in_scc_children": len(in_scc_children),
+            "min_cut_size": len(min_cut),
+            "min_cut": ",".join(sorted(min_cut)),
+            "joint_identifiable": joint_identifiable,
+            "cut_complete": cut_complete,
+            "tf_still_cyclic": tf_still_cyclic,
+            "surviving_children": ",".join(surviving),
+            "n_residual_clusters": dist["n_clusters"],
+            "max_residual_cluster_size": dist["max_size"],
+            "n_pergene_identifiable": n_pergene_identifiable
+            if n_pergene_identifiable is not None
+            else "",
+            "state": state,
+        }
+    )
 
 # ---------------------------------------------------------------------------
 # Summary
@@ -156,9 +162,18 @@ print(f"  {'TOTAL':<16} : {len(rows)}")
 # Write CSV
 # ---------------------------------------------------------------------------
 fieldnames = [
-    "tf", "state", "joint_identifiable", "cut_complete", "tf_still_cyclic",
-    "n_children", "n_in_scc_children", "min_cut_size", "min_cut",
-    "surviving_children", "n_residual_clusters", "max_residual_cluster_size",
+    "tf",
+    "state",
+    "joint_identifiable",
+    "cut_complete",
+    "tf_still_cyclic",
+    "n_children",
+    "n_in_scc_children",
+    "min_cut_size",
+    "min_cut",
+    "surviving_children",
+    "n_residual_clusters",
+    "max_residual_cluster_size",
     "n_pergene_identifiable",
 ]
 with open(OUTPUT_CSV, "w", newline="") as f:

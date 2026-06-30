@@ -55,6 +55,7 @@ ignore = [
     "D100", "D101", "D102", "D103", "D205", "D400", "D401",  # docstrings
     "B007",  # loop variable not used
     "B018",  # useless expression
+    "B905",  # zip without strict= (notebook zip calls are exploratory)
     "C408",  # unnecessary dict()
     "C401",  # unnecessary generator
     "S311",  # random not for crypto

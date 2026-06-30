@@ -88,8 +88,12 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 
-class _EdgeTimeout(Exception):
+class _EdgeTimeoutError(Exception):
     """Raised when a per-edge classification exceeds the timeout budget."""
+
+
+# Backwards-compatible alias used by tests
+_EdgeTimeout = _EdgeTimeoutError
 
 
 @contextmanager
@@ -107,8 +111,9 @@ def _timeout_context(seconds: int):
     old_handler = None
 
     if have_alarm:
-        def _handler(signum, frame):  # noqa: ANN001
-            raise _EdgeTimeout
+
+        def _handler(signum, frame):
+            raise _EdgeTimeoutError
 
         old_handler = signal.signal(signal.SIGALRM, _handler)
         signal.alarm(seconds)
@@ -120,6 +125,7 @@ def _timeout_context(seconds: int):
             signal.alarm(0)
             if old_handler is not None:
                 signal.signal(signal.SIGALRM, old_handler)
+
 
 # ---------------------------------------------------------------------------
 # nx_digraph_to_y0
@@ -376,9 +382,9 @@ def evaluate_all_edges(
     """
     # --- PRE ---
     assert isinstance(graph, nx.DiGraph), "PRE: graph must be an nx.DiGraph"
-    assert timeout_seconds is None or (
-        isinstance(timeout_seconds, int) and timeout_seconds > 0
-    ), "PRE: timeout_seconds must be None or a positive int"
+    assert timeout_seconds is None or (isinstance(timeout_seconds, int) and timeout_seconds > 0), (
+        "PRE: timeout_seconds must be None or a positive int"
+    )
 
     edges: list[tuple[str, str]] = (
         list(restrict_edges) if restrict_edges is not None else list(graph.edges())
@@ -403,7 +409,7 @@ def evaluate_all_edges(
                         precomputed_extension=g_sigma,
                         precomputed_y0=g_y0,
                     )
-            except _EdgeTimeout:
+            except _EdgeTimeoutError:
                 row = {
                     "cause": cause,
                     "effect": effect,
@@ -424,9 +430,9 @@ def evaluate_all_edges(
 
     # --- POST ---
     assert isinstance(results, list), "POST: result must be a list"
-    assert all(
-        r["status"] in ("identifiable", "unidentifiable", "timeout") for r in results
-    ), "POST: all statuses must be valid"
+    assert all(r["status"] in ("identifiable", "unidentifiable", "timeout") for r in results), (
+        "POST: all statuses must be valid"
+    )
     return results
 
 

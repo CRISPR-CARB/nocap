@@ -15,11 +15,7 @@ Tests cover:
 
 from __future__ import annotations
 
-import csv
-import io
-import json
 import sys
-import textwrap
 from pathlib import Path
 
 import networkx as nx
@@ -29,12 +25,12 @@ import pytest
 SCRIPTS_DIR = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-import csd_recovery_bank as crb
-
+import csd_recovery_bank as crb  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Tiny test graphs
 # ---------------------------------------------------------------------------
+
 
 def _tiny_graph_triangle() -> nx.DiGraph:
     """Triangle A->B->C->A with extra D->E outside the cycle."""
@@ -46,10 +42,15 @@ def _tiny_graph_triangle() -> nx.DiGraph:
 def _tiny_graph_two_cycles() -> nx.DiGraph:
     """Two cycles sharing node B: A->B->A and B->C->D->B."""
     G = nx.DiGraph()
-    G.add_edges_from([
-        ("A", "B"), ("B", "A"),       # 2-cycle
-        ("B", "C"), ("C", "D"), ("D", "B"),  # 3-cycle
-    ])
+    G.add_edges_from(
+        [
+            ("A", "B"),
+            ("B", "A"),  # 2-cycle
+            ("B", "C"),
+            ("C", "D"),
+            ("D", "B"),  # 3-cycle
+        ]
+    )
     return G
 
 
@@ -112,6 +113,7 @@ def _proxy_neq_exact_graph() -> nx.DiGraph:
 # Tests: _build_do_scc_map
 # ---------------------------------------------------------------------------
 
+
 class TestBuildDoSccMap:
     def test_every_node_assigned(self):
         G = _tiny_graph_triangle()
@@ -139,12 +141,13 @@ class TestBuildDoSccMap:
     def test_requires_frozenset(self):
         G = _tiny_graph_triangle()
         with pytest.raises(AssertionError, match="PRE"):
-            crb._build_do_scc_map(G, set(["A"]))  # set not frozenset
+            crb._build_do_scc_map(G, {"A"})  # set not frozenset
 
 
 # ---------------------------------------------------------------------------
 # Tests: _proxy_recovered
 # ---------------------------------------------------------------------------
+
 
 class TestProxyRecovered:
     def test_same_scc_not_recovered(self):
@@ -169,6 +172,7 @@ class TestProxyRecovered:
 # ---------------------------------------------------------------------------
 # Tests: _exact_recovered
 # ---------------------------------------------------------------------------
+
 
 class TestExactRecovered:
     def test_triangle_no_intervention(self):
@@ -219,6 +223,7 @@ class TestExactRecovered:
 # Tests: _greedy_bank
 # ---------------------------------------------------------------------------
 
+
 class TestGreedyBank:
     def _simple_targets(self):
         return [
@@ -248,7 +253,7 @@ class TestGreedyBank:
         bank = crb._greedy_bank(G, targets, pool, n=5, k=2, verbose=False)
         cumulative = [item["proxy_covered_cumulative"] for item in bank]
         for i in range(len(cumulative) - 1):
-            assert cumulative[i+1] >= cumulative[i], "Coverage must be non-decreasing"
+            assert cumulative[i + 1] >= cumulative[i], "Coverage must be non-decreasing"
 
     def test_genes_in_pool(self):
         G = _tiny_graph_triangle()
@@ -273,19 +278,22 @@ class TestGreedyBank:
     def test_precondition_n_zero(self):
         G = _tiny_graph_triangle()
         with pytest.raises(AssertionError, match="PRE"):
-            crb._greedy_bank(G, [{"cause": "A", "effect": "B", "same_scc": True}],
-                             {"C"}, n=0, k=1, verbose=False)
+            crb._greedy_bank(
+                G, [{"cause": "A", "effect": "B", "same_scc": True}], {"C"}, n=0, k=1, verbose=False
+            )
 
     def test_precondition_k_zero(self):
         G = _tiny_graph_triangle()
         with pytest.raises(AssertionError, match="PRE"):
-            crb._greedy_bank(G, [{"cause": "A", "effect": "B", "same_scc": True}],
-                             {"C"}, n=1, k=0, verbose=False)
+            crb._greedy_bank(
+                G, [{"cause": "A", "effect": "B", "same_scc": True}], {"C"}, n=1, k=0, verbose=False
+            )
 
 
 # ---------------------------------------------------------------------------
 # Tests: _exact_verify_bank
 # ---------------------------------------------------------------------------
+
 
 class TestExactVerifyBank:
     def test_postcondition_n_recovered_matches(self):
@@ -295,7 +303,12 @@ class TestExactVerifyBank:
             {"cause": "B", "effect": "C", "same_scc": True},
         ]
         bank = [
-            {"set_index": 1, "genes": ["C"], "proxy_recovered_new": 1, "proxy_covered_cumulative": 1},
+            {
+                "set_index": 1,
+                "genes": ["C"],
+                "proxy_recovered_new": 1,
+                "proxy_covered_cumulative": 1,
+            },
         ]
         bank_exact, edge_results = crb._exact_verify_bank(G, targets, bank)
         n_recovered_counted = sum(1 for e in edge_results if e["recovered"])
@@ -315,6 +328,7 @@ class TestExactVerifyBank:
 # ---------------------------------------------------------------------------
 # Tests: CSV loaders (with in-memory tmpfiles)
 # ---------------------------------------------------------------------------
+
 
 class TestLoadTargets:
     def test_basic(self, tmp_path):

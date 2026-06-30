@@ -1,13 +1,18 @@
 """smoke_csd_limitations.py — Verify cells 0-6 of the patched CSD notebook execute cleanly."""
+
 from __future__ import annotations
-import json, sys
+
+import json
+import sys
 from pathlib import Path
 
 REPO = Path(__file__).parent.parent
 NB_PATH = REPO / "notebooks" / "Ecoli_Analysis_Notebooks" / "Cyclic_SingleDoor_Analysis.ipynb"
 CSV_PATH = REPO / "notebooks" / "Ecoli_Analysis_Notebooks" / "csd_results.csv"
 SUMMARY_PATH = REPO / "notebooks" / "Ecoli_Analysis_Notebooks" / "csd_summary.json"
-GRAPHML = REPO / "notebooks" / "Ecoli_Analysis_Notebooks" / "ecoli_full_network_no_small_rna.graphml"
+GRAPHML = (
+    REPO / "notebooks" / "Ecoli_Analysis_Notebooks" / "ecoli_full_network_no_small_rna.graphml"
+)
 
 # Simulate the paths that the notebook sets up in its imports cell
 sys.path.insert(0, str(REPO / "src"))
@@ -15,7 +20,6 @@ sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "notebooks" / "Ecoli_Analysis_Notebooks"))
 
 import pandas as pd
-import networkx as nx
 
 # --- Replicate cell 4 (load cell) ---
 df = pd.read_csv(CSV_PATH)
@@ -30,9 +34,13 @@ _n_ident = (df.status == "identifiable").sum()
 _pct_ident_resolved = 100.0 * _n_ident / _n_resolved if _n_resolved > 0 else 0.0
 
 print(f"Total edges: {len(df):,}")
-print(f"Identifiable: {(df.status=='identifiable').sum():,}  ({summary['pct_identifiable']}% of all, {_pct_ident_resolved:.1f}% of resolved)")
-print(f"Unidentifiable: {(df.status=='unidentifiable').sum():,}")
-print(f"Timed out: {(df.status=='timeout').sum():,}  (80.8% — O-set computationally intractable, see §1b)")
+print(
+    f"Identifiable: {(df.status == 'identifiable').sum():,}  ({summary['pct_identifiable']}% of all, {_pct_ident_resolved:.1f}% of resolved)"
+)
+print(f"Unidentifiable: {(df.status == 'unidentifiable').sum():,}")
+print(
+    f"Timed out: {(df.status == 'timeout').sum():,}  (80.8% — O-set computationally intractable, see §1b)"
+)
 print(f"Same-SCC: {df.same_scc.sum():,}")
 
 # --- Replicate cell 6 (resolved-only rate) ---
@@ -50,11 +58,11 @@ print()
 print("=== Scope summary ===")
 print(f"  Total edges          : {n_total:,}")
 print(f"  Resolved (evaluated) : {n_resolved:,}  ({pct_resolved:.1f}% of total)")
-print(f"  Timeout (unevaluated): {n_timeout:,}  ({100-pct_resolved:.1f}% of total)")
+print(f"  Timeout (unevaluated): {n_timeout:,}  ({100 - pct_resolved:.1f}% of total)")
 print()
 print("=== Identifiability over *resolved* edges ===")
 print(f"  Identifiable         : {n_ident:,}  ({pct_ident_of_resolved:.1f}% of resolved)")
-print(f"  Unidentifiable       : {n_unident:,}  ({100-pct_ident_of_resolved:.1f}% of resolved)")
+print(f"  Unidentifiable       : {n_unident:,}  ({100 - pct_ident_of_resolved:.1f}% of resolved)")
 print()
 print(f"  (Over ALL edges: {pct_ident_of_total:.1f}% identifiable, but 80.8% unevaluated)")
 

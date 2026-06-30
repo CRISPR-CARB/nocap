@@ -9,9 +9,9 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
-import json
 from pathlib import Path
 
 import networkx as nx
@@ -44,7 +44,9 @@ print(f"PASS enumerate_tfs: {tfs}")
 # ---------------------------------------------------------------------------
 identifiable, unidentifiable = srb._classify_tfs(G, tfs)
 assert set(identifiable) == {"D"}, f"Expected D identifiable, got {identifiable}"
-assert set(unidentifiable) == {"A", "B", "C"}, f"Expected A,B,C unidentifiable, got {unidentifiable}"
+assert set(unidentifiable) == {"A", "B", "C"}, (
+    f"Expected A,B,C unidentifiable, got {unidentifiable}"
+)
 assert len(identifiable) + len(unidentifiable) == len(tfs)
 print(f"PASS classify_tfs: identifiable={identifiable}, unidentifiable={unidentifiable}")
 
@@ -96,10 +98,14 @@ with tempfile.TemporaryDirectory() as tmpdir:
     srb._write_bank_csv(bank, bank_csv)
     srb._write_tf_csv(tf_results, tf_csv)
     srb._update_summary(
-        summary_json, n=2, k=2,
-        n_tfs=len(tfs), n_identifiable=len(identifiable),
+        summary_json,
+        n=2,
+        k=2,
+        n_tfs=len(tfs),
+        n_identifiable=len(identifiable),
         n_unidentifiable=len(unidentifiable),
-        bank=bank, tf_results=tf_results,
+        bank=bank,
+        tf_results=tf_results,
     )
 
     # Verify CSV contents

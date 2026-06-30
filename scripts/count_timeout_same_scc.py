@@ -5,10 +5,10 @@ Those are exactly the edges the csd_break SCC-break sweep can act on:
 a residual cycle survives the removal of the direct edge, so an
 intervention may dissolve it and make the edge single-door identifiable.
 """
+
 from __future__ import annotations
 
 import csv
-import sys
 from pathlib import Path
 
 import networkx as nx
@@ -63,7 +63,7 @@ def main() -> None:
     s = len(same_scc_after)
     print(f"missing-node edges (skipped): {missing_nodes}")
     print(f"rows where cause->effect not a graph edge: {not_an_edge}")
-    print(f"same SCC after removing cause->effect: {s} / {n} ({100.0*s/n:.1f}%)")
+    print(f"same SCC after removing cause->effect: {s} / {n} ({100.0 * s / n:.1f}%)")
     print(f"NOT same SCC (cycle already broken by removal): {n - s - missing_nodes}")
 
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)

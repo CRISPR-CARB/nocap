@@ -9,6 +9,7 @@ Inserts two cells after the existing §1b (Computational Limitations) section:
 Usage:
     uv run python scripts/patch_csd_scc_residual_notebook.py
 """
+
 from __future__ import annotations
 
 import json
@@ -144,6 +145,7 @@ CODE_CELL = {
 # ---------------------------------------------------------------------------
 # Patch the notebook
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     nb = json.loads(NB_PATH.read_text())

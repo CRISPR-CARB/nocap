@@ -5,14 +5,14 @@ Two canonical cases:
 Case 1 — No intervention needed (break_size == 0):
   Graph: A→B, B→C, C→A, A→D
   Edge under study: A→D
-  G' = G − {A→D}: D has no path back to A (D is a leaf), so A & D are in
+  G' = G - {A→D}: D has no path back to A (D is a leaf), so A & D are in
   different SCCs.
   Expected: needs_intervention=False, break_set=[], break_size=0, cut_verified=True
 
 Case 2 — Intervention needed, min-cut is exactly size 2:
   Graph: A→B, B→C, C→D, A→D, D→E, E→A, D→F, F→A
   Edge under study: A→D
-  G' = G − {A→D}: forward path A→B→C→D still keeps A and D in the same SCC.
+  G' = G - {A→D}: forward path A→B→C→D still keeps A and D in the same SCC.
   Two node-disjoint return paths from D to A: D→E→A and D→F→A.
   Min vertex cut requires both E and F (one per path), so break_size == 2.
   Expected: needs_intervention=True, break_set=['E','F'], break_size==2,
@@ -33,7 +33,6 @@ _REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(_REPO / "src"))
 
 from nocap.scc_perturb import min_scc_break_set  # noqa: E402
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -56,12 +55,18 @@ def _make_two_return_paths() -> nx.DiGraph:
       - Min vertex cut = {E, F} (one per return path), so break_size == 2.
     """
     g = nx.DiGraph()
-    g.add_edges_from([
-        ("A", "B"), ("B", "C"), ("C", "D"),  # forward path keeps A & D in same SCC
-        ("A", "D"),                           # edge under study
-        ("D", "E"), ("E", "A"),               # return path 1: D→E→A
-        ("D", "F"), ("F", "A"),               # return path 2: D→F→A
-    ])
+    g.add_edges_from(
+        [
+            ("A", "B"),
+            ("B", "C"),
+            ("C", "D"),  # forward path keeps A & D in same SCC
+            ("A", "D"),  # edge under study
+            ("D", "E"),
+            ("E", "A"),  # return path 1: D→E→A
+            ("D", "F"),
+            ("F", "A"),  # return path 2: D→F→A
+        ]
+    )
     return g
 
 

@@ -51,17 +51,19 @@ def main() -> None:
             shard = json.load(f)
         k_values.append(shard.get("k", 3))
         for row in shard.get("results", []):
-            rows.append({
-                "cause":                 row["cause"],
-                "effect":                row["effect"],
-                "nonident_cause":        row["nonident_cause"],
-                "same_scc_after_removal": row["same_scc_after_removal"],
-                "needs_intervention":    row["needs_intervention"],
-                "min_break_set":         json.dumps(row["min_break_set"]),
-                "min_break_size":        row["min_break_size"],
-                "rescuable_within_k":    row["rescuable_within_k"],
-                "cut_verified":          row["cut_verified"],
-            })
+            rows.append(
+                {
+                    "cause": row["cause"],
+                    "effect": row["effect"],
+                    "nonident_cause": row["nonident_cause"],
+                    "same_scc_after_removal": row["same_scc_after_removal"],
+                    "needs_intervention": row["needs_intervention"],
+                    "min_break_set": json.dumps(row["min_break_set"]),
+                    "min_break_size": row["min_break_size"],
+                    "rescuable_within_k": row["rescuable_within_k"],
+                    "cut_verified": row["cut_verified"],
+                }
+            )
         n_shards_loaded += 1
 
     df = pd.DataFrame(rows)
@@ -79,12 +81,10 @@ def main() -> None:
     n_not_rescuable = n_total - n_rescuable
 
     break_size_counts: dict[str, int] = {
-        str(k): int(v)
-        for k, v in Counter(df["min_break_size"].tolist()).items()
+        str(k): int(v) for k, v in Counter(df["min_break_size"].tolist()).items()
     }
     nonident_cause_counts: dict[str, int] = {
-        str(k): int(v)
-        for k, v in Counter(df["nonident_cause"].tolist()).items()
+        str(k): int(v) for k, v in Counter(df["nonident_cause"].tolist()).items()
     }
     n_cut_verified = int(df["cut_verified"].sum())
     n_cut_not_verified = n_total - n_cut_verified
@@ -92,16 +92,16 @@ def main() -> None:
     summary = {
         "n_unidentifiable_edges": n_total,
         "k_budget": k,
-        "n_no_intervention_needed":   n_no_intervention,
-        "n_needs_intervention":        n_needs_intervention,
-        "n_rescuable_within_k":        n_rescuable,
-        "n_not_rescuable_within_k":    n_not_rescuable,
-        "pct_rescuable":               round(100.0 * n_rescuable / n_total, 2) if n_total else 0.0,
-        "break_size_distribution":     break_size_counts,
+        "n_no_intervention_needed": n_no_intervention,
+        "n_needs_intervention": n_needs_intervention,
+        "n_rescuable_within_k": n_rescuable,
+        "n_not_rescuable_within_k": n_not_rescuable,
+        "pct_rescuable": round(100.0 * n_rescuable / n_total, 2) if n_total else 0.0,
+        "break_size_distribution": break_size_counts,
         "nonident_cause_distribution": nonident_cause_counts,
-        "n_cut_verified":              n_cut_verified,
-        "n_cut_not_verified":          n_cut_not_verified,
-        "n_shards_loaded":             n_shards_loaded,
+        "n_cut_verified": n_cut_verified,
+        "n_cut_not_verified": n_cut_not_verified,
+        "n_shards_loaded": n_shards_loaded,
     }
 
     output_summary.parent.mkdir(parents=True, exist_ok=True)
@@ -110,7 +110,7 @@ def main() -> None:
     print(f"break gather: summary written to {output_summary}")
     print(f"  no_intervention_needed : {n_no_intervention:,}")
     print(f"  needs_intervention     : {n_needs_intervention:,}")
-    print(f"  rescuable within k={k}  : {n_rescuable:,} ({100.0*n_rescuable/n_total:.1f}%)")
+    print(f"  rescuable within k={k}  : {n_rescuable:,} ({100.0 * n_rescuable / n_total:.1f}%)")
     print(f"  cut_verified           : {n_cut_verified:,} / {n_total:,}")
 
 

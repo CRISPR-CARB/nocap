@@ -47,18 +47,18 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
-
 
 # ---------------------------------------------------------------------------
 # Graph helpers (networkx imported lazily for fast startup)
 # ---------------------------------------------------------------------------
 
+
 def _load_graph(graphml_path: str):
     """Load the E. coli graphml and return an nx.DiGraph."""
     import networkx as nx
+
     G = nx.read_graphml(graphml_path)
     if not isinstance(G, nx.DiGraph):
         G = nx.DiGraph(G)
@@ -168,6 +168,7 @@ def _build_do_scc_info(G, perturb_set: frozenset) -> tuple[dict, dict]:
 # TF enumeration and baseline classification
 # ---------------------------------------------------------------------------
 
+
 def _enumerate_tfs(G) -> list[str]:
     """
     Return sorted list of all nodes with out-degree >= 1 (i.e., TFs / regulators).
@@ -217,15 +218,14 @@ def _classify_tfs(G, tfs: list[str]) -> tuple[list[str], list[str]]:
         else:
             unidentifiable.append(t)
 
-    assert len(identifiable) + len(unidentifiable) == len(tfs), (
-        "POST: all TFs must be classified"
-    )
+    assert len(identifiable) + len(unidentifiable) == len(tfs), "POST: all TFs must be classified"
     return identifiable, unidentifiable
 
 
 # ---------------------------------------------------------------------------
 # Candidate pool construction
 # ---------------------------------------------------------------------------
+
 
 def _build_candidate_pool(G, unidentifiable_tfs: list[str]) -> set:
     """
@@ -241,9 +241,11 @@ def _build_candidate_pool(G, unidentifiable_tfs: list[str]) -> set:
         modifies:
             none
     """
-    import networkx as nx
-    import sys
     import os
+    import sys
+
+    import networkx as nx
+
     # Ensure src/ is on the path
     src_dir = os.path.join(os.path.dirname(__file__), "..", "src")
     if src_dir not in sys.path:
@@ -277,6 +279,7 @@ def _build_candidate_pool(G, unidentifiable_tfs: list[str]) -> set:
 # ---------------------------------------------------------------------------
 # Greedy bank construction
 # ---------------------------------------------------------------------------
+
 
 def _greedy_bank(
     G,
@@ -334,7 +337,8 @@ def _greedy_bank(
             if chosen_genes:
                 cur_scc_map, cur_scc_sizes = _build_do_scc_info(G, current_set)
                 already_covered = {
-                    i for i in uncovered
+                    i
+                    for i in uncovered
                     if _is_singleton_scc(targets[i], cur_scc_map, cur_scc_sizes)
                 }
             else:
@@ -346,7 +350,8 @@ def _greedy_bank(
                 trial_set = current_set | frozenset([gene])
                 trial_scc_map, trial_scc_sizes = _build_do_scc_info(G, trial_set)
                 newly_covered = sum(
-                    1 for i in uncovered
+                    1
+                    for i in uncovered
                     if i not in already_covered
                     and _is_singleton_scc(targets[i], trial_scc_map, trial_scc_sizes)
                 )
@@ -361,19 +366,22 @@ def _greedy_bank(
                 current_set = frozenset(chosen_genes)
                 if verbose:
                     print(
-                        f"  Set {set_idx+1} step {step+1}/{k}: "
+                        f"  Set {set_idx + 1} step {step + 1}/{k}: "
                         f"added {best_gene!r} (+{best_gain} TF queries recovered)"
                     )
             else:
                 if verbose:
-                    print(f"  Set {set_idx+1} step {step+1}/{k}: no candidate improves coverage")
+                    print(
+                        f"  Set {set_idx + 1} step {step + 1}/{k}: no candidate improves coverage"
+                    )
                 break
 
         # Score this set against uncovered
         if current_set:
             final_scc_map, final_scc_sizes = _build_do_scc_info(G, current_set)
             newly_covered_indices = {
-                i for i in uncovered
+                i
+                for i in uncovered
                 if _is_singleton_scc(targets[i], final_scc_map, final_scc_sizes)
             }
         else:
@@ -383,30 +391,34 @@ def _greedy_bank(
         uncovered -= newly_covered_indices
         total_covered += newly_covered_count
 
-        results.append({
-            "set_index": set_idx + 1,
-            "genes": sorted(chosen_genes),
-            "proxy_recovered_new": newly_covered_count,
-            "proxy_covered_cumulative": total_covered,
-        })
+        results.append(
+            {
+                "set_index": set_idx + 1,
+                "genes": sorted(chosen_genes),
+                "proxy_recovered_new": newly_covered_count,
+                "proxy_covered_cumulative": total_covered,
+            }
+        )
 
         if verbose:
             print(
-                f"  Set {set_idx+1}: {sorted(chosen_genes)} "
+                f"  Set {set_idx + 1}: {sorted(chosen_genes)} "
                 f"-> +{newly_covered_count} TFs (cumulative: {total_covered})"
             )
 
         if not uncovered:
             if verbose:
-                print(f"  All targets covered after set {set_idx+1}; stopping early.")
+                print(f"  All targets covered after set {set_idx + 1}; stopping early.")
             # Pad remaining slots with empty sets
             for rem in range(set_idx + 1, n):
-                results.append({
-                    "set_index": rem + 1,
-                    "genes": [],
-                    "proxy_recovered_new": 0,
-                    "proxy_covered_cumulative": total_covered,
-                })
+                results.append(
+                    {
+                        "set_index": rem + 1,
+                        "genes": [],
+                        "proxy_recovered_new": 0,
+                        "proxy_covered_cumulative": total_covered,
+                    }
+                )
             break
 
     # POST
@@ -417,6 +429,7 @@ def _greedy_bank(
 # ---------------------------------------------------------------------------
 # Per-TF recovery status
 # ---------------------------------------------------------------------------
+
 
 def _score_per_tf(
     targets: list[str],
@@ -491,39 +504,53 @@ def _score_per_tf(
 # Output writers
 # ---------------------------------------------------------------------------
 
+
 def _write_bank_csv(bank: list[dict], path: Path) -> None:
     """Write per-set CSV."""
     import csv as csv_mod
+
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", newline="") as f:
         w = csv_mod.writer(f)
-        w.writerow([
-            "set_index", "genes", "n_genes",
-            "proxy_recovered_new", "proxy_covered_cumulative",
-        ])
+        w.writerow(
+            [
+                "set_index",
+                "genes",
+                "n_genes",
+                "proxy_recovered_new",
+                "proxy_covered_cumulative",
+            ]
+        )
         for item in bank:
-            w.writerow([
-                item["set_index"],
-                json.dumps(item["genes"]),
-                len(item["genes"]),
-                item["proxy_recovered_new"],
-                item["proxy_covered_cumulative"],
-            ])
+            w.writerow(
+                [
+                    item["set_index"],
+                    json.dumps(item["genes"]),
+                    len(item["genes"]),
+                    item["proxy_recovered_new"],
+                    item["proxy_covered_cumulative"],
+                ]
+            )
     print(f"Wrote bank CSV: {path}")
 
 
 def _write_tf_csv(tf_results: list[dict], path: Path) -> None:
     """Write per-TF recovery CSV."""
     import csv as csv_mod
+
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", newline="") as f:
         w = csv_mod.writer(f)
         w.writerow(["tf", "scc_size", "recovered", "recovered_by_set"])
         for e in tf_results:
-            w.writerow([
-                e["tf"], e["scc_size"],
-                e["recovered"], e["recovered_by_set"] or "",
-            ])
+            w.writerow(
+                [
+                    e["tf"],
+                    e["scc_size"],
+                    e["recovered"],
+                    e["recovered_by_set"] or "",
+                ]
+            )
     print(f"Wrote TF CSV: {path}")
 
 
@@ -558,17 +585,16 @@ def _update_summary(
         "n_recovered": final_covered,
         "n_still_unrecovered": n_unidentifiable - final_covered,
         "pct_recovered_of_unidentifiable": (
-            round(100.0 * final_covered / n_unidentifiable, 2)
-            if n_unidentifiable else 0
+            round(100.0 * final_covered / n_unidentifiable, 2) if n_unidentifiable else 0
         ),
         "pct_identifiable_after_recovery": (
-            round(100.0 * (n_identifiable + final_covered) / n_tfs, 2)
-            if n_tfs else 0
+            round(100.0 * (n_identifiable + final_covered) / n_tfs, 2) if n_tfs else 0
         ),
         "marginal_curve": marginal_curve,
         "chosen_sets": [
             {"set_index": item["set_index"], "genes": item["genes"]}
-            for item in bank if item["genes"]
+            for item in bank
+            if item["genes"]
         ],
     }
 
@@ -581,6 +607,7 @@ def _update_summary(
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     p = argparse.ArgumentParser(
@@ -650,8 +677,10 @@ def main() -> None:
     bank = _greedy_bank(G, unidentifiable, candidate_pool, args.n, args.k, verbose=verbose)
 
     proxy_total = bank[-1]["proxy_covered_cumulative"] if bank else 0
-    print(f"\nProxy recovery: {proxy_total}/{len(unidentifiable)} unidentifiable TFs "
-          f"({100.0*proxy_total/len(unidentifiable):.1f}%)")
+    print(
+        f"\nProxy recovery: {proxy_total}/{len(unidentifiable)} unidentifiable TFs "
+        f"({100.0 * proxy_total / len(unidentifiable):.1f}%)"
+    )
 
     # Per-TF recovery scoring
     print("Computing per-TF recovery status...")
@@ -665,17 +694,30 @@ def main() -> None:
     _write_bank_csv(bank, bank_csv)
     _write_tf_csv(tf_results, tf_csv)
     _update_summary(
-        summary_json, args.n, args.k,
-        len(tfs), len(identifiable), len(unidentifiable),
-        bank, tf_results,
+        summary_json,
+        args.n,
+        args.k,
+        len(tfs),
+        len(identifiable),
+        len(unidentifiable),
+        bank,
+        tf_results,
     )
 
     print(f"\n=== Done: n={args.n}, k={args.k} ===")
     print(f"  Total TFs:           {len(tfs)}")
-    print(f"  Baseline identifiable:    {len(identifiable)} ({100.0*len(identifiable)/len(tfs):.1f}%)")
-    print(f"  Baseline unidentifiable:  {len(unidentifiable)} ({100.0*len(unidentifiable)/len(tfs):.1f}%)")
-    print(f"  Recovered by bank:        {proxy_total} ({100.0*proxy_total/len(unidentifiable):.1f}% of unidentifiable)")
-    print(f"  Identifiable after recovery: {len(identifiable)+proxy_total} / {len(tfs)} ({100.0*(len(identifiable)+proxy_total)/len(tfs):.1f}%)")
+    print(
+        f"  Baseline identifiable:    {len(identifiable)} ({100.0 * len(identifiable) / len(tfs):.1f}%)"
+    )
+    print(
+        f"  Baseline unidentifiable:  {len(unidentifiable)} ({100.0 * len(unidentifiable) / len(tfs):.1f}%)"
+    )
+    print(
+        f"  Recovered by bank:        {proxy_total} ({100.0 * proxy_total / len(unidentifiable):.1f}% of unidentifiable)"
+    )
+    print(
+        f"  Identifiable after recovery: {len(identifiable) + proxy_total} / {len(tfs)} ({100.0 * (len(identifiable) + proxy_total) / len(tfs):.1f}%)"
+    )
     print(f"  Bank CSV: {bank_csv}")
     print(f"  TF CSV:   {tf_csv}")
     print(f"  Summary:  {summary_json}")

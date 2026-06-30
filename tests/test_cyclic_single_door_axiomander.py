@@ -304,8 +304,8 @@ class TestMaximizeIdentifiableEdgesContracts:
 # _split_into_n_shards contracts
 # ---------------------------------------------------------------------------
 
-import os as _os
-import sys
+import os as _os  # noqa: E402
+import sys  # noqa: E402
 
 sys.path.insert(0, _os.path.join(_os.path.dirname(__file__), "..", "scripts"))
 from cyclic_single_door_classify import _split_into_n_shards  # noqa: E402
@@ -359,9 +359,7 @@ class TestSplitIntoNShardsContracts:
         for n, s in [(1, 1), (10, 3), (100, 179), (9501, 179)]:
             edges = self._edges(n)
             chunks = _split_into_n_shards(edges, s)
-            assert sum(len(c) for c in chunks) == n, (
-                f"POST: total edges preserved for n={n}, s={s}"
-            )
+            assert sum(len(c) for c in chunks) == n, f"POST: total edges preserved for n={n}, s={s}"
 
     def test_post_no_empty_shards(self):
         """POST: all shards are non-empty."""
@@ -406,31 +404,51 @@ class TestRowToJsonableContracts:
 
     def test_post_frozenset_becomes_sorted_list(self):
         """POST: adjustment_set frozenset is converted to a sorted list."""
-        row = {"cause": "X", "effect": "Y", "status": "identifiable",
-               "adjustment_set": frozenset(["Z", "A", "M"]), "same_scc": False}
+        row = {
+            "cause": "X",
+            "effect": "Y",
+            "status": "identifiable",
+            "adjustment_set": frozenset(["Z", "A", "M"]),
+            "same_scc": False,
+        }
         result = _row_to_jsonable(row)
         assert isinstance(result["adjustment_set"], list)
         assert result["adjustment_set"] == sorted(["Z", "A", "M"])
 
     def test_post_none_adjustment_set_preserved(self):
         """POST: adjustment_set=None is left as None."""
-        row = {"cause": "X", "effect": "Y", "status": "unidentifiable",
-               "adjustment_set": None, "same_scc": True}
+        row = {
+            "cause": "X",
+            "effect": "Y",
+            "status": "unidentifiable",
+            "adjustment_set": None,
+            "same_scc": True,
+        }
         result = _row_to_jsonable(row)
         assert result["adjustment_set"] is None
 
     def test_post_no_frozenset_values(self):
         """POST: no frozenset values remain in the returned dict."""
-        row = {"cause": "A", "effect": "B", "status": "identifiable",
-               "adjustment_set": frozenset(["W"]), "same_scc": False}
+        row = {
+            "cause": "A",
+            "effect": "B",
+            "status": "identifiable",
+            "adjustment_set": frozenset(["W"]),
+            "same_scc": False,
+        }
         result = _row_to_jsonable(row)
         assert not any(isinstance(v, frozenset) for v in result.values())
 
     def test_post_does_not_mutate_input(self):
         """POST: original row dict is not mutated."""
         adj = frozenset(["Z"])
-        row = {"cause": "X", "effect": "Y", "status": "identifiable",
-               "adjustment_set": adj, "same_scc": False}
+        row = {
+            "cause": "X",
+            "effect": "Y",
+            "status": "identifiable",
+            "adjustment_set": adj,
+            "same_scc": False,
+        }
         _row_to_jsonable(row)
         assert isinstance(row["adjustment_set"], frozenset), (
             "POST: original row must not be mutated"
@@ -485,16 +503,18 @@ class TestEvaluateAllEdgesTimeoutContracts:
         # 60-second wall-clock wait.
         # The structural contract: any row with status=="timeout" must carry
         # timed_out=True and adjustment_set=None.
-        from nocap.cyclic_single_door import _EdgeTimeout, _timeout_context
-
         # Verify _timeout_context raises _EdgeTimeout after alarm (positive path)
         import signal
+
+        from nocap.cyclic_single_door import _EdgeTimeout, _timeout_context
+
         if not hasattr(signal, "SIGALRM"):
             pytest.skip("SIGALRM not available on this platform")
 
         with pytest.raises(_EdgeTimeout):
             with _timeout_context(1):
                 import time
+
                 time.sleep(5)  # will be interrupted after 1 s
 
     def test_post_timeout_row_structure(self):
@@ -516,15 +536,11 @@ class TestEvaluateAllEdgesTimeoutContracts:
         assert timeout_row["adjustment_set"] is None, (
             "POST: timed-out row must have adjustment_set=None"
         )
-        assert timeout_row.get("timed_out") is True, (
-            "POST: timed-out row must carry timed_out=True"
-        )
+        assert timeout_row.get("timed_out") is True, "POST: timed-out row must carry timed_out=True"
 
     def test_post_non_timeout_row_no_timed_out_key(self):
         """POST: normal rows do not carry the timed_out key."""
         g = _chain()
         results = evaluate_all_edges(g)
         for r in results:
-            assert "timed_out" not in r, (
-                f"POST: normal row must not have timed_out key: {r}"
-            )
+            assert "timed_out" not in r, f"POST: normal row must not have timed_out key: {r}"

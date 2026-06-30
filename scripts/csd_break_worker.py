@@ -3,7 +3,7 @@
 For each unidentifiable edge cause→effect in a shard this worker:
   1. Classifies the *cause* of non-identifiability (reuses classify_nonident_cause).
   2. Calls ``min_scc_break_set`` to find the minimum vertex set B such that
-     do(B) on G' = G − {cause→effect} separates cause and effect into
+     do(B) on G' = G - {cause→effect} separates cause and effect into
      different SCCs, making the edge single-door identifiable.
   3. Reports whether the edge is rescuable within budget k (default k=3).
 
@@ -29,7 +29,7 @@ Output schema per row
         "cause":                 str,
         "effect":                str,
         "nonident_cause":        one of CAUSE_CATEGORIES,
-        "same_scc_after_removal": bool,   # same SCC in G' = G − {cause→effect}
+        "same_scc_after_removal": bool,   # same SCC in G' = G - {cause→effect}
         "needs_intervention":    bool,    # False → O-adjustment suffices
         "min_break_set":         list[str],
         "min_break_size":        int,
@@ -54,11 +54,11 @@ import networkx as nx
 _REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(_REPO / "src"))
 
-from nocap.scc_perturb import min_scc_break_set  # noqa: E402
+from nocap.scc_perturb import min_scc_break_set
 
 # Reuse the non-identifiability cause classifier from the rescue pipeline
 sys.path.insert(0, str(_REPO / "scripts"))
-from csd_rescue_worker import classify_nonident_cause  # noqa: E402
+from csd_rescue_worker import classify_nonident_cause
 
 # ---------------------------------------------------------------------------
 # Shard runner
@@ -118,9 +118,7 @@ def run_shard(graphml: Path, shard_path: Path, output_path: Path, k: int) -> Non
             nonident_cause = classify_nonident_cause(g, cause, effect)
             info = min_scc_break_set(cause, effect, g)
 
-            rescuable = (not info["needs_intervention"]) or (
-                0 < info["break_size"] <= k
-            )
+            rescuable = (not info["needs_intervention"]) or (0 < info["break_size"] <= k)
 
             row = {
                 "cause": cause,

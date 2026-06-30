@@ -61,7 +61,7 @@ def main() -> None:
     csv_path = Path(args.output_csv)
     csv_path.parent.mkdir(parents=True, exist_ok=True)
 
-    fieldnames = ["cause", "effect", "status", "adjustment_set", "same_scc", "timed_out"]
+    fieldnames = ["cause", "effect", "status", "adjustment_set", "same_scc"]
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
@@ -70,7 +70,6 @@ def main() -> None:
             adj = row.get("adjustment_set")
             row_out = {k: row.get(k) for k in fieldnames}
             row_out["adjustment_set"] = "|".join(sorted(adj)) if adj is not None else ""
-            row_out["timed_out"] = row.get("timed_out", False)
             writer.writerow(row_out)
 
     # Compute summary statistics

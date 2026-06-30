@@ -11,7 +11,6 @@ Usage
 from __future__ import annotations
 
 import json
-import os
 import sys
 import tempfile
 from pathlib import Path
@@ -22,7 +21,6 @@ _REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(_REPO / "src"))
 sys.path.insert(0, str(_REPO / "scripts"))
 
-from nocap.scc_perturb import min_scc_break_set  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Build tiny test graph (same as test_csd_break.py Case 2)
@@ -37,20 +35,31 @@ from nocap.scc_perturb import min_scc_break_set  # noqa: E402
 
 def _build_graph() -> nx.DiGraph:
     g = nx.DiGraph()
-    g.add_edges_from([
-        ("A", "B"), ("B", "C"), ("C", "D"),  # forward path keeps A & D in same SCC
-        ("A", "D"),                           # edge under study
-        ("D", "E"), ("E", "A"),               # return path 1: D→E→A
-        ("D", "F"), ("F", "A"),               # return path 2: D→F→A
-    ])
+    g.add_edges_from(
+        [
+            ("A", "B"),
+            ("B", "C"),
+            ("C", "D"),  # forward path keeps A & D in same SCC
+            ("A", "D"),  # edge under study
+            ("D", "E"),
+            ("E", "A"),  # return path 1: D→E→A
+            ("D", "F"),
+            ("F", "A"),  # return path 2: D→F→A
+        ]
+    )
     return g
 
 
 EXPECTED_SCHEMA = {
-    "cause", "effect", "nonident_cause",
-    "same_scc_after_removal", "needs_intervention",
-    "min_break_set", "min_break_size",
-    "rescuable_within_k", "cut_verified",
+    "cause",
+    "effect",
+    "nonident_cause",
+    "same_scc_after_removal",
+    "needs_intervention",
+    "min_break_set",
+    "min_break_size",
+    "rescuable_within_k",
+    "cut_verified",
 }
 
 K = 3
@@ -78,7 +87,7 @@ def run_smoke() -> None:
         output_path = tmpdir_path / "out" / "shard_0.json"
 
         # --- Run worker logic directly (no subprocess) ---
-        from csd_break_worker import run_shard  # noqa: E402
+        from csd_break_worker import run_shard
 
         run_shard(
             graphml=graphml_path,
@@ -117,7 +126,7 @@ def run_smoke() -> None:
 
         # Case: A→B — B is in the same SCC as A in G': cycle A→B→C→A persists
         # needs_intervention depends on whether A & B remain in same SCC after
-        # removing A→B. In G'=G−{A→B}: B can reach A via B→C→A, A can reach B
+        # removing A→B. In G'=G-{A→B}: B can reach A via B→C→A, A can reach B
         # only via... A→D→E→B or A→... but A→D→E→B is a path, so still same SCC.
         # We just check schema and that break_set excludes cause/effect.
         row_ab = next(r for r in rows if r["cause"] == "A" and r["effect"] == "B")
@@ -126,12 +135,16 @@ def run_smoke() -> None:
         assert isinstance(row_ab["rescuable_within_k"], bool), "FAIL: rescuable_within_k type"
 
     print("smoke_csd_break: ALL CHECKS PASSED")
-    print(f"  A→D: needs_intervention={row_ad['needs_intervention']}, "
-          f"break_size={row_ad['min_break_size']}, break_set={row_ad['min_break_set']}, "
-          f"cut_verified={row_ad['cut_verified']}")
-    print(f"  A→B: needs_intervention={row_ab['needs_intervention']}, "
-          f"break_size={row_ab['min_break_size']}, break_set={row_ab['min_break_set']}, "
-          f"cut_verified={row_ab['cut_verified']}")
+    print(
+        f"  A→D: needs_intervention={row_ad['needs_intervention']}, "
+        f"break_size={row_ad['min_break_size']}, break_set={row_ad['min_break_set']}, "
+        f"cut_verified={row_ad['cut_verified']}"
+    )
+    print(
+        f"  A→B: needs_intervention={row_ab['needs_intervention']}, "
+        f"break_size={row_ab['min_break_size']}, break_set={row_ab['min_break_set']}, "
+        f"cut_verified={row_ab['cut_verified']}"
+    )
 
 
 if __name__ == "__main__":

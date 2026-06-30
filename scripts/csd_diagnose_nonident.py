@@ -15,6 +15,7 @@ Outputs:
     notebooks/Ecoli_Analysis_Notebooks/csd_nonident_summary.json
         keys: cause_counts, total_unidentifiable
 """
+
 from __future__ import annotations
 
 import json
@@ -27,7 +28,7 @@ import pandas as pd
 REPO = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO / "scripts"))
 
-from csd_rescue_worker import CAUSE_CATEGORIES, classify_nonident_cause  # noqa: E402
+from csd_rescue_worker import CAUSE_CATEGORIES, classify_nonident_cause
 
 NB_DIR = REPO / "notebooks" / "Ecoli_Analysis_Notebooks"
 GRAPHML = NB_DIR / "ecoli_full_network_no_small_rna.graphml"
@@ -59,15 +60,15 @@ def main() -> None:
     cause_counts = unident["nonident_cause"].value_counts()
     print(cause_counts.to_string())
 
-    assert all(
-        c in list(CAUSE_CATEGORIES) + ["unknown"] for c in cause_counts.index
-    ), "POST: all causes must be valid category labels"
+    assert all(c in [*list(CAUSE_CATEGORIES), "unknown"] for c in cause_counts.index), (
+        "POST: all causes must be valid category labels"
+    )
 
     unident.to_csv(OUT_CSV, index=False)
     print(f"\nWrote {len(unident):,} rows to {OUT_CSV}")
 
     summary = {
-        "total_unidentifiable": int(len(unident)),
+        "total_unidentifiable": len(unident),
         "cause_counts": {k: int(v) for k, v in cause_counts.items()},
     }
     with open(OUT_JSON, "w") as f:

@@ -44,10 +44,10 @@ import json
 import sys
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _default_classified_dir() -> Path:
     """Return the default classified-shards directory relative to this script."""
@@ -80,6 +80,7 @@ def _load_all_results(classified_dir: Path) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Modes
 # ---------------------------------------------------------------------------
+
 
 def cmd_summary(classified_dir: Path, manifest_path: Path) -> None:
     """Print aggregate counts (default mode)."""
@@ -182,12 +183,12 @@ def cmd_errors(
             lines = log_file.read_text(errors="replace").splitlines()
         except OSError:
             continue
-        fail_lines = [l for l in lines if "[FAIL ]" in l]
+        fail_lines = [ln for ln in lines if "[FAIL ]" in ln]
         if fail_lines:
             fail_found = True
             print(f"  {log_file.name}:")
-            for l in fail_lines:
-                print(f"    {l}")
+            for ln in fail_lines:
+                print(f"    {ln}")
     if not fail_found:
         print("  No [FAIL] markers found.")
     print()
@@ -204,8 +205,8 @@ def cmd_errors(
             tb_found = True
             lines = text.splitlines()
             print(f"  --- {err_file.name} (last 20 lines) ---")
-            for l in lines[-20:]:
-                print(f"    {l}")
+            for ln in lines[-20:]:
+                print(f"    {ln}")
             print()
     if not tb_found:
         print("  No Traceback found in any .err log so far.")
@@ -240,6 +241,7 @@ def cmd_csv(classified_dir: Path, output_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(

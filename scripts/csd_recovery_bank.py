@@ -59,14 +59,15 @@ import os
 import sys
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # Graph helpers (no networkx at module level to keep startup fast; imported lazily)
 # ---------------------------------------------------------------------------
 
+
 def _load_graph(graphml_path: str):
     """Load the E.coli graphml and return an nx.DiGraph."""
     import networkx as nx
+
     G = nx.read_graphml(graphml_path)
     if not isinstance(G, nx.DiGraph):
         G = nx.DiGraph(G)
@@ -161,6 +162,7 @@ def _exact_recovered(cause: str, effect: str, G, perturb_set: frozenset) -> bool
 # Data loading
 # ---------------------------------------------------------------------------
 
+
 def _load_targets(classification_csv: str) -> list[dict]:
     """
     Load unidentifiable edges from classification_results.csv.
@@ -177,11 +179,13 @@ def _load_targets(classification_csv: str) -> list[dict]:
     with open(classification_csv, newline="") as f:
         for row in csv.DictReader(f):
             if row["status"] == "unidentifiable":
-                targets.append({
-                    "cause": row["cause"],
-                    "effect": row["effect"],
-                    "same_scc": row.get("same_scc", "").strip().lower() == "true",
-                })
+                targets.append(
+                    {
+                        "cause": row["cause"],
+                        "effect": row["effect"],
+                        "same_scc": row.get("same_scc", "").strip().lower() == "true",
+                    }
+                )
     assert len(targets) > 0, "POST: must have at least one unidentifiable edge"
     return targets
 
@@ -219,6 +223,7 @@ def _load_candidate_pool(break_csv: str) -> tuple[set, dict]:
 # ---------------------------------------------------------------------------
 # Greedy bank construction
 # ---------------------------------------------------------------------------
+
 
 def _greedy_bank(
     G,
@@ -276,7 +281,8 @@ def _greedy_bank(
             if chosen_genes:
                 cur_scc_map = _build_do_scc_map(G, current_set)
                 already_covered = {
-                    i for i in uncovered
+                    i
+                    for i in uncovered
                     if _proxy_recovered(targets[i]["cause"], targets[i]["effect"], cur_scc_map)
                 }
             else:
@@ -288,7 +294,8 @@ def _greedy_bank(
                 trial_set = current_set | frozenset([gene])
                 trial_scc_map = _build_do_scc_map(G, trial_set)
                 newly_covered = sum(
-                    1 for i in uncovered
+                    1
+                    for i in uncovered
                     if i not in already_covered
                     and _proxy_recovered(targets[i]["cause"], targets[i]["effect"], trial_scc_map)
                 )
@@ -303,19 +310,22 @@ def _greedy_bank(
                 current_set = frozenset(chosen_genes)
                 if verbose:
                     print(
-                        f"  Set {set_idx+1} step {step+1}/{k}: "
+                        f"  Set {set_idx + 1} step {step + 1}/{k}: "
                         f"added {best_gene!r} (+{best_gain} proxy edges)"
                     )
             else:
                 if verbose:
-                    print(f"  Set {set_idx+1} step {step+1}/{k}: no candidate improves coverage")
+                    print(
+                        f"  Set {set_idx + 1} step {step + 1}/{k}: no candidate improves coverage"
+                    )
                 break
 
         # Score this set against uncovered
         if current_set:
             final_scc_map = _build_do_scc_map(G, current_set)
             newly_covered_indices = {
-                i for i in uncovered
+                i
+                for i in uncovered
                 if _proxy_recovered(targets[i]["cause"], targets[i]["effect"], final_scc_map)
             }
         else:
@@ -325,30 +335,34 @@ def _greedy_bank(
         uncovered -= newly_covered_indices
         total_covered += newly_covered_count
 
-        results.append({
-            "set_index": set_idx + 1,
-            "genes": sorted(chosen_genes),
-            "proxy_recovered_new": newly_covered_count,
-            "proxy_covered_cumulative": total_covered,
-        })
+        results.append(
+            {
+                "set_index": set_idx + 1,
+                "genes": sorted(chosen_genes),
+                "proxy_recovered_new": newly_covered_count,
+                "proxy_covered_cumulative": total_covered,
+            }
+        )
 
         if verbose:
             print(
-                f"  Set {set_idx+1}: {sorted(chosen_genes)} "
+                f"  Set {set_idx + 1}: {sorted(chosen_genes)} "
                 f"-> +{newly_covered_count} (cumulative: {total_covered})"
             )
 
         if not uncovered:
             if verbose:
-                print(f"  All targets covered after set {set_idx+1}; stopping early.")
+                print(f"  All targets covered after set {set_idx + 1}; stopping early.")
             # Pad remaining slots with empty sets
             for rem in range(set_idx + 1, n):
-                results.append({
-                    "set_index": rem + 1,
-                    "genes": [],
-                    "proxy_recovered_new": 0,
-                    "proxy_covered_cumulative": total_covered,
-                })
+                results.append(
+                    {
+                        "set_index": rem + 1,
+                        "genes": [],
+                        "proxy_recovered_new": 0,
+                        "proxy_covered_cumulative": total_covered,
+                    }
+                )
             break
 
     # POST
@@ -359,6 +373,7 @@ def _greedy_bank(
 # ---------------------------------------------------------------------------
 # Exact final verification
 # ---------------------------------------------------------------------------
+
 
 def _exact_verify_bank(
     G,
@@ -402,7 +417,9 @@ def _exact_verify_bank(
     for item in bank:
         genes = item["genes"]
         if not genes:
-            bank_exact.append({**item, "exact_recovered_new": 0, "exact_covered_cumulative": total_exact})
+            bank_exact.append(
+                {**item, "exact_recovered_new": 0, "exact_covered_cumulative": total_exact}
+            )
             continue
 
         perturb_set = frozenset(genes)
@@ -419,11 +436,13 @@ def _exact_verify_bank(
             edge_status[i]["recovered_by_set"] = item["set_index"]
 
         total_exact += len(newly_exact)
-        bank_exact.append({
-            **item,
-            "exact_recovered_new": len(newly_exact),
-            "exact_covered_cumulative": total_exact,
-        })
+        bank_exact.append(
+            {
+                **item,
+                "exact_recovered_new": len(newly_exact),
+                "exact_covered_cumulative": total_exact,
+            }
+        )
 
     # POST
     n_recovered = sum(1 for e in edge_status if e["recovered"])
@@ -436,26 +455,35 @@ def _exact_verify_bank(
 # Output writers
 # ---------------------------------------------------------------------------
 
+
 def _write_bank_csv(bank_exact: list[dict], path: Path, n: int, k: int) -> None:
     """Write per-set CSV."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow([
-            "set_index", "genes", "n_genes",
-            "proxy_recovered_new", "proxy_covered_cumulative",
-            "exact_recovered_new", "exact_covered_cumulative",
-        ])
+        w.writerow(
+            [
+                "set_index",
+                "genes",
+                "n_genes",
+                "proxy_recovered_new",
+                "proxy_covered_cumulative",
+                "exact_recovered_new",
+                "exact_covered_cumulative",
+            ]
+        )
         for item in bank_exact:
-            w.writerow([
-                item["set_index"],
-                json.dumps(item["genes"]),
-                len(item["genes"]),
-                item["proxy_recovered_new"],
-                item["proxy_covered_cumulative"],
-                item.get("exact_recovered_new", ""),
-                item.get("exact_covered_cumulative", ""),
-            ])
+            w.writerow(
+                [
+                    item["set_index"],
+                    json.dumps(item["genes"]),
+                    len(item["genes"]),
+                    item["proxy_recovered_new"],
+                    item["proxy_covered_cumulative"],
+                    item.get("exact_recovered_new", ""),
+                    item.get("exact_covered_cumulative", ""),
+                ]
+            )
     print(f"Wrote bank CSV: {path}")
 
 
@@ -466,16 +494,28 @@ def _write_edge_csv(edge_results: list[dict], path: Path) -> None:
         w = csv.writer(f)
         w.writerow(["cause", "effect", "same_scc", "recovered", "recovered_by_set"])
         for e in edge_results:
-            w.writerow([
-                e["cause"], e["effect"], e["same_scc"],
-                e["recovered"], e["recovered_by_set"] or "",
-            ])
+            w.writerow(
+                [
+                    e["cause"],
+                    e["effect"],
+                    e["same_scc"],
+                    e["recovered"],
+                    e["recovered_by_set"] or "",
+                ]
+            )
     print(f"Wrote edge CSV: {path}")
 
 
-def _update_summary(summary_path: Path, n: int, k: int, targets: list[dict],
-                    bank_exact: list[dict], edge_results: list[dict],
-                    proxy_gap: int, n_universe: int) -> None:
+def _update_summary(
+    summary_path: Path,
+    n: int,
+    k: int,
+    targets: list[dict],
+    bank_exact: list[dict],
+    edge_results: list[dict],
+    proxy_gap: int,
+    n_universe: int,
+) -> None:
     """Append/update the shared summary JSON with this run's results."""
     # Load existing summary if present
     if summary_path.exists():
@@ -503,14 +543,19 @@ def _update_summary(summary_path: Path, n: int, k: int, targets: list[dict],
         "n_universe": n_universe,
         "n_recovered_exact": final_exact,
         "pct_recovered_of_unident": round(100.0 * final_exact / n_total, 2) if n_total else 0,
-        "pct_recovered_of_same_scc": round(100.0 * n_recovered_same_scc / n_same_scc, 2) if n_same_scc else 0,
-        "pct_recovered_of_universe": round(100.0 * final_exact / n_universe, 2) if n_universe else 0,
+        "pct_recovered_of_same_scc": round(100.0 * n_recovered_same_scc / n_same_scc, 2)
+        if n_same_scc
+        else 0,
+        "pct_recovered_of_universe": round(100.0 * final_exact / n_universe, 2)
+        if n_universe
+        else 0,
         "proxy_total": bank_exact[-1]["proxy_covered_cumulative"] if bank_exact else 0,
         "proxy_vs_exact_gap": proxy_gap,
         "marginal_curve_exact": marginal_curve,
         "chosen_sets": [
             {"set_index": item["set_index"], "genes": item["genes"]}
-            for item in bank_exact if item["genes"]
+            for item in bank_exact
+            if item["genes"]
         ],
     }
 
@@ -524,22 +569,31 @@ def _update_summary(summary_path: Path, n: int, k: int, targets: list[dict],
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     p = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("--graphml", required=True, help="E.coli GraphML file.")
-    p.add_argument("--classification", required=True,
-                   help="classification_results.csv (from cyclic_single_door gather).")
-    p.add_argument("--break-csv", required=True,
-                   help="csd_break_results_full.csv (per-edge min break sets, full run).")
+    p.add_argument(
+        "--classification",
+        required=True,
+        help="classification_results.csv (from cyclic_single_door gather).",
+    )
+    p.add_argument(
+        "--break-csv",
+        required=True,
+        help="csd_break_results_full.csv (per-edge min break sets, full run).",
+    )
     p.add_argument("--n", type=int, required=True, help="Number of perturbation sets.")
     p.add_argument("--k", type=int, required=True, help="Genes per set.")
-    p.add_argument("--output-dir", required=True,
-                   help="Directory to write output CSVs and summary JSON.")
-    p.add_argument("--n-universe", type=int, default=9211,
-                   help="Total valid edge pairs (default: 9211).")
+    p.add_argument(
+        "--output-dir", required=True, help="Directory to write output CSVs and summary JSON."
+    )
+    p.add_argument(
+        "--n-universe", type=int, default=9211, help="Total valid edge pairs (default: 9211)."
+    )
     p.add_argument("--quiet", action="store_true", help="Suppress per-step output.")
     args = p.parse_args()
 
@@ -562,8 +616,10 @@ def main() -> None:
     print("Loading unidentifiable targets...")
     targets = _load_targets(args.classification)
     n_same_scc = sum(1 for t in targets if t["same_scc"])
-    print(f"  Targets: {len(targets)} unidentifiable edges ({n_same_scc} same-SCC, "
-          f"{len(targets)-n_same_scc} not same-SCC)")
+    print(
+        f"  Targets: {len(targets)} unidentifiable edges ({n_same_scc} same-SCC, "
+        f"{len(targets) - n_same_scc} not same-SCC)"
+    )
 
     # Load candidate pool
     print("Loading SCC-break candidate pool...")
@@ -579,8 +635,10 @@ def main() -> None:
     bank = _greedy_bank(G, targets, candidate_pool, args.n, args.k, verbose=verbose)
 
     proxy_total = bank[-1]["proxy_covered_cumulative"] if bank else 0
-    print(f"\nProxy recovery: {proxy_total}/{len(targets)} "
-          f"({100.0*proxy_total/len(targets):.1f}%)")
+    print(
+        f"\nProxy recovery: {proxy_total}/{len(targets)} "
+        f"({100.0 * proxy_total / len(targets):.1f}%)"
+    )
 
     # Exact final verification
     print("\nRunning exact final verification...")
@@ -588,10 +646,10 @@ def main() -> None:
     exact_total = bank_exact[-1]["exact_covered_cumulative"] if bank_exact else 0
     proxy_gap = proxy_total - exact_total
 
-    print(f"Exact recovery: {exact_total}/{len(targets)} "
-          f"({100.0*exact_total/len(targets):.1f}%)")
-    print(f"Proxy-vs-exact gap: {proxy_gap} edges "
-          f"(proxy over-counts by {proxy_gap})")
+    print(
+        f"Exact recovery: {exact_total}/{len(targets)} ({100.0 * exact_total / len(targets):.1f}%)"
+    )
+    print(f"Proxy-vs-exact gap: {proxy_gap} edges (proxy over-counts by {proxy_gap})")
 
     # Write outputs
     bank_csv = out_dir / f"csd_recovery_n{args.n}_k{args.k}.csv"
@@ -601,18 +659,28 @@ def main() -> None:
     _write_bank_csv(bank_exact, bank_csv, args.n, args.k)
     _write_edge_csv(edge_results, edge_csv)
     _update_summary(
-        summary_json, args.n, args.k, targets, bank_exact, edge_results,
-        proxy_gap, args.n_universe,
+        summary_json,
+        args.n,
+        args.k,
+        targets,
+        bank_exact,
+        edge_results,
+        proxy_gap,
+        args.n_universe,
     )
 
     print(f"\n=== Done: n={args.n}, k={args.k} ===")
     print(f"  Bank CSV:  {bank_csv}")
     print(f"  Edge CSV:  {edge_csv}")
     print(f"  Summary:   {summary_json}")
-    print(f"  Exact recovered: {exact_total}/{len(targets)} unidentifiable edges "
-          f"({100.0*exact_total/len(targets):.1f}%)")
-    print(f"  Same-SCC ceiling: {n_same_scc} edges "
-          f"({100.0*n_same_scc/len(targets):.1f}% of unidentifiable)")
+    print(
+        f"  Exact recovered: {exact_total}/{len(targets)} unidentifiable edges "
+        f"({100.0 * exact_total / len(targets):.1f}%)"
+    )
+    print(
+        f"  Same-SCC ceiling: {n_same_scc} edges "
+        f"({100.0 * n_same_scc / len(targets):.1f}% of unidentifiable)"
+    )
 
 
 if __name__ == "__main__":

@@ -28,6 +28,7 @@ Output:
 Usage:
     uv run python scripts/csd_scc_residual_analysis.py
 """
+
 from __future__ import annotations
 
 import time
@@ -37,7 +38,9 @@ import networkx as nx
 import pandas as pd
 
 REPO = Path(__file__).parent.parent
-GRAPHML = REPO / "notebooks" / "Ecoli_Analysis_Notebooks" / "ecoli_full_network_no_small_rna.graphml"
+GRAPHML = (
+    REPO / "notebooks" / "Ecoli_Analysis_Notebooks" / "ecoli_full_network_no_small_rna.graphml"
+)
 CSD_CSV = REPO / "notebooks" / "Ecoli_Analysis_Notebooks" / "csd_results.csv"
 OUT_DIR = REPO / "results" / "cyclic_single_door"
 OUT_CSV = OUT_DIR / "csd_scc_residual.csv"
@@ -46,6 +49,7 @@ OUT_CSV = OUT_DIR / "csd_scc_residual.csv"
 # ---------------------------------------------------------------------------
 # Core per-edge function
 # ---------------------------------------------------------------------------
+
 
 def residual_scc_info(
     g: nx.DiGraph,
@@ -87,9 +91,9 @@ def residual_scc_info(
         # other paths exist, or may be a singleton).
         sub = nx.DiGraph(g.subgraph(scc_sets[sid_u]))
         sub.remove_edge(u, v)
-        sccs_after = {n: cid for cid, comp in
-                      enumerate(nx.strongly_connected_components(sub))
-                      for n in comp}
+        sccs_after = {
+            n: cid for cid, comp in enumerate(nx.strongly_connected_components(sub)) for n in comp
+        }
         row["same_scc_after"] = False  # self-loop can't be "same" after removal
         row["scc_size_u_after"] = sum(1 for n in sub if sccs_after[n] == sccs_after[u])
         row["scc_size_v_after"] = row["scc_size_u_after"]  # same node
@@ -106,9 +110,9 @@ def residual_scc_info(
     nodes_in_scc = scc_sets[sid_u]
     sub = nx.DiGraph(g.subgraph(nodes_in_scc))
     sub.remove_edge(u, v)
-    sccs_after = {n: cid for cid, comp in
-                  enumerate(nx.strongly_connected_components(sub))
-                  for n in comp}
+    sccs_after = {
+        n: cid for cid, comp in enumerate(nx.strongly_connected_components(sub)) for n in comp
+    }
     same_after = sccs_after[u] == sccs_after[v]
     row["same_scc_after"] = same_after
     row["scc_size_u_after"] = sum(1 for n in sub if sccs_after[n] == sccs_after[u])
@@ -119,6 +123,7 @@ def residual_scc_info(
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     t0 = time.time()
@@ -154,25 +159,36 @@ def main() -> None:
         u, v = row.cause, row.effect
         if u not in scc_map or v not in scc_map:
             # Node not in graphml (shouldn't happen, but handle gracefully)
-            rows.append({
-                "cause": u, "effect": v, "status": row.status,
+            rows.append(
+                {
+                    "cause": u,
+                    "effect": v,
+                    "status": row.status,
+                    "adjustment_set": row.adjustment_set,
+                    "same_scc": row.same_scc,
+                    "timed_out": row.timed_out,
+                    "is_self_loop": str(u) == str(v),
+                    "scc_id_before": -1,
+                    "scc_size_before": 0,
+                    "same_scc_before": False,
+                    "same_scc_after": None,
+                    "scc_size_u_after": None,
+                    "scc_size_v_after": None,
+                }
+            )
+            continue
+        info = residual_scc_info(g, str(u), str(v), scc_map, scc_sets, scc_sizes)
+        rows.append(
+            {
+                "cause": u,
+                "effect": v,
+                "status": row.status,
                 "adjustment_set": row.adjustment_set,
                 "same_scc": row.same_scc,
                 "timed_out": row.timed_out,
-                "is_self_loop": str(u) == str(v),
-                "scc_id_before": -1, "scc_size_before": 0,
-                "same_scc_before": False, "same_scc_after": None,
-                "scc_size_u_after": None, "scc_size_v_after": None,
-            })
-            continue
-        info = residual_scc_info(g, str(u), str(v), scc_map, scc_sets, scc_sizes)
-        rows.append({
-            "cause": u, "effect": v, "status": row.status,
-            "adjustment_set": row.adjustment_set,
-            "same_scc": row.same_scc,
-            "timed_out": row.timed_out,
-            **info,
-        })
+                **info,
+            }
+        )
         if i % 1000 == 0:
             print(f"  {i:,}/{len(df):,} edges processed ...", flush=True)
 
@@ -182,7 +198,7 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     result.to_csv(OUT_CSV, index=False)
     t1 = time.time()
-    print(f"\nWrote {OUT_CSV}  ({len(result):,} rows, {t1-t0:.1f}s)")
+    print(f"\nWrote {OUT_CSV}  ({len(result):,} rows, {t1 - t0:.1f}s)")
 
     # ----- Step 4: report -----
     _print_report(result)
@@ -213,7 +229,7 @@ def _print_report(result: pd.DataFrame) -> None:
     # Giant SCC size = 68; bucket at >=50 captures it.
     print("\n  SCC-size-before distribution by status (non-self-loops)")
     bin_edges = [0, 1, 2, 5, 10, 50, 10_000]
-    labels    = ["1", "2-4", "5-9", "10-49", "50-68 (giant)", "large"]
+    labels = ["1", "2-4", "5-9", "10-49", "50-68 (giant)", "large"]
     # Ensure labels == len(bin_edges)-1
     labels = labels[: len(bin_edges) - 1]
     non_self = non_self.copy()
@@ -232,9 +248,11 @@ def _print_report(result: pd.DataFrame) -> None:
     for status in ["identifiable", "unidentifiable", "timeout"]:
         sub = non_self[non_self.status == status]
         n_giant = (sub.scc_size_before >= GIANT_THRESH).sum()
-        print(f"  {status:15s}: {len(sub):5,} total, "
-              f"{n_giant:5,} with scc_size_before>={GIANT_THRESH}  "
-              f"({100.0*n_giant/len(sub) if len(sub) else 0:.1f}%)")
+        print(
+            f"  {status:15s}: {len(sub):5,} total, "
+            f"{n_giant:5,} with scc_size_before>={GIANT_THRESH}  "
+            f"({100.0 * n_giant / len(sub) if len(sub) else 0:.1f}%)"
+        )
 
     print("=" * 65)
 

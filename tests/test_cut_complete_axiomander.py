@@ -44,6 +44,7 @@ from nocap.scc_perturb import verify_cut_complete
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _digraph(*edges) -> nx.DiGraph:
     """Build a DiGraph from a sequence of (src, dst) tuples."""
     g = nx.DiGraph()
@@ -54,6 +55,7 @@ def _digraph(*edges) -> nx.DiGraph:
 # ---------------------------------------------------------------------------
 # 1. 2-cycle: Interpretation A cut failure
 # ---------------------------------------------------------------------------
+
 
 class TestTwoCycleCutFailure:
     """
@@ -72,47 +74,36 @@ class TestTwoCycleCutFailure:
         self.min_cut = []
 
     def test_complete_is_false(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
-        assert result["complete"] is False, (
-            "2-cycle with empty B(t) must yield complete=False"
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
+        assert result["complete"] is False, "2-cycle with empty B(t) must yield complete=False"
 
     def test_tf_still_cyclic(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["tf_still_cyclic"] is True, (
             "TF must still be cyclic when 2-cycle survives do([])"
         )
 
     def test_surviving_children_contains_child(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert self.child in result["surviving_children"], (
             "The in-SCC child that forms the return path must appear in surviving_children"
         )
 
     def test_postcondition_complete_eq_no_surviving(self):
         """Postcondition: complete == (len(surviving_children) == 0)."""
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["complete"] == (len(result["surviving_children"]) == 0)
 
     def test_surviving_children_is_sorted(self):
         """surviving_children must be in sorted order."""
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["surviving_children"] == sorted(result["surviving_children"])
 
 
 # ---------------------------------------------------------------------------
 # 2. Benign residual cluster: cut severs tf return path; children cyclic
 # ---------------------------------------------------------------------------
+
 
 class TestBenignResidualCluster:
     """
@@ -141,47 +132,40 @@ class TestBenignResidualCluster:
             (self.tf, self.c2),
             (self.c1, self.inter),
             (self.c2, self.inter),
-            (self.inter, self.tf),      # return path via inter
+            (self.inter, self.tf),  # return path via inter
             (self.c1, self.c2),
-            (self.c2, self.c1),         # residual cycle among children (benign)
+            (self.c2, self.c1),  # residual cycle among children (benign)
         )
         self.in_scc_children = [self.c1, self.c2]
         self.min_cut = [self.inter]
 
     def test_complete_is_true(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["complete"] is True, (
             "After do([inter]), no in-SCC child can reach tf — cut must be complete"
         )
 
     def test_tf_not_cyclic(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["tf_still_cyclic"] is False, (
             "After do([inter]), tf has no in-edges → tf is a singleton SCC"
         )
 
     def test_surviving_children_empty(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["surviving_children"] == [], (
             "No in-SCC children should survive after the cut is complete"
         )
 
     def test_postcondition_complete_eq_no_surviving(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["complete"] == (len(result["surviving_children"]) == 0)
 
 
 # ---------------------------------------------------------------------------
 # 3. Linear DAG: no return path, trivially complete
 # ---------------------------------------------------------------------------
+
 
 class TestLinearDag:
     """
@@ -200,27 +184,22 @@ class TestLinearDag:
         self.min_cut = []
 
     def test_complete_is_true(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["complete"] is True
 
     def test_tf_not_cyclic(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["tf_still_cyclic"] is False
 
     def test_surviving_empty(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["surviving_children"] == []
 
 
 # ---------------------------------------------------------------------------
 # 4. Negative: PRE contract violations raise AssertionError
 # ---------------------------------------------------------------------------
+
 
 class TestPreContractViolations:
     """
@@ -251,6 +230,7 @@ class TestPreContractViolations:
 # 5. Multiple in-SCC children — only some survive
 # ---------------------------------------------------------------------------
 
+
 class TestPartialSurvival:
     """
     Graph:
@@ -272,40 +252,30 @@ class TestPartialSurvival:
         self.mid = "mid"
         self.graph = _digraph(
             (self.tf, self.c1),
-            (self.c1, self.tf),          # direct 2-cycle
+            (self.c1, self.tf),  # direct 2-cycle
             (self.tf, self.c2),
             (self.c2, self.mid),
-            (self.mid, self.tf),         # c2 returns via mid
+            (self.mid, self.tf),  # c2 returns via mid
         )
         self.in_scc_children = [self.c1, self.c2]
         self.min_cut = [self.mid]
 
     def test_complete_false(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["complete"] is False
 
     def test_c1_survives(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert self.c1 in result["surviving_children"]
 
     def test_c2_does_not_survive(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert self.c2 not in result["surviving_children"]
 
     def test_tf_still_cyclic(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["tf_still_cyclic"] is True
 
     def test_postcondition(self):
-        result = verify_cut_complete(
-            self.tf, self.in_scc_children, self.min_cut, self.graph
-        )
+        result = verify_cut_complete(self.tf, self.in_scc_children, self.min_cut, self.graph)
         assert result["complete"] == (len(result["surviving_children"]) == 0)

@@ -7,6 +7,7 @@ in the standard {"shard_id", "edges"} format used by cyclic_single_door_classify
 Usage:
     uv run python scripts/csd_calibrate_prepare.py [--n 128] [--seed 42]
 """
+
 from __future__ import annotations
 
 import argparse

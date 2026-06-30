@@ -1,4 +1,5 @@
 """analyze_csd_break.py — cross-tabs for the break-sweep results."""
+
 from __future__ import annotations
 
 import pandas as pd

@@ -56,11 +56,12 @@ def main() -> None:
     # Summary
     n_total = len(all_rows)
     from collections import Counter
+
     cause_counts = Counter(r["nonident_cause"] for r in all_rows)
     n_rescuable = sum(1 for r in all_rows if r.get("n_rescue_nodes", 0) > 0)
     rescue_node_counter: Counter = Counter()
     for r in all_rows:
-        for node in (r.get("rescue_nodes") or []):
+        for node in r.get("rescue_nodes") or []:
             rescue_node_counter[node] += 1
     top_rescue = rescue_node_counter.most_common(20)
 

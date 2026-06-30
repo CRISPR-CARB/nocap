@@ -47,7 +47,6 @@ from __future__ import annotations
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Kernel 1: causal_nodes_kernel
 # ---------------------------------------------------------------------------
@@ -75,7 +74,9 @@ def causal_nodes_kernel(
     result = desc_cause & anc_effect
 
     assert result == desc_cause & anc_effect, "POST: result == desc_cause & anc_effect"
-    assert cause in result or effect not in desc_cause, "POST: cause in result when effect reachable"
+    assert cause in result or effect not in desc_cause, (
+        "POST: cause in result when effect reachable"
+    )
     assert effect in result or effect not in desc_cause, "POST: effect in result when reachable"
     return result
 
@@ -90,7 +91,7 @@ def forbidden_kernel(
     desc_map: dict[int, set[int]],
     cause: int,
 ) -> set[int]:
-    """Compute forbidden nodes: desc_inclusive(causal_nodes) ∪ {cause}.
+    """Compute forbidden nodes: desc_inclusive(causal_nodes) U {cause}.
 
     PRE: cause in causal_nodes  (cause is always a causal node)
     PRE: all(v in desc_map for v in causal_nodes)
@@ -390,7 +391,7 @@ class TestCausalNodesKernelAxiomander:
     def test_fork_dag(self) -> None:
         """Z→X→Y, Z→Y: causal_nodes = {X, Y} (Z is not on a causal path)."""
         result = causal_nodes_kernel(
-            desc_cause={1, 3},   # desc(X) = {X, Y}
+            desc_cause={1, 3},  # desc(X) = {X, Y}
             anc_effect={0, 1, 3},  # anc(Y) = {Z, X, Y}
             cause=1,
             effect=3,
@@ -577,12 +578,12 @@ class TestOsetPipelineIntegration:
         desc(X) = {X, A, Y} = {2, 1, 3}  (X→A, X→Y, A→X→A cycle)
         anc(Y) = {Y, X, A, B} = {3, 2, 1, 0}
         cn = {2, 1, 3}
-        forb = desc_inclusive({2,1,3}) ∪ {2} = {1,2,3}
-        pa({2,1,3}) = pa(2)∪pa(1)∪pa(3) = {1}∪{0,2}∪{2} = {0,1,2}
+        forb = desc_inclusive({2,1,3}) U {2} = {1,2,3}
+        pa({2,1,3}) = pa(2)Upa(1)Upa(3) = {1}U{0,2}U{2} = {0,1,2}
         o_set = {0,1,2} - {1,2,3} = {0} = {B}
         """
         result = self._run_oset(
-            desc_cause={2, 1, 3},   # desc(X) inclusive
+            desc_cause={2, 1, 3},  # desc(X) inclusive
             anc_effect={3, 2, 1, 0},  # anc(Y) inclusive
             pa_map={0: set(), 1: {0, 2}, 2: {1}, 3: {2}},
             desc_map={0: {0, 1, 2, 3}, 1: {1, 2, 3}, 2: {2, 1, 3}, 3: {3}},

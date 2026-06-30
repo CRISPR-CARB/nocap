@@ -38,30 +38,30 @@ from csd_rescue_worker import (  # type: ignore[import]  # noqa: E402
     compute_rescue_nodes,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixture graphs
 # ---------------------------------------------------------------------------
 
 
 def _make_two_cycle_graph() -> nx.DiGraph:
-    """A -> B -> A: both edges are in a 2-cycle."""
+    """Build graph with A -> B -> A (both edges in a 2-cycle)."""
     g = nx.DiGraph()
     g.add_edges_from([("A", "B"), ("B", "A")])
     return g
 
 
 def _make_long_feedback_graph() -> nx.DiGraph:
-    """A -> C -> D -> A (long feedback loop, removing A->C still leaves A in same SCC via D)."""
+    """Build long feedback loop A -> C -> D -> A (removing A->C leaves A in same SCC via D)."""
     g = nx.DiGraph()
     g.add_edges_from([("A", "C"), ("C", "D"), ("D", "A")])
     return g
 
 
 def _make_scc_dissolved_graph() -> nx.DiGraph:
-    """A -> B is the only link making A and B in the same SCC.
-    (B -> A is NOT present; instead B -> C -> A)
-    Removing A->B dissolves the SCC.
+    """Build graph where removing A->B dissolves the SCC.
+
+    A -> B is the only link making A and B in the same SCC
+    (B -> A is NOT present; instead B -> C -> A).
     """
     g = nx.DiGraph()
     # A -> B -> C -> A  (a 3-cycle; removing A->B dissolves the SCC)

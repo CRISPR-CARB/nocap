@@ -17,7 +17,6 @@ We estimate:
   - |targets| = 6676 unidentifiable edges
 """
 
-import sys
 import time
 from pathlib import Path
 
@@ -32,9 +31,9 @@ G_test = nx.DiGraph()
 G_test.add_nodes_from(range(V))
 edges_added = set()
 while len(edges_added) < E:
-    u = rng.randint(0, V-1)
-    v = rng.randint(0, V-1)
-    if u != v and (u,v) not in edges_added:
+    u = rng.randint(0, V - 1)
+    v = rng.randint(0, V - 1)
+    if u != v and (u, v) not in edges_added:
         G_test.add_edge(u, v)
         edges_added.add((u, v))
 
@@ -49,7 +48,9 @@ print(f"SCC time per call (V={V}, E={E}): {scc_time_ms:.2f} ms")
 # --- Pool size estimate ---
 break_csv = Path("notebooks/Ecoli_Analysis_Notebooks/csd_break_results_full.csv")
 if break_csv.exists():
-    import csv, ast
+    import ast
+    import csv
+
     pool = set()
     with open(break_csv) as f:
         for row in csv.DictReader(f):
@@ -79,7 +80,11 @@ for n, k in [(10, 3), (5, 6)]:
 
     total_min = (greedy_sec + exact_sec) / 60
     print(f"\nn={n}, k={k}:")
-    print(f"  Greedy SCC calls: {greedy_scc_calls:,}  -> {greedy_sec:.1f}s ({greedy_sec/60:.1f} min)")
-    print(f"  Exact verify calls: {exact_scc_calls:,} -> {exact_sec:.1f}s ({exact_sec/60:.1f} min)")
+    print(
+        f"  Greedy SCC calls: {greedy_scc_calls:,}  -> {greedy_sec:.1f}s ({greedy_sec / 60:.1f} min)"
+    )
+    print(
+        f"  Exact verify calls: {exact_scc_calls:,} -> {exact_sec:.1f}s ({exact_sec / 60:.1f} min)"
+    )
     print(f"  Total estimate: {total_min:.1f} min")
     print(f"  Fits in 4h budget: {'YES' if total_min < 240 else 'NO — need longer'}")

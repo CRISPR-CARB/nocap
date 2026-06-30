@@ -15,6 +15,7 @@ Usage
     uv run python scripts/check_residual_timeouts.py \\
         --input results/timeout_cohort_reclassified.json
 """
+
 from __future__ import annotations
 
 import argparse
@@ -58,9 +59,9 @@ def main() -> None:
     n_timeout = sum(1 for r in results if r.get("status") == "timeout")
 
     print(f"Cohort reclassification results ({n_total} edges):")
-    print(f"  identifiable   : {n_identifiable:>6}  ({100*n_identifiable/n_total:.1f}%)")
-    print(f"  unidentifiable : {n_unidentifiable:>6}  ({100*n_unidentifiable/n_total:.1f}%)")
-    print(f"  still timeout  : {n_timeout:>6}  ({100*n_timeout/n_total:.1f}%)")
+    print(f"  identifiable   : {n_identifiable:>6}  ({100 * n_identifiable / n_total:.1f}%)")
+    print(f"  unidentifiable : {n_unidentifiable:>6}  ({100 * n_unidentifiable / n_total:.1f}%)")
+    print(f"  still timeout  : {n_timeout:>6}  ({100 * n_timeout / n_total:.1f}%)")
     print()
 
     if n_timeout == 0:
@@ -71,7 +72,7 @@ def main() -> None:
         print()
         # Print the first few residual timeouts to help diagnose
         residual = [(r["cause"], r["effect"]) for r in results if r.get("status") == "timeout"]
-        print(f"First up to 20 residual timeout edges:")
+        print("First up to 20 residual timeout edges:")
         for cause, effect in residual[:20]:
             print(f"  {cause} -> {effect}")
         if len(residual) > 20:

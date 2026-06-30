@@ -8,10 +8,14 @@ Programmatically updates the SCC_Perturbation_Analysis.ipynb notebook:
 4. Update 9.A Summary caveat line about 12/18
 5. Add Future Work section (§10) before References
 """
+
 import json
 from pathlib import Path
 
-NB_PATH = Path(__file__).parent.parent / "notebooks/Ecoli_Analysis_Notebooks/SCC_Perturbation_Analysis.ipynb"
+NB_PATH = (
+    Path(__file__).parent.parent
+    / "notebooks/Ecoli_Analysis_Notebooks/SCC_Perturbation_Analysis.ipynb"
+)
 
 with open(NB_PATH) as f:
     nb = json.load(f)
@@ -19,6 +23,7 @@ with open(NB_PATH) as f:
 cells = nb["cells"]
 
 # ── helpers ──────────────────────────────────────────────────────────────────
+
 
 def find_markdown_cell_with(text):
     """Return index of first markdown cell whose source contains text."""
@@ -89,7 +94,7 @@ print(f"Found 9.A Results cell at index {idx_9a}")
 
 old_9a_src = cell_source_str(idx_9a)
 
-# Replace the old 2×2 table with new 3-state table + updated narrative
+# Replace the old 2x2 table with new 3-state table + updated narrative
 OLD_TABLE = (
     "| | Unidentifiable (12) | Identifiable (6) |\n"
     "|---|---|---|\n"
@@ -108,21 +113,13 @@ NEW_TABLE = (
 new_9a_src = old_9a_src.replace(OLD_TABLE, NEW_TABLE)
 
 # Also replace the opening sentence to reflect the 3-state framing
-OLD_OPENING = (
-    "Running `scripts/residual_scc_experiment.py` against all 18 SCC-TF shards produced the following headline result:"
-)
-NEW_OPENING = (
-    "Running `scripts/residual_scc_experiment.py` and `scripts/classify_scc_states.py` against all 18 SCC-TF shards produced the following headline 3-state classification:"
-)
+OLD_OPENING = "Running `scripts/residual_scc_experiment.py` against all 18 SCC-TF shards produced the following headline result:"
+NEW_OPENING = "Running `scripts/residual_scc_experiment.py` and `scripts/classify_scc_states.py` against all 18 SCC-TF shards produced the following headline 3-state classification:"
 new_9a_src = new_9a_src.replace(OLD_OPENING, NEW_OPENING)
 
 # Replace "The naïve verdict is *DISPROVEN*" opening with corrected framing
-OLD_VERDICT = (
-    "The naïve verdict is *DISPROVEN*.  However, mechanistic diagnosis (`scripts/diagnose_phase_a.py`) reveals that both classes of violation have explanations that motivate a **refined hypothesis** rather than outright rejection."
-)
-NEW_VERDICT = (
-    "The original hypothesis — that residual child-cycles predict unidentifiability — is **disproven as stated**.  However, mechanistic diagnosis (`scripts/diagnose_phase_a.py`) reveals that the violations have structural explanations that motivate a **refined hypothesis** (H₁) rather than outright rejection.  Most strikingly, the *unidentifiable* row is **empty** (0 TFs): on this cohort, every TF for which the background cut succeeded was found identifiable by `cyclic_id`."
-)
+OLD_VERDICT = "The naïve verdict is *DISPROVEN*.  However, mechanistic diagnosis (`scripts/diagnose_phase_a.py`) reveals that both classes of violation have explanations that motivate a **refined hypothesis** rather than outright rejection."
+NEW_VERDICT = "The original hypothesis — that residual child-cycles predict unidentifiability — is **disproven as stated**.  However, mechanistic diagnosis (`scripts/diagnose_phase_a.py`) reveals that the violations have structural explanations that motivate a **refined hypothesis** (H₁) rather than outright rejection.  Most strikingly, the *unidentifiable* row is **empty** (0 TFs): on this cohort, every TF for which the background cut succeeded was found identifiable by `cyclic_id`."
 new_9a_src = new_9a_src.replace(OLD_VERDICT, NEW_VERDICT)
 
 set_cell_source(idx_9a, new_9a_src)
@@ -136,12 +133,8 @@ print(f"Found 9.A Summary cell at index {idx_9a_sum}")
 
 old_sum_src = cell_source_str(idx_9a_sum)
 
-OLD_CAVEAT = (
-    "- 12/18 TFs have `cut_verified=False` — the B(t) computed by `compute_min_cut_b` does not always eliminate all feedback to the TF (it targets intermediate SCC nodes, not direct child→tf edges).  A more aggressive cut strategy (Phase C) would address this."
-)
-NEW_CAVEAT = (
-    "- 12/18 TFs are classified **cut_incomplete** (`cut_verified=False`) — confirmed by `verify_cut_complete` in `nocap.scc_perturb` and independently by `classify_scc_states.py`.  The Interpretation A cut strategy targets *intermediate* SCC nodes; it cannot sever direct 2-cycle return paths.  A Phase C experiment with augmented B(t) (allowing in-SCC children to be included at the cost of reducing the outcome set Y) would address this."
-)
+OLD_CAVEAT = "- 12/18 TFs have `cut_verified=False` — the B(t) computed by `compute_min_cut_b` does not always eliminate all feedback to the TF (it targets intermediate SCC nodes, not direct child→tf edges).  A more aggressive cut strategy (Phase C) would address this."
+NEW_CAVEAT = "- 12/18 TFs are classified **cut_incomplete** (`cut_verified=False`) — confirmed by `verify_cut_complete` in `nocap.scc_perturb` and independently by `classify_scc_states.py`.  The Interpretation A cut strategy targets *intermediate* SCC nodes; it cannot sever direct 2-cycle return paths.  A Phase C experiment with augmented B(t) (allowing in-SCC children to be included at the cost of reducing the outcome set Y) would address this."
 
 new_sum_src = old_sum_src.replace(OLD_CAVEAT, NEW_CAVEAT)
 
@@ -205,8 +198,8 @@ future_work_cell = {
         "\n",
         "### 10.5 Network Uncertainty\n",
         "\n",
-        "The RegulonDB *E. coli* network is an *evidence-curated* but **incomplete** graph.  Missing edges (false negatives) could alter both the SCC structure and the min-cut topology.  Sensitivity analysis varying edge confidence thresholds — and comparing results across RegulonDB confidence tiers — would bound the impact of network uncertainty on the identifiability conclusions."
-    ]
+        "The RegulonDB *E. coli* network is an *evidence-curated* but **incomplete** graph.  Missing edges (false negatives) could alter both the SCC structure and the min-cut topology.  Sensitivity analysis varying edge confidence thresholds — and comparing results across RegulonDB confidence tiers — would bound the impact of network uncertainty on the identifiability conclusions.",
+    ],
 }
 
 # Insert the future work cell before the References cell

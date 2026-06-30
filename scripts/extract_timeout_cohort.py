@@ -20,6 +20,7 @@ Usage
         --input notebooks/Ecoli_Analysis_Notebooks/csd_results.csv \\
         --output results/timeout_cohort_shard.json
 """
+
 from __future__ import annotations
 
 import argparse
@@ -83,11 +84,13 @@ def main() -> None:
     else:
         print(f"Shard ready: {n_timeout} edges written in shard format.")
         print("Next step:")
-        print(f"  uv run python scripts/cyclic_single_door_classify.py classify \\")
-        print(f"      --graphml notebooks/Ecoli_Analysis_Notebooks/ecoli_full_network_no_small_rna.graphml \\")
+        print("  uv run python scripts/cyclic_single_door_classify.py classify \\")
+        print(
+            "      --graphml notebooks/Ecoli_Analysis_Notebooks/ecoli_full_network_no_small_rna.graphml \\"
+        )
         print(f"      --shard {output_path} \\")
-        print(f"      --output results/timeout_cohort_reclassified.json \\")
-        print(f"      --timeout 60")
+        print("      --output results/timeout_cohort_reclassified.json \\")
+        print("      --timeout 60")
 
 
 if __name__ == "__main__":

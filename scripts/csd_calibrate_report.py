@@ -6,6 +6,7 @@ tallies status counts, and prints a go/no-go recommendation for the full rerun.
 Usage:
     uv run python scripts/csd_calibrate_report.py
 """
+
 from __future__ import annotations
 
 import json
@@ -58,13 +59,15 @@ def main() -> None:
         print(f"  other               : {counts['other']}")
     print()
     print(f"  Resolution rate     : {resolution_rate:.1%}  ({n_resolved}/{n_total_classified})")
-    print(f"  Identifiable rate   : {ident_rate:.1%}  ({counts['identifiable']}/{n_total_classified})")
+    print(
+        f"  Identifiable rate   : {ident_rate:.1%}  ({counts['identifiable']}/{n_total_classified})"
+    )
     print()
 
     # --- Extrapolation to full 7,442-edge pool ---
     N_FULL = 7442
-    est_resolved = int(round(resolution_rate * N_FULL))
-    est_ident = int(round(ident_rate * N_FULL))
+    est_resolved = round(resolution_rate * N_FULL)
+    est_ident = round(ident_rate * N_FULL)
 
     print(f"  Extrapolated to full {N_FULL} timeout edges:")
     print(f"    ~{est_resolved} would resolve  (~{est_ident} identifiable)")

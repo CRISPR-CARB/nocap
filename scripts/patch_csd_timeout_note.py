@@ -11,11 +11,11 @@ Inserts:
 Usage:
     uv run python scripts/patch_csd_timeout_note.py
 """
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
-import copy
 
 NB_PATH = (
     Path(__file__).parent.parent
@@ -149,8 +149,9 @@ def main() -> None:
     cells[0]["source"] = "".join(cells[0]["source"]) + INTRO_CAVEAT
 
     # 2. Patch cell 4 (load cell): replace source
-    assert "pd.read_csv(CSV_PATH)" in "".join(cells[4]["source"]), \
+    assert "pd.read_csv(CSV_PATH)" in "".join(cells[4]["source"]), (
         "cell 4 doesn't look like the load cell — aborting"
+    )
     cells[4]["source"] = CELL4_NEW
 
     # 3. Insert §1b after cell 4 and before cell 5 (old "## 2. Overall identifiability")
@@ -163,10 +164,10 @@ def main() -> None:
 
     NB_PATH.write_text(json.dumps(nb, indent=1, ensure_ascii=False))
     print(f"Patched notebook: {NB_PATH}")
-    print(f"  cell 0 : intro + caveat")
-    print(f"  cell 4 : load cell updated (resolved-only rate)")
-    print(f"  cell 5 : NEW §1b Computational Limitations (markdown)")
-    print(f"  cell 6 : NEW resolved-rate summary code")
+    print("  cell 0 : intro + caveat")
+    print("  cell 4 : load cell updated (resolved-only rate)")
+    print("  cell 5 : NEW §1b Computational Limitations (markdown)")
+    print("  cell 6 : NEW resolved-rate summary code")
     print(f"  Total cells now: {len(cells)}")
 
 

@@ -35,7 +35,8 @@ cells = []
 # ============================================================
 # Section 1 — Title / Methods
 # ============================================================
-cells.append(md("""\
+cells.append(
+    md("""\
 # Cyclic Single-Door Criterion — E. coli Network Analysis
 
 **Purpose:** Assess the identifiability of every directed edge in the *E. coli* transcriptional
@@ -67,13 +68,15 @@ genetic interventions (`do(v)`) could rescue identifiability.
 - Rantanen et al. (2020). *Learning Optimal Cyclic Causal Graphs.*
 - Perkovic et al. (2018). *Complete Graphical Characterization of Adjustment Sets. JMLR 19(1).*
 - Henckel et al. (2022). *Graphical criteria for efficient total effect estimation. JRSS-B 84(2).*\
-"""))
+""")
+)
 
 # ============================================================
 # Section 2 — Imports & paths
 # ============================================================
 cells.append(md("## 0. Imports and paths"))
-cells.append(code("""\
+cells.append(
+    code("""\
 from __future__ import annotations
 
 import sys, json
@@ -109,13 +112,15 @@ print(f"REPO: {REPO}")
 print(f"GraphML: {GRAPHML.exists()}")
 print(f"CSV: {CSV_PATH.exists()}")
 print(f"Summary: {SUMMARY_PATH.exists()}")\
-"""))
+""")
+)
 
 # ============================================================
 # Section 3 — Load & validate
 # ============================================================
 cells.append(md("## 1. Load and validate results"))
-cells.append(code("""\
+cells.append(
+    code("""\
 df = pd.read_csv(CSV_PATH)
 with open(SUMMARY_PATH) as f:
     summary = json.load(f)
@@ -130,13 +135,15 @@ print(f"Unidentifiable: {(df.status=='unidentifiable').sum():,}")
 print(f"Timed out: {(df.status=='timeout').sum():,}")
 print(f"Same-SCC: {df.same_scc.sum():,}")
 display(df.head())\
-"""))
+""")
+)
 
 # ============================================================
 # Section 4 — Overall identifiability
 # ============================================================
 cells.append(md("## 2. Overall identifiability"))
-cells.append(code("""\
+cells.append(
+    code("""\
 status_counts = df["status"].value_counts()
 colors = {"identifiable": "#2ecc71", "unidentifiable": "#e74c3c", "timeout": "#f39c12"}
 color_list = [colors.get(s, "#95a5a6") for s in status_counts.index]
@@ -154,13 +161,15 @@ plt.savefig(out, dpi=150, bbox_inches="tight")
 plt.close()
 display(Image(str(out)))
 print(f"Saved: {out}")\
-"""))
+""")
+)
 
 # ============================================================
 # Section 5 — Adjustment-set analysis
 # ============================================================
 cells.append(md("## 3. Adjustment-set analysis"))
-cells.append(code("""\
+cells.append(
+    code("""\
 ident = df[df.status == "identifiable"].copy()
 ident["adj_nodes"] = ident["adjustment_set"].fillna("").str.split("|")
 ident["adj_size"] = ident["adj_nodes"].apply(lambda x: len(x) if x != [""] else 0)
@@ -197,13 +206,15 @@ display(Image(str(out)))
 print(f"Saved: {out}")
 print(f"\\nMedian adjustment-set size: {ident['adj_size'].median():.1f}")
 print(f"Max adjustment-set size: {ident['adj_size'].max()}")\
-"""))
+""")
+)
 
 # ============================================================
 # Section 6 — Same-SCC vs Cross-SCC
 # ============================================================
 cells.append(md("## 4. Same-SCC vs Cross-SCC identifiability"))
-cells.append(code("""\
+cells.append(
+    code("""\
 cross = df[~df.same_scc]
 same  = df[df.same_scc]
 
@@ -241,12 +252,14 @@ display(Image(str(out)))
 print(f"Saved: {out}")
 print(f"\\nCross-SCC  identifiable rate: {100*r_cross['identifiable']/r_cross['total']:.1f}%")
 print(f"Same-SCC   identifiable rate: {100*r_same['identifiable']/r_same['total']:.1f}%")\
-"""))
+""")
+)
 
 # ============================================================
 # Section 7 — Non-identifiability cause taxonomy (load from pre-computed file)
 # ============================================================
-cells.append(md("""\
+cells.append(
+    md("""\
 ## 5. Non-identifiability cause taxonomy
 
 For each unidentifiable edge we classify the *structural reason*:
@@ -261,8 +274,10 @@ For each unidentifiable edge we classify the *structural reason*:
 
 Results are pre-computed by `scripts/csd_diagnose_nonident.py` (run once after
 gathering the SLURM results) and loaded here for display.\
-"""))
-cells.append(code("""\
+""")
+)
+cells.append(
+    code("""\
 DIAG_CSV  = NB_DIR / "csd_nonident_diagnosis.csv"
 DIAG_JSON = NB_DIR / "csd_nonident_summary.json"
 
@@ -283,9 +298,11 @@ unident = pd.read_csv(DIAG_CSV)
 cause_counts = unident["nonident_cause"].value_counts()
 print(f"Loaded {len(unident):,} unidentifiable edges from {DIAG_CSV.name}")
 display(cause_counts.to_frame(name="cause_count"))
-"""))
+""")
+)
 
-cells.append(code("""\
+cells.append(
+    code("""\
 CATEGORY_COLORS = {
     "self_loop": "#e74c3c",
     "two_cycle": "#e67e22",
@@ -321,12 +338,14 @@ plt.savefig(out, dpi=150, bbox_inches="tight")
 plt.close()
 display(Image(str(out)))
 print(f"Saved: {out}")\
-"""))
+""")
+)
 
 # ============================================================
 # Section 8 — Intervention rescue (from SLURM output)
 # ============================================================
-cells.append(md("""\
+cells.append(
+    md("""\
 ## 6. Intervention rescue results (SLURM)
 
 Each unidentifiable edge is tested to see whether a single hard intervention
@@ -343,8 +362,10 @@ uv run python scripts/csd_rescue_gather.py \\
     --output-csv notebooks/Ecoli_Analysis_Notebooks/csd_rescue_results.csv \\
     --output-summary notebooks/Ecoli_Analysis_Notebooks/csd_rescue_summary.json
 ```\
-"""))
-cells.append(code("""\
+""")
+)
+cells.append(
+    code("""\
 RESCUE_CSV     = NB_DIR / "csd_rescue_results.csv"
 RESCUE_SUMMARY = NB_DIR / "csd_rescue_summary.json"
 
@@ -364,9 +385,11 @@ else:
         print(f"  {row['node']}: {row['count']} edges")
 
     display(rescue_full.head())\
-"""))
+""")
+)
 
-cells.append(code("""\
+cells.append(
+    code("""\
 if RESCUE_CSV.exists():
     top_nodes_full = rescue_summary["top_rescue_nodes"][:20]
     if top_nodes_full:
@@ -383,12 +406,14 @@ if RESCUE_CSV.exists():
         print(f"Saved: {out}")
     else:
         print("No rescue nodes found in sweep.")\
-"""))
+""")
+)
 
 # ============================================================
 # Section 9 — Multi-experiment recovery design
 # ============================================================
-cells.append(md("""\
+cells.append(
+    md("""\
 ## 7. Multi-experiment recovery design
 
 Section 6 shows which single nodes can rescue individual unidentifiable edges.
@@ -416,9 +441,11 @@ uv run python scripts/csd_recovery_bank.py \\
     --output-dir notebooks/Ecoli_Analysis_Notebooks \\
     --configs "10,3" "5,6"
 ```\
-"""))
+""")
+)
 
-cells.append(code("""\
+cells.append(
+    code("""\
 RECOVERY_SUMMARY = NB_DIR / "csd_recovery_summary.json"
 
 if not RECOVERY_SUMMARY.exists():
@@ -441,9 +468,11 @@ else:
                  "k": len(s["genes"])} for s in d["chosen_sets"]]
         display(pd.DataFrame(rows).set_index("experiment"))
         print()
-"""))
+""")
+)
 
-cells.append(code("""\
+cells.append(
+    code("""\
 if RECOVERY_SUMMARY.exists():
     fig, ax = plt.subplots(figsize=(9, 4))
 
@@ -479,13 +508,15 @@ if RECOVERY_SUMMARY.exists():
     plt.close()
     display(Image(str(out)))
     print(f"Saved: {out}")
-"""))
+""")
+)
 
 # ============================================================
 # Section 10 — Export CSVs
 # ============================================================
 cells.append(md("## 8. Export final tables"))
-cells.append(code("""\
+cells.append(
+    code("""\
 # Export identifiable edges
 ident_out = df[df.status == "identifiable"][["cause", "effect", "adjustment_set", "same_scc"]]
 ident_out.to_csv(NB_DIR / "csd_identifiable_edges.csv", index=False)
@@ -497,7 +528,8 @@ if diag_path.exists():
     print(f"Non-identifiability diagnosis: {diag_path}")
 
 print("\\nAll done.")\
-"""))
+""")
+)
 
 # ============================================================
 # Build and write the notebook

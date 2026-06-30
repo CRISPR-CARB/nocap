@@ -1,6 +1,7 @@
 """Count timed-out edges across all classified shards."""
-import json
+
 import glob
+import json
 from collections import Counter
 
 classified = sorted(glob.glob("results/cyclic_single_door/classified/shard_*.json"))
@@ -23,7 +24,7 @@ for f in classified:
 
 print(f"Classified shards : {len(classified)}")
 print(f"Total edges       : {total_edges}")
-print(f"Timed out         : {total_timeouts}  ({100*total_timeouts/total_edges:.1f}%)")
+print(f"Timed out         : {total_timeouts}  ({100 * total_timeouts / total_edges:.1f}%)")
 print()
 
 # Most common timeout causes
