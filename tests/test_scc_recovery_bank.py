@@ -456,7 +456,6 @@ class TestIntegration:
         assert srb._is_singleton_scc("B", scc_map, scc_sizes) is False
         assert srb._is_singleton_scc("C", scc_map, scc_sizes) is False
 
-
     def test_break_recovers_tf_in_cycle(self):
         """
         In the triangle A->B->C->A, perturbing C removes C's in-edges (B->C).
@@ -468,4 +467,3 @@ class TestIntegration:
         assert srb._is_singleton_scc("A", scc_map, scc_sizes) is True
         assert srb._is_singleton_scc("B", scc_map, scc_sizes) is True
         assert srb._is_singleton_scc("C", scc_map, scc_sizes) is True
-
