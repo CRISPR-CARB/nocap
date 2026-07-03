@@ -43,6 +43,7 @@ ignore = [
 # (PRE/POST) and intentional en-dash separators in Returns dict documentation.
 "src/nocap/scc_perturb.py" = ["S101", "RUF002"]
 "src/nocap/cyclic_single_door.py" = ["S101", "RUF002", "D301"]
+"scripts/csd_estimate.py" = ["RUF002"]
 "docs/source/conf.py" = ["ERA001", "D100", "F821"]
 "notebooks/**" = [
     "T201",  # print
@@ -152,10 +153,12 @@ dependencies = [
     "pgmpy",
     "plotly",
     "pydot==2.0.0",
+    "pytest>=9.0.3",
     "seaborn",
     "semopy>=2.3.11",
     "sympy",
     "torch",
+    "tox>=4.34.1",
     "tqdm",
     "y0 @ git+https://github.com/y0-causal-inference/y0.git@402-add-%CF%83-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs",
 ]
