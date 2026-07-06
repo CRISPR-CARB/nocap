@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -648,7 +647,7 @@ def main() -> None:
                     "same_scc": bool(adj_info_same_scc),
                     "status": status_from_ident,
                     "adjustment_set": (
-                        json.dumps(sorted(adj_set)) if adj_set is not None else "null"
+                        "|".join(sorted(adj_set)) if adj_set is not None else "null"
                     ),
                     "n_rows_used": len(cleaned) if cleaned is not None else 0,
                     "estimated_path_coefficient": "",
