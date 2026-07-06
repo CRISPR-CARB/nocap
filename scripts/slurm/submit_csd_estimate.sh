@@ -36,7 +36,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 GRAPHML="${GRAPHML:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/ecoli_full_network_no_small_rna.graphml}"
 ADJUSTMENTS_CSV="${ADJUSTMENTS_CSV:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/csd_identifiable_edges.csv}"
 
-OUTDIR="${OUTDIR}:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/estimation"
+OUTDIR="${OUTDIR:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/estimation}"
 LOG_DIR="${OUTDIR}/logs"
 mkdir -p "${OUTDIR}" "${LOG_DIR}"
 
