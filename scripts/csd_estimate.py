@@ -118,17 +118,48 @@ def _sample_betas(
     return betas
 
 
+def _is_invertible(A: np.ndarray) -> bool:
+    """Checks if a matrix is invertible (not singular).
+
+    Pulled from https://stackoverflow.com/questions/13249108/efficient-pythonic-check-for-singular-matrix
+    """
+    return np.lingalg.cond(A) < 1 / (np.finfo(A.dtype).eps)
+
+
 def _build_beta_matrix(
     nodes: list[str],
-    betas_by_edge: dict[tuple[str, str], float],
-) -> np.ndarray:
-    """Return B where equation is X_v = sum_{u->v} beta[u->v] X_u + eps_v."""
+    edges: Iterable[tuple[str, str]],
+    beta_mean: float,
+    beta_std: float,
+    beta_abs_max: float,
+    rng: np.random.Generator,
+    gen_limit: int = 10000,
+) -> tuple[np.ndarray, dict[tuple[str, str], float]]:
+    """Return B where equation is X_v = sum_{u->v} beta[u->v] X_u + eps_v.
+
+    Will generate a B until it is not singular or gen_limit is hit.
+    """
     idx = {n: i for i, n in enumerate(nodes)}
     n = len(nodes)
     B = np.zeros((n, n), dtype=float)
-    for (u, v), b in betas_by_edge.items():
-        B[idx[u], idx[v]] = b
-    return B
+    betas_by_edge: dict[tuple[str, str], float] = {}
+
+    for _ in range(gen_limit):
+        betas_by_edge = _sample_betas(
+            edges,
+            beta_mean=beta_mean,
+            beta_std=beta_std,
+            beta_abs_max=beta_abs_max,
+            rng=rng,
+        )
+
+        for (u, v), b in betas_by_edge.items():
+            B[idx[u], idx[v]] = b
+
+        if _is_invertible(np.eye(len(nodes)) - B.T):
+            break
+
+    return B, betas_by_edge
 
 
 def _solve_linear_scm(
@@ -232,9 +263,7 @@ def generate_synthetic_observational_data(
             scm_graph_true.add_edges_from(edges_true)
         else:
             n_to_add = min(n_to_add, len(candidates))
-            added_edges = rng_true.choice(
-                len(candidates), size=n_to_add, replace=False
-            )
+            added_edges = rng_true.choice(len(candidates), size=n_to_add, replace=False)
             edges_true.extend(candidates[int(i)] for i in added_edges)
 
             scm_graph_true = nx.DiGraph()
@@ -242,15 +271,15 @@ def generate_synthetic_observational_data(
             scm_graph_true.add_edges_from(edges_true)
 
     rng_betas = _rng(params.seed)
-    betas_by_edge_true = _sample_betas(
+
+    beta_matrix, betas_by_edge_true = _build_beta_matrix(
+        scm_nodes,
         edges_true,
         beta_mean=params.beta_mean,
         beta_std=params.beta_std,
         beta_abs_max=params.beta_abs_max,
         rng=rng_betas,
     )
-
-    beta_matrix = _build_beta_matrix(scm_nodes, betas_by_edge_true)
     rng_eps = _rng(params.seed + 10_000)
     eps = _generate_exogenous_noises(
         scm_nodes,
