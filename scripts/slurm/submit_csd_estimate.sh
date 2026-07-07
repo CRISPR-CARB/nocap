@@ -22,10 +22,6 @@
 
 set -euo pipefail
 
-# ---------------------------------------------------------------------------
-# Modules
-# ---------------------------------------------------------------------------
-
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -153,8 +149,13 @@ submit_one() {
     local wrap_cmd
     wrap_cmd=(
         "set -euo pipefail"
-        "export UV_CACHE_DIR=${REPO_ROOT}/.uv-cache"
+        # Load the modules
+        "ml python"
+        "source /share/apps/python/miniconda25.5.1/etc/profile.d/conda.sh"
+        "ml uv"
         "cd ${REPO_ROOT}"
+        "uv sync"
+        "export UV_CACHE_DIR=${REPO_ROOT}/.uv-cache"
         "echo \"[csd_estimate] job: ${job_name}\""
         "echo \"  graphml: ${GRAPHML}\""
         "echo \"  out: ${out_csv}\""
