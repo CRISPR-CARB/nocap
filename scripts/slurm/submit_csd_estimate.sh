@@ -211,6 +211,7 @@ submit_one() {
     )
 
     echo "[submit] ${job_name} -> ${out_csv}"
+    echo "${wrap_str}"
     if [[ "${DRY_RUN}" == "1" ]]; then
         echo "  DRY_RUN=1: not calling sbatch"
         return 0
