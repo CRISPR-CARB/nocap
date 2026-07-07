@@ -156,30 +156,32 @@ submit_one() {
         "cd ${REPO_ROOT}"
         # Prevent race condition with uv cache across jobs
         "export UV_CACHE_DIR=/tmp/$USER/uv-cache-$$"
-        "mkdir -p "$UV_CACHE_DIR""
+        "mkdir -p \"\$UV_CACHE_DIR\""
         "uv sync"
         "echo \"[csd_estimate] job: ${job_name}\""
         "echo \"  graphml: ${GRAPHML}\""
         "echo \"  out: ${out_csv}\""
         "echo \"  mech: ${mech} edge: ${missing_edge_rate} data: ${missing_data_rate}\""
-        "uv run python ${REPO_ROOT}/scripts/csd_estimate.py"
-        "--graphml ${GRAPHML}"
-        "--output-csv ${out_csv}"
-        "${adjustments_arg[@]}"
-        "--seed ${SEED_BASE}"
-        "--n-samples-list ${N_SAMPLES_LIST}"
-        "--missing-edge-rate ${missing_edge_rate}"
-        "--missing-data-rate ${missing_data_rate}"
-        "--missing-data-mechanism ${mech}"
-        "--self-mask-quantile ${SELF_MASK_QUANTILE}"
-        "--self-mask-k ${SELF_MASK_K}"
-        "--self-mask-direction ${SELF_MASK_DIRECTION}"
-        "--missing-edge-seed-offset 0"
-        "--beta-mean ${BETA_MEAN}"
-        "--beta-std ${BETA_STD}"
-        "--beta-abs-max ${BETA_ABS_MAX}"
-        "--scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH}"
-        "--min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}"
+    )
+    wrap_cmd+=(
+        "uv run python '${REPO_ROOT}/scripts/csd_estimate.py' \
+        --graphml '${GRAPHML}' \
+        --output-csv '${out_csv}' \
+        ${adjustments_arg[@]} \
+        --seed '${SEED_BASE}' \
+        --n-samples-list '${N_SAMPLES_LIST}' \
+        --missing-edge-rate '${missing_edge_rate}' \
+        --missing-data-rate '${missing_data_rate}' \
+        --missing-data-mechanism '${mech}' \
+        --self-mask-quantile '${SELF_MASK_QUANTILE}' \
+        --self-mask-k '${SELF_MASK_K}' \
+        --self-mask-direction '${SELF_MASK_DIRECTION}' \
+        --missing-edge-seed-offset 0 \
+        --beta-mean '${BETA_MEAN}' \
+        --beta-std '${BETA_STD}' \
+        --beta-abs-max '${BETA_ABS_MAX}' \
+        --scc-confounding-strength '${SCC_CONFOUNDING_STRENGTH}' \
+        --min-rows-after-dropna '${MIN_ROWS_AFTER_DROPNA}'"
     )
 
     # Convert wrap_cmd array to a single string for sbatch --wrap.
