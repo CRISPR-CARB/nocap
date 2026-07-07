@@ -146,6 +146,43 @@ submit_one() {
         fi
     fi
 
+    # Build the python invocation as an argv array so flags like
+    # --adjustments-csv don't get mangled across sbatch/--wrap newlines.
+    local python_cmd=(
+        "uv" "run" "python" "${REPO_ROOT}/scripts/csd_estimate.py"
+        --graphml "${GRAPHML}"
+        --output-csv "${out_csv}"
+    )
+    if [[ "${#adjustments_arg[@]}" -gt 0 ]]; then
+        python_cmd+=("${adjustments_arg[@]}")
+    fi
+    python_cmd+=(
+        --seed "${SEED_BASE}"
+        --n-samples-list "${N_SAMPLES_LIST}"
+        --missing-edge-rate "${missing_edge_rate}"
+        --missing-data-rate "${missing_data_rate}"
+        --missing-data-mechanism "${mech}"
+        --self-mask-quantile "${SELF_MASK_QUANTILE}"
+        --self-mask-k "${SELF_MASK_K}"
+        --self-mask-direction "${SELF_MASK_DIRECTION}"
+        --missing-edge-seed-offset "0"
+        --beta-mean "${BETA_MEAN}"
+        --beta-std "${BETA_STD}"
+        --beta-abs-max "${BETA_ABS_MAX}"
+        --scc-confounding-strength "${SCC_CONFOUNDING_STRENGTH}"
+        --min-rows-after-dropna "${MIN_ROWS_AFTER_DROPNA}"
+    )
+
+    # Convert the argv array to a single shell-escaped command string.
+    local python_cmd_str=""
+    local arg
+    for arg in "${python_cmd[@]}"; do
+        python_cmd_str+="$(printf '%q' "${arg}") "
+    done
+    python_cmd_str="${python_cmd_str%% }"  # trim trailing space
+
+    echo "Executing: ${python_cmd_str}"
+
     local wrap_cmd
     wrap_cmd=(
         "set -euo pipefail"
@@ -162,26 +199,7 @@ submit_one() {
         "echo \"  graphml: ${GRAPHML}\""
         "echo \"  out: ${out_csv}\""
         "echo \"  mech: ${mech} edge: ${missing_edge_rate} data: ${missing_data_rate}\""
-    )
-    wrap_cmd+=(
-        "uv run python '${REPO_ROOT}/scripts/csd_estimate.py' \
-        --graphml '${GRAPHML}' \
-        --output-csv '${out_csv}' \
-        ${adjustments_arg[@]} \
-        --seed '${SEED_BASE}' \
-        --n-samples-list '${N_SAMPLES_LIST}' \
-        --missing-edge-rate '${missing_edge_rate}' \
-        --missing-data-rate '${missing_data_rate}' \
-        --missing-data-mechanism '${mech}' \
-        --self-mask-quantile '${SELF_MASK_QUANTILE}' \
-        --self-mask-k '${SELF_MASK_K}' \
-        --self-mask-direction '${SELF_MASK_DIRECTION}' \
-        --missing-edge-seed-offset 0 \
-        --beta-mean '${BETA_MEAN}' \
-        --beta-std '${BETA_STD}' \
-        --beta-abs-max '${BETA_ABS_MAX}' \
-        --scc-confounding-strength '${SCC_CONFOUNDING_STRENGTH}' \
-        --min-rows-after-dropna '${MIN_ROWS_AFTER_DROPNA}'"
+        "${python_cmd_str}"
     )
 
     # Convert wrap_cmd array to a single string for sbatch --wrap.
@@ -211,7 +229,6 @@ submit_one() {
     )
 
     echo "[submit] ${job_name} -> ${out_csv}"
-    echo "${wrap_str}"
     if [[ "${DRY_RUN}" == "1" ]]; then
         echo "  DRY_RUN=1: not calling sbatch"
         return 0
@@ -224,28 +241,39 @@ submit_one() {
 # Main: iterate the parameter grid
 # ---------------------------------------------------------------------------
 
-IFS=',' read -r -a EDGE_RATES <<< "${N_MISSING_EDGE_RATES_LIST}"
-IFS=',' read -r -a DATA_RATES <<< "${N_MISSING_DATA_RATES_LIST}"
+function main {
+    # If no argument is provided, run the full parameter grid.
+    # If an argument is provided, run a small smoke-test job.
+    if [[ "$#" -eq 0 ]]; then
+        IFS=',' read -r -a EDGE_RATES <<< "${N_MISSING_EDGE_RATES_LIST}"
+        IFS=',' read -r -a DATA_RATES <<< "${N_MISSING_DATA_RATES_LIST}"
 
-echo "=== CSD Estimation Submit ==="
-echo "  REPO_ROOT: ${REPO_ROOT}"
-echo "  GRAPHML:   ${GRAPHML}"
-echo "  OUTDIR:    ${OUTDIR}"
-echo "  LOG_DIR:   ${LOG_DIR}"
-echo "  Mechanisms: ${MECHANISMS[*]}"
-echo "  Edge rates: ${EDGE_RATES[*]}"
-echo "  Data rates: ${DATA_RATES[*]}"
-echo "  n_samples_list: ${N_SAMPLES_LIST}"
-echo "  DRY_RUN: ${DRY_RUN}"
-echo ""
+        echo "=== CSD Estimation Submit ==="
+        echo "  REPO_ROOT: ${REPO_ROOT}"
+        echo "  GRAPHML:   ${GRAPHML}"
+        echo "  OUTDIR:    ${OUTDIR}"
+        echo "  LOG_DIR:   ${LOG_DIR}"
+        echo "  Mechanisms: ${MECHANISMS[*]}"
+        echo "  Edge rates: ${EDGE_RATES[*]}"
+        echo "  Data rates: ${DATA_RATES[*]}"
+        echo "  n_samples_list: ${N_SAMPLES_LIST}"
+        echo "  DRY_RUN: ${DRY_RUN}"
+        echo ""
 
-for mech in "${MECHANISMS[@]}"; do
-    for edge_rate in "${EDGE_RATES[@]}"; do
-        for data_rate in "${DATA_RATES[@]}"; do
-            submit_one "${mech}" "${edge_rate}" "${data_rate}"
+        for mech in "${MECHANISMS[@]}"; do
+            for edge_rate in "${EDGE_RATES[@]}"; do
+                for data_rate in "${DATA_RATES[@]}"; do
+                    submit_one "${mech}" "${edge_rate}" "${data_rate}"
+                done
+            done
         done
-    done
-done
 
-echo "=== Done submitting CSD estimation jobs ==="
+        echo "=== Done submitting CSD estimation jobs ==="
+    else
+        submit_one MCAR 0.0 0.0
+        echo "=== Done submitting CSD estimation test job ==="
+    fi
+}
 
+# Invoke main when executed as a script.
+main "$@"
