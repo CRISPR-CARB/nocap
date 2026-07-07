@@ -195,16 +195,51 @@ def generate_synthetic_observational_data(
     scm_graph_true : nx.DiGraph
     betas_by_edge_true : dict[(u,v)] -> beta
     """
+    # "missing_edge_rate" means: how many edges are present in the *true* SCM,
+    # but missing from the provided/constructed estimation graph.
     rng_true = _rng(params.missing_edge_seed)
-    edges_true = []
-    for u, v in estimation_graph.edges():
-        if rng_true.random() < params.missing_edge_rate:
-            continue
-        edges_true.append((u, v))
 
-    scm_graph_true = nx.DiGraph()
-    scm_graph_true.add_nodes_from(scm_nodes)
-    scm_graph_true.add_edges_from(edges_true)
+    orig_edges = list(estimation_graph.edges())
+    orig_edge_set = set(orig_edges)
+    edges_true = list(orig_edges)
+
+    rate = float(params.missing_edge_rate)
+    rate = min(max(rate, 0.0), 1.0)
+
+    # Choose the number of extra edges to add (expected: rate * |E_orig|).
+    n_to_add = int(rng_true.binomial(len(orig_edges), rate))
+
+    if n_to_add <= 0:
+        scm_graph_true = nx.DiGraph()
+        scm_graph_true.add_nodes_from(scm_nodes)
+        scm_graph_true.add_edges_from(edges_true)
+    else:
+        # Candidate edges are all directed pairs of distinct nodes that are not
+        # already present in the estimation graph.
+        candidates: list[tuple[str, str]] = []
+        for u in scm_nodes:
+            for v in scm_nodes:
+                if u == v:
+                    continue
+                if (u, v) in orig_edge_set:
+                    continue
+                candidates.append((u, v))
+
+        if not candidates:
+            n_to_add = 0
+            scm_graph_true = nx.DiGraph()
+            scm_graph_true.add_nodes_from(scm_nodes)
+            scm_graph_true.add_edges_from(edges_true)
+        else:
+            n_to_add = min(n_to_add, len(candidates))
+            added_edges = rng_true.choice(
+                len(candidates), size=n_to_add, replace=False
+            )
+            edges_true.extend(candidates[int(i)] for i in added_edges)
+
+            scm_graph_true = nx.DiGraph()
+            scm_graph_true.add_nodes_from(scm_nodes)
+            scm_graph_true.add_edges_from(edges_true)
 
     rng_betas = _rng(params.seed)
     betas_by_edge_true = _sample_betas(
@@ -592,7 +627,7 @@ def main() -> None:
 
             n_true_edges = scm_graph_true.number_of_edges()
             n_orig_edges = graph.number_of_edges()
-            n_missing_edges = n_orig_edges - n_true_edges
+            n_missing_edges = n_true_edges - n_orig_edges
 
             for cause, effect in graph.edges():
                 same = (
