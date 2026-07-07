@@ -154,8 +154,10 @@ submit_one() {
         "source /share/apps/python/miniconda25.5.1/etc/profile.d/conda.sh"
         "ml uv"
         "cd ${REPO_ROOT}"
+        # Prevent race condition with uv cache across jobs
+        "export UV_CACHE_DIR=/tmp/$USER/uv-cache-$$"
+        "mkdir -p "$UV_CACHE_DIR""
         "uv sync"
-        "export UV_CACHE_DIR=${REPO_ROOT}/.uv-cache"
         "echo \"[csd_estimate] job: ${job_name}\""
         "echo \"  graphml: ${GRAPHML}\""
         "echo \"  out: ${out_csv}\""
