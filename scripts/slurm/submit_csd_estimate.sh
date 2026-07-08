@@ -33,6 +33,9 @@ GRAPHML="${GRAPHML:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/ecoli_full_n
 ADJUSTMENTS_CSV="${ADJUSTMENTS_CSV:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/csd_identifiable_edges.csv}"
 
 OUTDIR="${OUTDIR:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/estimation}"
+TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+OUTDIR="${OUTDIR}/${TIMESTAMP}"
+
 LOG_DIR="${OUTDIR}/logs"
 mkdir -p "${OUTDIR}" "${LOG_DIR}"
 

@@ -123,7 +123,7 @@ def _is_invertible(A: np.ndarray) -> bool:
 
     Pulled from https://stackoverflow.com/questions/13249108/efficient-pythonic-check-for-singular-matrix
     """
-    return np.lingalg.cond(A) < 1 / (np.finfo(A.dtype).eps)
+    return np.linalg.cond(A) < 1 / (np.finfo(A.dtype).eps)
 
 
 def _build_beta_matrix(
