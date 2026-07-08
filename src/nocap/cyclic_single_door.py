@@ -591,7 +591,7 @@ def estimate_path_coefficient_for_edge(
     adj_set: frozenset[str] | None = None,
     precomputed_extension: NxMixedGraph | None = None,
     precomputed_y0: NxMixedGraph | None = None,
-) -> tuple[float, float, float] | None:
+) -> tuple[float, float, float, float] | None:
     """Estimate the path coefficient (total effect) for a directed edge using OLS regression.
 
     If an adjustment set is not provided, it is automatically computed using the
@@ -617,13 +617,13 @@ def estimate_path_coefficient_for_edge(
 
     Returns
     -------
-    tuple[float, float] | None
-        A tuple of (path_coefficient, residual_variance, t_value) if identifiable,
+    tuple[float, float, float, float] | None
+        A tuple of (path_coefficient, stderr, residual_variance, t_value) if identifiable,
         otherwise None.
 
     axiomander:
         ensures:
-            implies(result is not None, isinstance(result, tuple) and len(result) == 2)
+            implies(result is not None, isinstance(result, tuple) and len(result) == 4)
         modifies:
             none
     """
@@ -648,9 +648,14 @@ def estimate_path_coefficient_for_edge(
     model = smf.ols(f"{effect} ~ {cause}" + (f" + {covs}" if covs else ""), data=data)
     res = model.fit()
 
-    result = (float(res.params[cause]), float(res.scale), float(res.tvalues[cause]))
+    result = (
+        float(res.params[cause]),
+        float(res.bse[cause]),
+        float(res.scale),
+        float(res.tvalues[cause]),
+    )
 
     # --- POST ---
     assert result is not None, "POST: result cannot be None here"
-    assert isinstance(result, tuple) and len(result) == 3, "POST: result must be a 3-tuple"
+    assert isinstance(result, tuple) and len(result) == 4, "POST: result must be a 4-tuple"
     return result

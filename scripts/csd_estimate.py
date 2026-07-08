@@ -715,6 +715,7 @@ def main() -> None:
                     ),
                     "n_rows_used": len(cleaned) if cleaned is not None else 0,
                     "estimated_path_coefficient": "",
+                    "stderr": "",
                     "residual_variance": "",
                     "t_value": "",
                     "ground_truth_beta": float(betas_true.get((str(cause), str(effect)), 0.0)),
@@ -753,8 +754,9 @@ def main() -> None:
                     if est is None:
                         row["status"] = "unidentifiable"
                     else:
-                        path_coef, residual_var, t_val = est
+                        path_coef, stderr, residual_var, t_val = est
                         row["estimated_path_coefficient"] = float(path_coef)
+                        row["stderr"] = float(stderr)
                         row["residual_variance"] = float(residual_var)
                         row["t_value"] = float(t_val)
                         row["status"] = "identifiable"
