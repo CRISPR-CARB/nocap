@@ -613,7 +613,7 @@ def main() -> None:
         "adjustment_set",
         "n_rows_used",
         "estimated_path_coefficient",
-        "stderr"
+        "stderr",
         "residual_variance",
         "t_value",
         "ground_truth_beta",
