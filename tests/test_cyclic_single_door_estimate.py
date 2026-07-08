@@ -35,9 +35,9 @@ def test_estimate_path_coefficient_identifiable_no_adj_set():
     result = estimate_path_coefficient_for_edge(g, "X", "Y", data)
     assert result is not None
     assert isinstance(result, tuple)
-    assert len(result) == 3
+    assert len(result) == 4
 
-    path_coef, residual_var, t_val = result
+    path_coef, _, residual_var, t_val = result
     # Path coefficient should be close to 3.0
     assert pytest.approx(path_coef, abs=0.1) == 3.0
     assert residual_var > 0
