@@ -68,7 +68,7 @@ def test_estimate_path_coefficient_identifiable_with_confounder():
     # 1. Without pre-computed adjustment set (should auto-compute {Z})
     result = estimate_path_coefficient_for_edge(g, "X", "Y", data)
     assert result is not None
-    path_coef, residual_var, t_val = result
+    path_coef, stderr, residual_var, t_val = result
     assert pytest.approx(path_coef, abs=0.1) == 2.5
 
     # 2. With pre-computed adjustment set
