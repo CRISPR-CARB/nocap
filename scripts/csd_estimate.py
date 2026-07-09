@@ -474,7 +474,7 @@ def main() -> None:
     )
     p.add_argument(
         "--save-config",
-        type=Optional[str],
+        type=str,
         default=None,
         help="Path to save arguments as a JSON file."
     )
