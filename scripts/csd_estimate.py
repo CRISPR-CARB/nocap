@@ -123,7 +123,7 @@ def _is_invertible(A: np.ndarray) -> bool:
 
     Pulled from https://stackoverflow.com/questions/13249108/efficient-pythonic-check-for-singular-matrix
     """
-    return np.linalg.cond(A) < 1 / (np.finfo(A.dtype).eps)
+    return np.linalg.cond(A) < (1 / (np.finfo(A.dtype).eps))
 
 
 def _build_beta_matrix(
@@ -133,7 +133,7 @@ def _build_beta_matrix(
     beta_std: float,
     beta_abs_max: float,
     rng: np.random.Generator,
-    gen_limit: int = 10000,
+    gen_limit: int = 10_000,
 ) -> tuple[np.ndarray, dict[tuple[str, str], float]]:
     """Return B where equation is X_v = sum_{u->v} beta[u->v] X_u + eps_v.
 
@@ -472,7 +472,7 @@ def main() -> None:
         help="Base RNG seed for beta/noise generation.",
     )
     p.add_argument(
-        "--save-config", type=str, default=None, help="Path to save arguments as a JSON file."
+        "--save-config", type=str, default=None, help="File path to save arguments as a JSON file."
     )
 
     # Experiment grid.
