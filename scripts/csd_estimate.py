@@ -80,7 +80,6 @@ class SyntheticScmParams:
     beta_std: float
     beta_abs_max: float
     missing_edge_rate: float
-    missing_edge_seed: int
     missing_data_rate: float
     missing_data_mechanism: str
     self_mask_quantile: float
