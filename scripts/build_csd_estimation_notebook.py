@@ -411,6 +411,7 @@ for mech in mechs:
             ax.plot(s2['n_samples'], s2['MAE'], marker='o', linewidth=2)
             ax.set_title(f'missing_edge_rate={er}')
             ax.set_xlabel('n_samples')
+            ax.set_xscale('log')
             ax.grid(True, alpha=0.25)
 
         axes[0].set_ylabel('MAE')
