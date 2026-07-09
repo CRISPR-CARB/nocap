@@ -631,7 +631,6 @@ def main() -> None:
                 beta_std=float(args.beta_std),
                 beta_abs_max=float(args.beta_abs_max),
                 missing_edge_rate=missing_edge_rate,
-                missing_edge_seed=args.seed + int(args.missing_edge_seed_offset),
                 missing_data_rate=missing_data_rate,
                 missing_data_mechanism=args.missing_data_mechanism,
                 self_mask_quantile=float(args.self_mask_quantile),
