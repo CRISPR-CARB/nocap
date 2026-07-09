@@ -28,7 +28,6 @@ import argparse
 import csv
 import json
 from collections.abc import Iterable
-from typing import Optional
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -473,10 +472,7 @@ def main() -> None:
         help="Base RNG seed for beta/noise generation.",
     )
     p.add_argument(
-        "--save-config",
-        type=str,
-        default=None,
-        help="Path to save arguments as a JSON file."
+        "--save-config", type=str, default=None, help="Path to save arguments as a JSON file."
     )
 
     # Experiment grid.

@@ -54,7 +54,7 @@ NB_PATH = (
 )
 
 NB_DIR = NB_PATH.parent
-VIZ_DIR = REPO / "notebooks" / "visualizations"
+VIZ_DIR = REPO / NB_DIR / "visualizations"
 VIZ_DIR.mkdir(exist_ok=True)
 
 
@@ -100,7 +100,7 @@ while not (REPO / 'src' / 'nocap').exists() and REPO != REPO.parent:
 
 INPUT_DIR = REPO / {str(INPUT_DIR)!r}
 NB_DIR = INPUT_DIR.parents[1]  # notebooks/Ecoli_Analysis_Notebooks/estimation
-VIZ_DIR = REPO / 'notebooks' / 'visualizations'
+VIZ_DIR = REPO / NB_DIR / 'visualizations'
 VIZ_DIR.mkdir(exist_ok=True)
 
 print('Input CSV dir:', INPUT_DIR)
