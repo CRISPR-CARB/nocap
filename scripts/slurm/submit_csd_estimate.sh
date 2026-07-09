@@ -161,6 +161,7 @@ submit_one() {
     fi
     python_cmd+=(
         --seed "${SEED_BASE}"
+        --save-config "${OUTDIR}"
         --n-samples-list "${N_SAMPLES_LIST}"
         --missing-edge-rate "${missing_edge_rate}"
         --missing-data-rate "${missing_data_rate}"

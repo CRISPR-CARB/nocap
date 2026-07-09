@@ -26,7 +26,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 from collections.abc import Iterable
+from typing import Optional
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -470,6 +472,12 @@ def main() -> None:
         default=0,
         help="Base RNG seed for beta/noise generation.",
     )
+    p.add_argument(
+        "--save-config",
+        type=Optional[str],
+        default=None,
+        help="Path to save arguments as a JSON file."
+    )
 
     # Experiment grid.
     p.add_argument("--n-samples", type=int, default=300)
@@ -586,6 +594,10 @@ def main() -> None:
 
     out_csv = Path(args.output_csv)
     out_csv.parent.mkdir(parents=True, exist_ok=True)
+
+    if args.save_config is not None:
+        with open(args.save_config, "w", encoding="utf-8") as f:
+            json.dump(vars(args), f, indent=4)
 
     # --- Header ---
     fieldnames = [
