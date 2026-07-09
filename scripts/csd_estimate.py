@@ -42,6 +42,8 @@ from nocap.cyclic_single_door import (
     nx_digraph_to_y0,
 )
 
+COND_NUMBER_THRESHOLD = 1  # https://en.wikipedia.org/wiki/Condition_number
+
 
 def _parse_csv_list(s: str | None, *, cast_fn):
     if s is None:
@@ -118,12 +120,13 @@ def _sample_betas(
     return betas
 
 
-def _is_invertible(A: np.ndarray) -> bool:
+def _is_invertible(A: np.ndarray) -> tuple[bool, float]:
     """Checks if a matrix is invertible (not singular).
 
     Pulled from https://stackoverflow.com/questions/13249108/efficient-pythonic-check-for-singular-matrix
     """
-    return np.linalg.cond(A) < (1 / (np.finfo(A.dtype).eps))
+    cond = np.linalg.cond(A)
+    return cond < (1 / (np.finfo(A.dtype).eps)), cond
 
 
 def _build_beta_matrix(
@@ -156,7 +159,8 @@ def _build_beta_matrix(
         for (u, v), b in betas_by_edge.items():
             B[idx[u], idx[v]] = b
 
-        if _is_invertible(np.eye(len(nodes)) - B.T):
+        is_invertible, cond = _is_invertible(np.eye(len(nodes)) - B.T)
+        if is_invertible and cond < COND_NUMBER_THRESHOLD:
             break
 
     return B, betas_by_edge
