@@ -168,7 +168,6 @@ submit_one() {
         --self-mask-quantile "${SELF_MASK_QUANTILE}"
         --self-mask-k "${SELF_MASK_K}"
         --self-mask-direction "${SELF_MASK_DIRECTION}"
-        --missing-edge-seed-offset "0"
         --beta-mean "${BETA_MEAN}"
         --beta-std "${BETA_STD}"
         --beta-abs-max "${BETA_ABS_MAX}"

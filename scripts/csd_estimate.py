@@ -228,7 +228,7 @@ def generate_synthetic_observational_data(
     """
     # "missing_edge_rate" means: how many edges are present in the *true* SCM,
     # but missing from the provided/constructed estimation graph.
-    rng_true = _rng(params.missing_edge_seed)
+    rng = _rng(params.seed)
 
     orig_edges = list(estimation_graph.edges())
     orig_edge_set = set(orig_edges)
@@ -238,7 +238,7 @@ def generate_synthetic_observational_data(
     rate = min(max(rate, 0.0), 1.0)
 
     # Choose the number of extra edges to add (expected: rate * |E_orig|).
-    n_to_add = int(rng_true.binomial(len(orig_edges), rate))
+    n_to_add = int(rng.binomial(len(orig_edges), rate))
 
     if n_to_add <= 0:
         scm_graph_true = nx.DiGraph()
@@ -263,14 +263,12 @@ def generate_synthetic_observational_data(
             scm_graph_true.add_edges_from(edges_true)
         else:
             n_to_add = min(n_to_add, len(candidates))
-            added_edges = rng_true.choice(len(candidates), size=n_to_add, replace=False)
+            added_edges = rng.choice(len(candidates), size=n_to_add, replace=False)
             edges_true.extend(candidates[int(i)] for i in added_edges)
 
             scm_graph_true = nx.DiGraph()
             scm_graph_true.add_nodes_from(scm_nodes)
             scm_graph_true.add_edges_from(edges_true)
-
-    rng_betas = _rng(params.seed)
 
     beta_matrix, betas_by_edge_true = _build_beta_matrix(
         scm_nodes,
@@ -278,14 +276,13 @@ def generate_synthetic_observational_data(
         beta_mean=params.beta_mean,
         beta_std=params.beta_std,
         beta_abs_max=params.beta_abs_max,
-        rng=rng_betas,
+        rng=rng,
     )
-    rng_eps = _rng(params.seed + 10_000)
     eps = _generate_exogenous_noises(
         scm_nodes,
         params.n_samples,
         scc_confounding_strength=params.scc_confounding_strength,
-        rng=rng_eps,
+        rng=rng,
         estimation_graph_for_scc=estimation_graph,
     )
 
@@ -294,7 +291,6 @@ def generate_synthetic_observational_data(
 
     # Apply missing data (entrywise missingness, MNAR or MCAR).
     if params.missing_data_rate > 0:
-        rng_miss = _rng(params.seed + 20_000)
         rate = float(params.missing_data_rate)
         rate = min(max(rate, 0.0), 1.0)
 
@@ -302,7 +298,7 @@ def generate_synthetic_observational_data(
         for col in scm_nodes:
             y = data[col].to_numpy()
             if mech in ("mcar", "mc ar", "mc"):
-                mask = rng_miss.random(params.n_samples) < rate
+                mask = rng.random(params.n_samples) < rate
             elif mech in ("mnar_self_mask", "self_mask", "self-masking", "mnar"):
                 # Use log(|y| + tiny) so the mechanism works with negative values.
                 tiny = 1e-6
@@ -324,11 +320,11 @@ def generate_synthetic_observational_data(
                 # Rescale raw probabilities so the *expected* missingness is ~ rate.
                 raw_mean = float(np.mean(raw))
                 if raw_mean <= 0:
-                    mask = rng_miss.random(params.n_samples) < rate
+                    mask = rng.random(params.n_samples) < rate
                 else:
                     prob = rate * raw / raw_mean
                     prob = np.clip(prob, 0.0, 1.0)
-                    mask = rng_miss.random(params.n_samples) < prob
+                    mask = rng.random(params.n_samples) < prob
             else:
                 raise ValueError(
                     f"Unknown missing-data mechanism: {params.missing_data_mechanism!r}"
@@ -524,12 +520,6 @@ def main() -> None:
         choices=["low", "high"],
         help="If low: mask more when value is small. If high: mask more when value is large.",
     )
-    p.add_argument(
-        "--missing-edge-seed-offset",
-        type=int,
-        default=0,
-        help="Offset added to --seed to deterministically mask edges.",
-    )
 
     # Linear SCM.
     p.add_argument(
@@ -648,7 +638,7 @@ def main() -> None:
                 self_mask_k=float(args.self_mask_k),
                 self_mask_direction=args.self_mask_direction,
                 scc_confounding_strength=float(args.scc_confounding_strength),
-                seed=int(args.seed) + trial_idx * 1000,
+                seed=int(args.seed),
             )
 
             data, scm_graph_true, betas_true = generate_synthetic_observational_data(
