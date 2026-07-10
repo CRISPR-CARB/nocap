@@ -383,6 +383,76 @@ print(f'Saved: {out}')
 cells.append(
     code(
         """\
+# Filter to rows with no missing edges, no missing data, and sample size > 10000
+eval_filtered = eval_df[
+    (eval_df["missing_edge_rate"] == 0)
+    & (eval_df["missing_data_rate"] == 0)
+    & (eval_df["n_samples"] > 10000)
+].copy()
+
+print(f"Filtered rows: {len(eval_filtered):,}")
+
+# Compute adjustment-set size (uses adj_set_size defined earlier)
+eval_filtered["adjustment_set_size"] = eval_filtered["adjustment_set"].apply(adj_set_size)
+eval_filtered = eval_filtered.dropna(subset=["adjustment_set_size"])
+eval_filtered["adjustment_set_size"] = eval_filtered["adjustment_set_size"].astype(int)
+
+# Aggregate metrics by adjustment_set_size
+adj_summary = (
+    eval_filtered.groupby("adjustment_set_size", dropna=False)
+    .agg(
+        n=("error", "size"),
+        MAE=("abs_error", "mean"),
+        RMSE=("sq_error", lambda x: float(np.sqrt(np.mean(x)))),
+        bias=("error", "mean"),
+        residual_mean=("residual_variance", "mean"),
+        residual_median=("residual_variance", "median"),
+    )
+    .reset_index()
+    .sort_values("adjustment_set_size")
+)
+
+adj_csv = NB_DIR / "csd_estimation_adjustment_set_size_summary_no_missing_n_gt10000.csv"
+adj_summary.to_csv(adj_csv, index=False)
+print(f"Wrote adjustment-set-size summary: {adj_csv}")
+
+display(adj_summary.head(20))
+
+# Plot MAE and residual variance vs adjustment set size
+fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharex=True)
+
+axes[0].plot(adj_summary["adjustment_set_size"], adj_summary["MAE"], marker="o", linewidth=2)
+axes[0].set_xlabel("Adjustment-set size (# nodes)")
+axes[0].set_ylabel("MAE")
+axes[0].set_title("MAE vs adjustment-set size (no missing, n>10000)")
+axes[0].grid(True, alpha=0.25)
+
+axes[1].plot(
+    adj_summary["adjustment_set_size"],
+    adj_summary["residual_mean"],
+    marker="o",
+    linewidth=2,
+    color="#d35400",
+)
+axes[1].set_xlabel("Adjustment-set size (# nodes)")
+axes[1].set_ylabel("Residual variance (mean)")
+axes[1].set_title("Residual variance vs adjustment-set size (no missing, n>10000)")
+axes[1].grid(True, alpha=0.25)
+
+plt.tight_layout()
+out = VIZ_DIR / "csd_estimation_mae_resid_vs_adjustment_set_size_no_missing_n_gt10000.png"
+plt.savefig(out, dpi=150, bbox_inches="tight")
+plt.close()
+
+display(Image(str(out)))
+print(f"Saved: {out}")
+"""
+    )
+)
+
+cells.append(
+    code(
+        """\
 # Line plot: MAE vs n_samples for each missing_edge_rate (separate panels)
 
 edge_rates = sorted(eval_df['missing_edge_rate'].unique())
