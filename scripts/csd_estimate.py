@@ -42,7 +42,7 @@ from nocap.cyclic_single_door import (
     nx_digraph_to_y0,
 )
 
-COND_NUMBER_THRESHOLD = 1  # https://en.wikipedia.org/wiki/Condition_number
+COND_NUMBER_THRESHOLD = 100  # https://en.wikipedia.org/wiki/Condition_number
 
 
 def _parse_csv_list(s: str | None, *, cast_fn):
@@ -162,6 +162,8 @@ def _build_beta_matrix(
         is_invertible, cond = _is_invertible(np.eye(len(nodes)) - B.T)
         if is_invertible and cond < COND_NUMBER_THRESHOLD:
             break
+    else:
+        raise Exception("Could not find B matrix that meets invertibility criteria.")
 
     return B, betas_by_edge
 
