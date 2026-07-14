@@ -43,7 +43,7 @@ mkdir -p "${OUTDIR}/csv"
 
 ACCOUNT="${ACCOUNT:-crispr_carb}"
 PARTITION="${PARTITION:-slurm}"
-TIME="${TIME:-12:00:00}"
+TIME="${TIME:-4:00:00}"
 MEM="${MEM:-0}"  # "0" lets slurm use partition default
 CPUS_PER_TASK="${CPUS_PER_TASK:-1}"
 
