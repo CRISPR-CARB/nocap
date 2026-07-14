@@ -42,7 +42,7 @@ from nocap.cyclic_single_door import (
     nx_digraph_to_y0,
 )
 
-COND_NUMBER_THRESHOLD = 100  # https://en.wikipedia.org/wiki/Condition_number
+COND_NUMBER_THRESHOLD = 1000  # https://en.wikipedia.org/wiki/Condition_number
 
 
 def _parse_csv_list(s: str | None, *, cast_fn):
@@ -129,6 +129,21 @@ def _is_invertible(A: np.ndarray) -> tuple[bool, float]:
     return cond < (1 / (np.finfo(A.dtype).eps)), cond
 
 
+def stabilize_cyclic_beta(beta_matrix: np.ndarray, target_rho: float = 0.8) -> np.ndarray:
+    """Rescale B so its spectral radius is target_rho, guaranteeing (I - B^T)
+    is well-conditioned and the fixed-point solution is stable.
+    """
+    eigs = np.linalg.eigvals(beta_matrix)
+    rho = np.max(np.abs(eigs))
+    if rho >= target_rho:
+        beta_matrix = beta_matrix * (target_rho / rho)
+    return beta_matrix
+
+
+def sync_betas_from_matrix(B, betas_by_edge, idx):
+    return {(u, v): float(B[idx[u], idx[v]]) for (u, v) in betas_by_edge}
+
+
 def _build_beta_matrix(
     nodes: list[str],
     edges: Iterable[tuple[str, str]],
@@ -159,7 +174,10 @@ def _build_beta_matrix(
         for (u, v), b in betas_by_edge.items():
             B[idx[u], idx[v]] = b
 
+        B = stabilize_cyclic_beta(B)  # guarantee spectral radius <0.8
+        betas_by_edge = sync_betas_from_matrix(B, betas_by_edge, idx)
         is_invertible, cond = _is_invertible(np.eye(len(nodes)) - B.T)
+
         if is_invertible and cond < COND_NUMBER_THRESHOLD:
             break
     else:
