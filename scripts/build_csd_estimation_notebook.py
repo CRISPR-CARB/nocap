@@ -50,6 +50,7 @@ NB_PATH = (
     / "notebooks"
     / "Ecoli_Analysis_Notebooks"
     / "estimation"
+    / RUN_ID
     / f"csd_estimation_analysis_{RUN_ID}.ipynb"
 )
 
@@ -99,7 +100,7 @@ while not (REPO / 'src' / 'nocap').exists() and REPO != REPO.parent:
     REPO = REPO.parent
 
 INPUT_DIR = REPO / {str(INPUT_DIR)!r}
-NB_DIR = INPUT_DIR.parents[1]  # notebooks/Ecoli_Analysis_Notebooks/estimation
+NB_DIR = INPUT_DIR.parent
 VIZ_DIR = REPO / NB_DIR / 'visualizations'
 VIZ_DIR.mkdir(exist_ok=True)
 
@@ -144,6 +145,11 @@ data['error'] = data['estimated_path_coefficient'] - data['ground_truth_beta']
 data['abs_error'] = data['error'].abs()
 data['sq_error'] = data['error'] ** 2
 
+# Relative slope error: absolute error normalized by ground-truth beta
+# (guard against division by zero / non-finite values)
+data['relative_slope_error'] = data['abs_error'] / data['ground_truth_beta']
+data.loc[~np.isfinite(data['relative_slope_error']), 'relative_slope_error'] = np.nan
+
 eval_df = data[data['status'].isin(['identifiable', 'insufficient_data'])].copy()
 print('Eval rows:', f"{len(eval_df):,}")
 
@@ -153,7 +159,16 @@ def summarize(df: pd.DataFrame) -> dict[str, float]:
     rmse = float(np.sqrt(df['sq_error'].mean()))
     bias = float(df['error'].mean())
     med_abs = float(df['abs_error'].median())
-    return {'MAE': mae, 'RMSE': rmse, 'bias': bias, 'median_abs_error': med_abs}
+    rel_mean = float(df['relative_slope_error'].mean())
+    rel_median = float(df['relative_slope_error'].median())
+    return {
+        'MAE': mae,
+        'RMSE': rmse,
+        'bias': bias,
+        'median_abs_error': med_abs,
+        'relative_slope_error_mean': rel_mean,
+        'relative_slope_error_median': rel_median,
+    }
 
 
 overall = summarize(eval_df)
@@ -218,6 +233,53 @@ print(f'Saved: {out}')
     )
 )
 
+cells.append(md("## 1b) Relative slope error (|estimated-true| / true) vs ground-truth beta"))
+
+cells.append(
+    code(
+        """\
+# Scatter plot: relative_slope_error vs ground-truth beta
+plot_df = eval_df.dropna(subset=['ground_truth_beta', 'relative_slope_error']).copy()
+plot_df = plot_df[np.isfinite(plot_df['relative_slope_error'])]
+
+fig, ax = plt.subplots(figsize=(7, 6))
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.scatter(
+    plot_df['ground_truth_beta'],
+    plot_df['relative_slope_error'],
+    s=4,
+    alpha=0.25,
+    rasterized=True,
+)
+
+ax.set_xlabel('Ground-truth beta (log)')
+ax.set_ylabel('Relative slope error (|error| / beta) (log)')
+ax.set_title('Relative slope error vs ground-truth beta (all parameter settings)')
+
+note = '\\n'.join([f"{k}: {v:.3g}" for k, v in overall.items() if k.startswith('relative_slope_error')])
+ax.text(
+    0.02,
+    0.98,
+    note,
+    transform=ax.transAxes,
+    va='top',
+    ha='left',
+    fontsize=9,
+    bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8, edgecolor='0.8'),
+)
+
+plt.tight_layout()
+out = VIZ_DIR / 'csd_estimation_relative_slope_error_scatter.png'
+plt.savefig(out, dpi=150, bbox_inches='tight')
+plt.close()
+
+display(Image(str(out)))
+print(f'Saved: {out}')
+"""
+    )
+)
+
 cells.append(md("## 2) Error-metric breakdown across simulation parameters"))
 
 cells.append(
@@ -239,6 +301,7 @@ g = (
         RMSE=('sq_error', lambda x: float(np.sqrt(np.mean(x)))),
         bias=('error', 'mean'),
         median_abs_error=('abs_error', 'median'),
+        RelativeSlopeError=('relative_slope_error', 'mean'),
     )
     .reset_index()
 )
@@ -301,6 +364,7 @@ for mech in mechs:
     for dr in data_rates:
         plot_metric_heatmap(mech, float(dr), 'RMSE')
         plot_metric_heatmap(mech, float(dr), 'MAE')
+        plot_metric_heatmap(mech, float(dr), 'RelativeSlopeError')
 """
     )
 )
