@@ -6,7 +6,7 @@
 #
 # This script builds a small parameter grid over synthetic observational
 # generation settings (sample size, missing-edge rate, missing-data rate,
-# missing-data mechanism) and submits one sbatch job per grid point.
+# missing-data mechanism) and submits node-packed sbatch jobs.
 #
 # Idempotency: if the target output CSV already exists and is non-empty, the
 # corresponding job is skipped.
@@ -46,6 +46,7 @@ PARTITION="${PARTITION:-slurm}"
 TIME="${TIME:-4:00:00}"
 MEM="${MEM:-0}"  # "0" lets slurm use partition default
 CPUS_PER_TASK="${CPUS_PER_TASK:-1}"
+BATCH_SIZE="${BATCH_SIZE:-64}"
 
 DRY_RUN="${DRY_RUN:-0}"
 
@@ -70,9 +71,10 @@ N_MISSING_DATA_RATES_LIST="${MISSING_DATA_RATES_LIST:-0.0,0.3}"
 # If you need stronger confounding or different beta sampling, you can
 # override these env vars:
 SCC_CONFOUNDING_STRENGTH="${SCC_CONFOUNDING_STRENGTH:-0.0}"
-BETA_MEAN="${BETA_MEAN:-1.0}"
-BETA_STD="${BETA_STD:-0.2}"
-BETA_ABS_MAX="${BETA_ABS_MAX:-0.9}"
+BETA_MED="${BETA_MED:-2.0}"
+BETA_LOG_SD="${BETA_LOG_SD:-0.5}"
+BETA_ABS_MAX="${BETA_ABS_MAX:-5}"
+BETA_P="${BETA_P:-0.5}"
 
 SELF_MASK_QUANTILE="${SELF_MASK_QUANTILE:-0.25}"
 SELF_MASK_K="${SELF_MASK_K:-8.0}"
@@ -116,106 +118,28 @@ csv_out_for_job() {
     echo "${OUTDIR}/csv/csd_estimate_mech_${mech_tag}_edge_${megr_tag}_data_${mdr_tag}_n_${N_SAMPLES_LIST_SANITIZED}.csv"
 }
 
-submit_one() {
-    local mech="$1"
-    local missing_edge_rate="$2"
-    local missing_data_rate="$3"
+submit_batch() {
+    local batch_file="$1"
+    local batch_id="$2"
+    local job_name="csd_est_pack_${batch_id}"
+    local log_prefix="${LOG_DIR}/${job_name}_%j"
 
-    local out_csv
-    out_csv="$(csv_out_for_job "${mech}" "${missing_edge_rate}" "${missing_data_rate}")"
-    local log_prefix
-    log_prefix="${LOG_DIR}/csd_estimate_$(basename "${out_csv%.*}")"
-
-    # Skip if already exists and non-empty.
-    if [[ -s "${out_csv}" ]]; then
-        echo "[skip] already exists: ${out_csv}"
-        return 0
-    fi
-
-    local job_name
-    job_name="csd_est_${mech}_e$(sanitize_num "${missing_edge_rate}")_d$(sanitize_num "${missing_data_rate}")"
-    job_name="${job_name//_/-}"
-    job_name="${job_name//__/-}"
-
-    # Build command pieces so optional args are easy.
-    local adjustments_arg=()
-    if [[ -n "${ADJUSTMENTS_CSV}" ]]; then
-        adjustments_arg=(--adjustments-csv "${ADJUSTMENTS_CSV}")
-        # If the CSV doesn't contain every edge, the script will fall back to the
-        # sigma-extension oracle. To enforce "only use what you have", export
-        # ASSUME_ADJUSTMENTS_CSV_COMPLETE=1.
-        if [[ "${ASSUME_ADJUSTMENTS_CSV_COMPLETE:-1}" == "1" ]]; then
-            adjustments_arg+=(--assume-adjustments-csv-complete)
-        fi
-    fi
-
-    # Build the python invocation as an argv array so flags like
-    # --adjustments-csv don't get mangled across sbatch/--wrap newlines.
-    local python_cmd=(
-        "uv" "run" "python" "${REPO_ROOT}/scripts/csd_estimate.py"
-        --graphml "${GRAPHML}"
-        --output-csv "${out_csv}"
-    )
-    if [[ "${#adjustments_arg[@]}" -gt 0 ]]; then
-        python_cmd+=("${adjustments_arg[@]}")
-    fi
-    python_cmd+=(
-        --seed "${SEED_BASE}"
-        --save-config "${OUTDIR}/config.json"
-        --n-samples-list "${N_SAMPLES_LIST}"
-        --missing-edge-rate "${missing_edge_rate}"
-        --missing-data-rate "${missing_data_rate}"
-        --missing-data-mechanism "${mech}"
-        --self-mask-quantile "${SELF_MASK_QUANTILE}"
-        --self-mask-k "${SELF_MASK_K}"
-        --self-mask-direction "${SELF_MASK_DIRECTION}"
-        --beta-mean "${BETA_MEAN}"
-        --beta-std "${BETA_STD}"
-        --beta-abs-max "${BETA_ABS_MAX}"
-        --scc-confounding-strength "${SCC_CONFOUNDING_STRENGTH}"
-        --min-rows-after-dropna "${MIN_ROWS_AFTER_DROPNA}"
-    )
-
-    # Convert the argv array to a single shell-escaped command string.
-    local python_cmd_str=""
-    local arg
-    for arg in "${python_cmd[@]}"; do
-        python_cmd_str+="$(printf '%q' "${arg}") "
-    done
-    python_cmd_str="${python_cmd_str%% }"  # trim trailing space
-
-    echo "Executing: ${python_cmd_str}"
-
-    local wrap_cmd
-    wrap_cmd=(
-        "set -euo pipefail"
-        # Load the modules
-        "ml python"
-        "source /share/apps/python/miniconda25.5.1/etc/profile.d/conda.sh"
-        "ml uv"
-        "cd ${REPO_ROOT}"
-        # Prevent race condition with uv cache across jobs
-        "export UV_CACHE_DIR=/tmp/$USER/uv-cache-$$"
-        "mkdir -p \"\$UV_CACHE_DIR\""
-        "uv sync"
-        "echo \"[csd_estimate] job: ${job_name}\""
-        "echo \"  graphml: ${GRAPHML}\""
-        "echo \"  out: ${out_csv}\""
-        "echo \"  mech: ${mech} edge: ${missing_edge_rate} data: ${missing_data_rate}\""
-        "${python_cmd_str}"
-    )
-
-    # Convert wrap_cmd array to a single string for sbatch --wrap.
-    # shellcheck disable=SC2145
-    local wrap_str=""
-    local part
-    for part in "${wrap_cmd[@]}"; do
-        if [[ -z "${wrap_str}" ]]; then
-            wrap_str="${part}"
-        else
-            wrap_str+=$'\n'"${part}"
-        fi
-    done
+    local wrap_str="set -euo pipefail
+ml python
+source /share/apps/python/miniconda25.5.1/etc/profile.d/conda.sh
+ml uv
+cd ${REPO_ROOT}
+export UV_CACHE_DIR=/tmp/\$USER/uv-cache-\$\$
+mkdir -p \"\$UV_CACHE_DIR\"
+uv sync
+run_one() {
+  IFS='|' read -r mech edge_rate data_rate out_csv <<< \"\$1\"
+  [[ -s \"\$out_csv\" ]] && { echo \"[skip] \$out_csv\"; return; }
+  uv run python ${REPO_ROOT}/scripts/csd_estimate.py --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --seed ${SEED_BASE} --save-config ${OUTDIR}/config.json --n-samples-list ${N_SAMPLES_LIST} --missing-edge-rate \"\$edge_rate\" --missing-data-rate \"\$data_rate\" --missing-data-mechanism \"\$mech\" --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
+}
+export -f run_one
+xargs -a ${batch_file} -P ${BATCH_SIZE} -I{} bash -c 'run_one "\$@"' _ {}
+"
 
     local sbatch_args=(
         --parsable
@@ -231,7 +155,7 @@ submit_one() {
         --wrap="${wrap_str}"
     )
 
-    echo "[submit] ${job_name} -> ${out_csv}"
+    echo "[submit] ${job_name} ($(wc -l < "${batch_file}") tasks)"
     if [[ "${DRY_RUN}" == "1" ]]; then
         echo "  DRY_RUN=1: not calling sbatch"
         return 0
@@ -263,18 +187,31 @@ function main {
         echo "  DRY_RUN: ${DRY_RUN}"
         echo ""
 
+        pending_file="${OUTDIR}/pending_tasks.txt"
+        batch_dir="${OUTDIR}/batches"
+        : > "${pending_file}"
+        mkdir -p "${batch_dir}"
         for mech in "${MECHANISMS[@]}"; do
             for edge_rate in "${EDGE_RATES[@]}"; do
                 for data_rate in "${DATA_RATES[@]}"; do
-                    submit_one "${mech}" "${edge_rate}" "${data_rate}"
+                    out_csv="$(csv_out_for_job "${mech}" "${edge_rate}" "${data_rate}")"
+                    [[ -s "${out_csv}" ]] || printf '%s|%s|%s|%s\n' "${mech}" "${edge_rate}" "${data_rate}" "${out_csv}" >> "${pending_file}"
                 done
             done
         done
-
+        rm -f "${batch_dir}"/batch_*.txt
+        if [[ -s "${pending_file}" ]]; then
+            split -l "${BATCH_SIZE}" --numeric-suffixes=0 --suffix-length=3 "${pending_file}" "${batch_dir}/batch_"
+            for batch_file in "${batch_dir}"/batch_*; do
+                submit_batch "${batch_file}" "$(basename "${batch_file}")"
+            done
+        else
+            echo "All CSD estimation outputs already exist. Nothing to submit."
+        fi
         echo "=== Done submitting CSD estimation jobs ==="
     else
-        submit_one MCAR 0.0 0.0
-        echo "=== Done submitting CSD estimation test job ==="
+        echo "Smoke-test mode is not supported by node packing; narrow the grid with environment variables."
+        exit 2
     fi
 }
 

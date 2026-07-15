@@ -79,8 +79,9 @@ class SyntheticScmParams:
     """Parameters for generating a synthetic SCM."""
 
     n_samples: int
-    beta_mean: float
-    beta_std: float
+    beta_med: float
+    beta_log_sd: float
+    beta_p: float
     beta_abs_max: float
     missing_edge_rate: float
     missing_data_rate: float
@@ -99,25 +100,128 @@ def _rng(seed: int) -> np.random.Generator:
 def _sample_betas(
     edges: Iterable[tuple[str, str]],
     *,
-    beta_mean: float,
-    beta_std: float,
-    beta_abs_max: float,
     rng: np.random.Generator,
+    beta_med: float = 2,
+    beta_log_sd: float = 0.5,
+    beta_p: float = 0.5,
+    beta_abs_max: float = 5,
 ) -> dict[tuple[str, str], float]:
-    betas: dict[tuple[str, str], float] = {}
-    for e in edges:
-        if beta_std == 0:
-            b = beta_mean
-        else:
-            # Truncated normal via rejection.
-            for _ in range(10_000):
-                b = float(rng.normal(beta_mean, beta_std))
-                if abs(b) <= beta_abs_max:
-                    break
-            else:
-                raise RuntimeError("Failed to sample truncated betas")
-        betas[e] = b
-    return betas
+    """Sample nonzero log fold changes for regulatory edges.
+
+    Parameters
+    ----------
+    edges:
+        Iterable of (source_gene, target_gene) edges.
+
+    beta_med:
+        Median absolute fold change for a one-unit increase in the
+        normalized regulator expression.
+
+        For example:
+            beta_med=2.0 means the median activating effect is a 2-fold
+            increase, corresponding to beta = log(2).
+
+    beta_log_sd:
+        Standard deviation of log(abs(beta)). Larger values produce
+        more heterogeneous effect sizes.
+
+    beta_p:
+        Probability that an edge is activating.
+
+        beta_p=1.0 -> all beta values are positive
+        beta_p=0.0 -> all beta values are negative
+        beta_p=0.5 -> equal probability of activation and inhibition
+
+    beta_abs_max:
+        Maximum allowed absolute value of beta, on the log scale.
+
+        For example:
+            beta_abs_max=np.log(4)
+        limits effects to at most 4-fold per one-unit increase.
+
+    rng:
+        NumPy random number generator.
+
+    Returns
+    -------
+    dict[tuple[str, str], float]
+        Mapping from edge to a nonzero signed log fold change.
+
+    Notes
+    -----
+    The sampled magnitude follows approximately
+
+        log(abs(beta)) ~ Normal(
+            log(log(beta_med)),
+            beta_log_sd**2
+        )
+
+    Therefore, the median absolute beta is approximately log(beta_med),
+    and the median absolute fold change is approximately beta_med.
+    """
+    if beta_med <= 1:
+        raise ValueError("beta_med must be greater than 1.")
+
+    if not 0 <= beta_p <= 1:
+        raise ValueError("beta_p must be between 0 and 1.")
+
+    if beta_abs_max <= 0:
+        raise ValueError("beta_abs_max must be positive.")
+
+    if beta_log_sd <= 0:
+        raise ValueError("beta_log_sd must be positive.")
+
+    edge_list = list(edges)
+
+    if not edge_list:
+        return {}
+
+    # Median absolute beta corresponding to the requested fold change.
+    #
+    # If median fold change = 2:
+    #     median(abs(beta)) = log(2)
+    median_abs_beta = np.log(beta_med)
+
+    if median_abs_beta >= beta_abs_max:
+        raise ValueError(
+            "beta_abs_max must be greater than log(beta_med). "
+            f"Got beta_abs_max={beta_abs_max:.3f}, "
+            f"log(beta_med)={median_abs_beta:.3f}."
+        )
+
+    n_edges = len(edge_list)
+
+    # Sample positive magnitudes. Rejection sampling ensures that the
+    # absolute values do not exceed beta_abs_max.
+    magnitudes = np.empty(n_edges, dtype=float)
+    remaining = np.arange(n_edges)
+
+    log_median_abs_beta = np.log(median_abs_beta)
+
+    while remaining.size > 0:
+        proposed = rng.lognormal(
+            mean=log_median_abs_beta,
+            sigma=beta_log_sd,
+            size=remaining.size,
+        )
+
+        accepted = proposed < beta_abs_max
+
+        magnitudes[remaining[accepted]] = proposed[accepted]
+        remaining = remaining[~accepted]
+
+    # Sample signs:
+    # +1 = activating edge
+    # -1 = inhibitory edge
+    signs = np.where(
+        rng.random(n_edges) < beta_p,
+        1.0,
+        -1.0,
+    )
+
+    betas_array = signs * magnitudes
+
+    return {edge: float(beta) for edge, beta in zip(edge_list, betas_array)}
 
 
 def _is_invertible(A: np.ndarray) -> tuple[bool, float]:
@@ -147,11 +251,12 @@ def sync_betas_from_matrix(B, betas_by_edge, idx):
 def _build_beta_matrix(
     nodes: list[str],
     edges: Iterable[tuple[str, str]],
-    beta_mean: float,
-    beta_std: float,
+    beta_med: float,
+    beta_log_sd: float,
+    beta_p: float,
     beta_abs_max: float,
     rng: np.random.Generator,
-    gen_limit: int = 10_000,
+    gen_limit: int = 100,
 ) -> tuple[np.ndarray, dict[tuple[str, str], float]]:
     """Return B where equation is X_v = sum_{u->v} beta[u->v] X_u + eps_v.
 
@@ -162,11 +267,12 @@ def _build_beta_matrix(
     B = np.zeros((n, n), dtype=float)
     betas_by_edge: dict[tuple[str, str], float] = {}
 
-    for _ in range(gen_limit):
+    for i in range(gen_limit):
         betas_by_edge = _sample_betas(
             edges,
-            beta_mean=beta_mean,
-            beta_std=beta_std,
+            beta_med=beta_med,
+            beta_log_sd=beta_log_sd,
+            beta_p=beta_p,
             beta_abs_max=beta_abs_max,
             rng=rng,
         )
@@ -176,10 +282,15 @@ def _build_beta_matrix(
 
         B = stabilize_cyclic_beta(B)  # guarantee spectral radius <0.8
         betas_by_edge = sync_betas_from_matrix(B, betas_by_edge, idx)
+
+        # I - B^T is guaranteed to be invertible if p(B) < 1, but still good
+        # to check just in case.
         is_invertible, cond = _is_invertible(np.eye(len(nodes)) - B.T)
 
         if is_invertible and cond < COND_NUMBER_THRESHOLD:
+            print(f"Beta matrix found after {i + 1} iteration(s) and k(I - B^T) = {cond}.")
             break
+
     else:
         raise Exception("Could not find B matrix that meets invertibility criteria.")
 
@@ -297,8 +408,9 @@ def generate_synthetic_observational_data(
     beta_matrix, betas_by_edge_true = _build_beta_matrix(
         scm_nodes,
         edges_true,
-        beta_mean=params.beta_mean,
-        beta_std=params.beta_std,
+        beta_med=params.beta_med,
+        beta_log_sd=params.beta_log_sd,
+        beta_p=params.beta_p,
         beta_abs_max=params.beta_abs_max,
         rng=rng,
     )
@@ -321,9 +433,14 @@ def generate_synthetic_observational_data(
         mech = params.missing_data_mechanism.lower()
         for col in scm_nodes:
             y = data[col].to_numpy()
-            if mech in ("mcar", "mc ar", "mc"):
+            if mech in ("mcar", "mc ar", "mc"):  # biological dropout / completely random
                 mask = rng.random(params.n_samples) < rate
-            elif mech in ("mnar_self_mask", "self_mask", "self-masking", "mnar"):
+            elif mech in (
+                "mnar_self_mask",
+                "self_mask",
+                "self-masking",
+                "mnar",
+            ):  # instrument dropout / mechanism
                 # Use log(|y| + tiny) so the mechanism works with negative values.
                 tiny = 1e-6
                 y_log = np.log(np.abs(y) + tiny)
@@ -354,7 +471,9 @@ def generate_synthetic_observational_data(
                     f"Unknown missing-data mechanism: {params.missing_data_mechanism!r}"
                 )
 
-            data.loc[mask, col] = np.nan
+            data.loc[mask, col] = (
+                0.0  # missingness is not "missing", but no read on gene expression value
+            )
 
     return data, scm_graph_true, betas_by_edge_true
 
@@ -550,21 +669,27 @@ def main() -> None:
 
     # Linear SCM.
     p.add_argument(
-        "--beta-mean",
+        "--beta-med",
         type=float,
-        default=1.0,
-        help="Mean for edge coefficients (used if beta-std != 0).",
+        default=2.0,
+        help="Median for edge coefficients (used if beta-std != 0).",
     )
     p.add_argument(
-        "--beta-std",
+        "--beta-log-sd",
         type=float,
-        default=0.2,
+        default=0.5,
         help="Std for edge coefficients (truncated). Set to 0 for fixed betas.",
+    )
+    p.add_argument(
+        "--beta-p",
+        type=float,
+        default=0.5,
+        help="Probability that an edge is activating. Set to 0.5.",
     )
     p.add_argument(
         "--beta-abs-max",
         type=float,
-        default=0.9,
+        default=5,
         help="Truncate sampled betas to |beta| <= this.",
     )
     p.add_argument(
@@ -658,9 +783,10 @@ def main() -> None:
 
             params = SyntheticScmParams(
                 n_samples=n_samples,
-                beta_mean=float(args.beta_mean),
-                beta_std=float(args.beta_std),
+                beta_med=float(args.beta_med),
+                beta_log_sd=float(args.beta_log_sd),
                 beta_abs_max=float(args.beta_abs_max),
+                beta_p=float(args.beta_p),
                 missing_edge_rate=missing_edge_rate,
                 missing_data_rate=missing_data_rate,
                 missing_data_mechanism=args.missing_data_mechanism,
