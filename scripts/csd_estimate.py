@@ -440,9 +440,7 @@ def _sample_umi_counts(
         raise ValueError("latent_log_expression must be a 2D array.")
 
     if len(library_sizes) != latent_log_expression.shape[0]:
-        raise ValueError(
-            "library_sizes must have one value per sample."
-        )
+        raise ValueError("library_sizes must have one value per sample.")
 
     # Avoid numerical overflow for extreme latent values.
     latent_log_expression = np.clip(
@@ -538,10 +536,7 @@ def generate_synthetic_observational_data(
     )
 
     candidates = [
-        (u, v)
-        for u in scm_nodes
-        for v in scm_nodes
-        if u != v and (u, v) not in orig_edge_set
+        (u, v) for u in scm_nodes for v in scm_nodes if u != v and (u, v) not in orig_edge_set
     ]
 
     if candidates and n_to_add > 0:
@@ -553,10 +548,7 @@ def generate_synthetic_observational_data(
             replace=False,
         )
 
-        edges_true.extend(
-            candidates[int(i)]
-            for i in selected
-        )
+        edges_true.extend(candidates[int(i)] for i in selected)
 
     scm_graph_true = nx.DiGraph()
     scm_graph_true.add_nodes_from(scm_nodes)
@@ -630,10 +622,7 @@ def generate_synthetic_observational_data(
 
         for j, col in enumerate(scm_nodes):
             if mechanism in {"mcar", "mc ar", "mc"}:
-                mask = (
-                    rng.random(params.n_samples)
-                    < missing_rate
-                )
+                mask = rng.random(params.n_samples) < missing_rate
 
             elif mechanism in {
                 "mnar_self_mask",
@@ -656,18 +645,11 @@ def generate_synthetic_observational_data(
                 direction = params.self_mask_direction.lower()
 
                 if direction == "low":
-                    raw_probability = 1.0 / (
-                        1.0 + np.exp(-k * (threshold - x))
-                    )
+                    raw_probability = 1.0 / (1.0 + np.exp(-k * (threshold - x)))
                 elif direction == "high":
-                    raw_probability = 1.0 / (
-                        1.0 + np.exp(-k * (x - threshold))
-                    )
+                    raw_probability = 1.0 / (1.0 + np.exp(-k * (x - threshold)))
                 else:
-                    raise ValueError(
-                        "--self-mask-direction must be one of "
-                        "{low,high}."
-                    )
+                    raise ValueError("--self-mask-direction must be one of {low,high}.")
 
                 raw_mean = float(np.mean(raw_probability))
 
@@ -677,29 +659,23 @@ def generate_synthetic_observational_data(
                         missing_rate,
                     )
                 else:
-                    probability = (
-                        missing_rate
-                        * raw_probability
-                        / raw_mean
-                    )
+                    probability = missing_rate * raw_probability / raw_mean
                     probability = np.clip(
                         probability,
                         0.0,
                         1.0,
                     )
 
-                mask = (
-                    rng.random(params.n_samples)
-                    < probability
-                )
+                mask = rng.random(params.n_samples) < probability
 
             else:
                 raise ValueError(
-                    "Unknown missing-data mechanism: "
-                    f"{params.missing_data_mechanism!r}"
+                    f"Unknown missing-data mechanism: {params.missing_data_mechanism!r}"
                 )
 
-            data.loc[mask, col] = 0.0  # missingness is not "missing", but no read on gene expression value
+            data.loc[mask, col] = (
+                0.0  # missingness is not "missing", but no read on gene expression value
+            )
 
     return data, scm_graph_true, betas_by_edge_true
 
@@ -908,9 +884,7 @@ def main() -> None:
         "--beta-log-sd",
         type=float,
         default=0.5,
-        help=(
-            "Standard deviation of log absolute structural beta values."
-        ),
+        help=("Standard deviation of log absolute structural beta values."),
     )
     p.add_argument(
         "--beta-p",
@@ -943,10 +917,7 @@ def main() -> None:
         "--umi-dispersion",
         type=float,
         default=0.1,
-        help=(
-            "Negative-binomial dispersion alpha. "
-            "Variance is mu + alpha * mu**2."
-        ),
+        help=("Negative-binomial dispersion alpha. Variance is mu + alpha * mu**2."),
     )
     p.add_argument(
         "--library-size-log-mean",
@@ -967,10 +938,7 @@ def main() -> None:
         "--umi-pseudocount",
         type=float,
         default=1.0,
-        help=(
-            "Pseudocount used when converting normalized UMI counts "
-            "to log-expression."
-        ),
+        help=("Pseudocount used when converting normalized UMI counts to log-expression."),
     )
 
     # Regression/data cleaning.
@@ -1057,19 +1025,16 @@ def main() -> None:
 
             params = SyntheticScmParams(
                 n_samples=n_samples,
-
                 # Structural SCM parameters.
                 beta_med=float(args.beta_med),
                 beta_log_sd=float(args.beta_log_sd),
                 beta_abs_max=float(args.beta_abs_max),
                 beta_p=float(args.beta_p),
-
                 # UMI observation-model parameters.
                 umi_dispersion=float(args.umi_dispersion),
                 library_size_log_mean=float(args.library_size_log_mean),
                 library_size_log_sd=float(args.library_size_log_sd),
                 umi_pseudocount=float(args.umi_pseudocount),
-
                 # Missingness parameters.
                 missing_edge_rate=missing_edge_rate,
                 missing_data_rate=missing_data_rate,
@@ -1077,11 +1042,8 @@ def main() -> None:
                 self_mask_quantile=float(args.self_mask_quantile),
                 self_mask_k=float(args.self_mask_k),
                 self_mask_direction=args.self_mask_direction,
-
                 # Confounding and reproducibility.
-                scc_confounding_strength=float(
-                    args.scc_confounding_strength
-                ),
+                scc_confounding_strength=float(args.scc_confounding_strength),
                 seed=int(args.seed),
             )
 
