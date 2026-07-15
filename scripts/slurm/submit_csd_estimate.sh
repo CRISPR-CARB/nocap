@@ -140,7 +140,7 @@ uv sync
 run_one() {
   IFS='|' read -r mech edge_rate data_rate out_csv <<< \"\$1\"
   [[ -s \"\$out_csv\" ]] && { echo \"[skip] \$out_csv\"; return; }
-  uv run python ${REPO_ROOT}/scripts/csd_estimate.py --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --seed ${SEED_BASE} --save-config ${OUTDIR}/config.json --n-samples-list ${N_SAMPLES_LIST} --missing-edge-rate \"\$edge_rate\" --missing-data-rate \"\$data_rate\" --missing-data-mechanism \"\$mech\" --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
+  uv run python ${REPO_ROOT}/scripts/csd_estimate.py --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --seed ${SEED_BASE} --save-config ${OUTDIR}/config.json --n-samples-list ${N_SAMPLES_LIST} --missing-edge-rate \"\$edge_rate\" --missing-data-rate \"\$data_rate\" --missing-data-mechanism \"\$mech\" --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --umi-dispersion ${UMI_DISP} --library-size-log-mean ${LIB_SIZE_MEAN} --library-size-log-sd ${LIB_SIZE_SD} --umi-pseudocount ${UMI_COUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
 }
 export -f run_one
 xargs -a ${batch_file} -P ${BATCH_SIZE} -I{} bash -c 'run_one "\$@"' _ {}
