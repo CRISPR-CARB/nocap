@@ -3,8 +3,32 @@ r"""csd_estimate.py — Synthetic observational data + per-edge path coefficient
 This script:
 
 1) Accepts an input :class:`networkx.DiGraph` (via GraphML or via a small built-in demo).
-2) Generates linear-Gaussian observational data from that graph (with knobs for
-   missing edges and missing data / MNAR self-masking).
+2) Generates synthetic UMI data
+
+    The latent structural causal model is
+
+        X = B.T @ X + eps,
+
+    where X is latent log-expression and B[u, v] is the structural coefficient
+    (beta) for the edge u -> v.
+
+    Observed UMI counts are generated from the latent expression using
+
+        Y_hs ~ NegativeBinomial(mu_hs, alpha_h)
+
+    with
+
+        mu_hs = L_s * exp(X_hs)
+
+    and
+
+        Var(Y_hs) = mu_hs + alpha_h * mu_hs**2.
+
+    The beta coefficients are continuous, nonzero structural log fold changes.
+    For a one-unit increase in latent regulator expression, beta is the direct
+    change in target log-expression and exp(beta) is the corresponding fold
+    change in expected molecular abundance.
+
 3) For **every** directed edge in the *estimation graph* calls
    :func:`nocap.cyclic_single_door.estimate_path_coefficient_for_edge`.
 4) Writes a CSV with per-edge estimation results and the corresponding
@@ -14,8 +38,6 @@ Notes
 -----
 * The estimator itself performs σ-single-door identifiability checks using only
   the graph structure.
-* Missing data is handled by dropping rows with NaNs in the regression
-  variables for each edge.
 * For cyclic graphs, the synthetic SCM is defined by the linear equations
   ``X = B^T X + eps`` solved via ``(I - B^T)^{-1}``.
 * Ground-truth coefficients are the structural edge coefficients (betas)
@@ -76,20 +98,33 @@ def _safe_dropna_for_cols(df: pd.DataFrame, cols: list[str], *, min_rows: int):
 
 @dataclass(frozen=True)
 class SyntheticScmParams:
-    """Parameters for generating a synthetic SCM."""
+    """Parameters for generating a synthetic UMI-count SCM."""
 
     n_samples: int
+
+    # Structural SCM beta parameters.
     beta_med: float
     beta_log_sd: float
     beta_p: float
     beta_abs_max: float
+
+    # UMI observation-model parameters.
+    umi_dispersion: float
+    library_size_log_mean: float
+    library_size_log_sd: float
+    umi_pseudocount: float
+
+    # Missingness parameters.
     missing_edge_rate: float
     missing_data_rate: float
     missing_data_mechanism: str
     self_mask_quantile: float
     self_mask_k: float
     self_mask_direction: str
+
+    # Optional latent confounding.
     scc_confounding_strength: float
+
     seed: int
 
 
@@ -348,63 +383,186 @@ def _generate_exogenous_noises(
     return eps
 
 
+def _sample_library_sizes(
+    n_samples: int,
+    *,
+    log_mean: float,
+    log_sd: float,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Generate positive per-sample library sizes.
+
+    The library sizes are sequencing-depth factors. For example, with
+    log_mean=np.log(10_000), the typical sample has approximately 10,000
+    expected UMIs per unit of latent abundance.
+    """
+    if log_sd < 0:
+        raise ValueError("library_size_log_sd must be non-negative.")
+
+    return rng.lognormal(
+        mean=log_mean,
+        sigma=log_sd,
+        size=n_samples,
+    )
+
+
+def _sample_umi_counts(
+    latent_log_expression: np.ndarray,
+    library_sizes: np.ndarray,
+    *,
+    dispersion: float,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Sample UMI counts from latent log-expression.
+
+    The model is
+
+        mu_hs = L_s * exp(X_hs)
+        Y_hs ~ NB(mu_hs, alpha)
+
+    with
+
+        Var(Y_hs) = mu_hs + alpha * mu_hs**2.
+
+    NumPy uses the parameterization NB(n, p), where
+
+        E[Y] = n * (1 - p) / p.
+
+    Therefore:
+
+        n = 1 / alpha
+        p = n / (n + mu)
+    """
+    if dispersion <= 0:
+        raise ValueError("umi_dispersion must be positive.")
+
+    if latent_log_expression.ndim != 2:
+        raise ValueError("latent_log_expression must be a 2D array.")
+
+    if len(library_sizes) != latent_log_expression.shape[0]:
+        raise ValueError(
+            "library_sizes must have one value per sample."
+        )
+
+    # Avoid numerical overflow for extreme latent values.
+    latent_log_expression = np.clip(
+        latent_log_expression,
+        a_min=-30.0,
+        a_max=30.0,
+    )
+
+    mu = library_sizes[:, None] * np.exp(latent_log_expression)
+
+    n = 1.0 / dispersion
+    p = n / (n + mu)
+
+    return rng.negative_binomial(n=n, p=p)
+
+
+def _counts_to_log_expression(
+    counts: np.ndarray,
+    library_sizes: np.ndarray,
+    *,
+    pseudocount: float,
+) -> np.ndarray:
+    """Convert UMI counts to normalized log-expression.
+
+    This is the observed expression supplied to the estimator. It is a
+    noisy proxy for the latent SCM variable X.
+
+    A count of zero remains a valid observation:
+
+        log(0 / L + pseudocount) = log(pseudocount).
+
+    Missing values are introduced later as np.nan.
+    """
+    if pseudocount <= 0:
+        raise ValueError("umi_pseudocount must be positive.")
+
+    normalized_counts = counts / library_sizes[:, None]
+
+    return np.log(normalized_counts + pseudocount)
+
+
 def generate_synthetic_observational_data(
     estimation_graph: nx.DiGraph,
     scm_nodes: list[str],
     params: SyntheticScmParams,
 ):
-    """Generate a linear-Gaussian observational dataset and metadata.
+    """Generate synthetic latent-SCM data and observed UMI expression.
+
+    The latent SCM is
+
+        X = B.T @ X + eps,
+
+    where X is latent log-expression and B[u, v] is the structural beta
+    for u -> v.
+
+    UMI counts are then generated using
+
+        mu_hs = L_s * exp(X_hs)
+        Y_hs ~ NB(mu_hs, alpha_h).
 
     Returns
     -------
-    data : pd.DataFrame
-    scm_graph_true : nx.DiGraph
-    betas_by_edge_true : dict[(u,v)] -> beta
+    data:
+        Library-size-normalized log-UMI expression. This is the noisy
+        observed expression supplied to the estimator.
+
+    scm_graph_true:
+        True SCM graph, including any added edges.
+
+    betas_by_edge_true:
+        Structural beta coefficients used by the latent SCM.
     """
-    # "missing_edge_rate" means: how many edges are present in the *true* SCM,
-    # but missing from the provided/constructed estimation graph.
     rng = _rng(params.seed)
 
     orig_edges = list(estimation_graph.edges())
     orig_edge_set = set(orig_edges)
     edges_true = list(orig_edges)
 
-    rate = float(params.missing_edge_rate)
-    rate = min(max(rate, 0.0), 1.0)
+    # "missing_edge_rate" means: how many edges are present in the *true* SCM,
+    # but missing from the provided/constructed estimation graph.
+    missing_edge_rate = np.clip(
+        float(params.missing_edge_rate),
+        0.0,
+        1.0,
+    )
 
     # Choose the number of extra edges to add (expected: rate * |E_orig|).
-    n_to_add = int(rng.binomial(len(orig_edges), rate))
+    n_to_add = int(
+        rng.binomial(
+            len(orig_edges),
+            missing_edge_rate,
+        )
+    )
 
-    if n_to_add <= 0:
-        scm_graph_true = nx.DiGraph()
-        scm_graph_true.add_nodes_from(scm_nodes)
-        scm_graph_true.add_edges_from(edges_true)
-    else:
-        # Candidate edges are all directed pairs of distinct nodes that are not
-        # already present in the estimation graph.
-        candidates: list[tuple[str, str]] = []
-        for u in scm_nodes:
-            for v in scm_nodes:
-                if u == v:
-                    continue
-                if (u, v) in orig_edge_set:
-                    continue
-                candidates.append((u, v))
+    candidates = [
+        (u, v)
+        for u in scm_nodes
+        for v in scm_nodes
+        if u != v and (u, v) not in orig_edge_set
+    ]
 
-        if not candidates:
-            n_to_add = 0
-            scm_graph_true = nx.DiGraph()
-            scm_graph_true.add_nodes_from(scm_nodes)
-            scm_graph_true.add_edges_from(edges_true)
-        else:
-            n_to_add = min(n_to_add, len(candidates))
-            added_edges = rng.choice(len(candidates), size=n_to_add, replace=False)
-            edges_true.extend(candidates[int(i)] for i in added_edges)
+    if candidates and n_to_add > 0:
+        n_to_add = min(n_to_add, len(candidates))
 
-            scm_graph_true = nx.DiGraph()
-            scm_graph_true.add_nodes_from(scm_nodes)
-            scm_graph_true.add_edges_from(edges_true)
+        selected = rng.choice(
+            len(candidates),
+            size=n_to_add,
+            replace=False,
+        )
 
+        edges_true.extend(
+            candidates[int(i)]
+            for i in selected
+        )
+
+    scm_graph_true = nx.DiGraph()
+    scm_graph_true.add_nodes_from(scm_nodes)
+    scm_graph_true.add_edges_from(edges_true)
+
+    # Sample the structural coefficients used by the latent SCM.
     beta_matrix, betas_by_edge_true = _build_beta_matrix(
         scm_nodes,
         edges_true,
@@ -414,6 +572,8 @@ def generate_synthetic_observational_data(
         beta_abs_max=params.beta_abs_max,
         rng=rng,
     )
+
+    # Generate exogenous noise for the latent log-expression SCM.
     eps = _generate_exogenous_noises(
         scm_nodes,
         params.n_samples,
@@ -422,58 +582,124 @@ def generate_synthetic_observational_data(
         estimation_graph_for_scc=estimation_graph,
     )
 
-    X = _solve_linear_scm(scm_nodes, beta_matrix=beta_matrix, eps=eps)
-    data = pd.DataFrame(X, columns=scm_nodes)
+    # Generate latent log-expression:
+    #
+    #     X = B.T @ X + eps
+    #
+    latent_log_expression = _solve_linear_scm(
+        scm_nodes,
+        beta_matrix=beta_matrix,
+        eps=eps,
+    )
+
+    # Generate sample-specific sequencing depths.
+    library_sizes = _sample_library_sizes(
+        params.n_samples,
+        log_mean=params.library_size_log_mean,
+        log_sd=params.library_size_log_sd,
+        rng=rng,
+    )
+
+    # Generate integer UMI counts from the latent expression.
+    umi_counts = _sample_umi_counts(
+        latent_log_expression,
+        library_sizes,
+        dispersion=params.umi_dispersion,
+        rng=rng,
+    )
+
+    # Convert counts to normalized log-expression for the estimator.
+    data = pd.DataFrame(
+        _counts_to_log_expression(
+            umi_counts,
+            library_sizes,
+            pseudocount=params.umi_pseudocount,
+        ),
+        columns=scm_nodes,
+    )
 
     # Apply missing data (entrywise missingness, MNAR or MCAR).
     if params.missing_data_rate > 0:
-        rate = float(params.missing_data_rate)
-        rate = min(max(rate, 0.0), 1.0)
+        missing_rate = np.clip(
+            float(params.missing_data_rate),
+            0.0,
+            1.0,
+        )
 
-        mech = params.missing_data_mechanism.lower()
-        for col in scm_nodes:
-            y = data[col].to_numpy()
-            if mech in ("mcar", "mc ar", "mc"):  # biological dropout / completely random
-                mask = rng.random(params.n_samples) < rate
-            elif mech in (
+        mechanism = params.missing_data_mechanism.lower()
+
+        for j, col in enumerate(scm_nodes):
+            if mechanism in {"mcar", "mc ar", "mc"}:
+                mask = (
+                    rng.random(params.n_samples)
+                    < missing_rate
+                )
+
+            elif mechanism in {
                 "mnar_self_mask",
                 "self_mask",
                 "self-masking",
                 "mnar",
-            ):  # instrument dropout / mechanism
-                # Use log(|y| + tiny) so the mechanism works with negative values.
-                tiny = 1e-6
-                y_log = np.log(np.abs(y) + tiny)
-                q = float(params.self_mask_quantile)
-                thr = float(np.quantile(y_log, q))
-                k = float(params.self_mask_k)
+            }:
+                # Self-masking depends on the underlying biological
+                # expression, rather than on the observed count alone.
+                x = latent_log_expression[:, j]
 
-                direction = params.self_mask_direction.lower()
-                if direction == "low":
-                    # Missing more likely when y is small (y_log below threshold).
-                    raw = 1.0 / (1.0 + np.exp(-k * (thr - y_log)))
-                elif direction == "high":
-                    # Missing more likely when y is large (y_log above threshold).
-                    raw = 1.0 / (1.0 + np.exp(-k * (y_log - thr)))
-                else:
-                    raise ValueError("--self-mask-direction must be one of {low,high}.")
-
-                # Rescale raw probabilities so the *expected* missingness is ~ rate.
-                raw_mean = float(np.mean(raw))
-                if raw_mean <= 0:
-                    mask = rng.random(params.n_samples) < rate
-                else:
-                    prob = rate * raw / raw_mean
-                    prob = np.clip(prob, 0.0, 1.0)
-                    mask = rng.random(params.n_samples) < prob
-            else:
-                raise ValueError(
-                    f"Unknown missing-data mechanism: {params.missing_data_mechanism!r}"
+                threshold = float(
+                    np.quantile(
+                        x,
+                        float(params.self_mask_quantile),
+                    )
                 )
 
-            data.loc[mask, col] = (
-                0.0  # missingness is not "missing", but no read on gene expression value
-            )
+                k = float(params.self_mask_k)
+                direction = params.self_mask_direction.lower()
+
+                if direction == "low":
+                    raw_probability = 1.0 / (
+                        1.0 + np.exp(-k * (threshold - x))
+                    )
+                elif direction == "high":
+                    raw_probability = 1.0 / (
+                        1.0 + np.exp(-k * (x - threshold))
+                    )
+                else:
+                    raise ValueError(
+                        "--self-mask-direction must be one of "
+                        "{low,high}."
+                    )
+
+                raw_mean = float(np.mean(raw_probability))
+
+                if raw_mean <= 0:
+                    probability = np.full(
+                        params.n_samples,
+                        missing_rate,
+                    )
+                else:
+                    probability = (
+                        missing_rate
+                        * raw_probability
+                        / raw_mean
+                    )
+                    probability = np.clip(
+                        probability,
+                        0.0,
+                        1.0,
+                    )
+
+                mask = (
+                    rng.random(params.n_samples)
+                    < probability
+                )
+
+            else:
+                raise ValueError(
+                    "Unknown missing-data mechanism: "
+                    f"{params.missing_data_mechanism!r}"
+                )
+
+            data.loc[mask, col] = 0.0  # missingness is not "missing", but no read on gene expression value
 
     return data, scm_graph_true, betas_by_edge_true
 
@@ -672,31 +898,79 @@ def main() -> None:
         "--beta-med",
         type=float,
         default=2.0,
-        help="Median for edge coefficients (used if beta-std != 0).",
+        help=(
+            "Median absolute fold change for a one-unit increase in "
+            "latent regulator log-expression. The median absolute beta "
+            "is log(beta_med)."
+        ),
     )
     p.add_argument(
         "--beta-log-sd",
         type=float,
         default=0.5,
-        help="Std for edge coefficients (truncated). Set to 0 for fixed betas.",
+        help=(
+            "Standard deviation of log absolute structural beta values."
+        ),
     )
     p.add_argument(
         "--beta-p",
         type=float,
         default=0.5,
-        help="Probability that an edge is activating. Set to 0.5.",
+        help=(
+            "Probability that an edge is activating. Positive beta "
+            "means activation; negative beta means inhibition."
+        ),
     )
     p.add_argument(
         "--beta-abs-max",
         type=float,
-        default=5,
-        help="Truncate sampled betas to |beta| <= this.",
+        default=5.0,
+        help=(
+            "Maximum absolute structural beta on the log-expression "
+            "scale. The corresponding maximum fold change is "
+            "exp(beta_abs_max)."
+        ),
     )
     p.add_argument(
         "--scc-confounding-strength",
         type=float,
         default=0.0,
         help="If >0, add SCC-level latent noise factor to exogenous noises (simulated confounding).",
+    )
+
+    # UMI model parameters
+    p.add_argument(
+        "--umi-dispersion",
+        type=float,
+        default=0.1,
+        help=(
+            "Negative-binomial dispersion alpha. "
+            "Variance is mu + alpha * mu**2."
+        ),
+    )
+    p.add_argument(
+        "--library-size-log-mean",
+        type=float,
+        default=float(np.log(10_000)),
+        help=(
+            "Mean of log library size. With the default, the median "
+            "library size is approximately 10,000 UMIs."
+        ),
+    )
+    p.add_argument(
+        "--library-size-log-sd",
+        type=float,
+        default=0.4,
+        help="Standard deviation of log library size.",
+    )
+    p.add_argument(
+        "--umi-pseudocount",
+        type=float,
+        default=1.0,
+        help=(
+            "Pseudocount used when converting normalized UMI counts "
+            "to log-expression."
+        ),
     )
 
     # Regression/data cleaning.
@@ -783,17 +1057,31 @@ def main() -> None:
 
             params = SyntheticScmParams(
                 n_samples=n_samples,
+
+                # Structural SCM parameters.
                 beta_med=float(args.beta_med),
                 beta_log_sd=float(args.beta_log_sd),
                 beta_abs_max=float(args.beta_abs_max),
                 beta_p=float(args.beta_p),
+
+                # UMI observation-model parameters.
+                umi_dispersion=float(args.umi_dispersion),
+                library_size_log_mean=float(args.library_size_log_mean),
+                library_size_log_sd=float(args.library_size_log_sd),
+                umi_pseudocount=float(args.umi_pseudocount),
+
+                # Missingness parameters.
                 missing_edge_rate=missing_edge_rate,
                 missing_data_rate=missing_data_rate,
                 missing_data_mechanism=args.missing_data_mechanism,
                 self_mask_quantile=float(args.self_mask_quantile),
                 self_mask_k=float(args.self_mask_k),
                 self_mask_direction=args.self_mask_direction,
-                scc_confounding_strength=float(args.scc_confounding_strength),
+
+                # Confounding and reproducibility.
+                scc_confounding_strength=float(
+                    args.scc_confounding_strength
+                ),
                 seed=int(args.seed),
             )
 
