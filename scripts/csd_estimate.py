@@ -113,6 +113,7 @@ class SyntheticScmParams:
     library_size_log_mean: float
     library_size_log_sd: float
     umi_pseudocount: float
+    baseline_log_sd: float
 
     # Missingness parameters.
     missing_edge_rate: float
@@ -323,7 +324,7 @@ def _build_beta_matrix(
         is_invertible, cond = _is_invertible(np.eye(len(nodes)) - B.T)
 
         if is_invertible and cond < COND_NUMBER_THRESHOLD:
-            print(f"Beta matrix found after {i + 1} iteration(s) and k(I - B^T) = {cond}.")
+            print(f"Beta matrix found after {i + 1} iteration(s) and k(I - B^T) = {cond}.", flush=True)
             break
 
     else:
@@ -392,9 +393,23 @@ def _sample_library_sizes(
 ) -> np.ndarray:
     """Generate positive per-sample library sizes.
 
-    The library sizes are sequencing-depth factors. For example, with
-    log_mean=np.log(10_000), the typical sample has approximately 10,000
-    expected UMIs per unit of latent abundance.
+    The library sizes represent total sequencing depth: the approximate
+    number of UMIs available across all genes in a sample or cell.
+
+    For example, with ``log_mean=np.log(10_000)``, the median sample
+    library size is approximately 10,000 UMIs. Gene-level expected counts
+    are determined by the gene-specific baseline abundance proportions
+    ``q_h``:
+
+        mu_hs = L_s * q_h * exp(X_hs)
+
+    where ``L_s`` is the sample library size, ``q_h`` is the baseline
+    proportion of UMIs assigned to gene ``h``, and ``X_hs`` is the
+    latent regulatory expression effect.
+
+    Thus, a library size of 10,000 does not imply 10,000 UMIs per gene.
+    If ``q_h=0.001`` and ``X_hs=0``, the expected baseline count for
+    gene ``h`` is approximately 10 UMIs.
     """
     if log_sd < 0:
         raise ValueError("library_size_log_sd must be non-negative.")
@@ -406,55 +421,94 @@ def _sample_library_sizes(
     )
 
 
+def _sample_baseline_abundances(
+    n_genes: int,
+    *,
+    log_sd: float,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Sample gene-specific baseline abundance proportions.
+
+    Returns q such that:
+
+        q[h] >= 0
+        sum(q) = 1
+
+    Therefore, q[h] is the baseline fraction of the total library
+    assigned to gene h when latent expression X[h] is zero.
+    """
+    if n_genes <= 0:
+        raise ValueError("n_genes must be positive.")
+
+    if log_sd < 0:
+        raise ValueError("baseline_log_sd must be non-negative.")
+
+    raw = rng.lognormal(
+        mean=0.0,
+        sigma=log_sd,
+        size=n_genes,
+    )
+
+    return raw / raw.sum()
+
+
 def _sample_umi_counts(
     latent_log_expression: np.ndarray,
     library_sizes: np.ndarray,
+    baseline_abundances: np.ndarray,
     *,
     dispersion: float,
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """Sample UMI counts from latent log-expression.
+    """Generate UMI counts from latent expression.
 
     The model is
 
-        mu_hs = L_s * exp(X_hs)
+        mu_hs = L_s * q_h * exp(X_hs)
         Y_hs ~ NB(mu_hs, alpha)
 
-    with
-
-        Var(Y_hs) = mu_hs + alpha * mu_hs**2.
-
-    NumPy uses the parameterization NB(n, p), where
-
-        E[Y] = n * (1 - p) / p.
-
-    Therefore:
-
-        n = 1 / alpha
-        p = n / (n + mu)
+    where q_h is the gene-specific baseline abundance proportion.
     """
     if dispersion <= 0:
         raise ValueError("umi_dispersion must be positive.")
 
     if latent_log_expression.ndim != 2:
-        raise ValueError("latent_log_expression must be a 2D array.")
+        raise ValueError("latent_log_expression must have shape (n_samples, n_genes).")
 
-    if len(library_sizes) != latent_log_expression.shape[0]:
-        raise ValueError("library_sizes must have one value per sample.")
+    n_samples, n_genes = latent_log_expression.shape
 
-    # Avoid numerical overflow for extreme latent values.
+    if library_sizes.shape != (n_samples,):
+        raise ValueError("library_sizes must have shape (n_samples,).")
+
+    if baseline_abundances.shape != (n_genes,):
+        raise ValueError("baseline_abundances must have shape (n_genes,).")
+
+    if not np.isclose(baseline_abundances.sum(), 1.0):
+        raise ValueError("baseline_abundances must sum to one.")
+
     latent_log_expression = np.clip(
         latent_log_expression,
         a_min=-30.0,
         a_max=30.0,
     )
 
-    mu = library_sizes[:, None] * np.exp(latent_log_expression)
+    # Expected UMI count:
+    #
+    # mu_hs = L_s * q_h * exp(X_hs)
+    mu = library_sizes[:, None] * baseline_abundances[None, :] * np.exp(latent_log_expression)
 
+    # Convert mean/dispersion parameterization to NumPy's
+    # negative_binomial(n, p) parameterization:
+    #
+    # E[Y]   = mu
+    # Var[Y] = mu + dispersion * mu**2
     n = 1.0 / dispersion
     p = n / (n + mu)
 
-    return rng.negative_binomial(n=n, p=p)
+    return rng.negative_binomial(
+        n=n,
+        p=p,
+    )
 
 
 def _counts_to_log_expression(
@@ -462,22 +516,19 @@ def _counts_to_log_expression(
     library_sizes: np.ndarray,
     *,
     pseudocount: float,
+    target_library_size: float,
 ) -> np.ndarray:
     """Convert UMI counts to normalized log-expression.
 
-    This is the observed expression supplied to the estimator. It is a
-    noisy proxy for the latent SCM variable X.
-
-    A count of zero remains a valid observation:
-
-        log(0 / L + pseudocount) = log(pseudocount).
-
-    Missing values are introduced later as np.nan.
+    Counts are rescaled to target_library_size before applying log1p.
     """
     if pseudocount <= 0:
         raise ValueError("umi_pseudocount must be positive.")
 
-    normalized_counts = counts / library_sizes[:, None]
+    if target_library_size <= 0:
+        raise ValueError("target_library_size must be positive.")
+
+    normalized_counts = counts / library_sizes[:, None] * target_library_size
 
     return np.log(normalized_counts + pseudocount)
 
@@ -592,20 +643,29 @@ def generate_synthetic_observational_data(
         rng=rng,
     )
 
-    # Generate integer UMI counts from the latent expression.
+    # Generate gene-specific baseline abundance proportions.
+    baseline_abundances = _sample_baseline_abundances(
+        len(scm_nodes),
+        log_sd=params.baseline_log_sd,
+        rng=rng,
+    )
+
+    # Generate observed integer UMI counts.
     umi_counts = _sample_umi_counts(
         latent_log_expression,
         library_sizes,
+        baseline_abundances,
         dispersion=params.umi_dispersion,
         rng=rng,
     )
 
-    # Convert counts to normalized log-expression for the estimator.
+    # Convert counts to normalized log-expression for estimation.
     data = pd.DataFrame(
         _counts_to_log_expression(
             umi_counts,
             library_sizes,
             pseudocount=params.umi_pseudocount,
+            target_library_size=np.exp(params.library_size_log_mean),
         ),
         columns=scm_nodes,
     )
@@ -940,6 +1000,16 @@ def main() -> None:
         default=1.0,
         help=("Pseudocount used when converting normalized UMI counts to log-expression."),
     )
+    p.add_argument(
+        "--baseline-log-sd",
+        type=float,
+        default=2.0,
+        help=(
+            "Log-scale variability of gene-specific baseline "
+            "abundances. Larger values create a wider expression "
+            "dynamic range."
+        ),
+    )
 
     # Regression/data cleaning.
     p.add_argument(
@@ -1035,6 +1105,7 @@ def main() -> None:
                 library_size_log_mean=float(args.library_size_log_mean),
                 library_size_log_sd=float(args.library_size_log_sd),
                 umi_pseudocount=float(args.umi_pseudocount),
+                baseline_log_sd=float(args.baseline_log_sd),
                 # Missingness parameters.
                 missing_edge_rate=missing_edge_rate,
                 missing_data_rate=missing_data_rate,
@@ -1163,7 +1234,7 @@ def main() -> None:
 
                 writer.writerow(row)
 
-    print(f"Wrote: {out_csv}")
+    print(f"Wrote: {out_csv}", flush=True)
 
 
 if __name__ == "__main__":
