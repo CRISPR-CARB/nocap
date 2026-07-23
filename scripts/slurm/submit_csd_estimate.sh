@@ -138,7 +138,7 @@ ml uv
 cd ${REPO_ROOT}
 export UV_CACHE_DIR=/tmp/\$USER/uv-cache-\$\$
 mkdir -p \"\$UV_CACHE_DIR\"
-uv sync
+uv sync --locked
 run_one() {
   IFS='|' read -r mech edge_rate data_rate out_csv <<< \"\$1\"
   [[ -s \"\$out_csv\" ]] && { echo \"[skip] \$out_csv\"; return; }
