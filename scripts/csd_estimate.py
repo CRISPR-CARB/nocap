@@ -324,7 +324,9 @@ def _build_beta_matrix(
         is_invertible, cond = _is_invertible(np.eye(len(nodes)) - B.T)
 
         if is_invertible and cond < COND_NUMBER_THRESHOLD:
-            print(f"Beta matrix found after {i + 1} iteration(s) and k(I - B^T) = {cond}.", flush=True)
+            print(
+                f"Beta matrix found after {i + 1} iteration(s) and k(I - B^T) = {cond}.", flush=True
+            )
             break
 
     else:
