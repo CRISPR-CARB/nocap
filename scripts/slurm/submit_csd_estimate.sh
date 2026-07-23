@@ -6,7 +6,7 @@
 #
 # This script builds a small parameter grid over synthetic observational
 # generation settings (sample size, missing-edge rate, missing-data rate,
-# missing-data mechanism) and submits node-packed sbatch jobs.
+# measurement-error mechanism) and submits node-packed sbatch jobs.
 #
 # Idempotency: if the target output CSV already exists and is non-empty, the
 # corresponding job is skipped.
@@ -54,10 +54,12 @@ DRY_RUN="${DRY_RUN:-0}"
 # Parameter grid
 # ---------------------------------------------------------------------------
 
-# Missingness mechanisms supported by scripts/csd_estimate.py
+# Measurement-error/misisng-data mechanisms supported by scripts/csd_estimate.py.
+# instrument_error: low expression is too low for the instrument to detect.
+# biological_error: a gene is not expressed at the time of measurement.
 MECHANISMS=(
-    "MCAR"
-    "MNAR_self_mask"
+    "instrument_error"
+    "biological_error"
 )
 
 # Synthetic regression parameters (linear-Gaussian SCM)

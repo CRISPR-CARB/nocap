@@ -9,7 +9,7 @@ This script:
 
         X = B.T @ X + eps,
 
-    where X is latent log-expression and B[u, v] is the structural coefficient
+    where X is latent log2-expression and B[u, v] is the structural coefficient
     (beta) for the edge u -> v.
 
     Observed UMI counts are generated from the latent expression using
@@ -18,7 +18,7 @@ This script:
 
     with
 
-        mu_hs = L_s * exp(X_hs)
+        mu_hs = L_s * 2**X_hs
 
     and
 
@@ -26,7 +26,7 @@ This script:
 
     The beta coefficients are continuous, nonzero structural log fold changes.
     For a one-unit increase in latent regulator expression, beta is the direct
-    change in target log-expression and exp(beta) is the corresponding fold
+    change in target log2-expression and 2**beta is the corresponding fold
     change in expected molecular abundance.
 
 3) For **every** directed edge in the *estimation graph* calls
@@ -155,7 +155,7 @@ def _sample_betas(
 
         For example:
             beta_med=2.0 means the median activating effect is a 2-fold
-            increase, corresponding to beta = log(2).
+            increase, corresponding to beta = log2(2).
 
     beta_log_sd:
         Standard deviation of log(abs(beta)). Larger values produce
@@ -172,7 +172,7 @@ def _sample_betas(
         Maximum allowed absolute value of beta, on the log scale.
 
         For example:
-            beta_abs_max=np.log(4)
+            beta_abs_max=np.log2(4)
         limits effects to at most 4-fold per one-unit increase.
 
     rng:
@@ -188,11 +188,11 @@ def _sample_betas(
     The sampled magnitude follows approximately
 
         log(abs(beta)) ~ Normal(
-            log(log(beta_med)),
+            log(log2(beta_med)),
             beta_log_sd**2
         )
 
-    Therefore, the median absolute beta is approximately log(beta_med),
+    Therefore, the median absolute beta is approximately log2(beta_med),
     and the median absolute fold change is approximately beta_med.
     """
     if beta_med <= 1:
@@ -215,14 +215,14 @@ def _sample_betas(
     # Median absolute beta corresponding to the requested fold change.
     #
     # If median fold change = 2:
-    #     median(abs(beta)) = log(2)
-    median_abs_beta = np.log(beta_med)
+    #     median(abs(beta)) = log2(2)
+    median_abs_beta = np.log2(beta_med)
 
     if median_abs_beta >= beta_abs_max:
         raise ValueError(
-            "beta_abs_max must be greater than log(beta_med). "
+            "beta_abs_max must be greater than log2(beta_med). "
             f"Got beta_abs_max={beta_abs_max:.3f}, "
-            f"log(beta_med)={median_abs_beta:.3f}."
+            f"log2(beta_med)={median_abs_beta:.3f}."
         )
 
     n_edges = len(edge_list)
@@ -403,7 +403,7 @@ def _sample_library_sizes(
     are determined by the gene-specific baseline abundance proportions
     ``q_h``:
 
-        mu_hs = L_s * q_h * exp(X_hs)
+        mu_hs = L_s * q_h * 2**X_hs
 
     where ``L_s`` is the sample library size, ``q_h`` is the baseline
     proportion of UMIs assigned to gene ``h``, and ``X_hs`` is the
@@ -466,7 +466,7 @@ def _sample_umi_counts(
 
     The model is
 
-        mu_hs = L_s * q_h * exp(X_hs)
+        mu_hs = L_s * q_h * 2**X_hs
         Y_hs ~ NB(mu_hs, alpha)
 
     where q_h is the gene-specific baseline abundance proportion.
@@ -496,8 +496,8 @@ def _sample_umi_counts(
 
     # Expected UMI count:
     #
-    # mu_hs = L_s * q_h * exp(X_hs)
-    mu = library_sizes[:, None] * baseline_abundances[None, :] * np.exp(latent_log_expression)
+    # mu_hs = L_s * q_h * 2**X_hs
+    mu = library_sizes[:, None] * baseline_abundances[None, :] * np.exp2(latent_log_expression)
 
     # Convert mean/dispersion parameterization to NumPy's
     # negative_binomial(n, p) parameterization:
@@ -520,7 +520,7 @@ def _counts_to_log_expression(
     pseudocount: float,
     target_library_size: float,
 ) -> np.ndarray:
-    """Convert UMI counts to normalized log-expression.
+    """Convert UMI counts to normalized log2-expression.
 
     Counts are rescaled to target_library_size before applying log1p.
     """
@@ -532,7 +532,7 @@ def _counts_to_log_expression(
 
     normalized_counts = counts / library_sizes[:, None] * target_library_size
 
-    return np.log(normalized_counts + pseudocount)
+    return np.log2(normalized_counts + pseudocount)
 
 
 def generate_synthetic_observational_data(
@@ -551,7 +551,7 @@ def generate_synthetic_observational_data(
 
     UMI counts are then generated using
 
-        mu_hs = L_s * exp(X_hs)
+        mu_hs = L_s * q_h * 2**X_hs
         Y_hs ~ NB(mu_hs, alpha_h).
 
     Returns
@@ -672,7 +672,9 @@ def generate_synthetic_observational_data(
         columns=scm_nodes,
     )
 
-    # Apply missing data (entrywise missingness, MNAR or MCAR).
+    # Apply measurement errors: instrument error is low-expression
+    # self-masking, while biological error is independent absence at the
+    # time of measurement.
     if params.missing_data_rate > 0:
         missing_rate = np.clip(
             float(params.missing_data_rate),
@@ -683,17 +685,16 @@ def generate_synthetic_observational_data(
         mechanism = params.missing_data_mechanism.lower()
 
         for j, col in enumerate(scm_nodes):
-            if mechanism in {"mcar", "mc ar", "mc"}:
+            if mechanism in {"biological_error", "biological", "bio"}:
                 mask = rng.random(params.n_samples) < missing_rate
 
             elif mechanism in {
-                "mnar_self_mask",
-                "self_mask",
-                "self-masking",
-                "mnar",
+                "instrument_error",
+                "instrument",
+                "instrument-self-masking",
             }:
-                # Self-masking depends on the underlying biological
-                # expression, rather than on the observed count alone.
+                # Instrument error depends on the underlying expression:
+                # low expression is less likely to be detected.
                 x = latent_log_expression[:, j]
 
                 threshold = float(
@@ -907,15 +908,19 @@ def main() -> None:
     p.add_argument(
         "--missing-data-mechanism",
         type=str,
-        default="MCAR",
-        choices=["MCAR", "MNAR_self_mask"],
-        help="Mechanism for missingness (MCAR or MNAR self-masking).",
+        default="biological_error",
+        choices=["instrument_error", "biological_error"],
+        help=(
+            "Measurement-error mechanism: instrument_error models low-expression "
+            "self-masking, while biological_error models genes not being expressed "
+            "at measurement time."
+        ),
     )
     p.add_argument(
         "--self-mask-quantile",
         type=float,
         default=0.25,
-        help="Quantile used as threshold for self-masking (MNAR).",
+        help="Quantile used as threshold for instrument-error self-masking.",
     )
     p.add_argument(
         "--self-mask-k",
@@ -939,7 +944,7 @@ def main() -> None:
         help=(
             "Median absolute fold change for a one-unit increase in "
             "latent regulator log-expression. The median absolute beta "
-            "is log(beta_med)."
+            "is log2(beta_med)."
         ),
     )
     p.add_argument(
@@ -962,9 +967,9 @@ def main() -> None:
         type=float,
         default=5.0,
         help=(
-            "Maximum absolute structural beta on the log-expression "
+            "Maximum absolute structural beta on the log2-expression "
             "scale. The corresponding maximum fold change is "
-            "exp(beta_abs_max)."
+            "2**beta_abs_max."
         ),
     )
     p.add_argument(
