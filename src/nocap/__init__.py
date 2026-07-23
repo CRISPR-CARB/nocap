@@ -24,9 +24,22 @@ from .scm import (
     read_dag_file,
     simulate_data_with_outliers,
 )
+from .scm_model import DirectedScm, SyntheticScmBuild, build_synthetic_scm
+from .simulation import (
+    SimulationConfig,
+    SimulationState,
+    default_simulation_stages,
+    generate_from_scm,
+    numpy_linear_solver,
+)
 
 __all__ = [
+    "DirectedScm",
+    "SimulationConfig",
+    "SimulationState",
+    "SyntheticScmBuild",
     "bootstrap_ATE",
+    "build_synthetic_scm",
     "compile_lgbn_from_lscm",
     "convert_to_eqn_array_latex",
     "convert_to_latex",
@@ -35,14 +48,17 @@ __all__ = [
     "dagitty_to_digraph",
     "dagitty_to_dot",
     "dagitty_to_mixed_graph",
+    "default_simulation_stages",
     "estimate_ate",
     "evaluate_lscm",
     "fit_model",
+    "generate_from_scm",
     "generate_lscm_from_dag",
     "generate_lscm_from_mixed_graph",
     "get_symbols_from_bi_edges",
     "get_symbols_from_di_edges",
     "get_symbols_from_nodes",
+    "numpy_linear_solver",
     "perform_soft_intervention_lgbn",
     "plot_interactive_lscm_graph",
     "read_dag_file",

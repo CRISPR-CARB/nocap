@@ -49,8 +49,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-from collections.abc import Iterable
-from dataclasses import dataclass
 from pathlib import Path
 
 import networkx as nx
@@ -63,8 +61,8 @@ from nocap.cyclic_single_door import (
     estimate_path_coefficient_for_edge,
     nx_digraph_to_y0,
 )
-
-COND_NUMBER_THRESHOLD = 1000  # https://en.wikipedia.org/wiki/Condition_number
+from nocap.scm_model import build_synthetic_scm
+from nocap.simulation import SimulationConfig, generate_from_scm
 
 
 def _parse_csv_list(s: str | None, *, cast_fn):
@@ -96,449 +94,21 @@ def _safe_dropna_for_cols(df: pd.DataFrame, cols: list[str], *, min_rows: int):
     return sub
 
 
-@dataclass(frozen=True)
-class SyntheticScmParams:
-    """Parameters for generating a synthetic UMI-count SCM."""
-
-    n_samples: int
-
-    # Structural SCM beta parameters.
-    beta_med: float
-    beta_log_sd: float
-    beta_p: float
-    beta_abs_max: float
-
-    # UMI observation-model parameters.
-    umi_dispersion: float
-    library_size_log_mean: float
-    library_size_log_sd: float
-    umi_pseudocount: float
-    baseline_log_sd: float
-
-    # Missingness parameters.
-    missing_edge_rate: float
-    missing_data_rate: float
-    missing_data_mechanism: str
-    self_mask_quantile: float
-    self_mask_k: float
-    self_mask_direction: str
-
-    # Optional latent confounding.
-    scc_confounding_strength: float
-
-    seed: int
-
-
 def _rng(seed: int) -> np.random.Generator:
     return np.random.default_rng(seed)
-
-
-def _sample_betas(
-    edges: Iterable[tuple[str, str]],
-    *,
-    rng: np.random.Generator,
-    beta_med: float = 2,
-    beta_log_sd: float = 0.5,
-    beta_p: float = 0.5,
-    beta_abs_max: float = 5,
-) -> dict[tuple[str, str], float]:
-    """Sample nonzero log fold changes for regulatory edges.
-
-    Parameters
-    ----------
-    edges:
-        Iterable of (source_gene, target_gene) edges.
-
-    beta_med:
-        Median absolute fold change for a one-unit increase in the
-        normalized regulator expression.
-
-        For example:
-            beta_med=2.0 means the median activating effect is a 2-fold
-            increase, corresponding to beta = log2(2).
-
-    beta_log_sd:
-        Standard deviation of log(abs(beta)). Larger values produce
-        more heterogeneous effect sizes.
-
-    beta_p:
-        Probability that an edge is activating.
-
-        beta_p=1.0 -> all beta values are positive
-        beta_p=0.0 -> all beta values are negative
-        beta_p=0.5 -> equal probability of activation and inhibition
-
-    beta_abs_max:
-        Maximum allowed absolute value of beta, on the log scale.
-
-        For example:
-            beta_abs_max=np.log2(4)
-        limits effects to at most 4-fold per one-unit increase.
-
-    rng:
-        NumPy random number generator.
-
-    Returns
-    -------
-    dict[tuple[str, str], float]
-        Mapping from edge to a nonzero signed log fold change.
-
-    Notes
-    -----
-    The sampled magnitude follows approximately
-
-        log(abs(beta)) ~ Normal(
-            log(log2(beta_med)),
-            beta_log_sd**2
-        )
-
-    Therefore, the median absolute beta is approximately log2(beta_med),
-    and the median absolute fold change is approximately beta_med.
-    """
-    if beta_med <= 1:
-        raise ValueError("beta_med must be greater than 1.")
-
-    if not 0 <= beta_p <= 1:
-        raise ValueError("beta_p must be between 0 and 1.")
-
-    if beta_abs_max <= 0:
-        raise ValueError("beta_abs_max must be positive.")
-
-    if beta_log_sd <= 0:
-        raise ValueError("beta_log_sd must be positive.")
-
-    edge_list = list(edges)
-
-    if not edge_list:
-        return {}
-
-    # Median absolute beta corresponding to the requested fold change.
-    #
-    # If median fold change = 2:
-    #     median(abs(beta)) = log2(2)
-    median_abs_beta = np.log2(beta_med)
-
-    if median_abs_beta >= beta_abs_max:
-        raise ValueError(
-            "beta_abs_max must be greater than log2(beta_med). "
-            f"Got beta_abs_max={beta_abs_max:.3f}, "
-            f"log2(beta_med)={median_abs_beta:.3f}."
-        )
-
-    n_edges = len(edge_list)
-
-    # Sample positive magnitudes. Rejection sampling ensures that the
-    # absolute values do not exceed beta_abs_max.
-    magnitudes = np.empty(n_edges, dtype=float)
-    remaining = np.arange(n_edges)
-
-    log_median_abs_beta = np.log(median_abs_beta)
-
-    while remaining.size > 0:
-        proposed = rng.lognormal(
-            mean=log_median_abs_beta,
-            sigma=beta_log_sd,
-            size=remaining.size,
-        )
-
-        accepted = proposed < beta_abs_max
-
-        magnitudes[remaining[accepted]] = proposed[accepted]
-        remaining = remaining[~accepted]
-
-    # Sample signs:
-    # +1 = activating edge
-    # -1 = inhibitory edge
-    signs = np.where(
-        rng.random(n_edges) < beta_p,
-        1.0,
-        -1.0,
-    )
-
-    betas_array = signs * magnitudes
-
-    return {edge: float(beta) for edge, beta in zip(edge_list, betas_array)}
-
-
-def _is_invertible(A: np.ndarray) -> tuple[bool, float]:
-    """Checks if a matrix is invertible (not singular).
-
-    Pulled from https://stackoverflow.com/questions/13249108/efficient-pythonic-check-for-singular-matrix
-    """
-    cond = np.linalg.cond(A)
-    return cond < (1 / (np.finfo(A.dtype).eps)), cond
-
-
-def stabilize_cyclic_beta(beta_matrix: np.ndarray, target_rho: float = 0.8) -> np.ndarray:
-    """Rescale B so its spectral radius is target_rho, guaranteeing (I - B^T)
-    is well-conditioned and the fixed-point solution is stable.
-    """
-    eigs = np.linalg.eigvals(beta_matrix)
-    rho = np.max(np.abs(eigs))
-    if rho >= target_rho:
-        beta_matrix = beta_matrix * (target_rho / rho)
-    return beta_matrix
-
-
-def sync_betas_from_matrix(B, betas_by_edge, idx):
-    return {(u, v): float(B[idx[u], idx[v]]) for (u, v) in betas_by_edge}
-
-
-def _build_beta_matrix(
-    nodes: list[str],
-    edges: Iterable[tuple[str, str]],
-    beta_med: float,
-    beta_log_sd: float,
-    beta_p: float,
-    beta_abs_max: float,
-    rng: np.random.Generator,
-    gen_limit: int = 100,
-) -> tuple[np.ndarray, dict[tuple[str, str], float]]:
-    """Return B where equation is X_v = sum_{u->v} beta[u->v] X_u + eps_v.
-
-    Will generate a B until it is not singular or gen_limit is hit.
-    """
-    idx = {n: i for i, n in enumerate(nodes)}
-    n = len(nodes)
-    B = np.zeros((n, n), dtype=float)
-    betas_by_edge: dict[tuple[str, str], float] = {}
-
-    for i in range(gen_limit):
-        betas_by_edge = _sample_betas(
-            edges,
-            beta_med=beta_med,
-            beta_log_sd=beta_log_sd,
-            beta_p=beta_p,
-            beta_abs_max=beta_abs_max,
-            rng=rng,
-        )
-
-        for (u, v), b in betas_by_edge.items():
-            B[idx[u], idx[v]] = b
-
-        B = stabilize_cyclic_beta(B)  # guarantee spectral radius <0.8
-        betas_by_edge = sync_betas_from_matrix(B, betas_by_edge, idx)
-
-        # I - B^T is guaranteed to be invertible if p(B) < 1, but still good
-        # to check just in case.
-        is_invertible, cond = _is_invertible(np.eye(len(nodes)) - B.T)
-
-        if is_invertible and cond < COND_NUMBER_THRESHOLD:
-            print(
-                f"Beta matrix found after {i + 1} iteration(s) and k(I - B^T) = {cond}.", flush=True
-            )
-            break
-
-    else:
-        raise Exception("Could not find B matrix that meets invertibility criteria.")
-
-    return B, betas_by_edge
-
-
-def _solve_linear_scm(
-    nodes: list[str],
-    beta_matrix: np.ndarray,
-    eps: np.ndarray,
-) -> np.ndarray:
-    """Solve X = B^T X + eps where eps shape is (n_samples, n_nodes)."""
-    # X_v - sum_u beta[u,v] X_u = eps_v.
-    # With our beta_matrix[u,v] = beta[u->v], the system for each sample is:
-    # (I - beta_matrix^T) X = eps.
-    A = np.eye(len(nodes)) - beta_matrix.T
-    # Solve A X^T = eps^T for X^T.
-    try:
-        X_T = np.linalg.solve(A, eps.T)
-    except np.linalg.LinAlgError as e:
-        raise RuntimeError(
-            "Synthetic SCM linear system is singular / ill-conditioned. "
-            "Try smaller beta magnitudes."
-        ) from e
-    return X_T.T
-
-
-def _generate_exogenous_noises(
-    nodes: list[str],
-    n_samples: int,
-    *,
-    scc_confounding_strength: float,
-    rng: np.random.Generator,
-    estimation_graph_for_scc: nx.DiGraph,
-) -> np.ndarray:
-    """Generate eps with optional SCC-level latent confounding."""
-    eps = rng.normal(0.0, 1.0, size=(n_samples, len(nodes)))
-    if scc_confounding_strength <= 0:
-        return eps
-
-    # Latent factor per non-trivial SCC: eps_i += s * L_s.
-    strength = float(scc_confounding_strength)
-    sccs = [
-        scc for scc in nx.strongly_connected_components(estimation_graph_for_scc) if len(scc) > 1
-    ]
-    if not sccs:
-        return eps
-
-    node_idx = {n: i for i, n in enumerate(nodes)}
-    for scc in sccs:
-        L = rng.normal(0.0, 1.0, size=(n_samples, 1))
-        for node in scc:
-            eps[:, node_idx[node]] += strength * L[:, 0]
-
-    return eps
-
-
-def _sample_library_sizes(
-    n_samples: int,
-    *,
-    log_mean: float,
-    log_sd: float,
-    rng: np.random.Generator,
-) -> np.ndarray:
-    """Generate positive per-sample library sizes.
-
-    The library sizes represent total sequencing depth: the approximate
-    number of UMIs available across all genes in a sample or cell.
-
-    For example, with ``log_mean=np.log(10_000)``, the median sample
-    library size is approximately 10,000 UMIs. Gene-level expected counts
-    are determined by the gene-specific baseline abundance proportions
-    ``q_h``:
-
-        mu_hs = L_s * q_h * 2**X_hs
-
-    where ``L_s`` is the sample library size, ``q_h`` is the baseline
-    proportion of UMIs assigned to gene ``h``, and ``X_hs`` is the
-    latent regulatory expression effect.
-
-    Thus, a library size of 10,000 does not imply 10,000 UMIs per gene.
-    If ``q_h=0.001`` and ``X_hs=0``, the expected baseline count for
-    gene ``h`` is approximately 10 UMIs.
-    """
-    if log_sd < 0:
-        raise ValueError("library_size_log_sd must be non-negative.")
-
-    return rng.lognormal(
-        mean=log_mean,
-        sigma=log_sd,
-        size=n_samples,
-    )
-
-
-def _sample_baseline_abundances(
-    n_genes: int,
-    *,
-    log_sd: float,
-    rng: np.random.Generator,
-) -> np.ndarray:
-    """Sample gene-specific baseline abundance proportions.
-
-    Returns q such that:
-
-        q[h] >= 0
-        sum(q) = 1
-
-    Therefore, q[h] is the baseline fraction of the total library
-    assigned to gene h when latent expression X[h] is zero.
-    """
-    if n_genes <= 0:
-        raise ValueError("n_genes must be positive.")
-
-    if log_sd < 0:
-        raise ValueError("baseline_log_sd must be non-negative.")
-
-    raw = rng.lognormal(
-        mean=0.0,
-        sigma=log_sd,
-        size=n_genes,
-    )
-
-    return raw / raw.sum()
-
-
-def _sample_umi_counts(
-    latent_log_expression: np.ndarray,
-    library_sizes: np.ndarray,
-    baseline_abundances: np.ndarray,
-    *,
-    dispersion: float,
-    rng: np.random.Generator,
-) -> np.ndarray:
-    """Generate UMI counts from latent expression.
-
-    The model is
-
-        mu_hs = L_s * q_h * 2**X_hs
-        Y_hs ~ NB(mu_hs, alpha)
-
-    where q_h is the gene-specific baseline abundance proportion.
-    """
-    if dispersion <= 0:
-        raise ValueError("umi_dispersion must be positive.")
-
-    if latent_log_expression.ndim != 2:
-        raise ValueError("latent_log_expression must have shape (n_samples, n_genes).")
-
-    n_samples, n_genes = latent_log_expression.shape
-
-    if library_sizes.shape != (n_samples,):
-        raise ValueError("library_sizes must have shape (n_samples,).")
-
-    if baseline_abundances.shape != (n_genes,):
-        raise ValueError("baseline_abundances must have shape (n_genes,).")
-
-    if not np.isclose(baseline_abundances.sum(), 1.0):
-        raise ValueError("baseline_abundances must sum to one.")
-
-    latent_log_expression = np.clip(
-        latent_log_expression,
-        a_min=-30.0,
-        a_max=30.0,
-    )
-
-    # Expected UMI count:
-    #
-    # mu_hs = L_s * q_h * 2**X_hs
-    mu = library_sizes[:, None] * baseline_abundances[None, :] * np.exp2(latent_log_expression)
-
-    # Convert mean/dispersion parameterization to NumPy's
-    # negative_binomial(n, p) parameterization:
-    #
-    # E[Y]   = mu
-    # Var[Y] = mu + dispersion * mu**2
-    n = 1.0 / dispersion
-    p = n / (n + mu)
-
-    return rng.negative_binomial(
-        n=n,
-        p=p,
-    )
-
-
-def _counts_to_log_expression(
-    counts: np.ndarray,
-    library_sizes: np.ndarray,
-    *,
-    pseudocount: float,
-    target_library_size: float,
-) -> np.ndarray:
-    """Convert UMI counts to normalized log2-expression.
-
-    Counts are rescaled to target_library_size before applying log1p.
-    """
-    if pseudocount <= 0:
-        raise ValueError("umi_pseudocount must be positive.")
-
-    if target_library_size <= 0:
-        raise ValueError("target_library_size must be positive.")
-
-    normalized_counts = counts / library_sizes[:, None] * target_library_size
-
-    return np.log2(normalized_counts + pseudocount)
 
 
 def generate_synthetic_observational_data(
     estimation_graph: nx.DiGraph,
     scm_nodes: list[str],
-    params: SyntheticScmParams,
+    config: SimulationConfig,
+    *,
+    missing_edge_rate: float,
+    beta_med: float,
+    beta_log_sd: float,
+    beta_p: float,
+    beta_abs_max: float,
+    seed: int,
 ):
     """Generate synthetic latent-SCM data and observed UMI expression.
 
@@ -566,181 +136,23 @@ def generate_synthetic_observational_data(
     betas_by_edge_true:
         Structural beta coefficients used by the latent SCM.
     """
-    rng = _rng(params.seed)
+    rng = _rng(seed)
 
-    orig_edges = list(estimation_graph.edges())
-    orig_edge_set = set(orig_edges)
-    edges_true = list(orig_edges)
-
-    # "missing_edge_rate" means: how many edges are present in the *true* SCM,
-    # but missing from the provided/constructed estimation graph.
-    missing_edge_rate = np.clip(
-        float(params.missing_edge_rate),
-        0.0,
-        1.0,
-    )
-
-    # Choose the number of extra edges to add (expected: rate * |E_orig|).
-    n_to_add = int(
-        rng.binomial(
-            len(orig_edges),
-            missing_edge_rate,
-        )
-    )
-
-    candidates = [
-        (u, v) for u in scm_nodes for v in scm_nodes if u != v and (u, v) not in orig_edge_set
-    ]
-
-    if candidates and n_to_add > 0:
-        n_to_add = min(n_to_add, len(candidates))
-
-        selected = rng.choice(
-            len(candidates),
-            size=n_to_add,
-            replace=False,
-        )
-
-        edges_true.extend(candidates[int(i)] for i in selected)
-
-    scm_graph_true = nx.DiGraph()
-    scm_graph_true.add_nodes_from(scm_nodes)
-    scm_graph_true.add_edges_from(edges_true)
-
-    # Sample the structural coefficients used by the latent SCM.
-    beta_matrix, betas_by_edge_true = _build_beta_matrix(
+    build = build_synthetic_scm(
+        estimation_graph,
         scm_nodes,
-        edges_true,
-        beta_med=params.beta_med,
-        beta_log_sd=params.beta_log_sd,
-        beta_p=params.beta_p,
-        beta_abs_max=params.beta_abs_max,
+        missing_edge_rate=missing_edge_rate,
+        beta_med=beta_med,
+        beta_log_sd=beta_log_sd,
+        beta_p=beta_p,
+        beta_abs_max=beta_abs_max,
         rng=rng,
     )
-
-    # Generate exogenous noise for the latent log-expression SCM.
-    eps = _generate_exogenous_noises(
-        scm_nodes,
-        params.n_samples,
-        scc_confounding_strength=params.scc_confounding_strength,
-        rng=rng,
-        estimation_graph_for_scc=estimation_graph,
-    )
-
-    # Generate latent log-expression:
-    #
-    #     X = B.T @ X + eps
-    #
-    latent_log_expression = _solve_linear_scm(
-        scm_nodes,
-        beta_matrix=beta_matrix,
-        eps=eps,
-    )
-
-    # Generate sample-specific sequencing depths.
-    library_sizes = _sample_library_sizes(
-        params.n_samples,
-        log_mean=params.library_size_log_mean,
-        log_sd=params.library_size_log_sd,
-        rng=rng,
-    )
-
-    # Generate gene-specific baseline abundance proportions.
-    baseline_abundances = _sample_baseline_abundances(
-        len(scm_nodes),
-        log_sd=params.baseline_log_sd,
-        rng=rng,
-    )
-
-    # Generate observed integer UMI counts.
-    umi_counts = _sample_umi_counts(
-        latent_log_expression,
-        library_sizes,
-        baseline_abundances,
-        dispersion=params.umi_dispersion,
-        rng=rng,
-    )
-
-    # Convert counts to normalized log-expression for estimation.
-    data = pd.DataFrame(
-        _counts_to_log_expression(
-            umi_counts,
-            library_sizes,
-            pseudocount=params.umi_pseudocount,
-            target_library_size=np.exp(params.library_size_log_mean),
-        ),
-        columns=scm_nodes,
-    )
-
-    # Apply measurement errors: instrument error is low-expression
-    # self-masking, while biological error is independent absence at the
-    # time of measurement.
-    if params.missing_data_rate > 0:
-        missing_rate = np.clip(
-            float(params.missing_data_rate),
-            0.0,
-            1.0,
-        )
-
-        mechanism = params.missing_data_mechanism.lower()
-
-        for j, col in enumerate(scm_nodes):
-            if mechanism in {"biological_error", "biological", "bio"}:
-                mask = rng.random(params.n_samples) < missing_rate
-
-            elif mechanism in {
-                "instrument_error",
-                "instrument",
-                "instrument-self-masking",
-            }:
-                # Instrument error depends on the underlying expression:
-                # low expression is less likely to be detected.
-                x = latent_log_expression[:, j]
-
-                threshold = float(
-                    np.quantile(
-                        x,
-                        float(params.self_mask_quantile),
-                    )
-                )
-
-                k = float(params.self_mask_k)
-                direction = params.self_mask_direction.lower()
-
-                if direction == "low":
-                    raw_probability = 1.0 / (1.0 + np.exp(-k * (threshold - x)))
-                elif direction == "high":
-                    raw_probability = 1.0 / (1.0 + np.exp(-k * (x - threshold)))
-                else:
-                    raise ValueError("--self-mask-direction must be one of {low,high}.")
-
-                raw_mean = float(np.mean(raw_probability))
-
-                if raw_mean <= 0:
-                    probability = np.full(
-                        params.n_samples,
-                        missing_rate,
-                    )
-                else:
-                    probability = missing_rate * raw_probability / raw_mean
-                    probability = np.clip(
-                        probability,
-                        0.0,
-                        1.0,
-                    )
-
-                mask = rng.random(params.n_samples) < probability
-
-            else:
-                raise ValueError(
-                    f"Unknown missing-data mechanism: {params.missing_data_mechanism!r}"
-                )
-
-            data.loc[mask, col] = (
-                0.0  # missingness is not "missing", but no read on gene expression value
-            )
-
-    return data, scm_graph_true, betas_by_edge_true
+    scm = build.scm
+    betas_by_edge_true = scm.betas
+    result = generate_from_scm(scm, config, rng=rng)
+    print(f"Generated results from SCM with cond number: {build.condition_number}")
+    return result.observed_data, scm.graph, betas_by_edge_true
 
 
 def _default_nodes_from_graph(g: nx.DiGraph) -> list[str]:
@@ -1100,33 +512,32 @@ def main() -> None:
             missing_edge_rate = float(cell["missing_edge_rate"])
             missing_data_rate = float(cell["missing_data_rate"])
 
-            params = SyntheticScmParams(
+            config = SimulationConfig(
                 n_samples=n_samples,
-                # Structural SCM parameters.
-                beta_med=float(args.beta_med),
-                beta_log_sd=float(args.beta_log_sd),
-                beta_abs_max=float(args.beta_abs_max),
-                beta_p=float(args.beta_p),
-                # UMI observation-model parameters.
                 umi_dispersion=float(args.umi_dispersion),
                 library_size_log_mean=float(args.library_size_log_mean),
                 library_size_log_sd=float(args.library_size_log_sd),
                 umi_pseudocount=float(args.umi_pseudocount),
                 baseline_log_sd=float(args.baseline_log_sd),
-                # Missingness parameters.
-                missing_edge_rate=missing_edge_rate,
                 missing_data_rate=missing_data_rate,
                 missing_data_mechanism=args.missing_data_mechanism,
                 self_mask_quantile=float(args.self_mask_quantile),
                 self_mask_k=float(args.self_mask_k),
                 self_mask_direction=args.self_mask_direction,
-                # Confounding and reproducibility.
                 scc_confounding_strength=float(args.scc_confounding_strength),
-                seed=int(args.seed),
+                estimation_graph=graph,
             )
 
             data, scm_graph_true, betas_true = generate_synthetic_observational_data(
-                graph, nodes, params
+                graph,
+                nodes,
+                config,
+                missing_edge_rate=missing_edge_rate,
+                beta_med=float(args.beta_med),
+                beta_log_sd=float(args.beta_log_sd),
+                beta_p=float(args.beta_p),
+                beta_abs_max=float(args.beta_abs_max),
+                seed=int(args.seed),
             )
 
             n_true_edges = scm_graph_true.number_of_edges()
@@ -1176,11 +587,11 @@ def main() -> None:
 
                 row = {
                     "trial": trial_idx,
-                    "n_samples": params.n_samples,
-                    "missing_edge_rate": params.missing_edge_rate,
-                    "missing_data_rate": params.missing_data_rate,
-                    "missing_data_mechanism": params.missing_data_mechanism,
-                    "seed": params.seed,
+                    "n_samples": config.n_samples,
+                    "missing_edge_rate": missing_edge_rate,
+                    "missing_data_rate": config.missing_data_rate,
+                    "missing_data_mechanism": config.missing_data_mechanism,
+                    "seed": int(args.seed),
                     "cause": cause,
                     "effect": effect,
                     "same_scc": bool(adj_info_same_scc),

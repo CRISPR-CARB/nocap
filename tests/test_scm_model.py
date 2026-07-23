@@ -1,0 +1,109 @@
+"""Tests for the neutral synthetic SCM model and builder."""
+
+import networkx as nx
+import numpy as np
+import pytest
+
+from nocap.scm_model import DirectedScm, build_synthetic_scm
+
+
+def test_directed_scm_builds_beta_matrix_in_stable_node_order():
+    graph = nx.DiGraph([("B", "A"), ("A", "C")])
+    scm = DirectedScm(
+        nodes=("C", "A", "B"),
+        graph=graph,
+        betas={("B", "A"): 2.0, ("A", "C"): -0.5},
+    )
+
+    assert scm.nodes == ("C", "A", "B")
+    np.testing.assert_array_equal(
+        scm.beta_matrix,
+        np.array([[0.0, 0.0, 0.0], [-0.5, 0.0, 0.0], [0.0, 2.0, 0.0]]),
+    )
+
+
+def test_directed_scm_rejects_coefficients_for_non_edges():
+    graph = nx.DiGraph([("A", "B")])
+
+    with pytest.raises(ValueError, match="exactly to graph edges"):
+        DirectedScm(
+            nodes=("A", "B"),
+            graph=graph,
+            betas={("B", "A"): 1.0},
+        )
+
+
+def test_directed_scm_defensively_copies_graph_and_stringifies_nodes():
+    graph = nx.DiGraph([(1, 2)])
+    scm = DirectedScm(nodes=(1, 2), graph=graph, betas={("1", "2"): 0.25})
+
+    graph.add_edge(2, 1)
+
+    assert scm.nodes == ("1", "2")
+    assert set(scm.graph.edges()) == {("1", "2")}
+    with pytest.raises(nx.NetworkXError):
+        scm.graph.add_edge("2", "1")
+
+
+def test_build_synthetic_scm_is_reproducible():
+    graph = nx.DiGraph([("A", "B"), ("B", "A")])
+    kwargs = {
+        "missing_edge_rate": 0.0,
+        "beta_med": 2.0,
+        "beta_log_sd": 0.5,
+        "beta_p": 0.5,
+        "beta_abs_max": 5.0,
+    }
+
+    first = build_synthetic_scm(graph, ["A", "B"], rng=np.random.default_rng(11), **kwargs)
+    second = build_synthetic_scm(graph, ["A", "B"], rng=np.random.default_rng(11), **kwargs)
+
+    assert first.added_edges == second.added_edges
+    assert first.condition_number == second.condition_number
+    assert first.scm.betas == second.scm.betas
+
+
+def test_build_synthetic_scm_only_adds_true_edges():
+    graph = nx.DiGraph([("A", "B")])
+    result = build_synthetic_scm(
+        graph,
+        ["A", "B", "C"],
+        missing_edge_rate=1.0,
+        beta_med=2.0,
+        beta_log_sd=0.5,
+        beta_p=0.5,
+        beta_abs_max=5.0,
+        rng=np.random.default_rng(4),
+    )
+
+    assert set(graph.edges()).issubset(result.scm.graph.edges())
+    assert set(result.added_edges).issubset(result.scm.graph.edges())
+    assert len(result.added_edges) == 1
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"beta_med": 1.0, "beta_log_sd": 0.5, "beta_abs_max": 5.0},
+        {"beta_med": 2.0, "beta_log_sd": 0.0, "beta_abs_max": 5.0},
+        {"beta_med": 2.0, "beta_log_sd": 0.5, "beta_abs_max": 0.5},
+        {"beta_med": 2.0, "beta_log_sd": 0.5, "beta_abs_max": 5.0, "beta_p": 1.5},
+    ],
+)
+def test_build_synthetic_scm_validates_beta_parameters(kwargs):
+    parameters = {
+        "missing_edge_rate": 0.0,
+        "beta_med": 2.0,
+        "beta_log_sd": 0.5,
+        "beta_p": 0.5,
+        "beta_abs_max": 5.0,
+    }
+    parameters.update(kwargs)
+
+    with pytest.raises(ValueError):
+        build_synthetic_scm(
+            nx.DiGraph([("A", "B")]),
+            ["A", "B"],
+            rng=np.random.default_rng(1),
+            **parameters,
+        )
