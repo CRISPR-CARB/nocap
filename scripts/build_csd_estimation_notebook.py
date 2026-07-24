@@ -4,7 +4,7 @@ This script programmatically builds a Jupyter notebook under:
 `notebooks/Ecoli_Analysis_Notebooks/estimation/`.
 
 The notebook aggregates per-edge CSV outputs from:
-`notebooks/Ecoli_Analysis_Notebooks/estimation/20260708_161623/csv`.
+`notebooks/Ecoli_Analysis_Notebooks/estimation/{RUN_ID}/csv`.
 
 Run with:
 
@@ -68,7 +68,7 @@ cells.append(
 
 This notebook aggregates per-edge CSV outputs from
 
-`notebooks/Ecoli_Analysis_Notebooks/estimation/20260708_161623/csv`.
+`notebooks/Ecoli_Analysis_Notebooks/estimation/{RUN_ID}/csv`.
 
 It produces plots showing:
 
@@ -103,6 +103,10 @@ INPUT_DIR = REPO / {str(INPUT_DIR)!r}
 NB_DIR = INPUT_DIR.parent
 VIZ_DIR = REPO / NB_DIR / 'visualizations'
 VIZ_DIR.mkdir(exist_ok=True)
+RUN_METADATA = NB_DIR / 'run_metadata.json'
+run_metadata = {{}}
+if RUN_METADATA.exists():
+    run_metadata = pd.read_json(RUN_METADATA, typ='series').to_dict()
 
 print('Input CSV dir:', INPUT_DIR)
 csv_paths = sorted(INPUT_DIR.glob('*.csv'))
@@ -153,6 +157,88 @@ data.loc[~np.isfinite(data['relative_slope_error']), 'relative_slope_error'] = n
 eval_df = data[data['status'].isin(['identifiable', 'insufficient_data'])].copy()
 print('Eval rows:', f"{len(eval_df):,}")
 
+print('Replicate intervals are empirical seed distributions, not row-bootstrap confidence intervals.')
+print('Full mode includes SCM and observation variability; fixed-SCM mode is conditional on one SCM block.')
+print('Full-mode bands describe end-to-end simulated performance; fixed-SCM bands describe conditional data-generation performance within each missing_edge_rate SCM block.')
+
+# Replicate summaries use seed identities rather than treating edge rows as replicates.
+for col in ['scm_seed', 'data_seed', 'seed']:
+    if col not in data:
+        data[col] = np.nan
+    data[col] = pd.to_numeric(data[col], errors='coerce')
+for col in [
+    'n_samples', 'missing_edge_rate', 'missing_data_rate',
+    'estimated_path_coefficient', 'stderr', 'residual_variance',
+    'ground_truth_beta', 'scm_true_missing_edges_count', 'n_rows_used',
+]:
+    assert col in data.columns, f'Missing required column: {col}'
+    data[col] = pd.to_numeric(data[col], errors='coerce')
+legacy_seed_fallback = data['scm_seed'].isna() | data['data_seed'].isna()
+if legacy_seed_fallback.any():
+    data.loc[legacy_seed_fallback, 'scm_seed'] = data.loc[legacy_seed_fallback, 'seed']
+    data.loc[legacy_seed_fallback, 'data_seed'] = data.loc[legacy_seed_fallback, 'seed']
+    print('Legacy fallback: seed is used for both SCM and data identities.')
+assert data[['scm_seed', 'data_seed']].notna().all().all(), 'Missing replicate seed identity'
+assert data[['n_samples', 'missing_edge_rate', 'missing_data_rate']].notna().all().all(), 'Missing cell parameter'
+eval_df = data[data['status'].isin(['identifiable', 'insufficient_data'])].copy()
+metadata_mode = run_metadata.get('bootstrap_mode') if run_metadata.get('bootstrap') else None
+design = metadata_mode or ('full' if any('full' in p.name for p in csv_paths) else ('fixed_scm' if any('fixed_scm' in p.name for p in csv_paths) else 'legacy'))
+
+# missing_edge_rate defines the SCM block. In fixed-SCM mode, data seeds may
+# be compared only within one edge-rate block: changing edge rate changes the
+# generated SCM and therefore does not produce a conditional replicate.
+scm_block_cols = ['missing_edge_rate']
+if design == 'fixed_scm':
+    block_seed_counts = (data.groupby(scm_block_cols, dropna=False)['scm_seed']
+        .nunique(dropna=True))
+    assert (block_seed_counts <= 1).all(), (
+        'fixed_scm requires one scm_seed per missing_edge_rate SCM block: '
+        f'{block_seed_counts.to_dict()}'
+    )
+    block_metadata = (data.groupby(scm_block_cols, dropna=False)
+        .agg(scm_seed_count=('scm_seed', 'nunique'),
+             missing_edge_counts=('scm_true_missing_edges_count', 'nunique')))
+    print('Fixed-SCM blocks by missing_edge_rate:')
+    display(block_metadata.reset_index())
+    assert (block_metadata['scm_seed_count'] <= 1).all()
+    beta_by_edge = (data.groupby(scm_block_cols + ['cause', 'effect'], dropna=False)
+        .agg(beta_values=('ground_truth_beta', 'nunique')).reset_index())
+    assert (beta_by_edge['beta_values'] <= 1).all(), (
+        'fixed_scm beta metadata varies within an edge/SCM block'
+    )
+    assert (block_metadata['missing_edge_counts'] <= 1).all(), (
+        'fixed_scm true-missing-edge metadata varies within an SCM block'
+    )
+
+# Include the SCM identity in the grouping even for fixed-SCM mode. The
+# edge-rate column is intentionally retained so different SCM blocks cannot
+# be pooled into one interval.
+data['replicate_id'] = list(zip(data['scm_seed'], data['data_seed'])) if design != 'fixed_scm' else list(zip(data['missing_edge_rate'], data['data_seed']))
+rep_cols = ['missing_data_mechanism', 'missing_data_rate', 'missing_edge_rate', 'n_samples', 'replicate_id']
+replicate_metrics = (eval_df.groupby(rep_cols, dropna=False)
+    .agg(MAE=('abs_error', 'mean'), RMSE=('sq_error', lambda x: float(np.sqrt(np.mean(x)))),
+         bias=('error', 'mean'), median_abs_error=('abs_error', 'median')).reset_index())
+ci_summary = (replicate_metrics.groupby(rep_cols[:-1], dropna=False)
+    .agg(total_replicates=('replicate_id', 'nunique'), usable_replicates=('MAE', 'count'),
+         mean_error=('bias', 'mean'), mean_MAE=('MAE', 'mean'), mean_RMSE=('RMSE', 'mean'), mean_bias=('bias', 'mean'),
+         median_abs_error=('median_abs_error', 'mean'),
+         error_lower=('bias', lambda x: x.quantile(.025)), error_upper=('bias', lambda x: x.quantile(.975)),
+         MAE_lower=('MAE', lambda x: x.quantile(.025)), MAE_upper=('MAE', lambda x: x.quantile(.975)),
+          RMSE_lower=('RMSE', lambda x: x.quantile(.025)), RMSE_upper=('RMSE', lambda x: x.quantile(.975))).reset_index())
+assert not replicate_metrics.duplicated(rep_cols).any(), 'Duplicate rows counted as one replicate'
+ci_summary['failed_replicates'] = ci_summary['total_replicates'] - ci_summary['usable_replicates']
+ci_summary['unique_seed_count'] = ci_summary['usable_replicates']
+ci_summary['scm_block_key'] = ci_summary['missing_edge_rate'].map(lambda x: f'missing_edge_rate={x}')
+ci_summary['interval_interpretation'] = np.where(
+    design == 'fixed_scm',
+    'conditional on one SCM realization within this missing_edge_rate block',
+    'end-to-end variability across SCM and observed-data generation')
+ci_summary.to_csv(NB_DIR / f'csd_estimation_{design}_seed_ci_summary.csv', index=False)
+print('Replicate design:', design)
+print('Replicate completeness by cell:')
+display(ci_summary[['missing_data_mechanism', 'missing_data_rate', 'missing_edge_rate', 'n_samples',
+                    'total_replicates', 'usable_replicates', 'failed_replicates']])
+
 
 def summarize(df: pd.DataFrame) -> dict[str, float]:
     mae = float(df['abs_error'].mean())
@@ -178,6 +264,102 @@ for k, v in overall.items():
 """
     )
 )
+
+cells.append(md("""## Bootstrap modes and interval interpretation
+
+The two modes repeat the simulation with independent random seeds, rather than
+resampling rows from one observed dataset:
+
+- **Full mode** assigns an independent `(scm_seed, data_seed)` pair to every
+  parameter cell and replicate. Each replicate redraws the structural beta
+  coefficients and the realized true missing-edge pattern, then redraws the
+  observed data. Its empirical distribution measures end-to-end variation from
+  both SCM construction and observation/data generation.
+- **Fixed-SCM mode** assigns one `scm_seed` to each `missing_edge_rate` SCM
+  block and varies only `data_seed`. Its empirical distribution is conditional
+  on that one structural realization: it measures variation from sampling,
+  UMI/count generation, library sizes, and missingness. Different
+  `missing_edge_rate` values are different SCM blocks and are never pooled into
+  one fixed-SCM interval.
+
+The shaded regions are empirical 95% percentile bands over completed,
+independent simulation replicates. They describe the simulated distribution
+of the displayed performance metric, not a formal confidence interval for a
+single real biological edge. In particular, a full-mode band includes
+structural-model uncertainty represented by the simulation, while a
+fixed-SCM band is conditional and does not generalize beyond its selected SCM
+without rerunning additional SCM seeds. Neither mode is a nonparametric
+row-bootstrap confidence interval, and neither resamples observations from one
+dataset. With few replicates, percentile endpoints are descriptive and can be
+unstable; cells with too few usable replicates are shown without bands.
+"""))
+
+cells.append(code("""
+plot_summary = ci_summary.copy()
+plot_summary['has_interval'] = (
+    (plot_summary['usable_replicates'] >= 2)
+    & np.isfinite(plot_summary['error_lower'])
+    & np.isfinite(plot_summary['error_upper'])
+)
+
+def plot_seed_bands(metric, lower, upper, ylabel, title, filename):
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for key, part in plot_summary.groupby(
+        ['missing_data_mechanism', 'missing_data_rate', 'missing_edge_rate'],
+        dropna=False):
+        part = part.sort_values('n_samples')
+        ax.plot(part['n_samples'], part[metric], marker='o',
+                label=f'mech={key[0]}, data={key[1]}, edge={key[2]}')
+        band = part[part['has_interval']]
+        if not band.empty:
+            ax.fill_between(band['n_samples'], band[lower], band[upper], alpha=0.15)
+    ax.set_xscale('log')
+    ax.set_xlabel('n_samples')
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.grid(True, which='both', alpha=0.25)
+    ax.legend(fontsize=8)
+    plt.tight_layout()
+    out = VIZ_DIR / filename
+    plt.savefig(out, dpi=150, bbox_inches='tight')
+    plt.close()
+    display(Image(str(out)))
+    print(f'Saved: {out}')
+
+plot_seed_bands('mean_error', 'error_lower', 'error_upper', 'Mean error',
+                f'Mean error with empirical 95% intervals ({design})',
+                f'csd_estimation_{design}_mean_error_ci_vs_n_samples.png')
+plot_seed_bands('mean_MAE', 'MAE_lower', 'MAE_upper', 'Mean MAE',
+                f'Mean MAE with empirical 95% intervals ({design})',
+                f'csd_estimation_{design}_mae_ci_vs_n_samples.png')
+
+for x, label, suffix in [
+    ('missing_edge_rate', 'Missing-edge rate (separate SCM blocks)', 'missing_edge_rate'),
+    ('missing_data_rate', 'Missing-data rate', 'missing_data_rate'),
+]:
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for key, part in plot_summary.groupby(
+        ['missing_data_mechanism', 'missing_data_rate', 'missing_edge_rate'],
+        dropna=False):
+        part = part.sort_values(x)
+        ax.plot(part[x], part['mean_error'], marker='o',
+                label=f'mech={key[0]}, data={key[1]}, edge={key[2]}')
+        band = part[part['has_interval']]
+        if not band.empty:
+            ax.fill_between(band[x], band['error_lower'], band['error_upper'], alpha=0.15)
+    ax.axhline(0, color='black', linestyle='--', linewidth=0.8)
+    ax.set_xlabel(label)
+    ax.set_ylabel('Mean error')
+    ax.set_title(f'Mean error with empirical 95% intervals versus {label} ({design})')
+    ax.grid(True, alpha=0.25)
+    ax.legend(fontsize=8)
+    plt.tight_layout()
+    out = VIZ_DIR / f'csd_estimation_{design}_mean_error_ci_vs_{suffix}.png'
+    plt.savefig(out, dpi=150, bbox_inches='tight')
+    plt.close()
+    display(Image(str(out)))
+    print(f'Saved: {out}')
+"""))
 
 cells.append(md("## 1) Estimated beta vs ground-truth beta"))
 

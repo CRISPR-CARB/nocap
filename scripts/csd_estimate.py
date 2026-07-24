@@ -42,6 +42,28 @@ Notes
   ``X = B^T X + eps`` solved via ``(I - B^T)^{-1}``.
 * Ground-truth coefficients are the structural edge coefficients (betas)
   used to generate the synthetic SCM.
+
+Seed contract
+-------------
+``--seed`` is the legacy shorthand and sets both phases to the same seed.
+For replicate designs, pass both ``--scm-seed`` and ``--data-seed``. The SCM
+seed controls structural beta draws and the realized true missing-edge
+pattern. The data seed controls exogenous noise, UMI/count generation,
+library sizes, and missingness. Separate RNG instances ensure that changing
+the data seed does not change the SCM, while changing the SCM seed does.
+Output rows include both explicit seeds; the compatibility ``seed`` column is
+the data seed when explicit seed pairs are used.
+
+Examples
+--------
+Legacy reproducible run::
+
+    uv run python scripts/csd_estimate.py --demo cycle --output-csv out.csv --seed 7
+
+Fixed-SCM data replicate::
+
+    uv run python scripts/csd_estimate.py --demo cycle --output-csv out.csv \
+        --scm-seed 101 --data-seed 202 --n-samples-list 500
 """
 
 from __future__ import annotations
@@ -108,7 +130,9 @@ def generate_synthetic_observational_data(
     beta_log_sd: float,
     beta_p: float,
     beta_abs_max: float,
-    seed: int,
+    seed: int | None = None,
+    scm_seed: int | None = None,
+    data_seed: int | None = None,
 ):
     """Generate synthetic latent-SCM data and observed UMI expression.
 
@@ -136,7 +160,11 @@ def generate_synthetic_observational_data(
     betas_by_edge_true:
         Structural beta coefficients used by the latent SCM.
     """
-    rng = _rng(seed)
+    if seed is not None:
+        scm_seed = seed if scm_seed is None else scm_seed
+        data_seed = seed if data_seed is None else data_seed
+    if scm_seed is None or data_seed is None:
+        raise ValueError("scm_seed and data_seed must both be provided")
 
     build = build_synthetic_scm(
         estimation_graph,
@@ -146,11 +174,11 @@ def generate_synthetic_observational_data(
         beta_log_sd=beta_log_sd,
         beta_p=beta_p,
         beta_abs_max=beta_abs_max,
-        rng=rng,
+        rng=_rng(scm_seed),
     )
     scm = build.scm
     betas_by_edge_true = scm.betas
-    result = generate_from_scm(scm, config, rng=rng)
+    result = generate_from_scm(scm, config, rng=_rng(data_seed))
     print(f"Generated results from SCM with cond number: {build.condition_number}")
     return result.observed_data, scm.graph, betas_by_edge_true
 
@@ -285,12 +313,12 @@ def main() -> None:
             "(no oracle re-classification). Default: fall back to classifying edge via σ-single-door oracle."
         ),
     )
-    p.add_argument(
-        "--seed",
-        type=int,
-        default=0,
-        help="Base RNG seed for beta/noise generation.",
-    )
+    p.add_argument("--seed", type=int, default=None,
+                   help="Legacy shorthand: sets both --scm-seed and --data-seed.")
+    p.add_argument("--scm-seed", type=int, default=None,
+                   help="RNG seed for structural betas and true missing edges.")
+    p.add_argument("--data-seed", type=int, default=None,
+                   help="RNG seed for exogenous noise, counts, libraries, and missingness.")
     p.add_argument(
         "--save-config", type=str, default=None, help="File path to save arguments as a JSON file."
     )
@@ -440,6 +468,16 @@ def main() -> None:
 
     args = p.parse_args()
 
+    if args.seed is not None:
+        if args.scm_seed is not None or args.data_seed is not None:
+            raise SystemExit("--seed cannot be combined with --scm-seed or --data-seed")
+        args.scm_seed = args.seed
+        args.data_seed = args.seed
+    elif args.scm_seed is None and args.data_seed is None:
+        args.seed = args.scm_seed = args.data_seed = 0
+    elif args.scm_seed is None or args.data_seed is None:
+        raise SystemExit("provide --seed, or provide both --scm-seed and --data-seed")
+
     # --- Graph ---
     if args.graphml is not None:
         graph = _load_graph_from_graphml(args.graphml)
@@ -483,6 +521,8 @@ def main() -> None:
         "missing_data_rate",
         "missing_data_mechanism",
         "seed",
+        "scm_seed",
+        "data_seed",
         "cause",
         "effect",
         "same_scc",
@@ -537,7 +577,8 @@ def main() -> None:
                 beta_log_sd=float(args.beta_log_sd),
                 beta_p=float(args.beta_p),
                 beta_abs_max=float(args.beta_abs_max),
-                seed=int(args.seed),
+                scm_seed=int(args.scm_seed),
+                data_seed=int(args.data_seed),
             )
 
             n_true_edges = scm_graph_true.number_of_edges()
@@ -591,7 +632,9 @@ def main() -> None:
                     "missing_edge_rate": missing_edge_rate,
                     "missing_data_rate": config.missing_data_rate,
                     "missing_data_mechanism": config.missing_data_mechanism,
-                    "seed": int(args.seed),
+                    "seed": int(args.seed) if args.seed is not None else int(args.data_seed),
+                    "scm_seed": int(args.scm_seed),
+                    "data_seed": int(args.data_seed),
                     "cause": cause,
                     "effect": effect,
                     "same_scc": bool(adj_info_same_scc),
