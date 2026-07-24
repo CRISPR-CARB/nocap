@@ -189,19 +189,19 @@ design = metadata_mode or ('full' if any('full' in p.name for p in csv_paths) el
 # generated SCM and therefore does not produce a conditional replicate.
 scm_block_cols = ['missing_edge_rate']
 if design == 'fixed_scm':
-    block_seed_counts = (data.groupby(scm_block_cols, dropna=False)['scm_seed']
+    block_seed_counts = (eval_df.groupby(scm_block_cols, dropna=False)['scm_seed']
         .nunique(dropna=True))
     assert (block_seed_counts <= 1).all(), (
         'fixed_scm requires one scm_seed per missing_edge_rate SCM block: '
         f'{block_seed_counts.to_dict()}'
     )
-    block_metadata = (data.groupby(scm_block_cols, dropna=False)
+    block_metadata = (eval_df.groupby(scm_block_cols, dropna=False)
         .agg(scm_seed_count=('scm_seed', 'nunique'),
              missing_edge_counts=('scm_true_missing_edges_count', 'nunique')))
     print('Fixed-SCM blocks by missing_edge_rate:')
     display(block_metadata.reset_index())
     assert (block_metadata['scm_seed_count'] <= 1).all()
-    beta_by_edge = (data.groupby(scm_block_cols + ['cause', 'effect'], dropna=False)
+    beta_by_edge = (eval_df.groupby(scm_block_cols + ['cause', 'effect'], dropna=False)
         .agg(beta_values=('ground_truth_beta', 'nunique')).reset_index())
     assert (beta_by_edge['beta_values'] <= 1).all(), (
         'fixed_scm beta metadata varies within an edge/SCM block'
@@ -213,7 +213,7 @@ if design == 'fixed_scm':
 # Include the SCM identity in the grouping even for fixed-SCM mode. The
 # edge-rate column is intentionally retained so different SCM blocks cannot
 # be pooled into one interval.
-data['replicate_id'] = list(zip(data['scm_seed'], data['data_seed'])) if design != 'fixed_scm' else list(zip(data['missing_edge_rate'], data['data_seed']))
+eval_df['replicate_id'] = list(zip(eval_df['scm_seed'], eval_df['data_seed'])) if design != 'fixed_scm' else list(zip(eval_df['missing_edge_rate'], eval_df['data_seed']))
 rep_cols = ['missing_data_mechanism', 'missing_data_rate', 'missing_edge_rate', 'n_samples', 'replicate_id']
 replicate_metrics = (eval_df.groupby(rep_cols, dropna=False)
     .agg(MAE=('abs_error', 'mean'), RMSE=('sq_error', lambda x: float(np.sqrt(np.mean(x)))),
@@ -296,11 +296,6 @@ unstable; cells with too few usable replicates are shown without bands.
 
 cells.append(code("""
 plot_summary = ci_summary.copy()
-plot_summary['has_interval'] = (
-    (plot_summary['usable_replicates'] >= 2)
-    & np.isfinite(plot_summary['error_lower'])
-    & np.isfinite(plot_summary['error_upper'])
-)
 
 def plot_seed_bands(metric, lower, upper, ylabel, title, filename):
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -308,11 +303,22 @@ def plot_seed_bands(metric, lower, upper, ylabel, title, filename):
         ['missing_data_mechanism', 'missing_data_rate', 'missing_edge_rate'],
         dropna=False):
         part = part.sort_values('n_samples')
-        ax.plot(part['n_samples'], part[metric], marker='o',
+        x_values = part['n_samples'].to_numpy(dtype=float)
+        y_values = part[metric].to_numpy(dtype=float)
+        ax.plot(x_values, y_values, marker='o',
                 label=f'mech={key[0]}, data={key[1]}, edge={key[2]}')
-        band = part[part['has_interval']]
+        band = part[
+            (part['usable_replicates'] >= 2)
+            & np.isfinite(part[lower])
+            & np.isfinite(part[upper])
+        ]
         if not band.empty:
-            ax.fill_between(band['n_samples'], band[lower], band[upper], alpha=0.15)
+            ax.fill_between(
+                band['n_samples'].to_numpy(dtype=float),
+                band[lower].to_numpy(dtype=float),
+                band[upper].to_numpy(dtype=float),
+                alpha=0.15,
+            )
     ax.set_xscale('log')
     ax.set_xlabel('n_samples')
     ax.set_ylabel(ylabel)
@@ -333,20 +339,40 @@ plot_seed_bands('mean_MAE', 'MAE_lower', 'MAE_upper', 'Mean MAE',
                 f'Mean MAE with empirical 95% intervals ({design})',
                 f'csd_estimation_{design}_mae_ci_vs_n_samples.png')
 
-for x, label, suffix in [
-    ('missing_edge_rate', 'Missing-edge rate (separate SCM blocks)', 'missing_edge_rate'),
-    ('missing_data_rate', 'Missing-data rate', 'missing_data_rate'),
+for x, label, suffix, fixed_cols in [
+    (
+        'missing_edge_rate',
+        'Missing-edge rate (separate SCM blocks)',
+        'missing_edge_rate',
+        ['missing_data_mechanism', 'missing_data_rate', 'n_samples'],
+    ),
+    (
+        'missing_data_rate',
+        'Missing-data rate',
+        'missing_data_rate',
+        ['missing_data_mechanism', 'missing_edge_rate', 'n_samples'],
+    ),
 ]:
     fig, ax = plt.subplots(figsize=(10, 5))
     for key, part in plot_summary.groupby(
-        ['missing_data_mechanism', 'missing_data_rate', 'missing_edge_rate'],
+        fixed_cols,
         dropna=False):
         part = part.sort_values(x)
-        ax.plot(part[x], part['mean_error'], marker='o',
-                label=f'mech={key[0]}, data={key[1]}, edge={key[2]}')
-        band = part[part['has_interval']]
+        x_values = part[x].to_numpy(dtype=float)
+        ax.plot(x_values, part['mean_error'].to_numpy(dtype=float), marker='o',
+                label='; '.join(f'{column}={value}' for column, value in zip(fixed_cols, key)))
+        band = part[
+            (part['usable_replicates'] >= 2)
+            & np.isfinite(part['error_lower'])
+            & np.isfinite(part['error_upper'])
+        ]
         if not band.empty:
-            ax.fill_between(band[x], band['error_lower'], band['error_upper'], alpha=0.15)
+            ax.fill_between(
+                band[x].to_numpy(dtype=float),
+                band['error_lower'].to_numpy(dtype=float),
+                band['error_upper'].to_numpy(dtype=float),
+                alpha=0.15,
+            )
     ax.axhline(0, color='black', linestyle='--', linewidth=0.8)
     ax.set_xlabel(label)
     ax.set_ylabel('Mean error')
@@ -829,7 +855,7 @@ for mech in sorted(plot_df['missing_data_mechanism'].unique()):
                     for n in ns_sorted
                 ]
                 fig2, ax2 = plt.subplots(figsize=(9, 4.5))
-                ax2.boxplot(data_by_n, labels=[str(n) for n in ns_sorted], showfliers=False)
+                ax2.boxplot(data_by_n, label=[str(n) for n in ns_sorted], showfliers=False)
                 ax2.set_xlabel('n_samples')
                 ax2.set_ylabel('Residual variance')
                 ax2.set_title(
