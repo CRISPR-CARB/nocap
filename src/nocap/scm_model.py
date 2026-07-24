@@ -180,8 +180,8 @@ def _sample_betas(
     The sampled magnitude follows approximately
     ``log(abs(beta)) ~ Normal(log(log2(beta_med)), beta_log_sd**2)``.
     """
-    if beta_med < 1:
-        raise ValueError("beta_med must be greater than or equal 1.")
+    if beta_med <= 1:
+        raise ValueError("beta_med must be greater than 1.")
     if beta_log_sd <= 0:
         raise ValueError("beta_log_sd must be positive.")
     if beta_abs_max <= np.log2(beta_med):

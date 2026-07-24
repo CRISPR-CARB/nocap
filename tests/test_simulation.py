@@ -27,6 +27,7 @@ def _one_edge_scm() -> DirectedScm:
 
 
 def test_numpy_linear_solver_solves_one_edge_model():
+    """Solve a one-edge structural model using the NumPy linear solver."""
     scm = _one_edge_scm()
     exogenous = np.array([[3.0, 5.0]])
 
@@ -36,6 +37,7 @@ def test_numpy_linear_solver_solves_one_edge_model():
 
 
 def test_numpy_linear_solver_handles_cycles():
+    """Solve cyclic structural equations by inverting their coefficient system."""
     scm = DirectedScm(
         nodes=("A", "B"),
         graph=nx.DiGraph([("A", "B"), ("B", "A")]),
@@ -49,6 +51,7 @@ def test_numpy_linear_solver_handles_cycles():
 
 
 def test_default_pipeline_is_reproducible_and_retains_state_fields():
+    """Keep generated state fields and reproduce them for a fixed seed."""
     config = SimulationConfig(n_samples=12)
     first = generate_from_scm(_one_edge_scm(), config, seed=7)
     second = generate_from_scm(_one_edge_scm(), config, seed=7)
@@ -62,10 +65,12 @@ def test_default_pipeline_is_reproducible_and_retains_state_fields():
 
 
 def test_default_stages_can_be_extended():
+    """Allow callers to insert custom stages into the default pipeline."""
     stages = list(default_simulation_stages())
     observed_metadata = {}
 
     def record_stage(state: SimulationState) -> SimulationState:
+        """Record the latent expression shape while passing state through."""
         observed_metadata["latent_shape"] = state.latent_log_expression.shape
         return state
 
@@ -77,6 +82,7 @@ def test_default_stages_can_be_extended():
 
 
 def test_pipeline_rejects_observation_before_solving():
+    """Reject a pipeline that attempts observation before latent expression exists."""
     with pytest.raises(ValueError, match="Latent expression must be generated"):
         generate_from_scm(
             _one_edge_scm(),
@@ -86,6 +92,7 @@ def test_pipeline_rejects_observation_before_solving():
 
 
 def test_biological_missingness_writes_zero_values():
+    """Represent complete biological missingness as zero observed values."""
     result = generate_from_scm(
         _one_edge_scm(),
         SimulationConfig(n_samples=100, missing_data_rate=1.0),
@@ -96,6 +103,7 @@ def test_biological_missingness_writes_zero_values():
 
 
 def test_instrument_missingness_validates_direction():
+    """Validate the self-masking direction for instrument-error missingness."""
     with pytest.raises(ValueError, match="self_mask_direction"):
         generate_from_scm(
             _one_edge_scm(),
@@ -109,6 +117,7 @@ def test_instrument_missingness_validates_direction():
 
 
 def test_observation_helpers_validate_shapes_and_parameters():
+    """Validate observation helper parameters and compatible array shapes."""
     with pytest.raises(ValueError, match="library_size_log_sd"):
         sample_library_sizes(2, log_mean=1.0, log_sd=-1.0, rng=np.random.default_rng(1))
 

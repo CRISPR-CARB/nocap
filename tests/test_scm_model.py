@@ -8,6 +8,7 @@ from nocap.scm_model import DirectedScm, build_synthetic_scm
 
 
 def test_directed_scm_builds_beta_matrix_in_stable_node_order():
+    """Build the coefficient matrix according to the requested node order."""
     graph = nx.DiGraph([("B", "A"), ("A", "C")])
     scm = DirectedScm(
         nodes=("C", "A", "B"),
@@ -23,6 +24,7 @@ def test_directed_scm_builds_beta_matrix_in_stable_node_order():
 
 
 def test_directed_scm_rejects_coefficients_for_non_edges():
+    """Reject coefficients whose directed pair is not present in the graph."""
     graph = nx.DiGraph([("A", "B")])
 
     with pytest.raises(ValueError, match="exactly to graph edges"):
@@ -34,6 +36,7 @@ def test_directed_scm_rejects_coefficients_for_non_edges():
 
 
 def test_directed_scm_defensively_copies_graph_and_stringifies_nodes():
+    """Copy the graph and normalize node labels without exposing mutable state."""
     graph = nx.DiGraph([(1, 2)])
     scm = DirectedScm(nodes=(1, 2), graph=graph, betas={("1", "2"): 0.25})
 
@@ -46,6 +49,7 @@ def test_directed_scm_defensively_copies_graph_and_stringifies_nodes():
 
 
 def test_build_synthetic_scm_is_reproducible():
+    """Produce identical synthetic SCM results from identical random seeds."""
     graph = nx.DiGraph([("A", "B"), ("B", "A")])
     kwargs = {
         "missing_edge_rate": 0.0,
@@ -64,6 +68,7 @@ def test_build_synthetic_scm_is_reproducible():
 
 
 def test_build_synthetic_scm_only_adds_true_edges():
+    """Restrict synthetic edge additions to pairs allowed by the true graph."""
     graph = nx.DiGraph([("A", "B")])
     result = build_synthetic_scm(
         graph,
@@ -91,6 +96,7 @@ def test_build_synthetic_scm_only_adds_true_edges():
     ],
 )
 def test_build_synthetic_scm_validates_beta_parameters(kwargs):
+    """Reject invalid beta-distribution parameters before building the model."""
     parameters = {
         "missing_edge_rate": 0.0,
         "beta_med": 2.0,
