@@ -96,6 +96,7 @@ N_MISSING_EDGE_RATES_LIST="${MISSING_EDGE_RATES_LIST:-0.0,0.2,0.4}"
 N_MISSING_DATA_RATES_LIST="${MISSING_DATA_RATES_LIST:-0.0,0.3}"
 [[ -n "${N_SAMPLES_LIST}" && -n "${N_MISSING_EDGE_RATES_LIST}" && -n "${N_MISSING_DATA_RATES_LIST}" ]] || { echo "Parameter lists must be nonempty" >&2; exit 2; }
 
+printf '{"bootstrap":%s,"bootstrap_mode":"%s","bootstrap_r":%s,"seed_base":%s,"n_samples_list":"%s","missing_edge_rates":"%s","missing_data_rates":"%s"}\n' \
     "${BOOTSTRAP}" "${BOOTSTRAP_MODE}" "${BOOTSTRAP_R}" "${SEED_BASE}" \
     "${N_SAMPLES_LIST}" "${N_MISSING_EDGE_RATES_LIST}" "${N_MISSING_DATA_RATES_LIST}" \
     > "${OUTDIR}/run_metadata.json"
