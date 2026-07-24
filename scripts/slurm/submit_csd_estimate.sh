@@ -162,10 +162,11 @@ csv_out_for_job() {
     mdr_tag="$(sanitize_num "${mdr}")"
 
     if [[ "${BOOTSTRAP}" == 1 ]]; then
-        echo "${OUTDIR}/csv/csd_estimate_${BOOTSTRAP_MODE}_mech_${mech_tag}_edge_${megr_tag}_data_${mdr_tag}_n_${n_samples}_rep_${replicate}_scm_${scm_seed}_data_${data_seed}.csv"
+        filename="csd_estimate_${BOOTSTRAP_MODE}_mech_${mech_tag}_edge_${megr_tag}_data_${mdr_tag}_n_${n_samples}_rep_${replicate}_scm_${scm_seed}_data_${data_seed}.csv"
     else
-        echo "${OUTDIR}/csv/csd_estimate_mech_${mech_tag}_edge_${megr_tag}_data_${mdr_tag}_n_${N_SAMPLES_LIST_SANITIZED}.csv"
+        filename="csd_estimate_mech_${mech_tag}_edge_${megr_tag}_data_${mdr_tag}_n_${N_SAMPLES_LIST_SANITIZED}.csv"
     fi
+    echo "${OUTDIR}/csv/${filename%.csv}/${filename}"
 }
 
 submit_batch() {
@@ -185,12 +186,13 @@ uv sync --locked
 run_one() {
   IFS='|' read -r mech edge_rate data_rate n_samples replicate scm_seed data_seed out_csv <<< \"\$1\"
   [[ -s \"\$out_csv\" ]] && { echo \"[skip] \$out_csv\"; return; }
+  mkdir -p \"\$(dirname \"\$out_csv\")\"
   if [[ \"${BOOTSTRAP}\" == 1 ]]; then
     seed_args=(--scm-seed \"\$scm_seed\" --data-seed \"\$data_seed\" --n-samples-list \"\$n_samples\")
   else
     seed_args=(--seed ${SEED_BASE} --n-samples-list ${N_SAMPLES_LIST})
   fi
-  uv run python ${REPO_ROOT}/scripts/csd_estimate.py --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete \"\${seed_args[@]}\" --save-config ${OUTDIR}/config.json --missing-edge-rate \"\$edge_rate\" --missing-data-rate \"\$data_rate\" --missing-data-mechanism \"\$mech\" --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --umi-dispersion ${UMI_DISP} --library-size-log-mean ${LIB_SIZE_MEAN} --library-size-log-sd ${LIB_SIZE_SD} --umi-pseudocount ${UMI_COUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
+  uv run python ${REPO_ROOT}/scripts/csd_estimate.py --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete \"\${seed_args[@]}\" --save-config \"\$(dirname \"\$out_csv\")/config.json\" --missing-edge-rate \"\$edge_rate\" --missing-data-rate \"\$data_rate\" --missing-data-mechanism \"\$mech\" --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --umi-dispersion ${UMI_DISP} --library-size-log-mean ${LIB_SIZE_MEAN} --library-size-log-sd ${LIB_SIZE_SD} --umi-pseudocount ${UMI_COUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
 }
 export -f run_one
 xargs -a ${batch_file} -P ${BATCH_SIZE} -I{} bash -c 'run_one "\$@"' _ {}
