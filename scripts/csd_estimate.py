@@ -629,34 +629,37 @@ def main() -> None:
 
         # --- Experiment grid ---
         grid = _iter_experiment_grid(args)
-        paired_artifact = None
+        paired_artifacts = None
         if args.design_mode == "paired_hierarchical":
             max_samples = args.max_samples or max(int(cell["n_samples"]) for cell in grid)
-            base_build = build_synthetic_scm(
-                graph,
-                nodes,
-                missing_edge_rate=0.0,
-                beta_med=float(args.beta_med),
-                beta_log_sd=float(args.beta_log_sd),
-                beta_p=float(args.beta_p),
-                beta_abs_max=float(args.beta_abs_max),
-                rng=_rng(int(args.scm_seed)),
+            artifact_config = SimulationConfig(
+                n_samples=max_samples,
+                estimation_graph=graph,
+                umi_dispersion=float(args.umi_dispersion),
+                library_size_log_mean=float(args.library_size_log_mean),
+                library_size_log_sd=float(args.library_size_log_sd),
+                umi_pseudocount=float(args.umi_pseudocount),
+                baseline_log_sd=float(args.baseline_log_sd),
             )
-            paired_artifact = generate_paired_data_artifact(
-                base_build.scm,
-                SimulationConfig(
-                    n_samples=max_samples,
-                    estimation_graph=graph,
-                    umi_dispersion=float(args.umi_dispersion),
-                    library_size_log_mean=float(args.library_size_log_mean),
-                    library_size_log_sd=float(args.library_size_log_sd),
-                    umi_pseudocount=float(args.umi_pseudocount),
-                    baseline_log_sd=float(args.baseline_log_sd),
-                ),
-                max_samples=max_samples,
-                scm_seed=int(args.scm_seed),
-                data_seed=int(args.data_seed),
-            )
+            paired_artifacts = {}
+            for edge_rate in sorted({float(cell["missing_edge_rate"]) for cell in grid}):
+                variant_build = build_synthetic_scm(
+                    graph,
+                    nodes,
+                    missing_edge_rate=edge_rate,
+                    beta_med=float(args.beta_med),
+                    beta_log_sd=float(args.beta_log_sd),
+                    beta_p=float(args.beta_p),
+                    beta_abs_max=float(args.beta_abs_max),
+                    rng=_rng(int(args.scm_seed)),
+                )
+                paired_artifacts[edge_rate] = generate_paired_data_artifact(
+                    variant_build.scm,
+                    artifact_config,
+                    max_samples=max_samples,
+                    scm_seed=int(args.scm_seed),
+                    data_seed=int(args.data_seed),
+                )
         for trial_idx, cell in enumerate(grid):
             n_samples = int(cell["n_samples"])
             missing_edge_rate = float(cell["missing_edge_rate"])
@@ -678,7 +681,8 @@ def main() -> None:
                 estimation_graph=graph,
             )
 
-            if paired_artifact is not None:
+            if paired_artifacts is not None:
+                paired_artifact = paired_artifacts[missing_edge_rate]
                 data = paired_artifact.view(config)
                 scm_graph_true = paired_artifact.scm.graph
                 betas_true = paired_artifact.scm.betas
