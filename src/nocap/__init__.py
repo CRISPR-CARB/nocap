@@ -25,11 +25,13 @@ from .scm import (
     simulate_data_with_outliers,
 )
 from .scm_model import DirectedScm, SyntheticScmBuild, build_synthetic_scm
+from .experiment import StageSeeds, canonical_condition_id, canonical_job_id, derive_seed
 from .simulation import (
     SimulationConfig,
     SimulationState,
     default_simulation_stages,
     generate_from_scm,
+    paired_view_stages,
     numpy_linear_solver,
 )
 
@@ -37,9 +39,12 @@ __all__ = [
     "DirectedScm",
     "SimulationConfig",
     "SimulationState",
+    "StageSeeds",
     "SyntheticScmBuild",
     "bootstrap_ATE",
     "build_synthetic_scm",
+    "canonical_condition_id",
+    "canonical_job_id",
     "compile_lgbn_from_lscm",
     "convert_to_eqn_array_latex",
     "convert_to_latex",
@@ -49,6 +54,7 @@ __all__ = [
     "dagitty_to_dot",
     "dagitty_to_mixed_graph",
     "default_simulation_stages",
+    "derive_seed",
     "estimate_ate",
     "evaluate_lscm",
     "fit_model",
@@ -59,6 +65,7 @@ __all__ = [
     "get_symbols_from_di_edges",
     "get_symbols_from_nodes",
     "numpy_linear_solver",
+    "paired_view_stages",
     "perform_soft_intervention_lgbn",
     "plot_interactive_lscm_graph",
     "read_dag_file",

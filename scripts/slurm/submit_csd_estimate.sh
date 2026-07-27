@@ -19,9 +19,8 @@
 #   OUTDIR=/path/to/output
 #   ADJUSTMENTS_CSV=/path/to/csd_identifiable_edges.csv
 #   DRY_RUN=1     # only print sbatch commands
-#   BOOTSTRAP=1 BOOTSTRAP_MODE=full BOOTSTRAP_R=3
-#   BOOTSTRAP=1 BOOTSTRAP_MODE=fixed_scm BOOTSTRAP_R=3
-# Replicate mode runs one sample size per csd_estimate.py process.
+# Paired mode creates task JSON records with setup_csd_experiment.py and passes
+# each record directly to csd_estimate.py.
 #
 # Seed contract:
 #   scm_seed controls structural betas and true missing edges.
@@ -32,12 +31,8 @@
 # The legacy default remains one process per mechanism/rate cell with --seed.
 # For example:
 #   bash scripts/slurm/submit_csd_estimate.sh
-#   BOOTSTRAP=1 BOOTSTRAP_MODE=full BOOTSTRAP_R=3 \
-#     bash scripts/slurm/submit_csd_estimate.sh
-#   BOOTSTRAP=1 BOOTSTRAP_MODE=fixed_scm BOOTSTRAP_R=3 \
-#     bash scripts/slurm/submit_csd_estimate.sh
-# These are simulation-replicate performance intervals, not row-bootstrap
-# confidence intervals or formal uncertainty for a real biological edge.
+# Statistical bootstrap intervals are computed downstream from completed
+# replicate outputs, not by generating additional simulation tasks here.
 
 set -euo pipefail
 
@@ -68,12 +63,10 @@ CPUS_PER_TASK="${CPUS_PER_TASK:-1}"
 BATCH_SIZE="${BATCH_SIZE:-64}"
 
 DRY_RUN="${DRY_RUN:-0}"
-BOOTSTRAP="${BOOTSTRAP:-0}"
-BOOTSTRAP_MODE="${BOOTSTRAP_MODE:-full}"
-BOOTSTRAP_R="${BOOTSTRAP_R:-1}"
-if [[ "${BOOTSTRAP}" != "0" && "${BOOTSTRAP}" != "1" ]]; then echo "BOOTSTRAP must be 0 or 1" >&2; exit 2; fi
-if [[ "${BOOTSTRAP_MODE}" != "full" && "${BOOTSTRAP_MODE}" != "fixed_scm" ]]; then echo "BOOTSTRAP_MODE must be full or fixed_scm" >&2; exit 2; fi
-if ! [[ "${BOOTSTRAP_R}" =~ ^[1-9][0-9]*$ ]]; then echo "BOOTSTRAP_R must be a positive integer" >&2; exit 2; fi
+DESIGN_MODE="${DESIGN_MODE:-paired_hierarchical}"
+EXPERIMENT_ID="${EXPERIMENT_ID:-csd-${TIMESTAMP}}"
+N_SCM_REPLICATES="${N_SCM_REPLICATES:-1}"
+N_DATA_REPLICATES_PER_SCM="${N_DATA_REPLICATES_PER_SCM:-1}"
 
 # ---------------------------------------------------------------------------
 # Parameter grid
@@ -96,8 +89,8 @@ N_MISSING_EDGE_RATES_LIST="${MISSING_EDGE_RATES_LIST:-0.0,0.2,0.4}"
 N_MISSING_DATA_RATES_LIST="${MISSING_DATA_RATES_LIST:-0.0,0.3}"
 [[ -n "${N_SAMPLES_LIST}" && -n "${N_MISSING_EDGE_RATES_LIST}" && -n "${N_MISSING_DATA_RATES_LIST}" ]] || { echo "Parameter lists must be nonempty" >&2; exit 2; }
 
-printf '{"bootstrap":%s,"bootstrap_mode":"%s","bootstrap_r":%s,"seed_base":%s,"n_samples_list":"%s","missing_edge_rates":"%s","missing_data_rates":"%s"}\n' \
-    "${BOOTSTRAP}" "${BOOTSTRAP_MODE}" "${BOOTSTRAP_R}" "${SEED_BASE}" \
+printf '{"design_mode":"%s","experiment_id":"%s","seed_base":%s,"n_samples_list":"%s","missing_edge_rates":"%s","missing_data_rates":"%s"}\n' \
+    "${DESIGN_MODE}" "${EXPERIMENT_ID}" "${SEED_BASE}" \
     "${N_SAMPLES_LIST}" "${N_MISSING_EDGE_RATES_LIST}" "${N_MISSING_DATA_RATES_LIST}" \
     > "${OUTDIR}/run_metadata.json"
 
@@ -120,55 +113,6 @@ SELF_MASK_DIRECTION="${SELF_MASK_DIRECTION:-low}"
 
 MIN_ROWS_AFTER_DROPNA="${MIN_ROWS_AFTER_DROPNA:-30}"
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-sanitize_num() {
-    # 0.2 -> 0p2, -0.1 -> m0p1
-    local x="$1"
-    local sign=""
-    if [[ "${x}" == -* ]]; then
-        sign="m"
-        x="${x#-}"
-    fi
-    x="${x/./p}"
-    echo "${sign}${x}"
-}
-
-seed_hash() {
-    printf '%s' "$1" | cksum | cut -d' ' -f1
-}
-
-csv_out_for_job() {
-    # Arguments: mech, missing_edge_rate, missing_data_rate, n, replicate, scm, data
-    local mech="$1"
-    local megr="$2"
-    local mdr="$3"
-    local n_samples="$4"
-    local replicate="$5"
-    local scm_seed="$6"
-    local data_seed="$7"
-
-    local mech_tag="${mech}"
-    mech_tag="${mech_tag//./_}"
-    mech_tag="${mech_tag//\//_}"
-    mech_tag="${mech_tag//_/_}"
-
-    local megr_tag
-    megr_tag="$(sanitize_num "${megr}")"
-
-    local mdr_tag
-    mdr_tag="$(sanitize_num "${mdr}")"
-
-    if [[ "${BOOTSTRAP}" == 1 ]]; then
-        filename="csd_estimate_${BOOTSTRAP_MODE}_mech_${mech_tag}_edge_${megr_tag}_data_${mdr_tag}_n_${n_samples}_rep_${replicate}_scm_${scm_seed}_data_${data_seed}.csv"
-    else
-        filename="csd_estimate_mech_${mech_tag}_edge_${megr_tag}_data_${mdr_tag}_n_${N_SAMPLES_LIST_SANITIZED}.csv"
-    fi
-    echo "${OUTDIR}/csv/${filename%.csv}/${filename}"
-}
-
 submit_batch() {
     local batch_file="$1"
     local batch_id="$2"
@@ -184,15 +128,11 @@ export UV_CACHE_DIR=/tmp/\$USER/uv-cache-\$\$
 mkdir -p \"\$UV_CACHE_DIR\"
 uv sync --locked
 run_one() {
-  IFS='|' read -r mech edge_rate data_rate n_samples replicate scm_seed data_seed out_csv <<< \"\$1\"
+  task_json=\"\$1\"
+  out_csv=\"\$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1]))[\"output_csv\"])' \"\$task_json\")\"
   [[ -s \"\$out_csv\" ]] && { echo \"[skip] \$out_csv\"; return; }
   mkdir -p \"\$(dirname \"\$out_csv\")\"
-  if [[ \"${BOOTSTRAP}\" == 1 ]]; then
-    seed_args=(--scm-seed \"\$scm_seed\" --data-seed \"\$data_seed\" --n-samples-list \"\$n_samples\")
-  else
-    seed_args=(--seed ${SEED_BASE} --n-samples-list ${N_SAMPLES_LIST})
-  fi
-  uv run python ${REPO_ROOT}/scripts/csd_estimate.py --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete \"\${seed_args[@]}\" --save-config \"\$(dirname \"\$out_csv\")/config.json\" --missing-edge-rate \"\$edge_rate\" --missing-data-rate \"\$data_rate\" --missing-data-mechanism \"\$mech\" --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --umi-dispersion ${UMI_DISP} --library-size-log-mean ${LIB_SIZE_MEAN} --library-size-log-sd ${LIB_SIZE_SD} --umi-pseudocount ${UMI_COUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
+  uv run python ${REPO_ROOT}/scripts/csd_estimate.py --task-json \"\$task_json\" --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --design-mode ${DESIGN_MODE} --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --umi-dispersion ${UMI_DISP} --library-size-log-mean ${LIB_SIZE_MEAN} --library-size-log-sd ${LIB_SIZE_SD} --umi-pseudocount ${UMI_COUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
 }
 export -f run_one
 xargs -a ${batch_file} -P ${BATCH_SIZE} -I{} bash -c 'run_one "\$@"' _ {}
@@ -242,50 +182,30 @@ function main {
         echo "  Data rates: ${DATA_RATES[*]}"
         echo "  n_samples_list: ${N_SAMPLES_LIST}"
         echo "  DRY_RUN: ${DRY_RUN}"
-        echo "  Bootstrap: ${BOOTSTRAP} mode=${BOOTSTRAP_MODE} R=${BOOTSTRAP_R}"
+        echo "  Design mode: ${DESIGN_MODE}"
         echo ""
 
         pending_file="${OUTDIR}/pending_tasks.txt"
         batch_dir="${OUTDIR}/batches"
-        declare -A scm_seed_by_edge=()
-        declare -A used_seed_pairs=()
+        tasks_dir="${OUTDIR}/tasks"
+        mkdir -p "${tasks_dir}"
+        uv run python "${REPO_ROOT}/scripts/setup_csd_experiment.py" \
+            --output "${OUTDIR}/experiment.json" \
+            --tasks-dir "${tasks_dir}" \
+            --output-dir "${OUTDIR}/csv" \
+            --experiment-id "${EXPERIMENT_ID}" \
+            --design-mode "${DESIGN_MODE}" \
+            --base-seed "${SEED_BASE}" \
+            --scm-replicates "${N_SCM_REPLICATES}" \
+            --data-replicates "${N_DATA_REPLICATES_PER_SCM}" \
+            --n-samples-list "${N_SAMPLES_LIST}" \
+            --missing-edge-rates "${N_MISSING_EDGE_RATES_LIST}" \
+            --missing-data-rates "${N_MISSING_DATA_RATES_LIST}" \
+            --mechanisms "$(IFS=,; echo "${MECHANISMS[*]}")"
         : > "${pending_file}"
-        mkdir -p "${batch_dir}"
-        for mech in "${MECHANISMS[@]}"; do
-            for edge_rate in "${EDGE_RATES[@]}"; do
-                for data_rate in "${DATA_RATES[@]}"; do
-                    if [[ "${BOOTSTRAP}" == 1 ]]; then
-                        for n in $(printf '%s' "${N_SAMPLES_LIST}" | tr ',' ' '); do
-                            for ((rep=0; rep<BOOTSTRAP_R; rep++)); do
-                                if [[ "${BOOTSTRAP_MODE}" == fixed_scm ]]; then
-                                    edge_key="${edge_rate}"
-                                    if [[ -z "${scm_seed_by_edge[${edge_key}]+x}" ]]; then
-                                        scm_seed=$((SEED_BASE + $(seed_hash "scm:${edge_key}")))
-                                        scm_seed_by_edge["${edge_key}"]="${scm_seed}"
-                                    else
-                                        scm_seed="${scm_seed_by_edge[${edge_key}]}"
-                                    fi
-                                    data_key="${mech}:${edge_rate}:${data_rate}:${n}:${rep}"
-                                else
-                                    key="${mech}:${edge_rate}:${data_rate}:${n}:${rep}"
-                                    scm_seed=$((SEED_BASE + $(seed_hash "scm:${key}")))
-                                    data_key="${key}"
-                                fi
-                                data_seed=$((SEED_BASE + $(seed_hash "data:${data_key}")))
-                                while [[ -n "${used_seed_pairs[${scm_seed}:${data_seed}]+x}" ]]; do
-                                    data_seed=$((data_seed + 1))
-                                done
-                                used_seed_pairs["${scm_seed}:${data_seed}"]=1
-                                out_csv="$(csv_out_for_job "${mech}" "${edge_rate}" "${data_rate}" "${n}" "${rep}" "${scm_seed}" "${data_seed}")"
-                                [[ -s "${out_csv}" ]] || printf '%s|%s|%s|%s|%s|%s|%s|%s\n' "${mech}" "${edge_rate}" "${data_rate}" "${n}" "${rep}" "${scm_seed}" "${data_seed}" "${out_csv}" >> "${pending_file}"
-                            done
-                        done
-                    else
-                        out_csv="$(csv_out_for_job "${mech}" "${edge_rate}" "${data_rate}" "" "" "" "")"
-                        [[ -s "${out_csv}" ]] || printf '%s|%s|%s|||||%s\n' "${mech}" "${edge_rate}" "${data_rate}" "${out_csv}" >> "${pending_file}"
-                    fi
-                done
-            done
+        for task_json in "${tasks_dir}"/*.json; do
+            out_csv="$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1]))["output_csv"])' "${task_json}")"
+            [[ -s "${out_csv}" ]] || printf '%s\n' "${task_json}" >> "${pending_file}"
         done
         rm -f "${batch_dir}"/batch_*.txt
         if [[ -s "${pending_file}" ]]; then
@@ -297,6 +217,7 @@ function main {
             echo "All CSD estimation outputs already exist. Nothing to submit."
         fi
         echo "=== Done submitting CSD estimation jobs ==="
+        return 0
     else
         echo "Smoke-test mode is not supported by node packing; narrow the grid with environment variables."
         exit 2

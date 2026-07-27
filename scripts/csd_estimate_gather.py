@@ -18,6 +18,17 @@ from collections import Counter
 from pathlib import Path
 
 ESTIMATE_FIELDS = [
+    "experiment_id",
+    "design_mode",
+    "seed_schema_version",
+    "scm_replicate_id",
+    "data_replicate_id",
+    "parameter_condition_id",
+    "target_effect_id",
+    "pairing_scope",
+    "sample_parent_id",
+    "sample_selection_rule",
+    "run_status",
     "trial",
     "n_samples",
     "missing_edge_rate",
@@ -66,11 +77,15 @@ def main() -> None:
             if reader.fieldnames is None:
                 print(f"gather: missing header in {path}", file=sys.stderr)
                 raise SystemExit(1)
-            missing = [field for field in fieldnames if field not in reader.fieldnames]
-            if missing:
-                print(f"gather: {path} is missing columns: {', '.join(missing)}", file=sys.stderr)
-                raise SystemExit(1)
-            rows.extend(reader)
+            for row in reader:
+                # Legacy files remain gatherable and are explicitly marked non-paired.
+                for field in fieldnames:
+                    row.setdefault(field, "")
+                if not row["design_mode"]:
+                    row["design_mode"] = "legacy_independent"
+                if not row["pairing_scope"]:
+                    row["pairing_scope"] = "none"
+                rows.append(row)
 
     output_csv.parent.mkdir(parents=True, exist_ok=True)
     with output_csv.open("w", newline="", encoding="utf-8") as handle:

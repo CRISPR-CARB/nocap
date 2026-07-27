@@ -1,6 +1,13 @@
-r"""csd_estimate.py — Synthetic observational data + per-edge path coefficient estimation.
+r"""Synthetic observational data and per-edge path coefficient estimation.
 
-This script:
+This script supports legacy independent generation and the explicit
+``paired_hierarchical`` design. In paired mode, one maximum-size observation
+artifact is generated for a nested replicate unit and each parameter condition
+is evaluated through a deterministic view of that artifact. This keeps the
+latent realization, observation draws, sample order, and missingness score
+streams shared across conditions without changing the legacy RNG path.
+
+The script:
 
 1) Accepts an input :class:`networkx.DiGraph` (via GraphML or via a small built-in demo).
 2) Generates synthetic UMI data
@@ -29,7 +36,7 @@ This script:
     change in target log2-expression and 2**beta is the corresponding fold
     change in expected molecular abundance.
 
-3) For **every** directed edge in the *estimation graph* calls
+3) For **every** directed edge in the *estimation graph*, calls
    :func:`nocap.cyclic_single_door.estimate_path_coefficient_for_edge`.
 4) Writes a CSV with per-edge estimation results and the corresponding
    ground-truth structural coefficient (beta) under the synthetic SCM.
@@ -43,6 +50,14 @@ Notes
 * Ground-truth coefficients are the structural edge coefficients (betas)
   used to generate the synthetic SCM.
 
+Design modes
+------------
+``legacy`` is the default and preserves the existing one-condition generation
+behavior. ``paired_hierarchical`` adds explicit experiment and nested
+replicate identifiers and evaluates the full condition grid against a shared
+maximum-size artifact. Use ``--max-samples`` to set the artifact size when it
+should exceed the largest value in ``--n-samples-list``.
+
 Seed contract
 -------------
 ``--seed`` is the legacy shorthand and sets both phases to the same seed.
@@ -52,7 +67,9 @@ pattern. The data seed controls exogenous noise, UMI/count generation,
 library sizes, and missingness. Separate RNG instances ensure that changing
 the data seed does not change the SCM, while changing the SCM seed does.
 Output rows include both explicit seeds; the compatibility ``seed`` column is
-the data seed when explicit seed pairs are used.
+the data seed when explicit seed pairs are used. Paired mode intentionally
+reuses the replicate seed pair across conditions and distinguishes jobs using
+the experiment, replicate, and parameter-condition identifiers.
 
 Examples
 --------
@@ -63,7 +80,15 @@ Legacy reproducible run::
 Fixed-SCM data replicate::
 
     uv run python scripts/csd_estimate.py --demo cycle --output-csv out.csv \
-        --scm-seed 101 --data-seed 202 --n-samples-list 500
+         --scm-seed 101 --data-seed 202 --n-samples-list 500
+
+Paired hierarchical replicate::
+
+    uv run python scripts/csd_estimate.py --demo cycle --output-csv out.csv \
+        --design-mode paired_hierarchical --experiment-id demo-v1 \
+        --scm-replicate-id scm-000 --data-replicate-id data-000 \
+        --scm-seed 101 --data-seed 202 --n-samples-list 250,500 \
+        --missing-data-rate-list 0,0.1
 """
 
 from __future__ import annotations
@@ -83,8 +108,9 @@ from nocap.cyclic_single_door import (
     estimate_path_coefficient_for_edge,
     nx_digraph_to_y0,
 )
+from nocap.experiment import canonical_condition_id
 from nocap.scm_model import build_synthetic_scm
-from nocap.simulation import SimulationConfig, generate_from_scm
+from nocap.simulation import SimulationConfig, generate_from_scm, generate_paired_data_artifact
 
 
 def _parse_csv_list(s: str | None, *, cast_fn):
@@ -292,7 +318,7 @@ def main() -> None:
     p.add_argument(
         "--output-csv",
         type=str,
-        required=True,
+        required=False,
         help="Write per-edge estimation results to this CSV.",
     )
 
@@ -313,12 +339,35 @@ def main() -> None:
             "(no oracle re-classification). Default: fall back to classifying edge via σ-single-door oracle."
         ),
     )
-    p.add_argument("--seed", type=int, default=None,
-                   help="Legacy shorthand: sets both --scm-seed and --data-seed.")
-    p.add_argument("--scm-seed", type=int, default=None,
-                   help="RNG seed for structural betas and true missing edges.")
-    p.add_argument("--data-seed", type=int, default=None,
-                   help="RNG seed for exogenous noise, counts, libraries, and missingness.")
+    p.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Legacy shorthand: sets both --scm-seed and --data-seed.",
+    )
+    p.add_argument(
+        "--scm-seed",
+        type=int,
+        default=None,
+        help="RNG seed for structural betas and true missing edges.",
+    )
+    p.add_argument(
+        "--data-seed",
+        type=int,
+        default=None,
+        help="RNG seed for exogenous noise, counts, libraries, and missingness.",
+    )
+    p.add_argument("--design-mode", choices=["legacy", "paired_hierarchical"], default="legacy")
+    p.add_argument("--experiment-id", default="legacy")
+    p.add_argument("--scm-replicate-id", default="0")
+    p.add_argument("--data-replicate-id", default="0")
+    p.add_argument("--max-samples", type=int, default=None)
+    p.add_argument(
+        "--task-json",
+        type=str,
+        default=None,
+        help="JSON task record generated by setup_csd_experiment.py.",
+    )
     p.add_argument(
         "--save-config", type=str, default=None, help="File path to save arguments as a JSON file."
     )
@@ -468,6 +517,28 @@ def main() -> None:
 
     args = p.parse_args()
 
+    if args.task_json is not None:
+        with open(args.task_json, encoding="utf-8") as handle:
+            task = json.load(handle)
+        for name in (
+            "experiment_id",
+            "design_mode",
+            "scm_replicate_id",
+            "data_replicate_id",
+            "scm_seed",
+            "data_seed",
+            "output_csv",
+        ):
+            if name in task:
+                setattr(args, name, task[name])
+        args.n_samples_list = str(task["n_samples"])
+        args.missing_edge_rate = float(task["missing_edge_rate"])
+        args.missing_data_rate = float(task["missing_data_rate"])
+        args.missing_data_mechanism = task["missing_data_mechanism"]
+
+    if args.output_csv is None:
+        raise SystemExit("--output-csv is required unless the task JSON supplies output_csv")
+
     if args.seed is not None:
         if args.scm_seed is not None or args.data_seed is not None:
             raise SystemExit("--seed cannot be combined with --scm-seed or --data-seed")
@@ -515,6 +586,17 @@ def main() -> None:
 
     # --- Header ---
     fieldnames = [
+        "experiment_id",
+        "design_mode",
+        "seed_schema_version",
+        "scm_replicate_id",
+        "data_replicate_id",
+        "parameter_condition_id",
+        "target_effect_id",
+        "pairing_scope",
+        "sample_parent_id",
+        "sample_selection_rule",
+        "run_status",
         "trial",
         "n_samples",
         "missing_edge_rate",
@@ -547,6 +629,34 @@ def main() -> None:
 
         # --- Experiment grid ---
         grid = _iter_experiment_grid(args)
+        paired_artifact = None
+        if args.design_mode == "paired_hierarchical":
+            max_samples = args.max_samples or max(int(cell["n_samples"]) for cell in grid)
+            base_build = build_synthetic_scm(
+                graph,
+                nodes,
+                missing_edge_rate=0.0,
+                beta_med=float(args.beta_med),
+                beta_log_sd=float(args.beta_log_sd),
+                beta_p=float(args.beta_p),
+                beta_abs_max=float(args.beta_abs_max),
+                rng=_rng(int(args.scm_seed)),
+            )
+            paired_artifact = generate_paired_data_artifact(
+                base_build.scm,
+                SimulationConfig(
+                    n_samples=max_samples,
+                    estimation_graph=graph,
+                    umi_dispersion=float(args.umi_dispersion),
+                    library_size_log_mean=float(args.library_size_log_mean),
+                    library_size_log_sd=float(args.library_size_log_sd),
+                    umi_pseudocount=float(args.umi_pseudocount),
+                    baseline_log_sd=float(args.baseline_log_sd),
+                ),
+                max_samples=max_samples,
+                scm_seed=int(args.scm_seed),
+                data_seed=int(args.data_seed),
+            )
         for trial_idx, cell in enumerate(grid):
             n_samples = int(cell["n_samples"])
             missing_edge_rate = float(cell["missing_edge_rate"])
@@ -568,18 +678,23 @@ def main() -> None:
                 estimation_graph=graph,
             )
 
-            data, scm_graph_true, betas_true = generate_synthetic_observational_data(
-                graph,
-                nodes,
-                config,
-                missing_edge_rate=missing_edge_rate,
-                beta_med=float(args.beta_med),
-                beta_log_sd=float(args.beta_log_sd),
-                beta_p=float(args.beta_p),
-                beta_abs_max=float(args.beta_abs_max),
-                scm_seed=int(args.scm_seed),
-                data_seed=int(args.data_seed),
-            )
+            if paired_artifact is not None:
+                data = paired_artifact.view(config)
+                scm_graph_true = paired_artifact.scm.graph
+                betas_true = paired_artifact.scm.betas
+            else:
+                data, scm_graph_true, betas_true = generate_synthetic_observational_data(
+                    graph,
+                    nodes,
+                    config,
+                    missing_edge_rate=missing_edge_rate,
+                    beta_med=float(args.beta_med),
+                    beta_log_sd=float(args.beta_log_sd),
+                    beta_p=float(args.beta_p),
+                    beta_abs_max=float(args.beta_abs_max),
+                    scm_seed=int(args.scm_seed),
+                    data_seed=int(args.data_seed),
+                )
 
             n_true_edges = scm_graph_true.number_of_edges()
             n_orig_edges = graph.number_of_edges()
@@ -627,6 +742,19 @@ def main() -> None:
                 )
 
                 row = {
+                    "experiment_id": args.experiment_id,
+                    "design_mode": args.design_mode,
+                    "seed_schema_version": "1",
+                    "scm_replicate_id": args.scm_replicate_id,
+                    "data_replicate_id": args.data_replicate_id,
+                    "parameter_condition_id": canonical_condition_id(cell),
+                    "target_effect_id": f"{cause}->{effect}",
+                    "pairing_scope": "shared_complete_observation_shared_scores"
+                    if paired_artifact is not None
+                    else "none",
+                    "sample_parent_id": "maximum" if paired_artifact is not None else "",
+                    "sample_selection_rule": "prefix" if paired_artifact is not None else "",
+                    "run_status": "complete",
                     "trial": trial_idx,
                     "n_samples": config.n_samples,
                     "missing_edge_rate": missing_edge_rate,

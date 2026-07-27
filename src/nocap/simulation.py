@@ -10,6 +10,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
+from .experiment import StageSeeds
 from .scm_model import DirectedScm
 
 
@@ -46,6 +47,171 @@ class SimulationState:
     baseline_abundances: np.ndarray | None = None
     observed_data: pd.DataFrame | None = None
     metadata: dict[str, object] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class PairedDataArtifact:
+    """Immutable maximum-size data realization used by paired conditions."""
+
+    scm: DirectedScm
+    exogenous_noise: np.ndarray
+    latent_log_expression: np.ndarray
+    umi_counts: np.ndarray
+    library_sizes: np.ndarray
+    baseline_abundances: np.ndarray
+    sample_order: np.ndarray
+    missingness_uniforms: np.ndarray
+    stage_seeds: StageSeeds
+
+    def view(
+        self,
+        config: SimulationConfig,
+        *,
+        stages: Sequence[SimulationStage] | None = None,
+    ) -> pd.DataFrame:
+        """Materialize a deterministic prefix view through configurable stages.
+
+        The default stages only materialize the immutable observation artifact and
+        apply condition-specific missingness. Callers may provide a replacement
+        stage sequence to add transformations or alternative observation models.
+        Stages receive a normal :class:`SimulationState`; the artifact fields are
+        also available in ``state.metadata`` for custom stages.
+        """
+        if config.n_samples > len(self.sample_order):
+            raise ValueError("Condition n_samples exceeds artifact maximum size")
+        indices = self.sample_order[: config.n_samples]
+        state = SimulationState(
+            scm=self.scm,
+            config=config,
+            rng=np.random.default_rng(0),
+            exogenous_noise=self.exogenous_noise[indices],
+            latent_log_expression=self.latent_log_expression[indices],
+            umi_counts=self.umi_counts[indices],
+            library_sizes=self.library_sizes[indices],
+            baseline_abundances=self.baseline_abundances,
+            metadata={
+                "missingness_uniforms": self.missingness_uniforms[indices],
+                "sample_parent_id": "maximum",
+                "sample_selection_rule": "prefix",
+                "pairing_scope": "shared_complete_observation_shared_scores",
+            },
+        )
+        ordered = paired_view_stages() if stages is None else stages
+        for stage in ordered:
+            state = stage(state)
+        if state.observed_data is None:
+            raise ValueError("Paired view stages must produce observed_data")
+        state.observed_data.attrs.update(state.metadata)
+        return state.observed_data
+
+
+def paired_view_stages() -> tuple[SimulationStage, ...]:
+    """Return the default stages used to materialize a paired artifact view."""
+    return (_view_observe, _view_missing)
+
+
+def _view_observe(state: SimulationState) -> SimulationState:
+    """Convert immutable artifact counts into condition-view expression data."""
+    if state.umi_counts is None or state.library_sizes is None:
+        raise ValueError("Paired view requires immutable observation arrays")
+    normalized = counts_to_log_expression(
+        state.umi_counts,
+        state.library_sizes,
+        pseudocount=state.config.umi_pseudocount,
+        target_library_size=np.exp(state.config.library_size_log_mean),
+    )
+    state.observed_data = pd.DataFrame(normalized, columns=state.scm.nodes)
+    return state
+
+
+def _view_missing(state: SimulationState) -> SimulationState:
+    """Apply condition-specific missingness using persisted shared uniforms."""
+    if state.observed_data is None:
+        raise ValueError("Paired observation must be materialized before missingness")
+    uniforms = state.metadata.get("missingness_uniforms")
+    if uniforms is None:
+        raise ValueError("Paired view requires persisted missingness uniforms")
+    if state.config.missing_data_rate > 0:
+        state.observed_data = _apply_missingness_arrays(
+            state.observed_data,
+            state.latent_log_expression,
+            uniforms,
+            state.config,
+        )
+    return state
+
+
+def _apply_missingness_arrays(data, latent, uniforms, config):
+    for j, col in enumerate(data.columns):
+        rate = np.clip(float(config.missing_data_rate), 0, 1)
+        if config.missing_data_mechanism.lower() in {"biological_error", "biological", "bio"}:
+            probability = np.full(len(data), rate)
+        elif config.missing_data_mechanism.lower() in {
+            "instrument_error",
+            "instrument",
+            "instrument-self-masking",
+        }:
+            x = latent[:, j]
+            threshold = np.quantile(x, config.self_mask_quantile)
+            direction = config.self_mask_direction.lower()
+            raw = (
+                1 / (1 + np.exp(-config.self_mask_k * (threshold - x)))
+                if direction == "low"
+                else 1 / (1 + np.exp(-config.self_mask_k * (x - threshold)))
+            )
+            probability = np.clip(rate * raw / raw.mean(), 0, 1)
+        else:
+            raise ValueError(f"Unknown missing-data mechanism: {config.missing_data_mechanism!r}")
+        data.loc[uniforms[:, j] < probability, col] = 0.0
+    return data
+
+
+def generate_paired_data_artifact(
+    scm: DirectedScm,
+    config: SimulationConfig,
+    *,
+    max_samples: int,
+    scm_seed: int,
+    data_seed: int,
+) -> PairedDataArtifact:
+    """Generate one immutable maximum-size realization for paired conditions."""
+    if max_samples < config.n_samples:
+        raise ValueError("max_samples must be at least config.n_samples")
+    seeds = StageSeeds.from_roots(scm_seed, data_seed)
+    latent_rng = np.random.default_rng(seeds.data_latent_seed)
+    observation_rng = np.random.default_rng(seeds.observation_seed)
+    missing_rng = np.random.default_rng(seeds.missingness_score_seed)
+    order_rng = np.random.default_rng(seeds.sample_order_seed)
+
+    # Generate exogenous noise and solve the linear SCM according to this noise
+    noise = latent_rng.normal(size=(max_samples, len(scm.nodes)))
+    latent = numpy_linear_solver(scm, noise)
+
+    # Generate observational UMI counts
+    libraries = sample_library_sizes(
+        max_samples,
+        log_mean=config.library_size_log_mean,
+        log_sd=config.library_size_log_sd,
+        rng=observation_rng,
+    )
+    baseline = sample_baseline_abundances(
+        len(scm.nodes), log_sd=config.baseline_log_sd, rng=observation_rng
+    )
+    counts = sample_umi_counts(
+        latent, libraries, baseline, dispersion=config.umi_dispersion, rng=observation_rng
+    )
+
+    return PairedDataArtifact(
+        scm,
+        noise,
+        latent,
+        counts,
+        libraries,
+        baseline,
+        order_rng.permutation(max_samples),
+        missing_rng.random((max_samples, len(scm.nodes))),
+        seeds,
+    )
 
 
 class SimulationStage(Protocol):
