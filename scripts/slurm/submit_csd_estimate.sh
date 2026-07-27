@@ -72,12 +72,14 @@ N_DATA_REPLICATES_PER_SCM="${N_DATA_REPLICATES_PER_SCM:-1}"
 # Parameter grid
 # ---------------------------------------------------------------------------
 
-# Measurement-error/misisng-data mechanisms supported by scripts/csd_estimate.py.
+# Measurement-error/missing-data mechanisms supported by scripts/csd_estimate.py.
 # instrument_error: low expression is too low for the instrument to detect.
 # biological_error: a gene is not expressed at the time of measurement.
+# biological_error+instrument_error: both independent mechanisms are active.
 MECHANISMS=(
     "instrument_error"
     "biological_error"
+    "biological_error+instrument_error"
 )
 
 # Synthetic regression parameters (linear-Gaussian SCM)
@@ -89,9 +91,10 @@ N_MISSING_EDGE_RATES_LIST="${MISSING_EDGE_RATES_LIST:-0.0,0.2,0.4}"
 N_MISSING_DATA_RATES_LIST="${MISSING_DATA_RATES_LIST:-0.0,0.3}"
 [[ -n "${N_SAMPLES_LIST}" && -n "${N_MISSING_EDGE_RATES_LIST}" && -n "${N_MISSING_DATA_RATES_LIST}" ]] || { echo "Parameter lists must be nonempty" >&2; exit 2; }
 
-printf '{"design_mode":"%s","experiment_id":"%s","seed_base":%s,"n_samples_list":"%s","missing_edge_rates":"%s","missing_data_rates":"%s"}\n' \
+printf '{"design_mode":"%s","experiment_id":"%s","seed_base":%s,"n_samples_list":"%s","missing_edge_rates":"%s","missing_data_rates":"%s","mechanisms":"%s"}\n' \
     "${DESIGN_MODE}" "${EXPERIMENT_ID}" "${SEED_BASE}" \
     "${N_SAMPLES_LIST}" "${N_MISSING_EDGE_RATES_LIST}" "${N_MISSING_DATA_RATES_LIST}" \
+    "$(IFS=,; echo "${MECHANISMS[*]}")" \
     > "${OUTDIR}/run_metadata.json"
 
 # If you need stronger confounding or different beta sampling, you can

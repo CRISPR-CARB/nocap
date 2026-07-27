@@ -116,6 +116,22 @@ def test_instrument_missingness_validates_direction():
         )
 
 
+def test_combined_missingness_applies_both_mechanisms():
+    """Allow biological and instrument missingness in one observation run."""
+    result = generate_from_scm(
+        _one_edge_scm(),
+        SimulationConfig(
+            n_samples=100,
+            missing_data_rate=0.5,
+            missing_data_mechanism="biological_error+instrument_error",
+        ),
+        seed=3,
+    )
+
+    assert (result.observed_data == 0.0).any().all()
+    assert (result.observed_data == 0.0).to_numpy().sum() > 100
+
+
 def test_observation_helpers_validate_shapes_and_parameters():
     """Validate observation helper parameters and compatible array shapes."""
     with pytest.raises(ValueError, match="library_size_log_sd"):

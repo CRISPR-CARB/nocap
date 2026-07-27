@@ -398,7 +398,7 @@ def main() -> None:
         "--missing-data-mechanism",
         type=str,
         default="biological_error",
-        choices=["instrument_error", "biological_error"],
+        choices=["instrument_error", "biological_error", "biological_error+instrument_error"],
         help=(
             "Measurement-error mechanism: instrument_error models low-expression "
             "self-masking, while biological_error models genes not being expressed "

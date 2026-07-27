@@ -142,15 +142,13 @@ def _view_missing(state: SimulationState) -> SimulationState:
 
 
 def _apply_missingness_arrays(data, latent, uniforms, config):
+    mechanisms = _missing_data_mechanisms(config.missing_data_mechanism)
     for j, col in enumerate(data.columns):
         rate = np.clip(float(config.missing_data_rate), 0, 1)
-        if config.missing_data_mechanism.lower() in {"biological_error", "biological", "bio"}:
-            probability = np.full(len(data), rate)
-        elif config.missing_data_mechanism.lower() in {
-            "instrument_error",
-            "instrument",
-            "instrument-self-masking",
-        }:
+        probabilities = []
+        if "biological_error" in mechanisms:
+            probabilities.append(np.full(len(data), rate))
+        if "instrument_error" in mechanisms:
             x = latent[:, j]
             threshold = np.quantile(x, config.self_mask_quantile)
             direction = config.self_mask_direction.lower()
@@ -159,11 +157,28 @@ def _apply_missingness_arrays(data, latent, uniforms, config):
                 if direction == "low"
                 else 1 / (1 + np.exp(-config.self_mask_k * (x - threshold)))
             )
-            probability = np.clip(rate * raw / raw.mean(), 0, 1)
-        else:
-            raise ValueError(f"Unknown missing-data mechanism: {config.missing_data_mechanism!r}")
+            probabilities.append(np.clip(rate * raw / raw.mean(), 0, 1))
+        # The mechanisms are independent causes of missingness.
+        probability = 1.0 - np.prod([1.0 - p for p in probabilities], axis=0)
         data.loc[uniforms[:, j] < probability, col] = 0.0
     return data
+
+
+def _missing_data_mechanisms(value: str) -> set[str]:
+    """Normalize one or more missingness mechanism names."""
+    aliases = {
+        "biological_error": "biological_error",
+        "biological": "biological_error",
+        "bio": "biological_error",
+        "instrument_error": "instrument_error",
+        "instrument": "instrument_error",
+        "instrument-self-masking": "instrument_error",
+    }
+    names = {part.strip().lower() for part in value.replace("+", ",").split(",") if part.strip()}
+    mechanisms = {aliases.get(name) for name in names}
+    if not names or None in mechanisms:
+        raise ValueError(f"Unknown missing-data mechanism: {value!r}")
+    return mechanisms
 
 
 def generate_paired_data_artifact(
@@ -437,14 +452,12 @@ def _missing(state: SimulationState) -> SimulationState:
     rate = np.clip(float(config.missing_data_rate), 0, 1)
     if rate <= 0:
         return state
+    mechanisms = _missing_data_mechanisms(config.missing_data_mechanism)
     for j, col in enumerate(state.scm.nodes):
-        if config.missing_data_mechanism.lower() in {"biological_error", "biological", "bio"}:
-            probability = np.full(config.n_samples, rate)
-        elif config.missing_data_mechanism.lower() in {
-            "instrument_error",
-            "instrument",
-            "instrument-self-masking",
-        }:
+        probabilities = []
+        if "biological_error" in mechanisms:
+            probabilities.append(np.full(config.n_samples, rate))
+        if "instrument_error" in mechanisms:
             latent_log_expression = state.latent_log_expression
             if latent_log_expression is None:
                 raise ValueError("Latent expression must be generated before missingness.")
@@ -457,9 +470,8 @@ def _missing(state: SimulationState) -> SimulationState:
                 raw = 1 / (1 + np.exp(-config.self_mask_k * (x - threshold)))
             else:
                 raise ValueError("self_mask_direction must be one of {low,high}.")
-            probability = np.clip(rate * raw / raw.mean(), 0, 1)
-        else:
-            raise ValueError(f"Unknown missing-data mechanism: {config.missing_data_mechanism!r}")
+            probabilities.append(np.clip(rate * raw / raw.mean(), 0, 1))
+        probability = 1.0 - np.prod([1.0 - p for p in probabilities], axis=0)
         state.observed_data.loc[state.rng.random(config.n_samples) < probability, col] = 0.0
     return state
 
