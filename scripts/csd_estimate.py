@@ -857,7 +857,7 @@ def main() -> None:
                         row["residual_variance"] = float(residual_var)
                         row["t_value"] = float(t_val)
                         row["status"] = "identifiable"
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     row["status"] = "estimation_error"
                     row["error"] = repr(exc)
 

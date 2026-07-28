@@ -179,7 +179,7 @@ def _missing_data_mechanisms(value: str) -> set[str]:
     mechanisms = {aliases.get(name) for name in names}
     if not names or None in mechanisms:
         raise ValueError(f"Unknown missing-data mechanism: {value!r}")
-    return mechanisms
+    return {mechanism for mechanism in mechanisms if mechanism is not None}
 
 
 def generate_paired_data_artifact(
@@ -244,7 +244,12 @@ class SimulationStage(Protocol):
 class NumpyLinearSolver(Protocol):
     """Protocol for solvers consuming a neutral SCM and exogenous values."""
 
-    def __call__(self, scm: DirectedScm, exogenous_noise: np.ndarray) -> np.ndarray:
+    def __call__(
+        self,
+        scm: DirectedScm,
+        exogenous_noise: np.ndarray,
+        fixed_intervention_values: dict[str, float] | None = None,
+    ) -> np.ndarray:
         """Solve the SCM and return sample-row latent values."""
         ...
 
@@ -372,14 +377,15 @@ def counts_to_log_expression(
 def numpy_linear_solver(
     scm: DirectedScm,
     exogenous_noise: np.ndarray,
-    fixed_values: dict[str, float] | None = None,
+    fixed_intervention_values: dict[str, float] | None = None,
 ) -> np.ndarray:
     """Solve ``X = B.T @ X + eps`` for sample-row data.
 
     With ``B[u, v]`` representing ``u -> v``, the system for each sample is
     ``(I - B.T) X = eps``.
 
-    If fixed_values is not None, then explicit hard interventions are applied.
+    If fixed_intervention_values is not None, then explicit hard interventions
+    are applied.
     In the case of solving this for some SCM that represents the mutilated SCM
     after applying an intervention, but no fixed_values are set, then solving
     is equivalent to a stochastic hard intervention where the values of the
@@ -387,7 +393,7 @@ def numpy_linear_solver(
     """
     coefficient_matrix = np.eye(len(scm.nodes)) - scm.beta_matrix.T
 
-    fixed_values = fixed_values or {}
+    fixed_values = fixed_intervention_values or {}
     try:
         if fixed_values:
             indices = {node: i for i, node in enumerate(scm.nodes)}
@@ -419,13 +425,13 @@ def numpy_linear_solver(
 
 def _solve(
     state: SimulationState,
-    solver: NumpyLinearSolver = numpy_linear_solver,
+    solver: NumpyLinearSolver | None = None,
 ) -> SimulationState:
     """Solve the neutral SCM using the configured solver."""
     if state.exogenous_noise is None:
         raise ValueError("Exogenous noise must be generated before solving the SCM.")
 
-    state.latent_log_expression = solver(
+    state.latent_log_expression = (solver or numpy_linear_solver)(
         state.scm, state.exogenous_noise, state.config.fixed_intervention_values
     )
     return state

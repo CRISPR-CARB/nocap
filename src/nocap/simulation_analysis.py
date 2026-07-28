@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+# Typing
 from collections.abc import Callable, Iterable
 
+# Data stuff
 import numpy as np
 import pandas as pd
-
 
 DEFAULT_REPLICATE_KEYS = (
     "experiment_id",
@@ -33,8 +34,8 @@ def pair_deltas(
     keys = list(keys) or [*DEFAULT_REPLICATE_KEYS, "target_effect_id"]
     ref = results.loc[_condition_mask(results, reference)].copy()
     comp = results.loc[_condition_mask(results, comparison)].copy()
-    ref = ref[keys + [value_column]].rename(columns={value_column: "reference"})
-    comp = comp[keys + [value_column]].rename(columns={value_column: "comparison"})
+    ref = ref[*keys, value_column].rename(columns={value_column: "reference"})
+    comp = comp[*keys, value_column].rename(columns={value_column: "comparison"})
     joined = ref.merge(comp, on=keys, how="inner", validate="one_to_one")
     joined["delta"] = joined["comparison"] - joined["reference"]
     return joined
@@ -72,6 +73,53 @@ def _unit_values(
     return values.groupby(replicate_keys, as_index=False, dropna=False)[value_column].mean()
 
 
+def _full_bootstrap_draws(
+    units: pd.DataFrame,
+    replicate_keys: list[str],
+    iterations: int,
+    rng: np.random.Generator,
+) -> list[pd.DataFrame]:
+    keys = units[replicate_keys].drop_duplicates().to_records(index=False)
+    draws: list[pd.DataFrame] = []
+    for iteration in range(iterations):
+        chosen = rng.choice(np.arange(len(keys)), size=len(keys), replace=True)
+        for position, index in enumerate(chosen):
+            key = keys[index]
+            mask = np.ones(len(units), dtype=bool)
+            for column, value in zip(replicate_keys, key, strict=True):
+                mask &= units[column].eq(value).to_numpy()
+            rows = units.loc[mask].copy()
+            rows["bootstrap_iteration"] = iteration
+            rows["bootstrap_draw_position"] = position
+            rows["bootstrap_scm_draw_position"] = position
+            rows["bootstrap_data_draw_position"] = 0
+            draws.append(rows)
+    return draws
+
+
+def _fixed_scm_bootstrap_draws(
+    units: pd.DataFrame,
+    iterations: int,
+    rng: np.random.Generator,
+) -> list[pd.DataFrame]:
+    scm_key = "scm_replicate_id"
+    data_key = "data_replicate_id"
+    _require_columns(units, [scm_key, data_key])
+    draws: list[pd.DataFrame] = []
+    for iteration in range(iterations):
+        for scm_position, (_, scm_rows) in enumerate(units.groupby(scm_key, dropna=False)):
+            data_ids = scm_rows[data_key].drop_duplicates().to_numpy()
+            chosen = rng.choice(data_ids, size=len(data_ids), replace=True)
+            for data_position, data_id in enumerate(chosen):
+                rows = scm_rows.loc[scm_rows[data_key].eq(data_id)].copy()
+                rows["bootstrap_iteration"] = iteration
+                rows["bootstrap_draw_position"] = data_position
+                rows["bootstrap_scm_draw_position"] = scm_position
+                rows["bootstrap_data_draw_position"] = data_position
+                draws.append(rows)
+    return draws
+
+
 def bootstrap_replicates(
     results: pd.DataFrame,
     *,
@@ -102,38 +150,10 @@ def bootstrap_replicates(
     if units.empty:
         return results.iloc[0:0].copy()
 
-    draws: list[pd.DataFrame] = []
     if design_mode == "full" or len(replicate_keys) == 1:
-        keys = units[replicate_keys].drop_duplicates().to_records(index=False)
-        selected = np.arange(len(keys))
-        for iteration in range(iterations):
-            chosen = rng.choice(selected, size=len(selected), replace=True)
-            for position, index in enumerate(chosen):
-                key = keys[index]
-                mask = np.ones(len(units), dtype=bool)
-                for column, value in zip(replicate_keys, key, strict=True):
-                    mask &= units[column].eq(value).to_numpy()
-                rows = units.loc[mask].copy()
-                rows["bootstrap_iteration"] = iteration
-                rows["bootstrap_draw_position"] = position
-                rows["bootstrap_scm_draw_position"] = position
-                rows["bootstrap_data_draw_position"] = 0
-                draws.append(rows)
+        draws = _full_bootstrap_draws(units, replicate_keys, iterations, rng)
     else:
-        scm_key = "scm_replicate_id"
-        data_key = "data_replicate_id"
-        _require_columns(units, [scm_key, data_key])
-        for iteration in range(iterations):
-            for scm_position, (_, scm_rows) in enumerate(units.groupby(scm_key, dropna=False)):
-                data_ids = scm_rows[data_key].drop_duplicates().to_numpy()
-                chosen = rng.choice(data_ids, size=len(data_ids), replace=True)
-                for data_position, data_id in enumerate(chosen):
-                    rows = scm_rows.loc[scm_rows[data_key].eq(data_id)].copy()
-                    rows["bootstrap_iteration"] = iteration
-                    rows["bootstrap_draw_position"] = data_position
-                    rows["bootstrap_scm_draw_position"] = scm_position
-                    rows["bootstrap_data_draw_position"] = data_position
-                    draws.append(rows)
+        draws = _fixed_scm_bootstrap_draws(units, iterations, rng)
     return pd.concat(draws, ignore_index=True) if draws else results.iloc[0:0].copy()
 
 
@@ -180,7 +200,7 @@ def bootstrap_confidence_interval(
             bootstrap_values.append(
                 float(statistic(iteration_rows[value_column].to_numpy(dtype=float)))
             )
-    alpha = (1 - confidence) / 2
+
     interval = percentile_interval(bootstrap_values, confidence=confidence)
     return {
         "estimate": float(statistic(values[value_column].to_numpy(dtype=float))),
@@ -198,8 +218,8 @@ def percentile_interval(values: Iterable[float], confidence: float = 0.95) -> tu
     """Return a percentile interval, preserving NaN behavior for empty input."""
     if not 0 < confidence < 1:
         raise ValueError("confidence must be between zero and one")
-    values = np.asarray(list(values), dtype=float)
-    if not len(values):
+    values_array = np.asarray(list(values), dtype=float)
+    if not values_array.size:
         return (float("nan"), float("nan"))
     tail = (1 - confidence) / 2
-    return tuple(np.quantile(values, [tail, 1 - tail]))
+    return tuple(np.quantile(values_array, [tail, 1 - tail]))

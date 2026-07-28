@@ -69,14 +69,13 @@ from pathlib import Path
 
 import networkx as nx
 
-from nocap.scc_perturb import build_intervened_graph
-
 from nocap.experiment import (
     canonical_condition_id,
     canonical_job_id,
     derive_seed,
     experiment_conditions,
 )
+from nocap.scc_perturb import build_intervened_graph
 
 
 def _floats(value: str) -> list[float]:
@@ -229,10 +228,7 @@ def main() -> None:
                                 "intervention_genes": intervention["genes"],
                                 "intervention_semantics": "hard_do",
                                 "fixed_intervention_values": (
-                                    {
-                                        gene: args.fixed_intervention_value
-                                        for gene in intervention["genes"]
-                                    }
+                                    dict.fromkeys(intervention["genes"], args.fixed_intervention_value)
                                     if args.fixed_intervention_value is not None
                                     else {}
                                 ),

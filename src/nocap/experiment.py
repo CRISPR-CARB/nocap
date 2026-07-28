@@ -67,6 +67,8 @@ def artifact_id(manifest: dict[str, Any]) -> str:
 
 @dataclass(frozen=True)
 class StageSeeds:
+    """Deterministic seeds for each stage of experiment data generation."""
+
     scm_structure_seed: int
     scm_coefficient_seed: int
     data_latent_seed: int
@@ -76,6 +78,7 @@ class StageSeeds:
 
     @classmethod
     def from_roots(cls, scm_seed: int, data_seed: int) -> StageSeeds:
+        """Derive stage-specific seeds from SCM and data root seeds."""
         return cls(
             *(derive_seed(scm_seed, "scm", name) for name in ("structure", "coefficient")),
             *(
