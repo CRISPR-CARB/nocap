@@ -31,6 +31,7 @@ class SimulationConfig:
     self_mask_direction: str = "low"
     scc_confounding_strength: float = 0.0
     estimation_graph: nx.DiGraph | None = None
+    fixed_intervention_values: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -188,6 +189,7 @@ def generate_paired_data_artifact(
     max_samples: int,
     scm_seed: int,
     data_seed: int,
+    fixed_intervention_values: dict[str, float] | None = None,
 ) -> PairedDataArtifact:
     """Generate one immutable maximum-size realization for paired conditions."""
     if max_samples < config.n_samples:
@@ -200,7 +202,9 @@ def generate_paired_data_artifact(
 
     # Generate exogenous noise and solve the linear SCM according to this noise
     noise = latent_rng.normal(size=(max_samples, len(scm.nodes)))
-    latent = numpy_linear_solver(scm, noise)
+    latent = numpy_linear_solver(
+        scm, noise, fixed_intervention_values or config.fixed_intervention_values
+    )
 
     # Generate observational UMI counts
     libraries = sample_library_sizes(
@@ -368,16 +372,42 @@ def counts_to_log_expression(
 def numpy_linear_solver(
     scm: DirectedScm,
     exogenous_noise: np.ndarray,
+    fixed_values: dict[str, float] | None = None,
 ) -> np.ndarray:
     """Solve ``X = B.T @ X + eps`` for sample-row data.
 
     With ``B[u, v]`` representing ``u -> v``, the system for each sample is
     ``(I - B.T) X = eps``.
+
+    If fixed_values is not None, then explicit hard interventions are applied.
+    In the case of solving this for some SCM that represents the mutilated SCM
+    after applying an intervention, but no fixed_values are set, then solving
+    is equivalent to a stochastic hard intervention where the values of the
+    intervened nodes are equal to their exogenous noise terms.
     """
     coefficient_matrix = np.eye(len(scm.nodes)) - scm.beta_matrix.T
 
+    fixed_values = fixed_values or {}
     try:
-        latent_transposed = np.linalg.solve(coefficient_matrix, exogenous_noise.T)
+        if fixed_values:
+            indices = {node: i for i, node in enumerate(scm.nodes)}
+            fixed = {indices[node]: value for node, value in fixed_values.items()}
+            free = [i for i in range(len(scm.nodes)) if i not in fixed]
+            latent_transposed = np.zeros((len(scm.nodes), exogenous_noise.shape[0]))
+            for index, value in fixed.items():
+                latent_transposed[index] = value
+            if free:
+                fixed_indices = list(fixed)
+                rhs = (
+                    exogenous_noise[:, free].T
+                    - coefficient_matrix[np.ix_(free, fixed_indices)]
+                    @ latent_transposed[fixed_indices]
+                )
+                latent_transposed[free] = np.linalg.solve(
+                    coefficient_matrix[np.ix_(free, free)], rhs
+                )
+        else:
+            latent_transposed = np.linalg.solve(coefficient_matrix, exogenous_noise.T)
     except np.linalg.LinAlgError as error:
         raise RuntimeError(
             "Synthetic SCM linear system is singular / ill-conditioned. "
@@ -395,7 +425,9 @@ def _solve(
     if state.exogenous_noise is None:
         raise ValueError("Exogenous noise must be generated before solving the SCM.")
 
-    state.latent_log_expression = solver(state.scm, state.exogenous_noise)
+    state.latent_log_expression = solver(
+        state.scm, state.exogenous_noise, state.config.fixed_intervention_values
+    )
     return state
 
 

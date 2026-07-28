@@ -132,6 +132,7 @@ def main() -> None:
     parser.add_argument("--intervention-csv", default=None)
     parser.add_argument("--intervention-graph-dir", default=None)
     parser.add_argument("--include-observational", action="store_true")
+    parser.add_argument("--fixed-intervention-value", type=float, default=None)
     args = parser.parse_args()
 
     source_graph = None
@@ -227,6 +228,14 @@ def main() -> None:
                                 "intervention_set_index": intervention["set_index"],
                                 "intervention_genes": intervention["genes"],
                                 "intervention_semantics": "hard_do",
+                                "fixed_intervention_values": (
+                                    {
+                                        gene: args.fixed_intervention_value
+                                        for gene in intervention["genes"]
+                                    }
+                                    if args.fixed_intervention_value is not None
+                                    else {}
+                                ),
                                 "forbidden_edges": [
                                     (str(u), str(v))
                                     for u in source_graph.nodes

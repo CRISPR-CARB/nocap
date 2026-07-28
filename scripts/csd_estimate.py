@@ -536,6 +536,7 @@ def main() -> None:
             "intervention_genes",
             "intervention_semantics",
             "forbidden_edges",
+            "fixed_intervention_values",
         ):
             if name in task:
                 setattr(args, name, task[name])
@@ -578,6 +579,7 @@ def main() -> None:
             raise ValueError(f"Unknown demo {args.demo!r}")
 
     nodes = _default_nodes_from_graph(graph)
+    fixed_intervention_values = getattr(args, "fixed_intervention_values", {}) or {}
     if not graph.edges():
         raise SystemExit("Input graph has no edges; nothing to estimate.")
 
@@ -655,6 +657,7 @@ def main() -> None:
             artifact_config = SimulationConfig(
                 n_samples=max_samples,
                 estimation_graph=graph,
+                fixed_intervention_values=fixed_intervention_values,
                 umi_dispersion=float(args.umi_dispersion),
                 library_size_log_mean=float(args.library_size_log_mean),
                 library_size_log_sd=float(args.library_size_log_sd),

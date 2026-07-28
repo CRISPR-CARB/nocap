@@ -50,6 +50,25 @@ def test_numpy_linear_solver_handles_cycles():
     np.testing.assert_allclose(latent, [[1.70212766, 2.34042553]])
 
 
+def test_numpy_linear_solver_supports_fixed_intervention_values():
+    """Hold an intervened variable fixed while solving downstream equations."""
+    scm = _one_edge_scm()
+    exogenous = np.array([[3.0, 5.0]])
+
+    latent = numpy_linear_solver(scm, exogenous, {"A": 7.0})
+
+    np.testing.assert_allclose(latent, [[7.0, 19.0]])
+
+
+def test_fixed_intervention_changes_generated_latent_values_but_not_noise():
+    """Fixed interventions affect the solve while preserving generated noise."""
+    config = SimulationConfig(n_samples=8, fixed_intervention_values={"A": 0.0})
+    result = generate_from_scm(_one_edge_scm(), config, seed=11)
+
+    np.testing.assert_array_equal(result.latent_log_expression[:, 0], 0.0)
+    np.testing.assert_allclose(result.latent_log_expression[:, 1], result.exogenous_noise[:, 1])
+
+
 def test_default_pipeline_is_reproducible_and_retains_state_fields():
     """Keep generated state fields and reproduce them for a fixed seed."""
     config = SimulationConfig(n_samples=12)
