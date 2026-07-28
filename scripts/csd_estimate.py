@@ -662,6 +662,7 @@ def main() -> None:
                 baseline_log_sd=float(args.baseline_log_sd),
             )
             paired_artifacts = {}
+            artifact_key_prefix = getattr(args, "intervention_id", "observational")
             for edge_rate in sorted({float(cell["missing_edge_rate"]) for cell in grid}):
                 variant_build = build_synthetic_scm(
                     graph,
@@ -674,7 +675,7 @@ def main() -> None:
                     rng=_rng(int(args.scm_seed)),
                     forbidden_edges=getattr(args, "forbidden_edges", []),
                 )
-                paired_artifacts[edge_rate] = generate_paired_data_artifact(
+                paired_artifacts[(artifact_key_prefix, edge_rate)] = generate_paired_data_artifact(
                     variant_build.scm,
                     artifact_config,
                     max_samples=max_samples,
@@ -703,7 +704,9 @@ def main() -> None:
             )
 
             if paired_artifacts is not None:
-                paired_artifact = paired_artifacts[missing_edge_rate]
+                paired_artifact = paired_artifacts[
+                    (getattr(args, "intervention_id", "observational"), missing_edge_rate)
+                ]
                 data = paired_artifact.view(config)
                 scm_graph_true = paired_artifact.scm.graph
                 betas_true = paired_artifact.scm.betas
