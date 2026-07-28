@@ -15,14 +15,14 @@
 import os
 import re
 import sys
-from datetime import date
+from datetime import UTC, datetime
 
 sys.path.insert(0, os.path.abspath("../../src"))
 
 # -- Project information -----------------------------------------------------
 
 project = "nocap"
-copyright = f"{date.today().year}, August George"
+copyright = f"{datetime.now(UTC).year}, August George"
 author = "August George"
 
 # The full version, including alpha/beta/rc tags.

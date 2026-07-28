@@ -58,7 +58,7 @@ def needs_rerun(task_idx: int, task: dict) -> bool:
     try:
         s = load_first_json_object(shard_path)
         return s.get("joint_identifiable") is False and len(s.get("per_gene", {})) == 0
-    except Exception:
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
         return True
 
 
@@ -70,7 +70,7 @@ def child_count(task_idx: int, task: dict) -> int:
         try:
             s = load_first_json_object(shard_path)
             return s.get("n_children", 9999)
-        except Exception:
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
             pass
     return 9999
 
@@ -131,7 +131,7 @@ for i, task in to_rerun:
             print(
                 f"[{tf}] Done: joint={s.get('joint_identifiable')}  per_gene={n_id}/{len(pg)} identifiable"
             )
-        except Exception as e:
+        except (OSError, ValueError, TypeError, json.JSONDecodeError) as e:
             print(f"[{tf}] Shard written but could not verify: {e}", file=sys.stderr)
     print()
 

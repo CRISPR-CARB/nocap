@@ -223,13 +223,12 @@ class TestExactRecovered:
         for genes in [frozenset(["A"]), frozenset(["C"]), frozenset(["A", "C"])]:
             scc_map = crb._build_do_scc_map(G, genes)
             for cause, effect in [("A", "B"), ("B", "C"), ("C", "D")]:
-                if G.has_edge(cause, effect):
-                    if crb._proxy_recovered(cause, effect, scc_map):
-                        # Proxy sound: exact must also be true
-                        assert crb._exact_recovered(cause, effect, G, genes), (
-                            f"Soundness violated: proxy=True but exact=False "
-                            f"for {cause}->{effect} do({genes})"
-                        )
+                if G.has_edge(cause, effect) and crb._proxy_recovered(cause, effect, scc_map):
+                    # Proxy sound: exact must also be true
+                    assert crb._exact_recovered(cause, effect, G, genes), (
+                        f"Soundness violated: proxy=True but exact=False "
+                        f"for {cause}->{effect} do({genes})"
+                    )
 
 
 # ---------------------------------------------------------------------------

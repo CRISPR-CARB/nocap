@@ -147,6 +147,7 @@ try:
     result = subprocess.run(
         [shutil.which("uv") or "uv", "run", "python", str(fig_script)],
         capture_output=True,
+        check=False,
         text=True,
         cwd=str(REPO),
     )

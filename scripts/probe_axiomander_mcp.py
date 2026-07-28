@@ -52,6 +52,7 @@ try:
     result = subprocess.run(
         [PYTHON, "-m", "axiomander.oracle.mcp_server"],
         input=stdin_bytes,
+        check=False,
         capture_output=True,
         timeout=15,
         cwd=AXIOMANDER_ROOT,
@@ -121,6 +122,6 @@ except subprocess.TimeoutExpired as e:
     print("stderr so far:")
     print(e.stderr.decode(errors="replace") if e.stderr else "(empty)")
     sys.exit(1)
-except Exception as exc:
+except Exception as exc:  # noqa: BLE001
     print(f"ERROR: {exc}")
     sys.exit(1)

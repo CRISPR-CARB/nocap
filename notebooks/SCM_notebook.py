@@ -57,7 +57,6 @@ def __(mo):
 @app.cell
 def __(chart, mo):
     mo.vstack([chart, chart.value.head()])
-    return
 
 
 @app.cell

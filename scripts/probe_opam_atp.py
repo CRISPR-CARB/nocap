@@ -6,6 +6,7 @@ result = subprocess.run(
     ["/opt/homebrew/bin/opam", "list"],
     capture_output=True,
     text=True,
+    check=False,
     env={
         "HOME": "/Users/zuck016",
         "PATH": "/Users/zuck016/.opam/default/bin:/usr/bin:/bin",
