@@ -8,6 +8,8 @@ from dataclasses import dataclass
 import networkx as nx
 import numpy as np
 
+from .scc_perturb import build_intervened_graph
+
 COND_NUMBER_THRESHOLD = 1000  # https://en.wikipedia.org/wiki/Condition_number
 
 
@@ -53,12 +55,24 @@ class SyntheticScmBuild:
     condition_number: float
 
 
+def build_intervened_scm(scm: DirectedScm, perturb_set: list[str]) -> DirectedScm:
+    """Return the hard-``do(perturb_set)`` SCM without changing ``scm``."""
+    nodes = list(scm.nodes)
+    unknown = set(perturb_set) - set(nodes)
+    if unknown:
+        raise ValueError(f"Intervention contains unknown SCM nodes: {sorted(unknown)}")
+    graph = build_intervened_graph(scm.graph, sorted(set(perturb_set)))
+    betas = {edge: value for edge, value in scm.betas.items() if graph.has_edge(*edge)}
+    return DirectedScm(scm.nodes, graph, betas)
+
+
 def _select_true_edges(
     estimation_graph: nx.DiGraph,
     nodes: tuple[str, ...],
     *,
     missing_edge_rate: float,
     rng: np.random.Generator,
+    forbidden_edges: Iterable[tuple[str, str]] = (),
 ) -> tuple[list[tuple[str, str]], tuple[tuple[str, str], ...]]:
     """Select the true SCM edges and the edges hidden from estimation.
 
@@ -68,6 +82,7 @@ def _select_true_edges(
     """
     original_edges = list(estimation_graph.edges())
     original_edge_set = set(original_edges)
+    forbidden = {(str(u), str(v)) for u, v in forbidden_edges}
     true_edges = list(original_edges)
 
     # Choose the number of extra edges to add (expected:
@@ -80,7 +95,10 @@ def _select_true_edges(
     )
 
     candidates = [
-        (u, v) for u in nodes for v in nodes if u != v and (u, v) not in original_edge_set
+        (u, v)
+        for u in nodes
+        for v in nodes
+        if u != v and (u, v) not in original_edge_set and (u, v) not in forbidden
     ]
 
     if candidates and n_to_add > 0:
@@ -213,6 +231,7 @@ def build_synthetic_scm(
     beta_p: float,
     beta_abs_max: float,
     rng: np.random.Generator,
+    forbidden_edges: Iterable[tuple[str, str]] = (),
 ) -> SyntheticScmBuild:
     """Build a stable SCM, adding true edges according to ``missing_edge_rate``.
 
@@ -227,6 +246,7 @@ def build_synthetic_scm(
         nodes,
         missing_edge_rate=missing_edge_rate,
         rng=rng,
+        forbidden_edges=forbidden_edges,
     )
 
     for _ in range(100):

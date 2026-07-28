@@ -159,6 +159,7 @@ def generate_synthetic_observational_data(
     seed: int | None = None,
     scm_seed: int | None = None,
     data_seed: int | None = None,
+    forbidden_edges=(),
 ):
     """Generate synthetic latent-SCM data and observed UMI expression.
 
@@ -201,6 +202,7 @@ def generate_synthetic_observational_data(
         beta_p=beta_p,
         beta_abs_max=beta_abs_max,
         rng=_rng(scm_seed),
+        forbidden_edges=forbidden_edges,
     )
     scm = build.scm
     betas_by_edge_true = scm.betas
@@ -528,6 +530,12 @@ def main() -> None:
             "scm_seed",
             "data_seed",
             "output_csv",
+            "graphml",
+            "intervention_id",
+            "intervention_set_index",
+            "intervention_genes",
+            "intervention_semantics",
+            "forbidden_edges",
         ):
             if name in task:
                 setattr(args, name, task[name])
@@ -535,6 +543,10 @@ def main() -> None:
         args.missing_edge_rate = float(task["missing_edge_rate"])
         args.missing_data_rate = float(task["missing_data_rate"])
         args.missing_data_mechanism = task["missing_data_mechanism"]
+        # Intervention graphs can contain edges absent from the observational
+        # adjustment table. Always classify those edges from the supplied graph.
+        if task.get("intervention_id"):
+            args.assume_adjustments_csv_complete = False
 
     if args.output_csv is None:
         raise SystemExit("--output-csv is required unless the task JSON supplies output_csv")
@@ -618,6 +630,14 @@ def main() -> None:
         "ground_truth_beta",
         "scm_true_missing_edges_count",
         "error",
+        "intervention_id",
+        "intervention_set_index",
+        "intervention_genes",
+        "intervention_n_genes",
+        "intervention_semantics",
+        "target_removed",
+        "target_present_in_intervened_graph",
+        "recovery_status",
     ]
 
     # Prepare to write rows.
@@ -652,6 +672,7 @@ def main() -> None:
                     beta_p=float(args.beta_p),
                     beta_abs_max=float(args.beta_abs_max),
                     rng=_rng(int(args.scm_seed)),
+                    forbidden_edges=getattr(args, "forbidden_edges", []),
                 )
                 paired_artifacts[edge_rate] = generate_paired_data_artifact(
                     variant_build.scm,
@@ -698,6 +719,7 @@ def main() -> None:
                     beta_abs_max=float(args.beta_abs_max),
                     scm_seed=int(args.scm_seed),
                     data_seed=int(args.data_seed),
+                    forbidden_edges=getattr(args, "forbidden_edges", []),
                 )
 
             n_true_edges = scm_graph_true.number_of_edges()
@@ -782,6 +804,14 @@ def main() -> None:
                     "ground_truth_beta": float(betas_true.get((str(cause), str(effect)), 0.0)),
                     "scm_true_missing_edges_count": n_missing_edges,
                     "error": "",
+                    "intervention_id": getattr(args, "intervention_id", ""),
+                    "intervention_set_index": getattr(args, "intervention_set_index", ""),
+                    "intervention_genes": json.dumps(getattr(args, "intervention_genes", [])),
+                    "intervention_n_genes": len(getattr(args, "intervention_genes", [])),
+                    "intervention_semantics": getattr(args, "intervention_semantics", ""),
+                    "target_removed": False,
+                    "target_present_in_intervened_graph": True,
+                    "recovery_status": "",
                 }
 
                 if cleaned is None:

@@ -42,10 +42,21 @@ def canonical_job_id(
     scm_replicate_id: str,
     data_replicate_id: str,
     condition_id: str,
+    intervention_suffix: str = "",
 ) -> str:
     """Identify one complete simulation job, not merely its seed pair."""
     return ":".join(
-        map(str, (experiment_id, design_mode, scm_replicate_id, data_replicate_id, condition_id))
+        map(
+            str,
+            (
+                experiment_id,
+                design_mode,
+                scm_replicate_id,
+                data_replicate_id,
+                condition_id,
+                intervention_suffix,
+            ),
+        )
     )
 
 

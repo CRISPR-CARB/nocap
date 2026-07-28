@@ -18,6 +18,9 @@
 #   GRAPHML=/path/to/graph.graphml
 #   OUTDIR=/path/to/output
 #   ADJUSTMENTS_CSV=/path/to/csd_identifiable_edges.csv
+#   INTERVENTION_CSV=/path/to/csd_recovery.csv
+#   INTERVENTION_GRAPH_DIR=/path/to/intervention-graphs
+#   INCLUDE_OBSERVATIONAL=1
 #   DRY_RUN=1     # only print sbatch commands
 # Paired mode creates task JSON records with setup_csd_experiment.py and passes
 # each record directly to csd_estimate.py.
@@ -45,10 +48,13 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # ---------------------------------------------------------------------------
 GRAPHML="${GRAPHML:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/ecoli_full_network_no_small_rna.graphml}"
 ADJUSTMENTS_CSV="${ADJUSTMENTS_CSV:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/csd_identifiable_edges.csv}"
+INTERVENTION_CSV="${INTERVENTION_CSV:-}"
 
-OUTDIR="${OUTDIR:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/estimation}"
-TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
-OUTDIR="${OUTDIR}/${TIMESTAMP}"
+OUTDIR_WAS_SET="${OUTDIR+x}"
+if [[ -z "${OUTDIR_WAS_SET}" ]]; then
+    TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+    OUTDIR="${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/estimation/${TIMESTAMP}"
+fi
 
 LOG_DIR="${OUTDIR}/logs"
 mkdir -p "${OUTDIR}" "${LOG_DIR}"
@@ -67,6 +73,7 @@ DESIGN_MODE="${DESIGN_MODE:-paired_hierarchical}"
 EXPERIMENT_ID="${EXPERIMENT_ID:-csd-${TIMESTAMP}}"
 N_SCM_REPLICATES="${N_SCM_REPLICATES:-1}"
 N_DATA_REPLICATES_PER_SCM="${N_DATA_REPLICATES_PER_SCM:-1}"
+INCLUDE_OBSERVATIONAL="${INCLUDE_OBSERVATIONAL:-0}"
 
 # ---------------------------------------------------------------------------
 # Parameter grid
@@ -186,25 +193,35 @@ function main {
         echo "  n_samples_list: ${N_SAMPLES_LIST}"
         echo "  DRY_RUN: ${DRY_RUN}"
         echo "  Design mode: ${DESIGN_MODE}"
+        echo "  Intervention CSV: ${INTERVENTION_CSV:-none}"
         echo ""
 
         pending_file="${OUTDIR}/pending_tasks.txt"
         batch_dir="${OUTDIR}/batches"
         tasks_dir="${OUTDIR}/tasks"
         mkdir -p "${tasks_dir}"
-        uv run python "${REPO_ROOT}/scripts/setup_csd_experiment.py" \
-            --output "${OUTDIR}/experiment.json" \
-            --tasks-dir "${tasks_dir}" \
-            --output-dir "${OUTDIR}/csv" \
-            --experiment-id "${EXPERIMENT_ID}" \
-            --design-mode "${DESIGN_MODE}" \
-            --base-seed "${SEED_BASE}" \
-            --scm-replicates "${N_SCM_REPLICATES}" \
-            --data-replicates "${N_DATA_REPLICATES_PER_SCM}" \
-            --n-samples-list "${N_SAMPLES_LIST}" \
-            --missing-edge-rates "${N_MISSING_EDGE_RATES_LIST}" \
-            --missing-data-rates "${N_MISSING_DATA_RATES_LIST}" \
+        setup_args=(
+            --output "${OUTDIR}/experiment.json" --tasks-dir "${tasks_dir}"
+            --output-dir "${OUTDIR}/csv" --experiment-id "${EXPERIMENT_ID}"
+            --design-mode "${DESIGN_MODE}" --base-seed "${SEED_BASE}"
+            --scm-replicates "${N_SCM_REPLICATES}"
+            --data-replicates "${N_DATA_REPLICATES_PER_SCM}"
+            --n-samples-list "${N_SAMPLES_LIST}"
+            --missing-edge-rates "${N_MISSING_EDGE_RATES_LIST}"
+            --missing-data-rates "${N_MISSING_DATA_RATES_LIST}"
             --mechanisms "$(IFS=,; echo "${MECHANISMS[*]}")"
+            --graphml "${GRAPHML}"
+        )
+        if [[ -n "${INTERVENTION_CSV}" ]]; then
+            INTERVENTION_GRAPH_DIR="${INTERVENTION_GRAPH_DIR:-${OUTDIR}/intervention-graphs}"
+            setup_args+=(--intervention-csv "${INTERVENTION_CSV}" --intervention-graph-dir "${INTERVENTION_GRAPH_DIR}")
+            [[ "${INCLUDE_OBSERVATIONAL}" == "1" ]] && setup_args+=(--include-observational)
+        fi
+        if [[ -z "${OUTDIR_WAS_SET}" || ! -s "${OUTDIR}/experiment.json" || ! -d "${tasks_dir}" ]]; then
+            uv run python "${REPO_ROOT}/scripts/setup_csd_experiment.py" "${setup_args[@]}"
+        else
+            echo "Using existing experiment manifest and tasks in ${OUTDIR}"
+        fi
         : > "${pending_file}"
         for task_json in "${tasks_dir}"/*.json; do
             out_csv="$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1]))["output_csv"])' "${task_json}")"
