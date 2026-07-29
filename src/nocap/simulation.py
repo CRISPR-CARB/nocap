@@ -19,11 +19,11 @@ class SimulationConfig:
     """Configuration for generation and observation."""
 
     n_samples: int
-    umi_dispersion: float = 0.1
-    library_size_log_mean: float = float(np.log(10_000))
-    library_size_log_sd: float = 0.4
+    dispersion: float | Sequence[float] = 0.1
+    size_factor_log_sd: float = 0.4
     umi_pseudocount: float = 1.0
-    baseline_log_sd: float = 2.0
+    baseline_expression_log_mean: float = 0.0
+    baseline_expression_log_sd: float = 2.0
     missing_data_rate: float = 0.0
     missing_data_mechanism: str = "biological_error"
     self_mask_quantile: float = 0.25
@@ -44,8 +44,10 @@ class SimulationState:
     exogenous_noise: np.ndarray | None = None
     latent_log_expression: np.ndarray | None = None
     umi_counts: np.ndarray | None = None
-    library_sizes: np.ndarray | None = None
-    baseline_abundances: np.ndarray | None = None
+    size_factors: np.ndarray | None = None
+    baseline_expression: np.ndarray | None = None
+    dispersions: np.ndarray | None = None
+    normalized_expression: np.ndarray | None = None
     observed_data: pd.DataFrame | None = None
     metadata: dict[str, object] = field(default_factory=dict)
 
@@ -58,8 +60,10 @@ class PairedDataArtifact:
     exogenous_noise: np.ndarray
     latent_log_expression: np.ndarray
     umi_counts: np.ndarray
-    library_sizes: np.ndarray
-    baseline_abundances: np.ndarray
+    size_factors: np.ndarray
+    baseline_expression: np.ndarray
+    dispersions: np.ndarray
+    normalized_expression: np.ndarray
     sample_order: np.ndarray
     missingness_uniforms: np.ndarray
     stage_seeds: StageSeeds
@@ -88,8 +92,10 @@ class PairedDataArtifact:
             exogenous_noise=self.exogenous_noise[indices],
             latent_log_expression=self.latent_log_expression[indices],
             umi_counts=self.umi_counts[indices],
-            library_sizes=self.library_sizes[indices],
-            baseline_abundances=self.baseline_abundances,
+            size_factors=self.size_factors[indices],
+            baseline_expression=self.baseline_expression,
+            dispersions=self.dispersions,
+            normalized_expression=self.normalized_expression[indices],
             metadata={
                 "missingness_uniforms": self.missingness_uniforms[indices],
                 "sample_parent_id": "maximum",
@@ -113,15 +119,26 @@ def paired_view_stages() -> tuple[SimulationStage, ...]:
 
 def _view_observe(state: SimulationState) -> SimulationState:
     """Convert immutable artifact counts into condition-view expression data."""
-    if state.umi_counts is None or state.library_sizes is None:
+    if (
+        state.umi_counts is None
+        or state.size_factors is None
+        or state.baseline_expression is None
+        or state.dispersions is None
+    ):
         raise ValueError("Paired view requires immutable observation arrays")
-    normalized = counts_to_log_expression(
+    if state.normalized_expression is None:
+        state.normalized_expression = counts_to_normalized_expression(
+            state.umi_counts,
+            state.size_factors,
+            pseudocount=state.config.umi_pseudocount,
+        )
+    latent_expression_hat = counts_to_log_expression(
         state.umi_counts,
-        state.library_sizes,
+        state.size_factors,
+        state.baseline_expression,
         pseudocount=state.config.umi_pseudocount,
-        target_library_size=np.exp(state.config.library_size_log_mean),
     )
-    state.observed_data = pd.DataFrame(normalized, columns=state.scm.nodes)
+    state.observed_data = pd.DataFrame(latent_expression_hat, columns=state.scm.nodes)
     return state
 
 
@@ -207,29 +224,39 @@ def generate_paired_data_artifact(
     )
 
     # Generate observational UMI counts
-    libraries = sample_library_sizes(
+    size_factors = sample_size_factors(
         max_samples,
-        log_mean=config.library_size_log_mean,
-        log_sd=config.library_size_log_sd,
+        log_sd=config.size_factor_log_sd,
         rng=observation_rng,
     )
-    baseline = sample_baseline_abundances(
-        len(scm.nodes), log_sd=config.baseline_log_sd, rng=observation_rng
+    baseline = sample_baseline_expression(
+        len(scm.nodes),
+        log_mean=config.baseline_expression_log_mean,
+        log_sd=config.baseline_expression_log_sd,
+        rng=observation_rng,
     )
+    dispersions = normalize_dispersions(config.dispersion, len(scm.nodes))
     counts = sample_umi_counts(
-        latent, libraries, baseline, dispersion=config.umi_dispersion, rng=observation_rng
+        latent, size_factors, baseline, dispersions, observation_rng
+    )
+    normalized_expression = counts_to_normalized_expression(
+        counts,
+        size_factors,
+        pseudocount=config.umi_pseudocount,
     )
 
     return PairedDataArtifact(
-        scm,
-        noise,
-        latent,
-        counts,
-        libraries,
-        baseline,
-        order_rng.permutation(max_samples),
-        missing_rng.random((max_samples, len(scm.nodes))),
-        seeds,
+        scm=scm,
+        exogenous_noise=noise,
+        latent_log_expression=latent,
+        umi_counts=counts,
+        size_factors=size_factors,
+        baseline_expression=baseline,
+        dispersions=dispersions,
+        normalized_expression=normalized_expression,
+        sample_order=order_rng.permutation(max_samples),
+        missingness_uniforms=missing_rng.random((max_samples, len(scm.nodes))),
+        stage_seeds=seeds,
     )
 
 
@@ -284,94 +311,181 @@ def _noise(state):
     return state
 
 
-def sample_library_sizes(
+def sample_size_factors(
     n_samples: int,
-    *,
-    log_mean: float,
     log_sd: float,
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """Generate positive per-sample library sizes.
+    """Sample positive size factors with geometric mean one."""
+    if n_samples <= 0:
+        raise ValueError("n_samples must be positive.")
+    if not np.isfinite(log_sd) or log_sd < 0:
+        raise ValueError("size_factor_log_sd must be finite and non-negative.")
 
-    The library sizes represent total sequencing depth: the approximate
-    number of UMIs available across all genes in a sample or cell.
-    """
-    if log_sd < 0:
-        raise ValueError("library_size_log_sd must be non-negative.")
-
-    return rng.lognormal(mean=log_mean, sigma=log_sd, size=n_samples)
+    raw = rng.lognormal(mean=0.0, sigma=log_sd, size=n_samples)
+    return raw / np.exp(np.mean(np.log(raw)))
 
 
-def sample_baseline_abundances(
+def sample_baseline_expression(
     n_genes: int,
     *,
-    log_sd: float,
+    log_mean: float = 0.0,
+    log_sd: float = 2.0,
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """Sample gene-specific baseline abundance proportions.
-
-    Returns ``q`` such that ``q[h] >= 0`` and ``sum(q) = 1``.
-    """
+    """Sample positive, unconstrained gene-specific q0 expression baselines."""
     if n_genes <= 0:
         raise ValueError("n_genes must be positive.")
-    if log_sd < 0:
-        raise ValueError("baseline_log_sd must be non-negative.")
+    if not np.isfinite(log_mean):
+        raise ValueError("baseline_expression_log_mean must be finite.")
+    if not np.isfinite(log_sd) or log_sd < 0:
+        raise ValueError("baseline_expression_log_sd must be finite and non-negative.")
 
-    raw = rng.lognormal(mean=0.0, sigma=log_sd, size=n_genes)
-    return raw / raw.sum()
+    return rng.lognormal(mean=log_mean, sigma=log_sd, size=n_genes)
+
+
+def normalize_dispersions(
+    dispersions: float | Sequence[float], n_genes: int
+) -> np.ndarray:
+    """Broadcast a positive scalar dispersion or validate a gene vector."""
+    if n_genes <= 0:
+        raise ValueError("n_genes must be positive.")
+    values = np.asarray(dispersions, dtype=float)
+    if values.ndim == 0:
+        values = np.full(n_genes, float(values))
+    elif values.ndim == 1 and len(values) == n_genes:
+        values = values.copy()
+    else:
+        raise ValueError("dispersions must be a scalar or have shape (n_genes,).")
+    if not np.all(np.isfinite(values)) or np.any(values <= 0):
+        raise ValueError("dispersions must be finite and positive.")
+    return values
+
+
+def _validate_observation_arrays(
+    latent_log_expression: np.ndarray,
+    size_factors: np.ndarray,
+    baseline_expression: np.ndarray,
+    dispersions: np.ndarray,
+) -> tuple[int, int]:
+    """Validate observation dimensions and return sample and gene counts."""
+    if latent_log_expression.ndim != 2:
+        raise ValueError("latent_log_expression must have shape (n_samples, n_genes).")
+    n_samples, n_genes = latent_log_expression.shape
+    if not np.all(np.isfinite(latent_log_expression)):
+        raise ValueError("latent_log_expression must be finite.")
+    if size_factors.shape != (n_samples,):
+        raise ValueError("size_factors must have shape (n_samples,).")
+    if not np.all(np.isfinite(size_factors)) or np.any(size_factors <= 0):
+        raise ValueError("size_factors must be finite and positive.")
+    if baseline_expression.shape != (n_genes,):
+        raise ValueError("baseline_expression must have shape (n_genes,).")
+    if not np.all(np.isfinite(baseline_expression)) or np.any(baseline_expression <= 0):
+        raise ValueError("baseline_expression must be finite and positive.")
+    if dispersions.shape != (n_genes,):
+        raise ValueError("dispersions must have shape (n_genes,).")
+    if not np.all(np.isfinite(dispersions)) or np.any(dispersions <= 0):
+        raise ValueError("dispersions must be finite and positive.")
+    return n_samples, n_genes
 
 
 def sample_umi_counts(
     latent_log_expression: np.ndarray,
-    library_sizes: np.ndarray,
-    baseline_abundances: np.ndarray,
-    *,
-    dispersion: float,
+    size_factors: np.ndarray,
+    baseline_expression: np.ndarray,
+    dispersions: float | Sequence[float] | np.ndarray,
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """Generate UMI counts from latent expression.
+    """Generate counts from the latent expression and NB observation model.
 
-    The model is ``mu_hs = L_s * q_h * 2**X_hs`` and
-    ``Y_hs ~ NB(mu_hs, alpha)`` with variance ``mu + alpha * mu**2``.
+    The model is ``mu_ig = s_i * q0_g * 2**X_ig`` and
+    ``Y_ig ~ NB(mu_ig, alpha_g)`` with variance ``mu + alpha_g * mu**2``.
     """
-    if dispersion <= 0:
-        raise ValueError("umi_dispersion must be positive.")
     if latent_log_expression.ndim != 2:
         raise ValueError("latent_log_expression must have shape (n_samples, n_genes).")
+    _, n_genes = latent_log_expression.shape
+    normalized_dispersions = normalize_dispersions(dispersions, n_genes)
+    _validate_observation_arrays(
+        latent_log_expression,
+        size_factors,
+        baseline_expression,
+        normalized_dispersions,
+    )
 
-    n_samples, n_genes = latent_log_expression.shape
-    if library_sizes.shape != (n_samples,):
-        raise ValueError("library_sizes must have shape (n_samples,).")
-    if baseline_abundances.shape != (n_genes,):
-        raise ValueError("baseline_abundances must have shape (n_genes,).")
-    if not np.isclose(baseline_abundances.sum(), 1.0):
-        raise ValueError("baseline_abundances must sum to one.")
-
-    latent_log_expression = np.clip(latent_log_expression, -30.0, 30.0)
-    mu = library_sizes[:, None] * baseline_abundances[None, :] * np.exp2(latent_log_expression)
-    n = 1.0 / dispersion
+    mu = size_factors[:, None] * baseline_expression[None, :] * np.exp2(
+        latent_log_expression
+    )
+    n = 1.0 / normalized_dispersions[None, :]
     p = n / (n + mu)
     return rng.negative_binomial(n=n, p=p)
 
 
 def counts_to_log_expression(
     counts: np.ndarray,
-    library_sizes: np.ndarray,
-    *,
+    size_factors: np.ndarray,
+    baseline_expression: np.ndarray,
     pseudocount: float,
-    target_library_size: float,
 ) -> np.ndarray:
-    """Convert UMI counts to normalized log2-expression.
+    """Estimate latent X as ``log2((Y + c) / (s * q0))``."""
+    counts, size_factors, baseline_expression = _validate_count_inputs(
+        counts, size_factors, baseline_expression, pseudocount
+    )
+    return np.log2(
+        (counts + pseudocount)
+        / (size_factors[:, None] * baseline_expression[None, :])
+    )
 
-    Counts are rescaled to target_library_size before applying log1p.
+
+def counts_to_normalized_expression(
+    counts: np.ndarray,
+    size_factors: np.ndarray,
+    pseudocount: float,
+) -> np.ndarray:
+    """Convert counts to q-hat on the normalized q scale.
+
+    The pseudocount is added to counts before dividing by the dimensionless
+    size factor: ``q_hat = (Y + c) / s``. This is intentionally separate from
+    the X-hat conversion, which also divides by the gene-specific q0 baseline.
     """
-    if pseudocount <= 0:
-        raise ValueError("umi_pseudocount must be positive.")
-    if target_library_size <= 0:
-        raise ValueError("target_library_size must be positive.")
+    counts = np.asarray(counts)
+    if counts.ndim != 2:
+        raise ValueError("counts must have shape (n_samples, n_genes).")
+    if size_factors.shape != (counts.shape[0],):
+        raise ValueError("size_factors must have shape (n_samples,).")
+    if not np.all(np.isfinite(size_factors)) or np.any(size_factors <= 0):
+        raise ValueError("size_factors must be finite and positive.")
+    if not np.all(np.isfinite(counts)) or np.any(counts < 0):
+        raise ValueError("counts must be finite and non-negative.")
+    if not np.isfinite(pseudocount) or pseudocount <= 0:
+        raise ValueError("umi_pseudocount must be finite and positive.")
+    return (counts + pseudocount) / size_factors[:, None]
 
-    normalized_counts = counts / library_sizes[:, None] * target_library_size
-    return np.log2(normalized_counts + pseudocount)
+
+def _validate_count_inputs(
+    counts: np.ndarray,
+    size_factors: np.ndarray,
+    baseline_expression: np.ndarray,
+    pseudocount: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Validate arrays used by count-to-expression conversions."""
+    counts = np.asarray(counts)
+    size_factors = np.asarray(size_factors)
+    baseline_expression = np.asarray(baseline_expression)
+    if counts.ndim != 2:
+        raise ValueError("counts must have shape (n_samples, n_genes).")
+    if size_factors.shape != (counts.shape[0],):
+        raise ValueError("size_factors must have shape (n_samples,).")
+    if baseline_expression.shape != (counts.shape[1],):
+        raise ValueError("baseline_expression must have shape (n_genes,).")
+    if not np.all(np.isfinite(counts)) or np.any(counts < 0):
+        raise ValueError("counts must be finite and non-negative.")
+    if not np.all(np.isfinite(size_factors)) or np.any(size_factors <= 0):
+        raise ValueError("size_factors must be finite and positive.")
+    if not np.all(np.isfinite(baseline_expression)) or np.any(baseline_expression <= 0):
+        raise ValueError("baseline_expression must be finite and positive.")
+    if not np.isfinite(pseudocount) or pseudocount <= 0:
+        raise ValueError("umi_pseudocount must be finite and positive.")
+    return counts, size_factors, baseline_expression
 
 
 def numpy_linear_solver(
@@ -379,10 +493,11 @@ def numpy_linear_solver(
     exogenous_noise: np.ndarray,
     fixed_intervention_values: dict[str, float] | None = None,
 ) -> np.ndarray:
-    """Solve ``X = B.T @ X + eps`` for sample-row data.
+    """Solve ``X = B @ X + eps`` for sample-row data.
 
-    With ``B[u, v]`` representing ``u -> v``, the system for each sample is
-    ``(I - B.T) X = eps``.
+    The public matrix is edge-oriented, with ``beta_matrix[source, target]``.
+    Its transpose is the mathematical target-parent matrix, so the system for
+    each sample is ``(I - beta_matrix.T) X = eps``.
 
     If fixed_intervention_values is not None, then explicit hard interventions
     are applied.
@@ -438,45 +553,46 @@ def _solve(
 
 
 def _observe(state: SimulationState) -> SimulationState:
-    """Generate integer UMI counts and normalized log-expression."""
+    """Generate integer counts, q-hat, and estimator-facing X-hat."""
     config = state.config
 
     if state.latent_log_expression is None:
         raise ValueError("Latent expression must be generated before observation.")
 
-    # Generate sample-specific sequencing depths and gene-specific baseline
-    # abundance proportions before drawing observed UMI counts.
-    state.library_sizes = sample_library_sizes(
+    state.size_factors = sample_size_factors(
         config.n_samples,
-        log_mean=config.library_size_log_mean,
-        log_sd=config.library_size_log_sd,
+        log_sd=config.size_factor_log_sd,
         rng=state.rng,
     )
-    state.baseline_abundances = sample_baseline_abundances(
+    state.baseline_expression = sample_baseline_expression(
         len(state.scm.nodes),
-        log_sd=config.baseline_log_sd,
+        log_mean=config.baseline_expression_log_mean,
+        log_sd=config.baseline_expression_log_sd,
         rng=state.rng,
     )
+    state.dispersions = normalize_dispersions(config.dispersion, len(state.scm.nodes))
 
-    # The observation model is mu_hs = L_s * q_h * 2**X_hs with
-    # Var(Y_hs) = mu_hs + dispersion * mu_hs**2.
     state.umi_counts = sample_umi_counts(
         state.latent_log_expression,
-        state.library_sizes,
-        state.baseline_abundances,
-        dispersion=config.umi_dispersion,
+        state.size_factors,
+        state.baseline_expression,
+        state.dispersions,
         rng=state.rng,
     )
 
-    # Normalize counts to the target library size before applying log2.
-    normalized = counts_to_log_expression(
+    state.normalized_expression = counts_to_normalized_expression(
         state.umi_counts,
-        state.library_sizes,
+        state.size_factors,
         pseudocount=config.umi_pseudocount,
-        target_library_size=np.exp(config.library_size_log_mean),
+    )
+    latent_expression_hat = counts_to_log_expression(
+        state.umi_counts,
+        state.size_factors,
+        state.baseline_expression,
+        pseudocount=config.umi_pseudocount,
     )
     state.observed_data = pd.DataFrame(
-        normalized,
+        latent_expression_hat,
         columns=state.scm.nodes,
     )
     return state

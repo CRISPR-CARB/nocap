@@ -9,11 +9,14 @@ from nocap.scm_model import DirectedScm
 from nocap.simulation import (
     SimulationConfig,
     SimulationState,
+    counts_to_log_expression,
+    counts_to_normalized_expression,
     default_simulation_stages,
     generate_from_scm,
+    normalize_dispersions,
     numpy_linear_solver,
-    sample_baseline_abundances,
-    sample_library_sizes,
+    sample_baseline_expression,
+    sample_size_factors,
     sample_umi_counts,
 )
 
@@ -79,8 +82,52 @@ def test_default_pipeline_is_reproducible_and_retains_state_fields():
     np.testing.assert_array_equal(first.latent_log_expression, second.latent_log_expression)
     np.testing.assert_array_equal(first.umi_counts, second.umi_counts)
     pd.testing.assert_frame_equal(first.observed_data, second.observed_data)
-    assert first.library_sizes.shape == (12,)
-    assert first.baseline_abundances.shape == (2,)
+    assert first.size_factors.shape == (12,)
+    assert first.baseline_expression.shape == (2,)
+    assert first.dispersions.shape == (2,)
+    assert first.normalized_expression.shape == (12, 2)
+
+
+def test_size_factors_are_geometrically_centered():
+    """Sample positive size factors whose geometric mean is one."""
+    values = sample_size_factors(100, 0.4, np.random.default_rng(1))
+
+    assert np.all(values > 0)
+    assert np.isclose(np.exp(np.mean(np.log(values))), 1.0)
+
+
+def test_baseline_expression_is_not_compositionally_normalized():
+    """Sample direct positive q0 baselines without forcing a unit sum."""
+    values = sample_baseline_expression(
+        5, log_mean=0.0, log_sd=2.0, rng=np.random.default_rng(1)
+    )
+
+    assert np.all(values > 0)
+    assert not np.isclose(values.sum(), 1.0)
+
+
+def test_dispersions_broadcast_and_copy_gene_vectors():
+    """Normalize scalar and gene-specific dispersion inputs."""
+    scalar = normalize_dispersions(0.1, 3)
+    vector = normalize_dispersions([0.1, 0.2, 0.3], 3)
+
+    np.testing.assert_array_equal(scalar, [0.1, 0.1, 0.1])
+    np.testing.assert_array_equal(vector, [0.1, 0.2, 0.3])
+
+
+def test_count_transforms_use_canonical_qhat_and_xhat_formulas():
+    """Keep q-hat and X-hat conversions distinct and explicit."""
+    counts = np.array([[9.0, 19.0]])
+    size_factors = np.array([2.0])
+    baseline = np.array([2.0, 5.0])
+
+    np.testing.assert_allclose(
+        counts_to_normalized_expression(counts, size_factors, 1.0), [[5.0, 10.0]]
+    )
+    np.testing.assert_allclose(
+        counts_to_log_expression(counts, size_factors, baseline, 1.0),
+        np.log2([[10.0 / 4.0, 20.0 / 10.0]]),
+    )
 
 
 def test_default_stages_can_be_extended():
@@ -153,17 +200,31 @@ def test_combined_missingness_applies_both_mechanisms():
 
 def test_observation_helpers_validate_shapes_and_parameters():
     """Validate observation helper parameters and compatible array shapes."""
-    with pytest.raises(ValueError, match="library_size_log_sd"):
-        sample_library_sizes(2, log_mean=1.0, log_sd=-1.0, rng=np.random.default_rng(1))
+    with pytest.raises(ValueError, match="size_factor_log_sd"):
+        sample_size_factors(2, -1.0, np.random.default_rng(1))
 
     with pytest.raises(ValueError, match="n_genes"):
-        sample_baseline_abundances(0, log_sd=1.0, rng=np.random.default_rng(1))
+        sample_baseline_expression(0, log_sd=1.0, rng=np.random.default_rng(1))
 
     with pytest.raises(ValueError, match="shape"):
         sample_umi_counts(
             np.zeros(2),
             np.ones(2),
             np.ones(1),
-            dispersion=0.1,
-            rng=np.random.default_rng(1),
+            0.1,
+            np.random.default_rng(1),
         )
+
+
+def test_sample_umi_counts_accepts_gene_specific_dispersion():
+    """Use one negative-binomial dispersion value per gene."""
+    counts = sample_umi_counts(
+        np.zeros((2, 2)),
+        np.ones(2),
+        np.ones(2),
+        [0.1, 0.2],
+        np.random.default_rng(1),
+    )
+
+    assert counts.shape == (2, 2)
+    assert np.issubdtype(counts.dtype, np.integer)

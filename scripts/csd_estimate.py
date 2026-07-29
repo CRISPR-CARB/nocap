@@ -1,52 +1,70 @@
-r"""Synthetic observational data and per-edge path coefficient estimation.
+r"""Generate synthetic latent-SCM data and estimate directed path coefficients.
 
-This script supports legacy independent generation and the explicit
+This script combines a latent linear structural causal model (SCM), a
+DESeq2-style negative-binomial observation model, and the existing regression-
+based cyclic single-door estimator. It supports independent generation and the
 ``paired_hierarchical`` design. In paired mode, one maximum-size observation
 artifact is generated for a nested replicate unit and each parameter condition
-is evaluated through a deterministic view of that artifact. This keeps the
-latent realization, observation draws, sample order, and missingness score
-streams shared across conditions without changing the legacy RNG path.
+is evaluated through a deterministic view of that artifact.
+
+The simulation uses log2-fold change (relative to a geometric control baseline)
+as its latent scale. In the equations below, ``B[target, parent]`` is the
+mathematical target-parent matrix. The repository stores its transpose internally
+as ``beta_matrix[source, target]`` for the edge ``source -> target``.
+
+The equilibrium model is:
+
+    X = B @ X + epsilon
+
+The solver therefore evaluates ``(I - beta_matrix.T) X = epsilon``. Structural
+betas are continuous signed log2 effects. For target ``g`` and parent ``k``:
+
+    X_g = sum_k beta_gk * X_k + epsilon_g
+    beta_gk = d X_g / d X_k
+
+Thus ``beta_gk`` is the direct change in target log2-fold change for a
+one-unit increase in the parent's log2-fold change. Since one unit on the
+log2 scale is a doubling, ``2**beta_gk`` is the direct target-expression
+multiplier for a doubling of the parent. For a general parent change
+``delta_X_k``, the direct multiplier is ``2**(beta_gk * delta_X_k)``.
+
+Observed counts use positive gene-specific baselines ``q0_g``, geometrically
+centered sample size factors ``s_i``, and scalar or gene-specific dispersions
+``alpha_g``:
+
+    q_ig = q0_g * 2**X_ig
+    mu_ig = s_i * q_ig
+    Y_ig ~ NB(mu_ig, alpha_g)
+    Var(Y_ig) = mu_ig + alpha_g * mu_ig**2
+
+Here ``X_ig = log2(q_ig / q0_g)`` and ``2**X_ig`` is the cell-specific
+normalized-expression multiplier relative to baseline. ``q0_g`` is a positive
+geometric control baseline.
+
+The estimator receives ``X-hat`` rather than raw counts. The pipeline also
+computes normalized expression ``q-hat``:
+
+    q_hat_ig = (Y_ig + pseudocount) / s_i
+    X_hat_ig = log2((Y_ig + pseudocount) / (s_i * q0_g))
+
+Missingness is applied to the estimator-facing ``X-hat`` DataFrame after
+observation. Instrument-error missingness uses latent ``X`` so it is not
+driven by observation noise or an already-masked representation.
 
 The script:
 
 1) Accepts an input :class:`networkx.DiGraph` (via GraphML or via a small built-in demo).
-2) Generates synthetic UMI data
-
-    The latent structural causal model is
-
-        X = B.T @ X + eps,
-
-    where X is latent log2-expression and B[u, v] is the structural coefficient
-    (beta) for the edge u -> v.
-
-    Observed UMI counts are generated from the latent expression using
-
-        Y_hs ~ NegativeBinomial(mu_hs, alpha_h)
-
-    with
-
-        mu_hs = L_s * 2**X_hs
-
-    and
-
-        Var(Y_hs) = mu_hs + alpha_h * mu_hs**2.
-
-    The beta coefficients are continuous, nonzero structural log fold changes.
-    For a one-unit increase in latent regulator expression, beta is the direct
-    change in target log2-expression and 2**beta is the corresponding fold
-    change in expected molecular abundance.
-
-3) For **every** directed edge in the *estimation graph*, calls
+2) For **every** directed edge in the *estimation graph*, calls
    :func:`nocap.cyclic_single_door.estimate_path_coefficient_for_edge`.
-4) Writes a CSV with per-edge estimation results and the corresponding
-   ground-truth structural coefficient (beta) under the synthetic SCM.
+3) Writes a CSV with per-edge estimation results and the corresponding
+    ground-truth structural coefficient (beta) under the synthetic SCM.
 
 Notes
 -----
 * The estimator itself performs σ-single-door identifiability checks using only
   the graph structure.
-* For cyclic graphs, the synthetic SCM is defined by the linear equations
-  ``X = B^T X + eps`` solved via ``(I - B^T)^{-1}``.
+* For cyclic graphs, the coefficient matrix is stabilized and checked for
+  conditioning before the equilibrium solve.
 * Ground-truth coefficients are the structural edge coefficients (betas)
   used to generate the synthetic SCM.
 
@@ -63,8 +81,8 @@ Seed contract
 ``--seed`` is the legacy shorthand and sets both phases to the same seed.
 For replicate designs, pass both ``--scm-seed`` and ``--data-seed``. The SCM
 seed controls structural beta draws and the realized true missing-edge
-pattern. The data seed controls exogenous noise, UMI/count generation,
-library sizes, and missingness. Separate RNG instances ensure that changing
+pattern. The data seed controls exogenous noise, size factors, q0, count
+generation, and missingness. Separate RNG instances ensure that changing
 the data seed does not change the SCM, while changing the SCM seed does.
 Output rows include both explicit seeds; the compatibility ``seed`` column is
 the data seed when explicit seed pairs are used. Paired mode intentionally
@@ -161,7 +179,7 @@ def generate_synthetic_observational_data(
     data_seed: int | None = None,
     forbidden_edges=(),
 ):
-    """Generate synthetic latent-SCM data and observed UMI expression.
+    """Generate synthetic latent-SCM data and observed expression.
 
     The latent SCM is
 
@@ -172,14 +190,13 @@ def generate_synthetic_observational_data(
 
     UMI counts are then generated using
 
-        mu_hs = L_s * q_h * 2**X_hs
-        Y_hs ~ NB(mu_hs, alpha_h).
+        mu_ig = s_i * q0_g * 2**X_ig
+        Y_ig ~ NB(mu_ig, alpha_g).
 
     Returns
     -------
     data:
-        Library-size-normalized log-UMI expression. This is the noisy
-        observed expression supplied to the estimator.
+        X-hat expression DataFrame supplied to the estimator.
 
     scm_graph_true:
         True SCM graph, including any added edges.
@@ -470,43 +487,42 @@ def main() -> None:
         help="If >0, add SCC-level latent noise factor to exogenous noises (simulated confounding).",
     )
 
-    # UMI model parameters
+    # Negative-binomial observation model parameters.
     p.add_argument(
-        "--umi-dispersion",
+        "--dispersion",
         type=float,
-        default=0.1,
-        help=("Negative-binomial dispersion alpha. Variance is mu + alpha * mu**2."),
+        default=None,
+        help="Scalar negative-binomial dispersion alpha. Variance is mu + alpha * mu**2.",
     )
     p.add_argument(
-        "--library-size-log-mean",
-        type=float,
-        default=float(np.log(10_000)),
-        help=(
-            "Mean of log library size. With the default, the median "
-            "library size is approximately 10,000 UMIs."
-        ),
+        "--dispersions",
+        type=str,
+        default=None,
+        help="Comma-separated gene-specific negative-binomial dispersions.",
     )
     p.add_argument(
-        "--library-size-log-sd",
+        "--size-factor-log-sd",
         type=float,
         default=0.4,
-        help="Standard deviation of log library size.",
+        help="Standard deviation of the natural log of raw size factors.",
     )
     p.add_argument(
         "--umi-pseudocount",
         type=float,
         default=1.0,
-        help=("Pseudocount used when converting normalized UMI counts to log-expression."),
+        help=("Pseudocount used when converting counts to q-hat and X-hat."),
     )
     p.add_argument(
-        "--baseline-log-sd",
+        "--baseline-expression-log-mean",
+        type=float,
+        default=0.0,
+        help="Natural-log mean of the positive gene-specific q0 baselines.",
+    )
+    p.add_argument(
+        "--baseline-expression-log-sd",
         type=float,
         default=2.0,
-        help=(
-            "Log-scale variability of gene-specific baseline "
-            "abundances. Larger values create a wider expression "
-            "dynamic range."
-        ),
+        help="Natural-log standard deviation of gene-specific q0 baselines.",
     )
 
     # Regression/data cleaning.
@@ -579,6 +595,14 @@ def main() -> None:
             raise ValueError(f"Unknown demo {args.demo!r}")
 
     nodes = _default_nodes_from_graph(graph)
+    if args.dispersion is not None and args.dispersions is not None:
+        raise SystemExit("--dispersion and --dispersions cannot be used together")
+    if args.dispersions is not None:
+        dispersion = _parse_csv_list(args.dispersions, cast_fn=float)
+    else:
+        dispersion = 0.1 if args.dispersion is None else float(args.dispersion)
+    if isinstance(dispersion, list) and len(dispersion) != len(nodes):
+        raise SystemExit("--dispersions must contain one value per graph node")
     fixed_intervention_values = getattr(args, "fixed_intervention_values", {}) or {}
     if not graph.edges():
         raise SystemExit("Input graph has no edges; nothing to estimate.")
@@ -658,11 +682,11 @@ def main() -> None:
                 n_samples=max_samples,
                 estimation_graph=graph,
                 fixed_intervention_values=fixed_intervention_values,
-                umi_dispersion=float(args.umi_dispersion),
-                library_size_log_mean=float(args.library_size_log_mean),
-                library_size_log_sd=float(args.library_size_log_sd),
+                dispersion=dispersion,
+                size_factor_log_sd=float(args.size_factor_log_sd),
                 umi_pseudocount=float(args.umi_pseudocount),
-                baseline_log_sd=float(args.baseline_log_sd),
+                baseline_expression_log_mean=float(args.baseline_expression_log_mean),
+                baseline_expression_log_sd=float(args.baseline_expression_log_sd),
             )
             paired_artifacts = {}
             artifact_key_prefix = getattr(args, "intervention_id", "observational")
@@ -692,11 +716,11 @@ def main() -> None:
 
             config = SimulationConfig(
                 n_samples=n_samples,
-                umi_dispersion=float(args.umi_dispersion),
-                library_size_log_mean=float(args.library_size_log_mean),
-                library_size_log_sd=float(args.library_size_log_sd),
+                dispersion=dispersion,
+                size_factor_log_sd=float(args.size_factor_log_sd),
                 umi_pseudocount=float(args.umi_pseudocount),
-                baseline_log_sd=float(args.baseline_log_sd),
+                baseline_expression_log_mean=float(args.baseline_expression_log_mean),
+                baseline_expression_log_sd=float(args.baseline_expression_log_sd),
                 missing_data_rate=missing_data_rate,
                 missing_data_mechanism=args.missing_data_mechanism,
                 self_mask_quantile=float(args.self_mask_quantile),
@@ -782,10 +806,10 @@ def main() -> None:
                     "parameter_condition_id": canonical_condition_id(cell),
                     "target_effect_id": f"{cause}->{effect}",
                     "pairing_scope": "shared_complete_observation_shared_scores"
-                    if paired_artifact is not None
+                    if paired_artifacts is not None
                     else "none",
-                    "sample_parent_id": "maximum" if paired_artifact is not None else "",
-                    "sample_selection_rule": "prefix" if paired_artifact is not None else "",
+                    "sample_parent_id": "maximum" if paired_artifacts is not None else "",
+                    "sample_selection_rule": "prefix" if paired_artifacts is not None else "",
                     "run_status": "complete",
                     "trial": trial_idx,
                     "n_samples": config.n_samples,

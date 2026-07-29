@@ -29,10 +29,16 @@ from .experiment import StageSeeds, canonical_condition_id, canonical_job_id, de
 from .simulation import (
     SimulationConfig,
     SimulationState,
+    counts_to_log_expression,
+    counts_to_normalized_expression,
     default_simulation_stages,
     generate_from_scm,
+    normalize_dispersions,
     paired_view_stages,
     numpy_linear_solver,
+    sample_baseline_expression,
+    sample_size_factors,
+    sample_umi_counts,
 )
 
 __all__ = [
@@ -48,6 +54,8 @@ __all__ = [
     "compile_lgbn_from_lscm",
     "convert_to_eqn_array_latex",
     "convert_to_latex",
+    "counts_to_log_expression",
+    "counts_to_normalized_expression",
     "create_dag_from_lscm",
     "create_lgbn_from_dag",
     "dagitty_to_digraph",
@@ -64,10 +72,14 @@ __all__ = [
     "get_symbols_from_bi_edges",
     "get_symbols_from_di_edges",
     "get_symbols_from_nodes",
+    "normalize_dispersions",
     "numpy_linear_solver",
     "paired_view_stages",
     "perform_soft_intervention_lgbn",
     "plot_interactive_lscm_graph",
     "read_dag_file",
+    "sample_baseline_expression",
+    "sample_size_factors",
+    "sample_umi_counts",
     "simulate_data_with_outliers",
 ]

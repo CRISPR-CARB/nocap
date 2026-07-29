@@ -27,7 +27,7 @@
 #
 # Seed contract:
 #   scm_seed controls structural betas and true missing edges.
-#   data_seed controls exogenous noise, counts, library sizes, and missingness.
+#   data_seed controls exogenous noise, size factors, q0, counts, and missingness.
 # Full mode assigns a deterministic unique seed pair to every parameter cell
 # and replicate. fixed_scm assigns one SCM seed per edge-rate condition and
 # varies data seeds across mechanisms, data rates, sample sizes, and replicates.
@@ -112,10 +112,11 @@ BETA_LOG_SD="${BETA_LOG_SD:-0.5}"
 BETA_ABS_MAX="${BETA_ABS_MAX:-5}"
 BETA_P="${BETA_P:-0.5}"
 
-UMI_DISP="${UMI_DISP:-0.1}"
-LIB_SIZE_MEAN="${LIB_SIZE_MEAN:-13.2877}"
-LIB_SIZE_SD="${LIB_SIZE_SD:-0.4}"
-UMI_COUNT="${UMI_COUNT:-1.0}"
+DISPERSION="${DISPERSION:-0.1}"
+SIZE_FACTOR_LOG_SD="${SIZE_FACTOR_LOG_SD:-0.4}"
+BASELINE_EXPRESSION_LOG_MEAN="${BASELINE_EXPRESSION_LOG_MEAN:-0.0}"
+BASELINE_EXPRESSION_LOG_SD="${BASELINE_EXPRESSION_LOG_SD:-2.0}"
+UMI_PSEUDOCOUNT="${UMI_PSEUDOCOUNT:-1.0}"
 
 SELF_MASK_QUANTILE="${SELF_MASK_QUANTILE:-0.25}"
 SELF_MASK_K="${SELF_MASK_K:-8.0}"
@@ -142,7 +143,7 @@ run_one() {
   out_csv=\"\$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1]))[\"output_csv\"])' \"\$task_json\")\"
   [[ -s \"\$out_csv\" ]] && { echo \"[skip] \$out_csv\"; return; }
   mkdir -p \"\$(dirname \"\$out_csv\")\"
-  uv run python ${REPO_ROOT}/scripts/csd_estimate.py --task-json \"\$task_json\" --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --design-mode ${DESIGN_MODE} --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --umi-dispersion ${UMI_DISP} --library-size-log-mean ${LIB_SIZE_MEAN} --library-size-log-sd ${LIB_SIZE_SD} --umi-pseudocount ${UMI_COUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
+   uv run python ${REPO_ROOT}/scripts/csd_estimate.py --task-json \"\$task_json\" --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --design-mode ${DESIGN_MODE} --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --dispersion ${DISPERSION} --size-factor-log-sd ${SIZE_FACTOR_LOG_SD} --baseline-expression-log-mean ${BASELINE_EXPRESSION_LOG_MEAN} --baseline-expression-log-sd ${BASELINE_EXPRESSION_LOG_SD} --umi-pseudocount ${UMI_PSEUDOCOUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA}
 }
 export -f run_one
 xargs -a ${batch_file} -P ${BATCH_SIZE} -I{} bash -c 'run_one "\$@"' _ {}

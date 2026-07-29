@@ -154,16 +154,27 @@ def main() -> None:
             ordered.add_edges_from(sorted((str(u), str(v)) for u, v in graph.edges()))
             nx.write_graphml(ordered, path)
 
+    designs = list(interventions)
+    if args.include_observational or not args.intervention_csv:
+        designs.append(None)
+
     conditions = experiment_conditions(
         _ints(args.n_samples_list),
         _floats(args.missing_edge_rates),
         _floats(args.missing_data_rates),
         args.mechanisms.split(","),
     )
+
+    # The cell samples sizes for multiple experiments is
+    # the number of total cells divided by the number of experiments.
+    # So if there are n=5 experiments and 100k total cells, then
+    # each experiment will have 20k total cells
+    if len(designs) > 1:
+        for condition in conditions:
+            condition["n_samples"] //= len(designs)
+
     tasks = []
-    designs = list(interventions)
-    if args.include_observational or not args.intervention_csv:
-        designs.append(None)
+
     for scm_rep in range(args.scm_replicates):
         for data_rep in range(args.data_replicates):
             data_replicate_id = str(data_rep)

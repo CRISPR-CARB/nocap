@@ -38,7 +38,11 @@ class DirectedScm:
 
     @property
     def beta_matrix(self) -> np.ndarray:
-        """Return ``B`` with ``B[u, v]`` representing ``u -> v``."""
+        """Return edge-oriented ``B`` with ``B[source, target]`` for ``source -> target``.
+
+        The mathematical target-parent matrix is ``B.T``. The numerical solver
+        therefore uses ``(I - beta_matrix.T)`` to implement ``X = B X + eps``.
+        """
         index = {node: i for i, node in enumerate(self.nodes)}
         matrix = np.zeros((len(self.nodes), len(self.nodes)))
         for (u, v), value in self.betas.items():
@@ -118,7 +122,7 @@ def _beta_matrix_from_edges(
     nodes: tuple[str, ...],
     betas: dict[tuple[str, str], float],
 ) -> np.ndarray:
-    """Build ``B`` where ``B[u, v]`` is the beta for ``u -> v``."""
+    """Build edge-oriented ``B`` where ``B[source, target]`` is beta."""
     node_index = {node: i for i, node in enumerate(nodes)}
     beta_matrix = np.zeros((len(nodes), len(nodes)), dtype=float)
 
