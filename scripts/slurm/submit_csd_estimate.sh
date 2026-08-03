@@ -201,6 +201,7 @@ function main {
         batch_dir="${OUTDIR}/batches"
         tasks_dir="${OUTDIR}/tasks"
         mkdir -p "${tasks_dir}"
+        mkdir -p "${batch_dir}
         setup_args=(
             --output "${OUTDIR}/experiment.json" --tasks-dir "${tasks_dir}"
             --output-dir "${OUTDIR}/csv" --experiment-id "${EXPERIMENT_ID}"
