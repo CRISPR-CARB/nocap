@@ -115,6 +115,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
+from typing import cast
 
 import networkx as nx
 import numpy as np
@@ -530,6 +531,11 @@ def main() -> None:
         help=("Pseudocount used when converting counts to q-hat and X-hat."),
     )
     p.add_argument(
+        "--no-latent-expression-hat",
+        action="store_true",
+        help="Use true latent expression as estimator input instead of count-derived expression.",
+    )
+    p.add_argument(
         "--baseline-expression-log-mean",
         type=float,
         default=0.0,
@@ -615,7 +621,9 @@ def main() -> None:
     if args.dispersion is not None and args.dispersions is not None:
         raise SystemExit("--dispersion and --dispersions cannot be used together")
     if args.dispersions is not None:
-        dispersion = _parse_csv_list(args.dispersions, cast_fn=float)
+        dispersion: float | list[float] = cast(
+            list[float], _parse_csv_list(args.dispersions, cast_fn=float)
+        )
     else:
         dispersion = 0.1 if args.dispersion is None else float(args.dispersion)
     if isinstance(dispersion, list) and len(dispersion) != len(nodes):
@@ -704,6 +712,7 @@ def main() -> None:
                 umi_pseudocount=float(args.umi_pseudocount),
                 baseline_expression_log_mean=float(args.baseline_expression_log_mean),
                 baseline_expression_log_sd=float(args.baseline_expression_log_sd),
+                use_latent_expression_hat=not args.no_latent_expression_hat,
             )
             paired_artifacts = {}
             artifact_key_prefix = getattr(args, "intervention_id", "observational")
@@ -746,6 +755,7 @@ def main() -> None:
                 self_mask_direction=args.self_mask_direction,
                 scc_confounding_strength=float(args.scc_confounding_strength),
                 estimation_graph=graph,
+                use_latent_expression_hat=not args.no_latent_expression_hat,
             )
 
             if paired_artifacts is not None:
@@ -809,6 +819,8 @@ def main() -> None:
                 if adj_set is not None:
                     cols.extend([str(z) for z in sorted(adj_set)])
 
+                if not isinstance(data, pd.DataFrame):
+                    raise TypeError("synthetic data must be a pandas DataFrame")
                 cleaned = _safe_dropna_for_cols(
                     data,
                     cols,

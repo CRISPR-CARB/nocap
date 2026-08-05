@@ -32,6 +32,7 @@ class SimulationConfig:
     scc_confounding_strength: float = 0.0
     estimation_graph: nx.DiGraph | None = None
     fixed_intervention_values: dict[str, float] = field(default_factory=dict)
+    use_latent_expression_hat: bool = True
 
 
 @dataclass
@@ -132,13 +133,18 @@ def _view_observe(state: SimulationState) -> SimulationState:
             state.size_factors,
             pseudocount=state.config.umi_pseudocount,
         )
-    latent_expression_hat = counts_to_log_expression(
-        state.umi_counts,
-        state.size_factors,
-        state.baseline_expression,
-        pseudocount=state.config.umi_pseudocount,
-    )
-    state.observed_data = pd.DataFrame(latent_expression_hat, columns=state.scm.nodes)
+    if state.config.use_latent_expression_hat:
+        observed_expression = counts_to_log_expression(
+            state.umi_counts,
+            state.size_factors,
+            state.baseline_expression,
+            pseudocount=state.config.umi_pseudocount,
+        )
+    else:
+        if state.latent_log_expression is None:
+            raise ValueError("Latent expression must be generated before observation.")
+        observed_expression = state.latent_log_expression
+    state.observed_data = pd.DataFrame(observed_expression, columns=state.scm.nodes)
     return state
 
 
@@ -345,7 +351,7 @@ def sample_baseline_expression(
 
 
 def normalize_dispersions(
-    dispersions: float | Sequence[float], n_genes: int
+    dispersions: float | Sequence[float] | np.ndarray, n_genes: int
 ) -> np.ndarray:
     """Broadcast a positive scalar dispersion or validate a gene vector."""
     if n_genes <= 0:
@@ -585,14 +591,19 @@ def _observe(state: SimulationState) -> SimulationState:
         state.size_factors,
         pseudocount=config.umi_pseudocount,
     )
-    latent_expression_hat = counts_to_log_expression(
-        state.umi_counts,
-        state.size_factors,
-        state.baseline_expression,
-        pseudocount=config.umi_pseudocount,
-    )
+    if config.use_latent_expression_hat:
+        observed_expression = counts_to_log_expression(
+            state.umi_counts,
+            state.size_factors,
+            state.baseline_expression,
+            pseudocount=config.umi_pseudocount,
+        )
+    else:
+        if state.latent_log_expression is None:
+            raise ValueError("Latent expression must be generated before observation.")
+        observed_expression = state.latent_log_expression
     state.observed_data = pd.DataFrame(
-        latent_expression_hat,
+        observed_expression,
         columns=state.scm.nodes,
     )
     return state

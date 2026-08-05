@@ -21,6 +21,7 @@
 #   INTERVENTION_CSV=/path/to/csd_recovery.csv
 #   INTERVENTION_GRAPH_DIR=/path/to/intervention-graphs
 #   INCLUDE_OBSERVATIONAL=1
+#   USE_LATENT_EXPRESSION_HAT=0  # use true latent expression instead of count-derived estimates
 #   DRY_RUN=1     # only print sbatch commands
 # Paired mode creates task JSON records with setup_csd_experiment.py and passes
 # each record directly to csd_estimate.py.
@@ -117,6 +118,12 @@ SIZE_FACTOR_LOG_SD="${SIZE_FACTOR_LOG_SD:-0.4}"
 BASELINE_EXPRESSION_LOG_MEAN="${BASELINE_EXPRESSION_LOG_MEAN:-0.0}"
 BASELINE_EXPRESSION_LOG_SD="${BASELINE_EXPRESSION_LOG_SD:-2.0}"
 UMI_PSEUDOCOUNT="${UMI_PSEUDOCOUNT:-1.0}"
+USE_LATENT_EXPRESSION_HAT="${USE_LATENT_EXPRESSION_HAT:-1}"
+if [[ "${USE_LATENT_EXPRESSION_HAT}" == "0" ]]; then
+    LATENT_EXPRESSION_HAT_ARG="--no-latent-expression-hat"
+else
+    LATENT_EXPRESSION_HAT_ARG=""
+fi
 
 SELF_MASK_QUANTILE="${SELF_MASK_QUANTILE:-0.25}"
 SELF_MASK_K="${SELF_MASK_K:-8.0}"
@@ -194,6 +201,7 @@ function main {
         echo "  n_samples_list: ${N_SAMPLES_LIST}"
         echo "  DRY_RUN: ${DRY_RUN}"
         echo "  Design mode: ${DESIGN_MODE}"
+        echo "  Use latent expression hat: ${USE_LATENT_EXPRESSION_HAT}"
         echo "  Intervention CSV: ${INTERVENTION_CSV:-none}"
         echo ""
 
