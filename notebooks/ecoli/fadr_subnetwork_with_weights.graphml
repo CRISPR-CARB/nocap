@@ -1,0 +1,1712 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d0" for="edge" attr.name="weight" attr.type="double" />
+  <graph edgedefault="directed">
+    <node id="accB" />
+    <node id="accC" />
+    <node id="rseX" />
+    <node id="ihfB" />
+    <node id="aceA" />
+    <node id="aceB" />
+    <node id="aceK" />
+    <node id="csgD" />
+    <node id="fis" />
+    <node id="flhC" />
+    <node id="flhD" />
+    <node id="fliA" />
+    <node id="fliZ" />
+    <node id="fnr" />
+    <node id="hipA" />
+    <node id="hipB" />
+    <node id="micF" />
+    <node id="ompR" />
+    <node id="rpoE" />
+    <node id="rpoH" />
+    <node id="uspA" />
+    <node id="iclR" />
+    <node id="phoP" />
+    <node id="fadL" />
+    <node id="gadE" />
+    <node id="gadW" />
+    <node id="mgrR" />
+    <node id="rstA" />
+    <node id="ydeO" />
+    <node id="rcsA" />
+    <node id="soxS" />
+    <node id="marA" />
+    <node id="glaR" />
+    <node id="gadX" />
+    <node id="gcvA" />
+    <node id="pdhR" />
+    <node id="yjjQ" />
+    <node id="zraR" />
+    <node id="gcvB" />
+    <node id="fadE" />
+    <node id="fadH" />
+    <node id="fadM" />
+    <node id="lrhA" />
+    <node id="leuO" />
+    <node id="bglJ" />
+    <node id="glrR" />
+    <node id="asflhD" />
+    <node id="cyaR" />
+    <node id="matA" />
+    <node id="rybB" />
+    <node id="oxyR" />
+    <node id="fur" />
+    <node id="oxyS" />
+    <node id="soxR" />
+    <node id="rpoS" />
+    <node id="dsrA" />
+    <node id="hns" />
+    <node id="lrp" />
+    <node id="bolA" />
+    <node id="cspA" />
+    <node id="evgA" />
+    <node id="hdfR" />
+    <node id="rcsB" />
+    <node id="stpA" />
+    <node id="deaD" />
+    <node id="fadI" />
+    <node id="gadY" />
+    <node id="nac" />
+    <node id="qseB" />
+    <node id="rpoN" />
+    <node id="slyA" />
+    <node id="arrS" />
+    <node id="csrA" />
+    <node id="ihfA" />
+    <node id="mlrA" />
+    <node id="sgrS" />
+    <node id="sgrR" />
+    <node id="adiY" />
+    <node id="marR" />
+    <node id="rob" />
+    <node id="fadA" />
+    <node id="fadB" />
+    <node id="fadD" />
+    <node id="cytR" />
+    <node id="rprA" />
+    <node id="micA" />
+    <node id="dksA" />
+    <node id="fabD" />
+    <node id="fabG" />
+    <node id="fabH" />
+    <node id="fadR" />
+    <node id="rpoD" />
+    <node id="rpsA" />
+    <node id="sdiA" />
+    <node id="accA" />
+    <node id="accD" />
+    <node id="fabA" />
+    <node id="fabB" />
+    <node id="fabI" />
+    <node id="fadJ" />
+    <node id="acrR" />
+    <node id="arcA" />
+    <node id="argR" />
+    <node id="cpxR" />
+    <node id="crp" />
+    <node id="dnaA" />
+    <node id="fnrS" />
+    <node id="glnG" />
+    <node id="hupB" />
+    <node id="lexA" />
+    <node id="lldR" />
+    <node id="mqsA" />
+    <node id="phoB" />
+    <node id="rutR" />
+    <node id="rydC" />
+    <node id="ryhB" />
+    <node id="sutR" />
+    <node id="torR" />
+    <node id="arcZ" />
+    <node id="mcaS" />
+    <node id="basR" />
+    <node id="cra" />
+    <node id="hupA" />
+    <node id="omrB" />
+    <node id="rcdA" />
+    <node id="ptrR" />
+    <node id="argP" />
+    <node id="omrA" />
+    <node id="fabR" />
+    <node id="alpA" />
+    <node id="btsR" />
+    <node id="ydiP" />
+    <node id="nsrR" />
+    <node id="c0293" />
+    <edge source="accB" target="accC">
+      <data key="d0">0.3745401188473625</data>
+    </edge>
+    <edge source="rseX" target="ihfB">
+      <data key="d0">0.9507143064099162</data>
+    </edge>
+    <edge source="ihfB" target="aceA">
+      <data key="d0">0.7319939418114051</data>
+    </edge>
+    <edge source="ihfB" target="aceB">
+      <data key="d0">0.5986584841970366</data>
+    </edge>
+    <edge source="ihfB" target="aceK">
+      <data key="d0">0.15601864044243652</data>
+    </edge>
+    <edge source="ihfB" target="csgD">
+      <data key="d0">0.15599452033620265</data>
+    </edge>
+    <edge source="ihfB" target="fis">
+      <data key="d0">0.05808361216819946</data>
+    </edge>
+    <edge source="ihfB" target="flhC">
+      <data key="d0">0.8661761457749352</data>
+    </edge>
+    <edge source="ihfB" target="flhD">
+      <data key="d0">0.6011150117432088</data>
+    </edge>
+    <edge source="ihfB" target="fliA">
+      <data key="d0">0.7080725777960455</data>
+    </edge>
+    <edge source="ihfB" target="fliZ">
+      <data key="d0">0.020584494295802447</data>
+    </edge>
+    <edge source="ihfB" target="fnr">
+      <data key="d0">0.9699098521619943</data>
+    </edge>
+    <edge source="ihfB" target="hipA">
+      <data key="d0">0.8324426408004217</data>
+    </edge>
+    <edge source="ihfB" target="hipB">
+      <data key="d0">0.21233911067827616</data>
+    </edge>
+    <edge source="ihfB" target="micF">
+      <data key="d0">0.18182496720710062</data>
+    </edge>
+    <edge source="ihfB" target="ompR">
+      <data key="d0">0.18340450985343382</data>
+    </edge>
+    <edge source="ihfB" target="rpoE">
+      <data key="d0">0.3042422429595377</data>
+    </edge>
+    <edge source="ihfB" target="rpoH">
+      <data key="d0">0.5247564316322378</data>
+    </edge>
+    <edge source="ihfB" target="uspA">
+      <data key="d0">0.43194501864211576</data>
+    </edge>
+    <edge source="fis" target="cspA">
+      <data key="d0">0.8492234104941779</data>
+    </edge>
+    <edge source="fis" target="fadA">
+      <data key="d0">0.6576128923003434</data>
+    </edge>
+    <edge source="fis" target="fadB">
+      <data key="d0">0.5683086033354716</data>
+    </edge>
+    <edge source="flhC" target="aceB">
+      <data key="d0">0.045227288910538066</data>
+    </edge>
+    <edge source="flhC" target="iclR">
+      <data key="d0">0.32533033076326434</data>
+    </edge>
+    <edge source="flhD" target="aceB">
+      <data key="d0">0.2912291401980419</data>
+    </edge>
+    <edge source="flhD" target="iclR">
+      <data key="d0">0.6118528947223795</data>
+    </edge>
+    <edge source="fliA" target="fliZ">
+      <data key="d0">0.7616196153287176</data>
+    </edge>
+    <edge source="fliZ" target="csgD">
+      <data key="d0">0.23763754399239967</data>
+    </edge>
+    <edge source="fliZ" target="flhC">
+      <data key="d0">0.7282163486118596</data>
+    </edge>
+    <edge source="fliZ" target="flhD">
+      <data key="d0">0.3677831327192532</data>
+    </edge>
+    <edge source="fliZ" target="gadE">
+      <data key="d0">0.6323058305935795</data>
+    </edge>
+    <edge source="fliZ" target="mlrA">
+      <data key="d0">0.6335297107608947</data>
+    </edge>
+    <edge source="fnr" target="gadW">
+      <data key="d0">0.3881699262065219</data>
+    </edge>
+    <edge source="fnr" target="pdhR">
+      <data key="d0">0.6432882184423532</data>
+    </edge>
+    <edge source="hipB" target="fadH">
+      <data key="d0">0.7615106317174722</data>
+    </edge>
+    <edge source="hipB" target="hipA">
+      <data key="d0">0.6182180633162611</data>
+    </edge>
+    <edge source="ompR" target="acrR">
+      <data key="d0">0.75237452943768</data>
+    </edge>
+    <edge source="ompR" target="bolA">
+      <data key="d0">0.7915790437258485</data>
+    </edge>
+    <edge source="ompR" target="csgD">
+      <data key="d0">0.7896181427945539</data>
+    </edge>
+    <edge source="ompR" target="fadE">
+      <data key="d0">0.09120610304869037</data>
+    </edge>
+    <edge source="ompR" target="fadL">
+      <data key="d0">0.49442030470258147</data>
+    </edge>
+    <edge source="ompR" target="flhC">
+      <data key="d0">0.057558760016644284</data>
+    </edge>
+    <edge source="ompR" target="flhD">
+      <data key="d0">0.5495288823237355</data>
+    </edge>
+    <edge source="ompR" target="micF">
+      <data key="d0">0.441530501373377</data>
+    </edge>
+    <edge source="ompR" target="pdhR">
+      <data key="d0">0.8877041827582998</data>
+    </edge>
+    <edge source="ompR" target="rob">
+      <data key="d0">0.3509150125520787</data>
+    </edge>
+    <edge source="rpoE" target="asflhD">
+      <data key="d0">0.3567533266935893</data>
+    </edge>
+    <edge source="rpoE" target="cyaR">
+      <data key="d0">0.28093450968738076</data>
+    </edge>
+    <edge source="rpoE" target="fadM">
+      <data key="d0">0.5426960831582485</data>
+    </edge>
+    <edge source="rpoE" target="matA">
+      <data key="d0">0.14092422497476265</data>
+    </edge>
+    <edge source="rpoE" target="rybB">
+      <data key="d0">0.8021969807540397</data>
+    </edge>
+    <edge source="rpoH" target="ydeO">
+      <data key="d0">0.489452760277563</data>
+    </edge>
+    <edge source="iclR" target="aceA">
+      <data key="d0">0.13949386065204183</data>
+    </edge>
+    <edge source="iclR" target="aceB">
+      <data key="d0">0.29214464853521815</data>
+    </edge>
+    <edge source="iclR" target="aceK">
+      <data key="d0">0.3663618432936917</data>
+    </edge>
+    <edge source="phoP" target="fadL">
+      <data key="d0">0.45606998421703593</data>
+    </edge>
+    <edge source="phoP" target="gadE">
+      <data key="d0">0.7851759613930136</data>
+    </edge>
+    <edge source="phoP" target="gadW">
+      <data key="d0">0.19967378215835974</data>
+    </edge>
+    <edge source="phoP" target="mgrR">
+      <data key="d0">0.5142344384136116</data>
+    </edge>
+    <edge source="phoP" target="rstA">
+      <data key="d0">0.5924145688620425</data>
+    </edge>
+    <edge source="phoP" target="ydeO">
+      <data key="d0">0.046450412719997725</data>
+    </edge>
+    <edge source="gadE" target="rcsA">
+      <data key="d0">0.6075448519014384</data>
+    </edge>
+    <edge source="gadW" target="gadE">
+      <data key="d0">0.17052412368729153</data>
+    </edge>
+    <edge source="mgrR" target="soxS">
+      <data key="d0">0.06505159298527952</data>
+    </edge>
+    <edge source="rstA" target="csgD">
+      <data key="d0">0.9488855372533332</data>
+    </edge>
+    <edge source="ydeO" target="gadE">
+      <data key="d0">0.9656320330745594</data>
+    </edge>
+    <edge source="ydeO" target="gadW">
+      <data key="d0">0.8083973481164611</data>
+    </edge>
+    <edge source="rcsA" target="csgD">
+      <data key="d0">0.835302495589238</data>
+    </edge>
+    <edge source="rcsA" target="flhC">
+      <data key="d0">0.32078006497173583</data>
+    </edge>
+    <edge source="rcsA" target="flhD">
+      <data key="d0">0.18651851039985423</data>
+    </edge>
+    <edge source="soxS" target="marA">
+      <data key="d0">0.9624472949421112</data>
+    </edge>
+    <edge source="soxS" target="marR">
+      <data key="d0">0.25178229582536416</data>
+    </edge>
+    <edge source="soxS" target="micF">
+      <data key="d0">0.49724850589238545</data>
+    </edge>
+    <edge source="soxS" target="rob">
+      <data key="d0">0.30087830981676966</data>
+    </edge>
+    <edge source="marA" target="micF">
+      <data key="d0">0.3046137691733707</data>
+    </edge>
+    <edge source="glaR" target="gadW">
+      <data key="d0">0.09767211400638387</data>
+    </edge>
+    <edge source="glaR" target="gadX">
+      <data key="d0">0.6842330265121569</data>
+    </edge>
+    <edge source="glaR" target="gcvA">
+      <data key="d0">0.4401524937396013</data>
+    </edge>
+    <edge source="glaR" target="pdhR">
+      <data key="d0">0.12203823484477883</data>
+    </edge>
+    <edge source="glaR" target="ydeO">
+      <data key="d0">0.4951769101112702</data>
+    </edge>
+    <edge source="glaR" target="yjjQ">
+      <data key="d0">0.034388521115218396</data>
+    </edge>
+    <edge source="glaR" target="zraR">
+      <data key="d0">0.9093204020787821</data>
+    </edge>
+    <edge source="gadX" target="gadE">
+      <data key="d0">0.2587799816000169</data>
+    </edge>
+    <edge source="gcvA" target="gcvB">
+      <data key="d0">0.662522284353982</data>
+    </edge>
+    <edge source="pdhR" target="fadE">
+      <data key="d0">0.31171107608941095</data>
+    </edge>
+    <edge source="pdhR" target="fadH">
+      <data key="d0">0.5200680211778108</data>
+    </edge>
+    <edge source="pdhR" target="fadL">
+      <data key="d0">0.5467102793432796</data>
+    </edge>
+    <edge source="pdhR" target="fadM">
+      <data key="d0">0.18485445552552704</data>
+    </edge>
+    <edge source="yjjQ" target="flhC">
+      <data key="d0">0.9695846277645586</data>
+    </edge>
+    <edge source="yjjQ" target="flhD">
+      <data key="d0">0.7751328233611146</data>
+    </edge>
+    <edge source="zraR" target="fliA">
+      <data key="d0">0.9394989415641891</data>
+    </edge>
+    <edge source="zraR" target="gadW">
+      <data key="d0">0.8948273504276488</data>
+    </edge>
+    <edge source="zraR" target="rpoH">
+      <data key="d0">0.5978999788110851</data>
+    </edge>
+    <edge source="gcvB" target="csgD">
+      <data key="d0">0.45825289049151663</data>
+    </edge>
+    <edge source="gcvB" target="lrp">
+      <data key="d0">0.5456167893159349</data>
+    </edge>
+    <edge source="gcvB" target="oxyR">
+      <data key="d0">0.9414648087765252</data>
+    </edge>
+    <edge source="gcvB" target="phoP">
+      <data key="d0">0.38610263780077425</data>
+    </edge>
+    <edge source="lrhA" target="flhC">
+      <data key="d0">0.9218742350231168</data>
+    </edge>
+    <edge source="lrhA" target="flhD">
+      <data key="d0">0.0884925020519195</data>
+    </edge>
+    <edge source="lrhA" target="leuO">
+      <data key="d0">0.1959828624191452</data>
+    </edge>
+    <edge source="leuO" target="bglJ">
+      <data key="d0">0.388677289689482</data>
+    </edge>
+    <edge source="leuO" target="yjjQ">
+      <data key="d0">0.2713490317738959</data>
+    </edge>
+    <edge source="glrR" target="rpoE">
+      <data key="d0">0.8287375091519293</data>
+    </edge>
+    <edge source="asflhD" target="flhD">
+      <data key="d0">0.5941307153521351</data>
+    </edge>
+    <edge source="matA" target="flhC">
+      <data key="d0">0.026366974497252005</data>
+    </edge>
+    <edge source="matA" target="flhD">
+      <data key="d0">0.3764633668780496</data>
+    </edge>
+    <edge source="matA" target="fliA">
+      <data key="d0">0.8105533307818329</data>
+    </edge>
+    <edge source="matA" target="fliZ">
+      <data key="d0">0.9872761293149445</data>
+    </edge>
+    <edge source="rybB" target="csgD">
+      <data key="d0">0.7578461104643691</data>
+    </edge>
+    <edge source="rybB" target="fadL">
+      <data key="d0">0.014393488629755868</data>
+    </edge>
+    <edge source="oxyR" target="fur">
+      <data key="d0">0.07455064367977082</data>
+    </edge>
+    <edge source="oxyR" target="oxyS">
+      <data key="d0">0.9868869366005173</data>
+    </edge>
+    <edge source="fur" target="flhC">
+      <data key="d0">0.7722447692966574</data>
+    </edge>
+    <edge source="fur" target="flhD">
+      <data key="d0">0.1987156815341724</data>
+    </edge>
+    <edge source="fur" target="fnr">
+      <data key="d0">0.005522117123602399</data>
+    </edge>
+    <edge source="fur" target="soxR">
+      <data key="d0">0.8154614284548342</data>
+    </edge>
+    <edge source="fur" target="soxS">
+      <data key="d0">0.7068573438476171</data>
+    </edge>
+    <edge source="oxyS" target="flhC">
+      <data key="d0">0.7290071680409873</data>
+    </edge>
+    <edge source="oxyS" target="flhD">
+      <data key="d0">0.7712703466859457</data>
+    </edge>
+    <edge source="oxyS" target="rpoS">
+      <data key="d0">0.07404465173409036</data>
+    </edge>
+    <edge source="soxR" target="soxS">
+      <data key="d0">0.8218600592903562</data>
+    </edge>
+    <edge source="rpoS" target="arrS">
+      <data key="d0">0.8925589984899778</data>
+    </edge>
+    <edge source="rpoS" target="bolA">
+      <data key="d0">0.5393422419156507</data>
+    </edge>
+    <edge source="rpoS" target="csgD">
+      <data key="d0">0.8074401551640625</data>
+    </edge>
+    <edge source="rpoS" target="csrA">
+      <data key="d0">0.8960912999234932</data>
+    </edge>
+    <edge source="rpoS" target="cyaR">
+      <data key="d0">0.3180034749718639</data>
+    </edge>
+    <edge source="rpoS" target="evgA">
+      <data key="d0">0.11005192452767676</data>
+    </edge>
+    <edge source="rpoS" target="fadL">
+      <data key="d0">0.22793516254194168</data>
+    </edge>
+    <edge source="rpoS" target="gadE">
+      <data key="d0">0.4271077886262563</data>
+    </edge>
+    <edge source="rpoS" target="gadW">
+      <data key="d0">0.8180147659224931</data>
+    </edge>
+    <edge source="rpoS" target="gadX">
+      <data key="d0">0.8607305832563434</data>
+    </edge>
+    <edge source="rpoS" target="gadY">
+      <data key="d0">0.006952130531190703</data>
+    </edge>
+    <edge source="rpoS" target="hdfR">
+      <data key="d0">0.5107473025775657</data>
+    </edge>
+    <edge source="rpoS" target="ihfA">
+      <data key="d0">0.417411003148779</data>
+    </edge>
+    <edge source="rpoS" target="ihfB">
+      <data key="d0">0.22210781047073025</data>
+    </edge>
+    <edge source="rpoS" target="micF">
+      <data key="d0">0.1198653673336828</data>
+    </edge>
+    <edge source="rpoS" target="mlrA">
+      <data key="d0">0.33761517140362796</data>
+    </edge>
+    <edge source="rpoS" target="pdhR">
+      <data key="d0">0.9429097039125192</data>
+    </edge>
+    <edge source="rpoS" target="rpoE">
+      <data key="d0">0.32320293202075523</data>
+    </edge>
+    <edge source="rpoS" target="rpoH">
+      <data key="d0">0.5187906217433661</data>
+    </edge>
+    <edge source="rpoS" target="sgrS">
+      <data key="d0">0.7030189588951778</data>
+    </edge>
+    <edge source="dsrA" target="hns">
+      <data key="d0">0.3584657285442726</data>
+    </edge>
+    <edge source="dsrA" target="lrp">
+      <data key="d0">0.11586905952512971</data>
+    </edge>
+    <edge source="dsrA" target="rpoS">
+      <data key="d0">0.8631034258755935</data>
+    </edge>
+    <edge source="hns" target="bglJ">
+      <data key="d0">0.6232981268275579</data>
+    </edge>
+    <edge source="hns" target="bolA">
+      <data key="d0">0.3308980248526492</data>
+    </edge>
+    <edge source="hns" target="csgD">
+      <data key="d0">0.06355835028602363</data>
+    </edge>
+    <edge source="hns" target="cspA">
+      <data key="d0">0.3109823217156622</data>
+    </edge>
+    <edge source="hns" target="evgA">
+      <data key="d0">0.32518332202674705</data>
+    </edge>
+    <edge source="hns" target="flhC">
+      <data key="d0">0.7296061783380641</data>
+    </edge>
+    <edge source="hns" target="flhD">
+      <data key="d0">0.6375574713552131</data>
+    </edge>
+    <edge source="hns" target="fliA">
+      <data key="d0">0.8872127425763265</data>
+    </edge>
+    <edge source="hns" target="fliZ">
+      <data key="d0">0.4722149251619493</data>
+    </edge>
+    <edge source="hns" target="gadE">
+      <data key="d0">0.1195942459383017</data>
+    </edge>
+    <edge source="hns" target="gadW">
+      <data key="d0">0.713244787222995</data>
+    </edge>
+    <edge source="hns" target="gadX">
+      <data key="d0">0.7607850486168974</data>
+    </edge>
+    <edge source="hns" target="hdfR">
+      <data key="d0">0.5612771975694962</data>
+    </edge>
+    <edge source="hns" target="leuO">
+      <data key="d0">0.770967179954561</data>
+    </edge>
+    <edge source="hns" target="lrp">
+      <data key="d0">0.49379559636439074</data>
+    </edge>
+    <edge source="hns" target="micF">
+      <data key="d0">0.5227328293819941</data>
+    </edge>
+    <edge source="hns" target="rcsA">
+      <data key="d0">0.42754101835854963</data>
+    </edge>
+    <edge source="hns" target="rcsB">
+      <data key="d0">0.02541912674409519</data>
+    </edge>
+    <edge source="hns" target="stpA">
+      <data key="d0">0.10789142699330445</data>
+    </edge>
+    <edge source="hns" target="ydeO">
+      <data key="d0">0.03142918568673425</data>
+    </edge>
+    <edge source="hns" target="yjjQ">
+      <data key="d0">0.6364104112637804</data>
+    </edge>
+    <edge source="lrp" target="aceB">
+      <data key="d0">0.3143559810763267</data>
+    </edge>
+    <edge source="lrp" target="deaD">
+      <data key="d0">0.5085706911647028</data>
+    </edge>
+    <edge source="lrp" target="fadI">
+      <data key="d0">0.907566473926093</data>
+    </edge>
+    <edge source="lrp" target="fadL">
+      <data key="d0">0.24929222914887494</data>
+    </edge>
+    <edge source="lrp" target="fliA">
+      <data key="d0">0.41038292303562973</data>
+    </edge>
+    <edge source="lrp" target="gadW">
+      <data key="d0">0.7555511385430487</data>
+    </edge>
+    <edge source="lrp" target="gadY">
+      <data key="d0">0.22879816549162246</data>
+    </edge>
+    <edge source="lrp" target="leuO">
+      <data key="d0">0.07697990982879299</data>
+    </edge>
+    <edge source="lrp" target="lrhA">
+      <data key="d0">0.289751452913768</data>
+    </edge>
+    <edge source="lrp" target="micF">
+      <data key="d0">0.16122128725400442</data>
+    </edge>
+    <edge source="lrp" target="nac">
+      <data key="d0">0.9296976523425731</data>
+    </edge>
+    <edge source="lrp" target="qseB">
+      <data key="d0">0.808120379564417</data>
+    </edge>
+    <edge source="lrp" target="rpoN">
+      <data key="d0">0.6334037565104235</data>
+    </edge>
+    <edge source="lrp" target="slyA">
+      <data key="d0">0.8714605901877177</data>
+    </edge>
+    <edge source="lrp" target="soxS">
+      <data key="d0">0.8036720768991145</data>
+    </edge>
+    <edge source="lrp" target="stpA">
+      <data key="d0">0.18657005888603584</data>
+    </edge>
+    <edge source="bolA" target="csgD">
+      <data key="d0">0.9856504541106007</data>
+    </edge>
+    <edge source="evgA" target="gadE">
+      <data key="d0">0.2420552715115004</data>
+    </edge>
+    <edge source="evgA" target="ydeO">
+      <data key="d0">0.6721355474058786</data>
+    </edge>
+    <edge source="hdfR" target="flhC">
+      <data key="d0">0.5357746840747585</data>
+    </edge>
+    <edge source="hdfR" target="flhD">
+      <data key="d0">0.0902897700544083</data>
+    </edge>
+    <edge source="rcsB" target="csgD">
+      <data key="d0">0.040775141554763916</data>
+    </edge>
+    <edge source="rcsB" target="flhC">
+      <data key="d0">0.5908929431882418</data>
+    </edge>
+    <edge source="rcsB" target="flhD">
+      <data key="d0">0.6775643618422824</data>
+    </edge>
+    <edge source="rcsB" target="gadX">
+      <data key="d0">0.016587828927856152</data>
+    </edge>
+    <edge source="rcsB" target="gadY">
+      <data key="d0">0.512093058299281</data>
+    </edge>
+    <edge source="rcsB" target="leuO">
+      <data key="d0">0.22649577519793795</data>
+    </edge>
+    <edge source="rcsB" target="rcsA">
+      <data key="d0">0.6451727904094499</data>
+    </edge>
+    <edge source="rcsB" target="rpoE">
+      <data key="d0">0.17436642900499144</data>
+    </edge>
+    <edge source="rcsB" target="rprA">
+      <data key="d0">0.690937738102466</data>
+    </edge>
+    <edge source="rcsB" target="ydeO">
+      <data key="d0">0.3867353463005374</data>
+    </edge>
+    <edge source="stpA" target="leuO">
+      <data key="d0">0.9367299887367345</data>
+    </edge>
+    <edge source="deaD" target="sdiA">
+      <data key="d0">0.011353644767419069</data>
+    </edge>
+    <edge source="gadY" target="gadW">
+      <data key="d0">0.70096913145912</data>
+    </edge>
+    <edge source="gadY" target="gadX">
+      <data key="d0">0.07276300636419353</data>
+    </edge>
+    <edge source="nac" target="aceB">
+      <data key="d0">0.07773463696498484</data>
+    </edge>
+    <edge source="nac" target="dnaA">
+      <data key="d0">0.9743948076661665</data>
+    </edge>
+    <edge source="nac" target="evgA">
+      <data key="d0">0.9862107444796029</data>
+    </edge>
+    <edge source="nac" target="gadE">
+      <data key="d0">0.6981617140197451</data>
+    </edge>
+    <edge source="nac" target="gadX">
+      <data key="d0">0.5360963663441204</data>
+    </edge>
+    <edge source="nac" target="hupA">
+      <data key="d0">0.30952761628632774</data>
+    </edge>
+    <edge source="nac" target="leuO">
+      <data key="d0">0.8137950197069487</data>
+    </edge>
+    <edge source="nac" target="marR">
+      <data key="d0">0.6847311725538793</data>
+    </edge>
+    <edge source="nac" target="ompR">
+      <data key="d0">0.1626169393448913</data>
+    </edge>
+    <edge source="nac" target="rcsA">
+      <data key="d0">0.9109271844938425</data>
+    </edge>
+    <edge source="nac" target="sdiA">
+      <data key="d0">0.822537242923169</data>
+    </edge>
+    <edge source="nac" target="uspA">
+      <data key="d0">0.949799913291924</data>
+    </edge>
+    <edge source="nac" target="ydiP">
+      <data key="d0">0.72571950838836</data>
+    </edge>
+    <edge source="qseB" target="dnaA">
+      <data key="d0">0.6830067734163568</data>
+    </edge>
+    <edge source="qseB" target="flhC">
+      <data key="d0">0.07118864846022899</data>
+    </edge>
+    <edge source="qseB" target="flhD">
+      <data key="d0">0.3189756302937613</data>
+    </edge>
+    <edge source="rpoN" target="fadL">
+      <data key="d0">0.28571208628186073</data>
+    </edge>
+    <edge source="rpoN" target="flhC">
+      <data key="d0">0.8685991281894603</data>
+    </edge>
+    <edge source="rpoN" target="flhD">
+      <data key="d0">0.22359583851945264</data>
+    </edge>
+    <edge source="rpoN" target="glnG">
+      <data key="d0">0.9632225394406113</data>
+    </edge>
+    <edge source="rpoN" target="nac">
+      <data key="d0">0.012154474689816341</data>
+    </edge>
+    <edge source="rpoN" target="rpoE">
+      <data key="d0">0.969878826707639</data>
+    </edge>
+    <edge source="rpoN" target="rpoH">
+      <data key="d0">0.04315991195057611</data>
+    </edge>
+    <edge source="rpoN" target="zraR">
+      <data key="d0">0.8911431136980711</data>
+    </edge>
+    <edge source="slyA" target="leuO">
+      <data key="d0">0.8421189231357087</data>
+    </edge>
+    <edge source="arrS" target="gadE">
+      <data key="d0">0.08410680611499743</data>
+    </edge>
+    <edge source="csrA" target="rpoE">
+      <data key="d0">0.7259556788702394</data>
+    </edge>
+    <edge source="csrA" target="sdiA">
+      <data key="d0">0.8971102599525771</data>
+    </edge>
+    <edge source="ihfA" target="aceA">
+      <data key="d0">0.09367476782809248</data>
+    </edge>
+    <edge source="ihfA" target="aceB">
+      <data key="d0">0.3677158030594335</data>
+    </edge>
+    <edge source="ihfA" target="aceK">
+      <data key="d0">0.26520236768172545</data>
+    </edge>
+    <edge source="ihfA" target="csgD">
+      <data key="d0">0.24398964337908358</data>
+    </edge>
+    <edge source="ihfA" target="fis">
+      <data key="d0">0.9730105547524456</data>
+    </edge>
+    <edge source="ihfA" target="flhC">
+      <data key="d0">0.3930977246667604</data>
+    </edge>
+    <edge source="ihfA" target="flhD">
+      <data key="d0">0.8920465551771133</data>
+    </edge>
+    <edge source="ihfA" target="fliA">
+      <data key="d0">0.6311386259972629</data>
+    </edge>
+    <edge source="ihfA" target="fliZ">
+      <data key="d0">0.7948113035416484</data>
+    </edge>
+    <edge source="ihfA" target="fnr">
+      <data key="d0">0.5026370931051921</data>
+    </edge>
+    <edge source="ihfA" target="hipA">
+      <data key="d0">0.5769038846263591</data>
+    </edge>
+    <edge source="ihfA" target="hipB">
+      <data key="d0">0.4925176938188639</data>
+    </edge>
+    <edge source="ihfA" target="ihfB">
+      <data key="d0">0.1952429877980445</data>
+    </edge>
+    <edge source="ihfA" target="micF">
+      <data key="d0">0.7224521152615053</data>
+    </edge>
+    <edge source="ihfA" target="ompR">
+      <data key="d0">0.2807723624408558</data>
+    </edge>
+    <edge source="ihfA" target="rpoE">
+      <data key="d0">0.02431596643145384</data>
+    </edge>
+    <edge source="ihfA" target="rpoH">
+      <data key="d0">0.6454722959071678</data>
+    </edge>
+    <edge source="ihfA" target="uspA">
+      <data key="d0">0.17711067940704894</data>
+    </edge>
+    <edge source="mlrA" target="csgD">
+      <data key="d0">0.08134878064189976</data>
+    </edge>
+    <edge source="sgrS" target="adiY">
+      <data key="d0">0.9717820827209607</data>
+    </edge>
+    <edge source="sgrR" target="sgrS">
+      <data key="d0">0.363629602379294</data>
+    </edge>
+    <edge source="adiY" target="gadX">
+      <data key="d0">0.5836561118508721</data>
+    </edge>
+    <edge source="marR" target="marA">
+      <data key="d0">0.2848404943774676</data>
+    </edge>
+    <edge source="rob" target="fadA">
+      <data key="d0">0.036886947354532795</data>
+    </edge>
+    <edge source="rob" target="fadB">
+      <data key="d0">0.6095643339798968</data>
+    </edge>
+    <edge source="rob" target="fadD">
+      <data key="d0">0.5026790232288615</data>
+    </edge>
+    <edge source="rob" target="fadL">
+      <data key="d0">0.05147875124998935</data>
+    </edge>
+    <edge source="rob" target="marA">
+      <data key="d0">0.27864646423661144</data>
+    </edge>
+    <edge source="rob" target="marR">
+      <data key="d0">0.9082658859666537</data>
+    </edge>
+    <edge source="rob" target="micF">
+      <data key="d0">0.23956189066697242</data>
+    </edge>
+    <edge source="cytR" target="rpoH">
+      <data key="d0">0.1448948720912231</data>
+    </edge>
+    <edge source="rprA" target="csgD">
+      <data key="d0">0.11706701642760586</data>
+    </edge>
+    <edge source="rprA" target="rpoS">
+      <data key="d0">0.14299168205283586</data>
+    </edge>
+    <edge source="micA" target="phoP">
+      <data key="d0">0.13752094414599325</data>
+    </edge>
+    <edge source="dksA" target="csrA">
+      <data key="d0">0.3410663510502585</data>
+    </edge>
+    <edge source="dksA" target="dsrA">
+      <data key="d0">0.11347352124058907</data>
+    </edge>
+    <edge source="dksA" target="fabD">
+      <data key="d0">0.9246936182785628</data>
+    </edge>
+    <edge source="dksA" target="fabG">
+      <data key="d0">0.877339353380981</data>
+    </edge>
+    <edge source="dksA" target="fabH">
+      <data key="d0">0.2579416277151556</data>
+    </edge>
+    <edge source="dksA" target="fadR">
+      <data key="d0">0.659984046034179</data>
+    </edge>
+    <edge source="dksA" target="fis">
+      <data key="d0">0.8172222002012158</data>
+    </edge>
+    <edge source="dksA" target="ihfA">
+      <data key="d0">0.5552008115994623</data>
+    </edge>
+    <edge source="dksA" target="ihfB">
+      <data key="d0">0.5296505783560065</data>
+    </edge>
+    <edge source="dksA" target="rpoD">
+      <data key="d0">0.24185229090045168</data>
+    </edge>
+    <edge source="dksA" target="rpoE">
+      <data key="d0">0.09310276780589921</data>
+    </edge>
+    <edge source="dksA" target="rpoS">
+      <data key="d0">0.8972157579533268</data>
+    </edge>
+    <edge source="dksA" target="rpsA">
+      <data key="d0">0.9004180571633305</data>
+    </edge>
+    <edge source="dksA" target="rybB">
+      <data key="d0">0.6331014572732679</data>
+    </edge>
+    <edge source="dksA" target="sgrR">
+      <data key="d0">0.3390297910487007</data>
+    </edge>
+    <edge source="dksA" target="sgrS">
+      <data key="d0">0.3492095746126609</data>
+    </edge>
+    <edge source="fadR" target="accA">
+      <data key="d0">0.8870864242651173</data>
+    </edge>
+    <edge source="fadR" target="accB">
+      <data key="d0">0.7798755458576239</data>
+    </edge>
+    <edge source="fadR" target="accC">
+      <data key="d0">0.6420316461542878</data>
+    </edge>
+    <edge source="fadR" target="accD">
+      <data key="d0">0.08413996499504883</data>
+    </edge>
+    <edge source="fadR" target="fabA">
+      <data key="d0">0.16162871409461377</data>
+    </edge>
+    <edge source="fadR" target="fabB">
+      <data key="d0">0.8985541885270792</data>
+    </edge>
+    <edge source="fadR" target="fabD">
+      <data key="d0">0.6064290596595899</data>
+    </edge>
+    <edge source="fadR" target="fabG">
+      <data key="d0">0.009197051616629648</data>
+    </edge>
+    <edge source="fadR" target="fabH">
+      <data key="d0">0.1014715428660321</data>
+    </edge>
+    <edge source="fadR" target="fabI">
+      <data key="d0">0.6635017691080558</data>
+    </edge>
+    <edge source="fadR" target="fadA">
+      <data key="d0">0.005061583846218687</data>
+    </edge>
+    <edge source="fadR" target="fadB">
+      <data key="d0">0.16080805141749865</data>
+    </edge>
+    <edge source="fadR" target="fadD">
+      <data key="d0">0.5487337893665861</data>
+    </edge>
+    <edge source="fadR" target="fadE">
+      <data key="d0">0.6918951976926933</data>
+    </edge>
+    <edge source="fadR" target="fadH">
+      <data key="d0">0.6519612595026005</data>
+    </edge>
+    <edge source="fadR" target="fadI">
+      <data key="d0">0.22426930946055978</data>
+    </edge>
+    <edge source="fadR" target="fadJ">
+      <data key="d0">0.7121792213475359</data>
+    </edge>
+    <edge source="fadR" target="fadL">
+      <data key="d0">0.23724908749680007</data>
+    </edge>
+    <edge source="fadR" target="fadM">
+      <data key="d0">0.3253996981592677</data>
+    </edge>
+    <edge source="fadR" target="iclR">
+      <data key="d0">0.7464914051180241</data>
+    </edge>
+    <edge source="fadR" target="uspA">
+      <data key="d0">0.6496328990472147</data>
+    </edge>
+    <edge source="rpoD" target="accA">
+      <data key="d0">0.9404585843529143</data>
+    </edge>
+    <edge source="rpoD" target="accB">
+      <data key="d0">0.9539285770025874</data>
+    </edge>
+    <edge source="rpoD" target="accC">
+      <data key="d0">0.9148643902204485</data>
+    </edge>
+    <edge source="rpoD" target="accD">
+      <data key="d0">0.3701587002554444</data>
+    </edge>
+    <edge source="rpoD" target="aceA">
+      <data key="d0">0.015456616528867428</data>
+    </edge>
+    <edge source="rpoD" target="aceB">
+      <data key="d0">0.9283185625877254</data>
+    </edge>
+    <edge source="rpoD" target="aceK">
+      <data key="d0">0.42818414831731433</data>
+    </edge>
+    <edge source="rpoD" target="acrR">
+      <data key="d0">0.9666548190436696</data>
+    </edge>
+    <edge source="rpoD" target="arcA">
+      <data key="d0">0.9636199770892528</data>
+    </edge>
+    <edge source="rpoD" target="argR">
+      <data key="d0">0.8530094554673601</data>
+    </edge>
+    <edge source="rpoD" target="arrS">
+      <data key="d0">0.2944488920695857</data>
+    </edge>
+    <edge source="rpoD" target="bglJ">
+      <data key="d0">0.38509772860192526</data>
+    </edge>
+    <edge source="rpoD" target="bolA">
+      <data key="d0">0.8511366715168569</data>
+    </edge>
+    <edge source="rpoD" target="cpxR">
+      <data key="d0">0.31692200515627766</data>
+    </edge>
+    <edge source="rpoD" target="crp">
+      <data key="d0">0.1694927466860925</data>
+    </edge>
+    <edge source="rpoD" target="csgD">
+      <data key="d0">0.5568012624583502</data>
+    </edge>
+    <edge source="rpoD" target="cspA">
+      <data key="d0">0.936154774160781</data>
+    </edge>
+    <edge source="rpoD" target="csrA">
+      <data key="d0">0.696029796674973</data>
+    </edge>
+    <edge source="rpoD" target="cyaR">
+      <data key="d0">0.570061170089365</data>
+    </edge>
+    <edge source="rpoD" target="cytR">
+      <data key="d0">0.09717649377076854</data>
+    </edge>
+    <edge source="rpoD" target="deaD">
+      <data key="d0">0.6150072266991697</data>
+    </edge>
+    <edge source="rpoD" target="dnaA">
+      <data key="d0">0.9900538501042633</data>
+    </edge>
+    <edge source="rpoD" target="dsrA">
+      <data key="d0">0.14008401523652403</data>
+    </edge>
+    <edge source="rpoD" target="evgA">
+      <data key="d0">0.5183296523637367</data>
+    </edge>
+    <edge source="rpoD" target="fabA">
+      <data key="d0">0.8773730719279554</data>
+    </edge>
+    <edge source="rpoD" target="fabB">
+      <data key="d0">0.7407686177542044</data>
+    </edge>
+    <edge source="rpoD" target="fabD">
+      <data key="d0">0.697015740995268</data>
+    </edge>
+    <edge source="rpoD" target="fabG">
+      <data key="d0">0.7024840839871093</data>
+    </edge>
+    <edge source="rpoD" target="fabH">
+      <data key="d0">0.35949115121975517</data>
+    </edge>
+    <edge source="rpoD" target="fadA">
+      <data key="d0">0.29359184426449336</data>
+    </edge>
+    <edge source="rpoD" target="fadB">
+      <data key="d0">0.8093611554785136</data>
+    </edge>
+    <edge source="rpoD" target="fadD">
+      <data key="d0">0.8101133946791808</data>
+    </edge>
+    <edge source="rpoD" target="fadI">
+      <data key="d0">0.8670723185801037</data>
+    </edge>
+    <edge source="rpoD" target="fadJ">
+      <data key="d0">0.9132405525564713</data>
+    </edge>
+    <edge source="rpoD" target="fadR">
+      <data key="d0">0.5113423988609378</data>
+    </edge>
+    <edge source="rpoD" target="fis">
+      <data key="d0">0.5015162946871996</data>
+    </edge>
+    <edge source="rpoD" target="flhC">
+      <data key="d0">0.7982951789667752</data>
+    </edge>
+    <edge source="rpoD" target="flhD">
+      <data key="d0">0.6499639307777652</data>
+    </edge>
+    <edge source="rpoD" target="fliA">
+      <data key="d0">0.7019668772577033</data>
+    </edge>
+    <edge source="rpoD" target="fliZ">
+      <data key="d0">0.795792669436101</data>
+    </edge>
+    <edge source="rpoD" target="fnr">
+      <data key="d0">0.8900053418175663</data>
+    </edge>
+    <edge source="rpoD" target="fnrS">
+      <data key="d0">0.3379951568515358</data>
+    </edge>
+    <edge source="rpoD" target="fur">
+      <data key="d0">0.375582952639944</data>
+    </edge>
+    <edge source="rpoD" target="gadE">
+      <data key="d0">0.093981939840869</data>
+    </edge>
+    <edge source="rpoD" target="gadX">
+      <data key="d0">0.578280140996174</data>
+    </edge>
+    <edge source="rpoD" target="gcvA">
+      <data key="d0">0.035942273796742086</data>
+    </edge>
+    <edge source="rpoD" target="gcvB">
+      <data key="d0">0.46559801813246016</data>
+    </edge>
+    <edge source="rpoD" target="glnG">
+      <data key="d0">0.5426446347075766</data>
+    </edge>
+    <edge source="rpoD" target="hipA">
+      <data key="d0">0.2865412521282844</data>
+    </edge>
+    <edge source="rpoD" target="hipB">
+      <data key="d0">0.5908332605690108</data>
+    </edge>
+    <edge source="rpoD" target="hns">
+      <data key="d0">0.03050024993904943</data>
+    </edge>
+    <edge source="rpoD" target="hupB">
+      <data key="d0">0.03734818874921442</data>
+    </edge>
+    <edge source="rpoD" target="ihfB">
+      <data key="d0">0.8226005606596583</data>
+    </edge>
+    <edge source="rpoD" target="leuO">
+      <data key="d0">0.3601906414112629</data>
+    </edge>
+    <edge source="rpoD" target="lexA">
+      <data key="d0">0.12706051265188478</data>
+    </edge>
+    <edge source="rpoD" target="lldR">
+      <data key="d0">0.5222432600548044</data>
+    </edge>
+    <edge source="rpoD" target="lrp">
+      <data key="d0">0.7699935530986108</data>
+    </edge>
+    <edge source="rpoD" target="marA">
+      <data key="d0">0.21582102749684318</data>
+    </edge>
+    <edge source="rpoD" target="marR">
+      <data key="d0">0.6228904758190003</data>
+    </edge>
+    <edge source="rpoD" target="mgrR">
+      <data key="d0">0.085347464993768</data>
+    </edge>
+    <edge source="rpoD" target="micF">
+      <data key="d0">0.0516817211686077</data>
+    </edge>
+    <edge source="rpoD" target="mlrA">
+      <data key="d0">0.531354631568148</data>
+    </edge>
+    <edge source="rpoD" target="mqsA">
+      <data key="d0">0.5406351216101065</data>
+    </edge>
+    <edge source="rpoD" target="ompR">
+      <data key="d0">0.6374299014982066</data>
+    </edge>
+    <edge source="rpoD" target="oxyR">
+      <data key="d0">0.7260913337226615</data>
+    </edge>
+    <edge source="rpoD" target="oxyS">
+      <data key="d0">0.9758520794625346</data>
+    </edge>
+    <edge source="rpoD" target="pdhR">
+      <data key="d0">0.5163003483011953</data>
+    </edge>
+    <edge source="rpoD" target="phoB">
+      <data key="d0">0.32295647294124596</data>
+    </edge>
+    <edge source="rpoD" target="qseB">
+      <data key="d0">0.7951861947687037</data>
+    </edge>
+    <edge source="rpoD" target="rcsA">
+      <data key="d0">0.2708322512620742</data>
+    </edge>
+    <edge source="rpoD" target="rcsB">
+      <data key="d0">0.4389714207056361</data>
+    </edge>
+    <edge source="rpoD" target="rpoE">
+      <data key="d0">0.07845638134226596</data>
+    </edge>
+    <edge source="rpoD" target="rpoH">
+      <data key="d0">0.02535074341545751</data>
+    </edge>
+    <edge source="rpoD" target="rpoN">
+      <data key="d0">0.9626484146779251</data>
+    </edge>
+    <edge source="rpoD" target="rpoS">
+      <data key="d0">0.8359801205122058</data>
+    </edge>
+    <edge source="rpoD" target="rpsA">
+      <data key="d0">0.695974206093698</data>
+    </edge>
+    <edge source="rpoD" target="rutR">
+      <data key="d0">0.4089529444142699</data>
+    </edge>
+    <edge source="rpoD" target="rydC">
+      <data key="d0">0.17329432007084578</data>
+    </edge>
+    <edge source="rpoD" target="ryhB">
+      <data key="d0">0.15643704267108605</data>
+    </edge>
+    <edge source="rpoD" target="sdiA">
+      <data key="d0">0.25024289816459533</data>
+    </edge>
+    <edge source="rpoD" target="sgrR">
+      <data key="d0">0.5492266647061205</data>
+    </edge>
+    <edge source="rpoD" target="sgrS">
+      <data key="d0">0.7145959227000623</data>
+    </edge>
+    <edge source="rpoD" target="soxR">
+      <data key="d0">0.6601973767177313</data>
+    </edge>
+    <edge source="rpoD" target="soxS">
+      <data key="d0">0.27993389694594284</data>
+    </edge>
+    <edge source="rpoD" target="stpA">
+      <data key="d0">0.9548652806631941</data>
+    </edge>
+    <edge source="rpoD" target="sutR">
+      <data key="d0">0.7378969166957685</data>
+    </edge>
+    <edge source="rpoD" target="torR">
+      <data key="d0">0.5543540525114007</data>
+    </edge>
+    <edge source="rpoD" target="uspA">
+      <data key="d0">0.6117207462343522</data>
+    </edge>
+    <edge source="rpoD" target="ydeO">
+      <data key="d0">0.4196000624277899</data>
+    </edge>
+    <edge source="rpoD" target="yjjQ">
+      <data key="d0">0.24773098950115746</data>
+    </edge>
+    <edge source="rpsA" target="fis">
+      <data key="d0">0.3559726786512616</data>
+    </edge>
+    <edge source="sdiA" target="gadW">
+      <data key="d0">0.5230978441701488</data>
+    </edge>
+    <edge source="sdiA" target="gadY">
+      <data key="d0">0.6293986381352625</data>
+    </edge>
+    <edge source="accD" target="accA">
+      <data key="d0">0.10077800137742665</data>
+    </edge>
+    <edge source="acrR" target="flhC">
+      <data key="d0">0.3742707957561203</data>
+    </edge>
+    <edge source="acrR" target="flhD">
+      <data key="d0">0.3706421470668909</data>
+    </edge>
+    <edge source="acrR" target="marA">
+      <data key="d0">0.8127995672575026</data>
+    </edge>
+    <edge source="acrR" target="marR">
+      <data key="d0">0.9472485773838587</data>
+    </edge>
+    <edge source="acrR" target="micF">
+      <data key="d0">0.9860010638228709</data>
+    </edge>
+    <edge source="arcA" target="aceA">
+      <data key="d0">0.11607264050691624</data>
+    </edge>
+    <edge source="arcA" target="aceB">
+      <data key="d0">0.04600264202175275</data>
+    </edge>
+    <edge source="arcA" target="aceK">
+      <data key="d0">0.040728802318970136</data>
+    </edge>
+    <edge source="arcA" target="arcZ">
+      <data key="d0">0.8554605840110072</data>
+    </edge>
+    <edge source="arcA" target="argR">
+      <data key="d0">0.7036578593800237</data>
+    </edge>
+    <edge source="arcA" target="fadA">
+      <data key="d0">0.4741738290873252</data>
+    </edge>
+    <edge source="arcA" target="fadB">
+      <data key="d0">0.09783416065100148</data>
+    </edge>
+    <edge source="arcA" target="fadD">
+      <data key="d0">0.49161587511683236</data>
+    </edge>
+    <edge source="arcA" target="fadE">
+      <data key="d0">0.4734717707805657</data>
+    </edge>
+    <edge source="arcA" target="fadH">
+      <data key="d0">0.17320186991001518</data>
+    </edge>
+    <edge source="arcA" target="fadI">
+      <data key="d0">0.43385164923797304</data>
+    </edge>
+    <edge source="arcA" target="fadJ">
+      <data key="d0">0.39850473439737344</data>
+    </edge>
+    <edge source="arcA" target="fadL">
+      <data key="d0">0.6158500980522165</data>
+    </edge>
+    <edge source="arcA" target="fnr">
+      <data key="d0">0.6350936508676438</data>
+    </edge>
+    <edge source="arcA" target="gadE">
+      <data key="d0">0.04530400977204452</data>
+    </edge>
+    <edge source="arcA" target="gadX">
+      <data key="d0">0.3746126146264712</data>
+    </edge>
+    <edge source="arcA" target="gcvB">
+      <data key="d0">0.6258599157142364</data>
+    </edge>
+    <edge source="arcA" target="lldR">
+      <data key="d0">0.5031362585800877</data>
+    </edge>
+    <edge source="arcA" target="micF">
+      <data key="d0">0.8564898411883223</data>
+    </edge>
+    <edge source="arcA" target="rpoS">
+      <data key="d0">0.658693631618945</data>
+    </edge>
+    <edge source="arcA" target="rstA">
+      <data key="d0">0.1629344270814297</data>
+    </edge>
+    <edge source="argR" target="lrp">
+      <data key="d0">0.5857755812734633</data>
+    </edge>
+    <edge source="argR" target="mcaS">
+      <data key="d0">0.9402302414249576</data>
+    </edge>
+    <edge source="argR" target="stpA">
+      <data key="d0">0.575474177875879</data>
+    </edge>
+    <edge source="cpxR" target="csgD">
+      <data key="d0">0.7533781852589416</data>
+    </edge>
+    <edge source="cpxR" target="cspA">
+      <data key="d0">0.37625958553091576</data>
+    </edge>
+    <edge source="cpxR" target="cyaR">
+      <data key="d0">0.08350071669866876</data>
+    </edge>
+    <edge source="cpxR" target="fadE">
+      <data key="d0">0.7771469159274368</data>
+    </edge>
+    <edge source="cpxR" target="fadI">
+      <data key="d0">0.558404249735805</data>
+    </edge>
+    <edge source="cpxR" target="matA">
+      <data key="d0">0.4242220092469763</data>
+    </edge>
+    <edge source="cpxR" target="rpoE">
+      <data key="d0">0.906354385094736</data>
+    </edge>
+    <edge source="cpxR" target="rpoH">
+      <data key="d0">0.11119748230615134</data>
+    </edge>
+    <edge source="cpxR" target="rprA">
+      <data key="d0">0.49262510429085915</data>
+    </edge>
+    <edge source="crp" target="aceA">
+      <data key="d0">0.7506147516408583</data>
+    </edge>
+    <edge source="crp" target="aceB">
+      <data key="d0">0.806834739267264</data>
+    </edge>
+    <edge source="crp" target="aceK">
+      <data key="d0">0.9905051420006733</data>
+    </edge>
+    <edge source="crp" target="csgD">
+      <data key="d0">0.4126176769114265</data>
+    </edge>
+    <edge source="crp" target="cyaR">
+      <data key="d0">0.37201808579278317</data>
+    </edge>
+    <edge source="crp" target="fadD">
+      <data key="d0">0.7764129607419968</data>
+    </edge>
+    <edge source="crp" target="fadH">
+      <data key="d0">0.34080354025301784</data>
+    </edge>
+    <edge source="crp" target="fadL">
+      <data key="d0">0.9307573256035647</data>
+    </edge>
+    <edge source="crp" target="fis">
+      <data key="d0">0.8584127518430118</data>
+    </edge>
+    <edge source="crp" target="flhC">
+      <data key="d0">0.42899402737501835</data>
+    </edge>
+    <edge source="crp" target="flhD">
+      <data key="d0">0.7508710677914974</data>
+    </edge>
+    <edge source="crp" target="fur">
+      <data key="d0">0.7545428740846823</data>
+    </edge>
+    <edge source="crp" target="gadE">
+      <data key="d0">0.10312386883593261</data>
+    </edge>
+    <edge source="crp" target="gadX">
+      <data key="d0">0.9025529066795667</data>
+    </edge>
+    <edge source="crp" target="glnG">
+      <data key="d0">0.5052523724478571</data>
+    </edge>
+    <edge source="crp" target="hupA">
+      <data key="d0">0.8264574661077416</data>
+    </edge>
+    <edge source="crp" target="hupB">
+      <data key="d0">0.32004960103061175</data>
+    </edge>
+    <edge source="crp" target="marA">
+      <data key="d0">0.8955232284962005</data>
+    </edge>
+    <edge source="crp" target="marR">
+      <data key="d0">0.3892016787341631</data>
+    </edge>
+    <edge source="crp" target="mcaS">
+      <data key="d0">0.01083765148029836</data>
+    </edge>
+    <edge source="crp" target="ompR">
+      <data key="d0">0.9053819764192637</data>
+    </edge>
+    <edge source="crp" target="oxyR">
+      <data key="d0">0.09128667678613356</data>
+    </edge>
+    <edge source="crp" target="pdhR">
+      <data key="d0">0.31931363759041487</data>
+    </edge>
+    <edge source="crp" target="rpoE">
+      <data key="d0">0.9500619670508049</data>
+    </edge>
+    <edge source="crp" target="rpoH">
+      <data key="d0">0.9506071469375561</data>
+    </edge>
+    <edge source="crp" target="rpoS">
+      <data key="d0">0.5734378881232861</data>
+    </edge>
+    <edge source="crp" target="zraR">
+      <data key="d0">0.6318372121697993</data>
+    </edge>
+    <edge source="dnaA" target="rpoH">
+      <data key="d0">0.7062422271564962</data>
+    </edge>
+    <edge source="fnrS" target="marA">
+      <data key="d0">0.46866064199412627</data>
+    </edge>
+    <edge source="glnG" target="nac">
+      <data key="d0">0.05630327568183735</data>
+    </edge>
+    <edge source="glnG" target="rpoE">
+      <data key="d0">0.11881791626807192</data>
+    </edge>
+    <edge source="hupB" target="micF">
+      <data key="d0">0.10112267612279024</data>
+    </edge>
+    <edge source="lldR" target="fadE">
+      <data key="d0">0.9611905638239142</data>
+    </edge>
+    <edge source="lldR" target="fadL">
+      <data key="d0">0.9053506419560637</data>
+    </edge>
+    <edge source="lldR" target="gadW">
+      <data key="d0">0.19579113478929644</data>
+    </edge>
+    <edge source="lldR" target="gadY">
+      <data key="d0">0.06936130087516545</data>
+    </edge>
+    <edge source="mqsA" target="csgD">
+      <data key="d0">0.11752624677710488</data>
+    </edge>
+    <edge source="mqsA" target="rpoS">
+      <data key="d0">0.6492103021160636</data>
+    </edge>
+    <edge source="phoB" target="argP">
+      <data key="d0">0.7460448792654233</data>
+    </edge>
+    <edge source="phoB" target="cra">
+      <data key="d0">0.5833687650971596</data>
+    </edge>
+    <edge source="phoB" target="gadW">
+      <data key="d0">0.9621725484745419</data>
+    </edge>
+    <edge source="phoB" target="gadX">
+      <data key="d0">0.37487057952370406</data>
+    </edge>
+    <edge source="rutR" target="gadW">
+      <data key="d0">0.5277011090862999</data>
+    </edge>
+    <edge source="rutR" target="gadX">
+      <data key="d0">0.9929647961193003</data>
+    </edge>
+    <edge source="rydC" target="csgD">
+      <data key="d0">0.07379656473539886</data>
+    </edge>
+    <edge source="ryhB" target="fur">
+      <data key="d0">0.5538542844013208</data>
+    </edge>
+    <edge source="ryhB" target="marA">
+      <data key="d0">0.969302535619099</data>
+    </edge>
+    <edge source="sutR" target="fliA">
+      <data key="d0">0.6957486889846172</data>
+    </edge>
+    <edge source="sutR" target="fliZ">
+      <data key="d0">0.45454106476777323</data>
+    </edge>
+    <edge source="torR" target="gadE">
+      <data key="d0">0.6275580800840634</data>
+    </edge>
+    <edge source="torR" target="gadX">
+      <data key="d0">0.5843143119231002</data>
+    </edge>
+    <edge source="torR" target="rpoS">
+      <data key="d0">0.901158010490989</data>
+    </edge>
+    <edge source="arcZ" target="flhC">
+      <data key="d0">0.07056874740042984</data>
+    </edge>
+    <edge source="arcZ" target="flhD">
+      <data key="d0">0.6424192782063156</data>
+    </edge>
+    <edge source="arcZ" target="rpoS">
+      <data key="d0">0.026511310541621813</data>
+    </edge>
+    <edge source="mcaS" target="csgD">
+      <data key="d0">0.8448753109694546</data>
+    </edge>
+    <edge source="mcaS" target="flhC">
+      <data key="d0">0.023271935735825866</data>
+    </edge>
+    <edge source="mcaS" target="flhD">
+      <data key="d0">0.8144684825889358</data>
+    </edge>
+    <edge source="basR" target="csgD">
+      <data key="d0">0.018221825651549728</data>
+    </edge>
+    <edge source="basR" target="qseB">
+      <data key="d0">0.0944429607559284</data>
+    </edge>
+    <edge source="cra" target="aceA">
+      <data key="d0">0.28185477477339993</data>
+    </edge>
+    <edge source="cra" target="aceB">
+      <data key="d0">0.11816482762165625</data>
+    </edge>
+    <edge source="cra" target="aceK">
+      <data key="d0">0.6967371653641506</data>
+    </edge>
+    <edge source="cra" target="crp">
+      <data key="d0">0.628942846779884</data>
+    </edge>
+    <edge source="cra" target="csgD">
+      <data key="d0">0.877472013527053</data>
+    </edge>
+    <edge source="cra" target="marA">
+      <data key="d0">0.7350710438038858</data>
+    </edge>
+    <edge source="cra" target="marR">
+      <data key="d0">0.8034809303848486</data>
+    </edge>
+    <edge source="cra" target="pdhR">
+      <data key="d0">0.2820345725713065</data>
+    </edge>
+    <edge source="cra" target="sgrS">
+      <data key="d0">0.17743954377972282</data>
+    </edge>
+    <edge source="hupA" target="micF">
+      <data key="d0">0.15041689110352818</data>
+    </edge>
+    <edge source="omrB" target="csgD">
+      <data key="d0">0.44844552197831977</data>
+    </edge>
+    <edge source="omrB" target="flhC">
+      <data key="d0">0.29321077169806453</data>
+    </edge>
+    <edge source="omrB" target="flhD">
+      <data key="d0">0.32866454536991596</data>
+    </edge>
+    <edge source="omrB" target="ompR">
+      <data key="d0">0.6725184560770384</data>
+    </edge>
+    <edge source="rcdA" target="csgD">
+      <data key="d0">0.08483771408519192</data>
+    </edge>
+    <edge source="ptrR" target="acrR">
+      <data key="d0">0.9866395785011755</data>
+    </edge>
+    <edge source="argP" target="dnaA">
+      <data key="d0">0.45565675278571294</data>
+    </edge>
+    <edge source="omrA" target="csgD">
+      <data key="d0">0.04544638034145787</data>
+    </edge>
+    <edge source="omrA" target="flhC">
+      <data key="d0">0.2809631895922303</data>
+    </edge>
+    <edge source="omrA" target="flhD">
+      <data key="d0">0.9504114840765587</data>
+    </edge>
+    <edge source="omrA" target="ompR">
+      <data key="d0">0.8902637838909163</data>
+    </edge>
+    <edge source="fabR" target="fabA">
+      <data key="d0">0.6201325978015367</data>
+    </edge>
+    <edge source="fabR" target="fabB">
+      <data key="d0">0.2773811829811327</data>
+    </edge>
+    <edge source="alpA" target="phoB">
+      <data key="d0">0.1881211597237613</data>
+    </edge>
+    <edge source="btsR" target="csgD">
+      <data key="d0">0.46369840493998216</data>
+    </edge>
+    <edge source="btsR" target="pdhR">
+      <data key="d0">0.3533522280260528</data>
+    </edge>
+    <edge source="ydiP" target="cspA">
+      <data key="d0">0.3808908566310215</data>
+    </edge>
+    <edge source="nsrR" target="fliA">
+      <data key="d0">0.6134151959357899</data>
+    </edge>
+    <edge source="nsrR" target="fliZ">
+      <data key="d0">0.4182430362906189</data>
+    </edge>
+    <edge source="nsrR" target="ihfA">
+      <data key="d0">0.9327284833540133</data>
+    </edge>
+    <edge source="nsrR" target="lrp">
+      <data key="d0">0.8660638895004084</data>
+    </edge>
+    <edge source="nsrR" target="rybB">
+      <data key="d0">0.04521867010618941</data>
+    </edge>
+    <edge source="c0293" target="fadR">
+      <data key="d0">0.9699143978146032</data>
+    </edge>
+  </graph>
+</graphml>
