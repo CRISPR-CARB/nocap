@@ -67,6 +67,24 @@ def test_build_synthetic_scm_is_reproducible():
     assert first.scm.betas == second.scm.betas
 
 
+def test_build_synthetic_scm_uses_explicit_edge_signs():
+    graph = nx.DiGraph([("A", "B"), ("B", "A")])
+    result = build_synthetic_scm(
+        graph,
+        ["A", "B"],
+        missing_edge_rate=0.0,
+        beta_med=2.0,
+        beta_log_sd=0.5,
+        beta_p=0.5,
+        beta_abs_max=5.0,
+        rng=np.random.default_rng(11),
+        signs={("A", "B"): 1.0, ("B", "A"): -1.0},
+    )
+
+    assert result.scm.betas[("A", "B")] > 0
+    assert result.scm.betas[("B", "A")] < 0
+
+
 def test_build_synthetic_scm_only_adds_true_edges():
     """Restrict synthetic edge additions to pairs allowed by the true graph."""
     graph = nx.DiGraph([("A", "B")])
@@ -89,7 +107,7 @@ def test_build_synthetic_scm_only_adds_true_edges():
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"beta_med": 1.0, "beta_log_sd": 0.5, "beta_abs_max": 5.0},
+        {"beta_med": 0.0, "beta_log_sd": 0.5, "beta_abs_max": 5.0},
         {"beta_med": 2.0, "beta_log_sd": 0.0, "beta_abs_max": 5.0},
         {"beta_med": 2.0, "beta_log_sd": 0.5, "beta_abs_max": 0.5},
         {"beta_med": 2.0, "beta_log_sd": 0.5, "beta_abs_max": 5.0, "beta_p": 1.5},

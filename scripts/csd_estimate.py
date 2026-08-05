@@ -149,8 +149,24 @@ def _load_graph_from_graphml(graphml_path: str) -> nx.DiGraph:
     # Force node IDs to be strings for compatibility with y0 Variable(name).
     g2 = nx.DiGraph()
     g2.add_nodes_from([str(n) for n in g.nodes()])
-    g2.add_edges_from([(str(u), str(v)) for u, v in g.edges()])
+    g2.add_edges_from(
+        (str(u), str(v), dict(data)) for u, v, data in g.edges(data=True)
+    )
     return g2
+
+
+def _edge_signs(graph: nx.DiGraph) -> dict[tuple[str, str], float]:
+    """Extract explicit +/- GraphML edge signs, ignoring missing/unknown values."""
+    signs = {}
+    for source, target, data in graph.edges(data=True):
+        value = data.get("polarity", data.get("d0", data.get("sign")))
+        if isinstance(value, str):
+            value = value.strip()
+        if value in ("+", "1", 1, 1.0):
+            signs[(str(source), str(target))] = 1.0
+        elif value in ("-", "-1", -1, -1.0):
+            signs[(str(source), str(target))] = -1.0
+    return signs
 
 
 def _safe_dropna_for_cols(df: pd.DataFrame, cols: list[str], *, min_rows: int):
@@ -220,6 +236,7 @@ def generate_synthetic_observational_data(
         beta_abs_max=beta_abs_max,
         rng=_rng(scm_seed),
         forbidden_edges=forbidden_edges,
+        signs=_edge_signs(estimation_graph),
     )
     scm = build.scm
     betas_by_edge_true = scm.betas
@@ -448,11 +465,11 @@ def main() -> None:
     p.add_argument(
         "--beta-med",
         type=float,
-        default=2.0,
+        default=0.5,
         help=(
-            "Median absolute fold change for a one-unit increase in "
-            "latent regulator log-expression. The median absolute beta "
-            "is log2(beta_med)."
+            "Median increase in log2fc of a genes expression over its baseline"
+            "expression value given an increase in its parents log2fc. The median "
+            "absolute beta is log(beta_med)."
         ),
     )
     p.add_argument(
@@ -701,6 +718,7 @@ def main() -> None:
                     beta_abs_max=float(args.beta_abs_max),
                     rng=_rng(int(args.scm_seed)),
                     forbidden_edges=getattr(args, "forbidden_edges", []),
+                    signs=_edge_signs(graph),
                 )
                 paired_artifacts[(artifact_key_prefix, edge_rate)] = generate_paired_data_artifact(
                     variant_build.scm,

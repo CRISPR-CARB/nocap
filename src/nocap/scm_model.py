@@ -173,16 +173,17 @@ def _sample_betas(
     beta_log_sd: float,
     beta_p: float,
     beta_abs_max: float,
+    signs: dict[tuple[str, str], float] | None = None,
 ) -> dict[tuple[str, str], float]:
-    """Sample nonzero log fold changes for regulatory edges.
+    """Sample nonzero coefficients for regulatory edges.
 
     Parameters
     ----------
     edges:
         Iterable of (source_gene, target_gene) edges.
     beta_med:
-        Median absolute fold change for a one-unit increase in the
-        normalized regulator expression.
+        Median absolute change to the log2fc of a gene
+        for a one-unit increase in the log2fc of a regulator.
     beta_log_sd:
         Standard deviation of log(abs(beta)).
     beta_p:
@@ -191,6 +192,8 @@ def _sample_betas(
         Maximum allowed absolute value of beta, on the log scale.
     rng:
         NumPy random number generator.
+    signs:
+        Optional dict mapping a pair of edges to an edge polarity (-1 or 1).
 
     Returns
     -------
@@ -200,28 +203,30 @@ def _sample_betas(
     Notes
     -----
     The sampled magnitude follows approximately
-    ``log(abs(beta)) ~ Normal(log(log2(beta_med)), beta_log_sd**2)``.
+    ``log(abs(beta)) ~ Normal(log(beta_med), beta_log_sd**2)``.
     """
-    if beta_med <= 1:
-        raise ValueError("beta_med must be greater than 1.")
+    if beta_med <= 0:
+        raise ValueError("beta_med must be greater than 0.")
     if beta_log_sd <= 0:
         raise ValueError("beta_log_sd must be positive.")
-    if beta_abs_max <= np.log2(beta_med):
-        raise ValueError("beta_abs_max must be greater than log2(beta_med).")
+    if beta_abs_max <= beta_med:
+        raise ValueError("beta_abs_max must be greater than beta_med.")
     if not 0 <= beta_p <= 1:
         raise ValueError("beta_p must be between 0 and 1.")
     edges = list(edges)
     magnitudes = np.empty(len(edges))
     remaining = np.arange(len(edges))
+
     while remaining.size:
-        proposed = rng.lognormal(np.log(np.log2(beta_med)), beta_log_sd, remaining.size)
+        proposed = rng.lognormal(np.log(beta_med), beta_log_sd, remaining.size)
         accepted = proposed < beta_abs_max
         magnitudes[remaining[accepted]] = proposed[accepted]
         remaining = remaining[~accepted]
-    signs = np.where(rng.random(len(edges)) < beta_p, 1.0, -1.0)
+    sampled_signs = np.where(rng.random(len(edges)) < beta_p, 1.0, -1.0)
+    signs = {} if signs is None else signs
     return {
-        edge: float(sign * magnitude)
-        for edge, sign, magnitude in zip(edges, signs, magnitudes, strict=True)
+        edge: float(signs.get(edge, sampled_signs[i]) * magnitude)
+        for i, (edge, magnitude) in enumerate(zip(edges, magnitudes, strict=True))
     }
 
 
@@ -236,6 +241,7 @@ def build_synthetic_scm(
     beta_abs_max: float,
     rng: np.random.Generator,
     forbidden_edges: Iterable[tuple[str, str]] = (),
+    signs: dict[tuple[str, str], float] | None = None,
 ) -> SyntheticScmBuild:
     """Build a stable SCM, adding true edges according to ``missing_edge_rate``.
 
@@ -244,6 +250,17 @@ def build_synthetic_scm(
     solver. A fresh coefficient matrix is built on each retry.
     """
     nodes = tuple(str(node) for node in nodes)
+    graph_signs = {
+        (str(u), str(v)): data.get(
+            "polarity", data.get("d0", data.get("sign"))
+        )
+        for u, v, data in estimation_graph.edges(data=True)
+    }
+    normalized_signs = {
+        (str(u), str(v)): float(np.sign(sign))
+        for (u, v), sign in (graph_signs if signs is None else signs).items()
+        if sign in ("+", "-", "1", "-1", 1, -1, 1.0, -1.0)
+    }
 
     edges, added_edges = _select_true_edges(
         estimation_graph,
@@ -261,6 +278,7 @@ def build_synthetic_scm(
             beta_log_sd,
             beta_p,
             beta_abs_max,
+            normalized_signs
         )
 
         matrix = _beta_matrix_from_edges(nodes, betas)

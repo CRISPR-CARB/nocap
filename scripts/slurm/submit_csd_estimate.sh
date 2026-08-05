@@ -107,7 +107,7 @@ printf '{"design_mode":"%s","experiment_id":"%s","seed_base":%s,"n_samples_list"
 # If you need stronger confounding or different beta sampling, you can
 # override these env vars:
 SCC_CONFOUNDING_STRENGTH="${SCC_CONFOUNDING_STRENGTH:-0.0}"
-BETA_MED="${BETA_MED:-2.0}"
+BETA_MED="${BETA_MED:-0.5}"
 BETA_LOG_SD="${BETA_LOG_SD:-0.5}"
 BETA_ABS_MAX="${BETA_ABS_MAX:-5}"
 BETA_P="${BETA_P:-0.5}"
