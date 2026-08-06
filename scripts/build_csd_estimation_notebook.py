@@ -66,11 +66,12 @@ cells.append(
         """\
 # CSD estimation analysis — E. coli (Ecoli_Analysis_Notebooks/estimation)
 
-This notebook aggregates per-edge CSV outputs from
+This notebook aggregates per-edge observational CSV outputs from
 
 `notebooks/Ecoli_Analysis_Notebooks/estimation/{RUN_ID}/csv`.
 
-It produces plots showing:
+It preserves intervention provenance for validation, but excludes intervention
+rows from performance summaries and plots. It produces plots showing:
 
 1. **Estimated path coefficient** vs **ground-truth beta**
 2. **Error metrics** (MAE / RMSE / bias) across simulation parameters
@@ -92,6 +93,7 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 import pandas as pd
+import json
 
 from IPython.display import Image, display
 
@@ -121,68 +123,152 @@ cells.append(
     code(
         """\
 # ============================================================
-# Load and derive error columns
+# Load, validate, partition, and derive error columns
 # ============================================================
 
+CURRENT_REQUIRED_COLUMNS = [
+    'experiment_id', 'design_mode', 'seed_schema_version', 'scm_replicate_id',
+    'data_replicate_id', 'parameter_condition_id', 'target_effect_id',
+    'pairing_scope', 'sample_parent_id', 'sample_selection_rule', 'run_status',
+    'trial', 'n_samples', 'missing_edge_rate', 'missing_data_rate',
+    'missing_data_mechanism', 'seed', 'scm_seed', 'data_seed', 'cause', 'effect',
+    'same_scc', 'status', 'adjustment_set', 'n_rows_used',
+    'estimated_path_coefficient', 'stderr', 'residual_variance', 't_value',
+    'ground_truth_beta', 'scm_true_missing_edges_count', 'error',
+    'intervention_id', 'intervention_set_index', 'intervention_genes',
+    'intervention_n_genes', 'intervention_semantics', 'target_removed',
+    'target_present_in_intervened_graph', 'recovery_status',
+]
+NUMERIC_COLUMNS = [
+    'n_samples', 'missing_edge_rate', 'missing_data_rate', 'seed', 'scm_seed',
+    'data_seed', 'trial', 'n_rows_used', 'estimated_path_coefficient', 'stderr',
+    'residual_variance', 't_value', 'ground_truth_beta',
+    'scm_true_missing_edges_count', 'intervention_set_index',
+]
+
 dfs = []
+schema_mismatches = []
 for p in csv_paths:
-    df = pd.read_csv(p)
+    try:
+        df = pd.read_csv(p)
+    except pd.errors.EmptyDataError:
+        print(f"CSV {p} has no data.")
+    missing = sorted(set(CURRENT_REQUIRED_COLUMNS) - set(df.columns))
+    if missing:
+        schema_mismatches.append({'file': p.name, 'missing': ', '.join(missing)})
     df['csv_file'] = p.name
     dfs.append(df)
-
+if schema_mismatches:
+    print('CSV schema mismatches (legacy files may be supported only if analysis columns exist):')
+    display(pd.DataFrame(schema_mismatches))
 data = pd.concat(dfs, ignore_index=True)
+analysis_required = [
+    'status', 'n_samples', 'missing_edge_rate', 'missing_data_rate',
+    'missing_data_mechanism', 'cause', 'effect', 'estimated_path_coefficient',
+    'ground_truth_beta', 'scm_seed', 'data_seed', 'seed',
+]
+missing_analysis = sorted(set(analysis_required) - set(data.columns))
+assert not missing_analysis, f'Missing required analysis columns: {missing_analysis}'
 
 print('Total rows:', f"{len(data):,}")
 print('Status counts:')
-print(data['status'].value_counts())
+print(data['status'].value_counts(dropna=False))
+for col in NUMERIC_COLUMNS:
+    if col in data:
+        data[col] = pd.to_numeric(data[col], errors='coerce')
+for col in ['same_scc', 'target_removed', 'target_present_in_intervened_graph']:
+    if col in data:
+        data[col] = data[col].astype('string').str.strip().str.lower().map(
+            {'true': True, 'false': False, '1': True, '0': False}
+        )
 
-for col in [
-    'estimated_path_coefficient',
-    'stderr',
-    'residual_variance',
-    'ground_truth_beta',
-]:
-    data[col] = pd.to_numeric(data[col], errors='coerce')
+def intervention_genes_valid(value):
+    if pd.isna(value) or str(value).strip() == '':
+        return True
+    try:
+        parsed = json.loads(value) if isinstance(value, str) else value
+        return isinstance(parsed, list)
+    except (TypeError, json.JSONDecodeError):
+        return False
 
-# Core derived metrics
+if 'intervention_genes' in data:
+    invalid_genes = ~data['intervention_genes'].apply(intervention_genes_valid)
+    assert not invalid_genes.any(), 'Invalid intervention_genes JSON/list text found'
+
+intervention_id = data['intervention_id'].astype('string').fillna('').str.strip()
+observational = intervention_id.eq('') | intervention_id.str.lower().eq('observational')
+observational_df = data.loc[observational].copy()
+intervention_df = data.loc[~observational].copy()
+print('Observational rows:', f"{len(observational_df):,}")
+print('Intervention rows:', f"{len(intervention_df):,}")
+if len(intervention_df):
+    print('Intervention rows are preserved for diagnostics and excluded from all performance summaries and plots.')
+unexpected_intervention_metadata = intervention_df[
+    intervention_df['target_removed'].isna() | intervention_df['target_present_in_intervened_graph'].isna()
+]
+print('Unexpected intervention metadata rows:', f"{len(unexpected_intervention_metadata):,}")
+assert len(observational_df), 'No observational rows found after intervention partition'
+
+# Core derived metrics use signed log2 path coefficients. The source error is
+# retained when valid; this derived value is the consistent analysis contract.
 data['error'] = data['estimated_path_coefficient'] - data['ground_truth_beta']
 data['abs_error'] = data['error'].abs()
 data['sq_error'] = data['error'] ** 2
+data['relative_slope_error'] = data['abs_error'] / data['ground_truth_beta'].abs()
+data.loc[(data['ground_truth_beta'] == 0) | ~np.isfinite(data['relative_slope_error']), 'relative_slope_error'] = np.nan
 
-# Relative slope error: absolute error normalized by ground-truth beta
-# (guard against division by zero / non-finite values)
-data['relative_slope_error'] = data['abs_error'] / data['ground_truth_beta']
-data.loc[~np.isfinite(data['relative_slope_error']), 'relative_slope_error'] = np.nan
-
-eval_df = data[data['status'].isin(['identifiable', 'insufficient_data'])].copy()
-print('Eval rows:', f"{len(eval_df):,}")
+completed = data['run_status'].astype('string').str.strip().str.lower().isin({'', 'complete', 'completed'})
+eval_df = data.loc[
+    observational & completed & data['status'].isin(['identifiable', 'insufficient_data'])
+].copy()
+print('Eval rows (observational, identifiable/insufficient_data):', f"{len(eval_df):,}")
+print('Incomplete task rows excluded by run_status:', f"{(~completed).sum():,}")
+print('Estimator errors/unidentifiable rows retained in data diagnostics and excluded from numeric metrics.')
 
 print('Replicate intervals are empirical seed distributions, not row-bootstrap confidence intervals.')
 print('Full mode includes SCM and observation variability; fixed-SCM mode is conditional on one SCM block.')
-print('Full-mode bands describe end-to-end simulated performance; fixed-SCM bands describe conditional data-generation performance within each missing_edge_rate SCM block.')
 
 # Replicate summaries use seed identities rather than treating edge rows as replicates.
-for col in ['scm_seed', 'data_seed', 'seed']:
-    if col not in data:
-        data[col] = np.nan
-    data[col] = pd.to_numeric(data[col], errors='coerce')
-for col in [
-    'n_samples', 'missing_edge_rate', 'missing_data_rate',
-    'estimated_path_coefficient', 'stderr', 'residual_variance',
-    'ground_truth_beta', 'scm_true_missing_edges_count', 'n_rows_used',
-]:
-    assert col in data.columns, f'Missing required column: {col}'
-    data[col] = pd.to_numeric(data[col], errors='coerce')
-legacy_seed_fallback = data['scm_seed'].isna() | data['data_seed'].isna()
+legacy_seed_fallback = eval_df['scm_seed'].isna() | eval_df['data_seed'].isna()
 if legacy_seed_fallback.any():
-    data.loc[legacy_seed_fallback, 'scm_seed'] = data.loc[legacy_seed_fallback, 'seed']
-    data.loc[legacy_seed_fallback, 'data_seed'] = data.loc[legacy_seed_fallback, 'seed']
+    eval_df.loc[legacy_seed_fallback, 'scm_seed'] = eval_df.loc[legacy_seed_fallback, 'seed']
+    eval_df.loc[legacy_seed_fallback, 'data_seed'] = eval_df.loc[legacy_seed_fallback, 'seed']
     print('Legacy fallback: seed is used for both SCM and data identities.')
-assert data[['scm_seed', 'data_seed']].notna().all().all(), 'Missing replicate seed identity'
-assert data[['n_samples', 'missing_edge_rate', 'missing_data_rate']].notna().all().all(), 'Missing cell parameter'
-eval_df = data[data['status'].isin(['identifiable', 'insufficient_data'])].copy()
-metadata_mode = run_metadata.get('bootstrap_mode') if run_metadata.get('bootstrap') else None
-design = metadata_mode or ('full' if any('full' in p.name for p in csv_paths) else ('fixed_scm' if any('fixed_scm' in p.name for p in csv_paths) else 'legacy'))
+assert eval_df[['scm_seed', 'data_seed']].notna().all().all(), 'Missing replicate seed identity'
+assert eval_df[['n_samples', 'missing_edge_rate', 'missing_data_rate']].notna().all().all(), 'Missing cell parameter'
+
+explicit_modes = set(observational_df['design_mode'].dropna().astype(str).str.strip()) if 'design_mode' in data else set()
+assert len(explicit_modes) <= 1, f'Mixed observational design modes are not supported: {sorted(explicit_modes)}'
+metadata_mode = run_metadata.get('design_mode')
+if explicit_modes:
+    design = next(iter(explicit_modes)).lower()
+    if metadata_mode and str(metadata_mode).lower() != design:
+        print(f'Warning: CSV design_mode={design!r} differs from run metadata design_mode={metadata_mode!r}; using CSV value.')
+else:
+    design = str(metadata_mode).lower() if metadata_mode else (
+        'full' if any('full' in p.name for p in csv_paths) else
+        ('fixed_scm' if any('fixed_scm' in p.name for p in csv_paths) else 'legacy')
+    )
+assert design in {'paired_hierarchical', 'fixed_scm', 'full', 'legacy'}, f'Unsupported design mode: {design}'
+if design == 'paired_hierarchical':
+    print('Paired-hierarchical artifacts use shared complete observations/scores, maximum sample parents, and prefix sample selection.')
+
+unit_cols = ['experiment_id', 'parameter_condition_id', 'target_effect_id', 'pairing_scope', 'sample_parent_id', 'sample_selection_rule']
+present_unit_cols = [col for col in unit_cols if col in observational_df]
+unit_variants = observational_df.groupby(
+    ['csv_file', 'parameter_condition_id', 'target_effect_id'], dropna=False
+)[present_unit_cols].nunique(dropna=False)
+assert (unit_variants <= 1).all().all(), 'Explicit design/provenance metadata varies within an edge-condition unit'
+
+partition_summary = pd.DataFrame([{
+    'total_rows': len(data),
+    'observational_rows': len(observational_df),
+    'intervention_rows_excluded': len(intervention_df),
+    'incomplete_rows_excluded': int((~completed).sum()),
+    'design_mode': design,
+    'required_schema_valid': not bool(schema_mismatches),
+}])
+partition_summary.to_csv(NB_DIR / 'csd_estimation_schema_partition_summary.csv', index=False)
 
 # missing_edge_rate defines the SCM block. In fixed-SCM mode, data seeds may
 # be compared only within one edge-rate block: changing edge rate changes the
@@ -265,7 +351,7 @@ for k, v in overall.items():
     )
 )
 
-cells.append(md("""## Bootstrap modes and interval interpretation
+cells.append(md("""## Replicate designs and interval interpretation
 
 The two modes repeat the simulation with independent random seeds, rather than
 resampling rows from one observed dataset:
@@ -278,7 +364,7 @@ resampling rows from one observed dataset:
 - **Fixed-SCM mode** assigns one `scm_seed` to each `missing_edge_rate` SCM
   block and varies only `data_seed`. Its empirical distribution is conditional
   on that one structural realization: it measures variation from sampling,
-  UMI/count generation, library sizes, and missingness. Different
+  count generation, size factors, q0 baselines, and missingness. Different
   `missing_edge_rate` values are different SCM blocks and are never pooled into
   one fixed-SCM interval.
 
@@ -298,33 +384,37 @@ cells.append(code("""
 plot_summary = ci_summary.copy()
 
 def plot_seed_bands(metric, lower, upper, ylabel, title, filename):
-    fig, ax = plt.subplots(figsize=(10, 5))
-    for key, part in plot_summary.groupby(
-        ['missing_data_mechanism', 'missing_data_rate', 'missing_edge_rate'],
-        dropna=False):
-        part = part.sort_values('n_samples')
-        x_values = part['n_samples'].to_numpy(dtype=float)
-        y_values = part[metric].to_numpy(dtype=float)
-        ax.plot(x_values, y_values, marker='o',
-                label=f'mech={key[0]}, data={key[1]}, edge={key[2]}')
-        band = part[
-            (part['usable_replicates'] >= 2)
-            & np.isfinite(part[lower])
-            & np.isfinite(part[upper])
-        ]
-        if not band.empty:
-            ax.fill_between(
-                band['n_samples'].to_numpy(dtype=float),
-                band[lower].to_numpy(dtype=float),
-                band[upper].to_numpy(dtype=float),
-                alpha=0.15,
-            )
-    ax.set_xscale('log')
-    ax.set_xlabel('n_samples')
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
-    ax.grid(True, which='both', alpha=0.25)
-    ax.legend(fontsize=8)
+    panel_cols = ['missing_data_mechanism', 'missing_data_rate']
+    panels = list(plot_summary.groupby(panel_cols, dropna=False))
+    fig, axes = plt.subplots(
+        len(panels), 1, figsize=(11, max(4, 3.8 * len(panels))),
+        sharex=True, squeeze=False,
+    )
+    for ax, (panel_key, panel) in zip(axes[:, 0], panels):
+        for edge_rate, part in panel.groupby('missing_edge_rate', dropna=False):
+            part = part.sort_values('n_samples')
+            x_values = part['n_samples'].to_numpy(dtype=float)
+            y_values = part[metric].to_numpy(dtype=float)
+            ax.plot(x_values, y_values, marker='o', label=f'edge={edge_rate}')
+            band = part[
+                (part['usable_replicates'] >= 2)
+                & np.isfinite(part[lower])
+                & np.isfinite(part[upper])
+            ]
+            if not band.empty:
+                ax.fill_between(
+                    band['n_samples'].to_numpy(dtype=float),
+                    band[lower].to_numpy(dtype=float),
+                    band[upper].to_numpy(dtype=float),
+                    alpha=0.15,
+                )
+        ax.set_xscale('log')
+        ax.set_ylabel(ylabel)
+        ax.set_title(f'mech={panel_key[0]}, data={panel_key[1]}')
+        ax.grid(True, which='both', alpha=0.25)
+        ax.legend(fontsize=8, ncol=min(4, max(1, panel['missing_edge_rate'].nunique())))
+    axes[-1, 0].set_xlabel('n_samples')
+    fig.suptitle(title, y=1.01)
     plt.tight_layout()
     out = VIZ_DIR / filename
     plt.savefig(out, dpi=150, bbox_inches='tight')
@@ -338,56 +428,9 @@ plot_seed_bands('mean_error', 'error_lower', 'error_upper', 'Mean error',
 plot_seed_bands('mean_MAE', 'MAE_lower', 'MAE_upper', 'Mean MAE',
                 f'Mean MAE with empirical 95% intervals ({design})',
                 f'csd_estimation_{design}_mae_ci_vs_n_samples.png')
-
-for x, label, suffix, fixed_cols in [
-    (
-        'missing_edge_rate',
-        'Missing-edge rate (separate SCM blocks)',
-        'missing_edge_rate',
-        ['missing_data_mechanism', 'missing_data_rate', 'n_samples'],
-    ),
-    (
-        'missing_data_rate',
-        'Missing-data rate',
-        'missing_data_rate',
-        ['missing_data_mechanism', 'missing_edge_rate', 'n_samples'],
-    ),
-]:
-    fig, ax = plt.subplots(figsize=(10, 5))
-    for key, part in plot_summary.groupby(
-        fixed_cols,
-        dropna=False):
-        part = part.sort_values(x)
-        x_values = part[x].to_numpy(dtype=float)
-        ax.plot(x_values, part['mean_error'].to_numpy(dtype=float), marker='o',
-                label='; '.join(f'{column}={value}' for column, value in zip(fixed_cols, key)))
-        band = part[
-            (part['usable_replicates'] >= 2)
-            & np.isfinite(part['error_lower'])
-            & np.isfinite(part['error_upper'])
-        ]
-        if not band.empty:
-            ax.fill_between(
-                band[x].to_numpy(dtype=float),
-                band['error_lower'].to_numpy(dtype=float),
-                band['error_upper'].to_numpy(dtype=float),
-                alpha=0.15,
-            )
-    ax.axhline(0, color='black', linestyle='--', linewidth=0.8)
-    ax.set_xlabel(label)
-    ax.set_ylabel('Mean error')
-    ax.set_title(f'Mean error with empirical 95% intervals versus {label} ({design})')
-    ax.grid(True, alpha=0.25)
-    ax.legend(fontsize=8)
-    plt.tight_layout()
-    out = VIZ_DIR / f'csd_estimation_{design}_mean_error_ci_vs_{suffix}.png'
-    plt.savefig(out, dpi=150, bbox_inches='tight')
-    plt.close()
-    display(Image(str(out)))
-    print(f'Saved: {out}')
 """))
 
-cells.append(md("## 1) Estimated beta vs ground-truth beta"))
+cells.append(md("## 1) Estimated signed beta vs ground-truth signed beta"))
 
 cells.append(
     code(
@@ -396,8 +439,6 @@ cells.append(
 plot_df = eval_df.dropna(subset=['ground_truth_beta', 'estimated_path_coefficient']).copy()
 
 fig, ax = plt.subplots(figsize=(7, 6))
-ax.set_xscale('log')
-ax.set_yscale('log')
 ax.scatter(
     plot_df['ground_truth_beta'],
     plot_df['estimated_path_coefficient'],
@@ -414,9 +455,9 @@ pad = 0.05 * (lims[1] - lims[0] + 1e-12)
 lo, hi = lims[0] - pad, lims[1] + pad
 ax.plot([lo, hi], [lo, hi], color='black', linewidth=1, linestyle='--', alpha=0.7)
 
-ax.set_xlabel('Ground-truth beta (log)')
-ax.set_ylabel('Estimated path coefficient (log)')
-ax.set_title('Estimated vs ground-truth beta (all parameter settings)')
+ax.set_xlabel('Ground-truth beta (signed log2 path coefficient)')
+ax.set_ylabel('Estimated path coefficient (signed log2 coefficient)')
+ax.set_title('Estimated vs ground-truth signed beta (observational rows)')
 
 note = '\\n'.join([f"{k}: {v:.3g}" for k, v in overall.items()])
 ax.text(
@@ -441,17 +482,19 @@ print(f'Saved: {out}')
     )
 )
 
-cells.append(md("## 1b) Relative slope error (|estimated-true| / true) vs ground-truth beta"))
+cells.append(md("## 1b) Relative slope error (|estimated-true| / |true|) vs ground-truth beta"))
 
 cells.append(
     code(
         """\
 # Scatter plot: relative_slope_error vs ground-truth beta
 plot_df = eval_df.dropna(subset=['ground_truth_beta', 'relative_slope_error']).copy()
-plot_df = plot_df[np.isfinite(plot_df['relative_slope_error'])]
+plot_df = plot_df[
+    np.isfinite(plot_df['relative_slope_error'])
+    & (plot_df['relative_slope_error'] > 0)
+]
 
 fig, ax = plt.subplots(figsize=(7, 6))
-ax.set_xscale('log')
 ax.set_yscale('log')
 ax.scatter(
     plot_df['ground_truth_beta'],
@@ -461,9 +504,9 @@ ax.scatter(
     rasterized=True,
 )
 
-ax.set_xlabel('Ground-truth beta (log)')
-ax.set_ylabel('Relative slope error (|error| / beta) (log)')
-ax.set_title('Relative slope error vs ground-truth beta (all parameter settings)')
+ax.set_xlabel('Ground-truth beta (signed log2 path coefficient)')
+ax.set_ylabel('Relative slope error (|error| / |beta|, log scale)')
+ax.set_title('Relative slope error vs ground-truth signed beta (observational rows)')
 
 note = '\\n'.join([f"{k}: {v:.3g}" for k, v in overall.items() if k.startswith('relative_slope_error')])
 ax.text(
@@ -594,7 +637,7 @@ cells.append(
         """\
 # Compute adjustment-set size from the pipe-separated adjustment_set string
 def adj_set_size(s) -> float:
-    if pd.isna(s):
+    if pd.isna(s) or str(s).strip().lower() in {'', 'null', 'none', 'nan'}:
         return float('nan')
     parts = str(s).split('|')
     parts = [p for p in parts if p]
@@ -726,46 +769,49 @@ cells.append(
     code(
         """\
 # Line plot: MAE vs n_samples for each missing_edge_rate (separate panels)
+def plot_error_versus_samples_against_me_dr(metric: str):
+    edge_rates = sorted(eval_df['missing_edge_rate'].unique())
 
-edge_rates = sorted(eval_df['missing_edge_rate'].unique())
+    mechs = sorted(eval_df['missing_data_mechanism'].unique())
+    data_rates = sorted(eval_df['missing_data_rate'].unique())
 
-mechs = sorted(eval_df['missing_data_mechanism'].unique())
-data_rates = sorted(eval_df['missing_data_rate'].unique())
+    for mech in mechs:
+        for dr in data_rates:
+            sub = g[(g['missing_data_mechanism'] == mech) & (g['missing_data_rate'] == dr)].copy()
+            if len(sub) == 0:
+                continue
 
-for mech in mechs:
-    for dr in data_rates:
-        sub = g[(g['missing_data_mechanism'] == mech) & (g['missing_data_rate'] == dr)].copy()
-        if len(sub) == 0:
-            continue
+            sub = sub.sort_values(['missing_edge_rate', 'n_samples'])
+            fig, axes = plt.subplots(
+                1,
+                len(edge_rates),
+                figsize=(4.0 * len(edge_rates), 3.8),
+                sharey=True,
+            )
+            if len(edge_rates) == 1:
+                axes = [axes]
 
-        sub = sub.sort_values(['missing_edge_rate', 'n_samples'])
-        fig, axes = plt.subplots(
-            1,
-            len(edge_rates),
-            figsize=(4.0 * len(edge_rates), 3.8),
-            sharey=True,
-        )
-        if len(edge_rates) == 1:
-            axes = [axes]
+            for ax, er in zip(axes, edge_rates):
+                s2 = sub[sub['missing_edge_rate'] == er]
+                ax.plot(s2['n_samples'], s2[metric], marker='o', linewidth=2)
+                ax.set_title(f'missing_edge_rate={er}')
+                ax.set_xlabel('n_samples')
+                ax.set_xscale('log')
+                ax.grid(True, alpha=0.25)
 
-        for ax, er in zip(axes, edge_rates):
-            s2 = sub[sub['missing_edge_rate'] == er]
-            ax.plot(s2['n_samples'], s2['MAE'], marker='o', linewidth=2)
-            ax.set_title(f'missing_edge_rate={er}')
-            ax.set_xlabel('n_samples')
-            ax.set_xscale('log')
-            ax.grid(True, alpha=0.25)
+            axes[0].set_ylabel(metric)
+            fig.suptitle(f'{metric} vs n_samples: {mech}, missing_data_rate={dr}')
+            plt.tight_layout()
 
-        axes[0].set_ylabel('MAE')
-        fig.suptitle(f'MAE vs n_samples: {mech}, missing_data_rate={dr}')
-        plt.tight_layout()
+            out = VIZ_DIR / f'csd_estimation_{metric}_lines_{mech}_data_rate{dr}.png'
+            plt.savefig(out, dpi=150, bbox_inches='tight')
+            plt.close()
 
-        out = VIZ_DIR / f'csd_estimation_mae_lines_{mech}_data_rate{dr}.png'
-        plt.savefig(out, dpi=150, bbox_inches='tight')
-        plt.close()
+            display(Image(str(out)))
+            print(f'Saved: {out}')
 
-        display(Image(str(out)))
-        print(f'Saved: {out}')
+plot_error_versus_samples_against_me_dr("MAE")
+plot_error_versus_samples_against_me_dr("RelativeSlopeError")
 """
     )
 )
@@ -847,7 +893,7 @@ for mech in sorted(plot_df['missing_data_mechanism'].unique()):
         print(f'Saved: {out}')
 
         # Distribution via boxplot for the edge-rates
-        for er in edge_rates:
+        for er in edge_rates_sorted:
             box_sub = sub[sub['missing_edge_rate'] == er]
             if len(box_sub) > 0:
                 data_by_n = [
