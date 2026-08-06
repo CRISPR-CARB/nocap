@@ -329,6 +329,12 @@ def _load_adjustment_sets_csv(
     return mapping
 
 
+def _task_latent_expression_hat(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    raise ValueError("Task field 'use_latent_expression_hat' must be a JSON boolean")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(
         description=__doc__,
@@ -349,6 +355,7 @@ def main() -> None:
             "confounded_chain",
             "cycle",
             "two_cycles_disconnected",
+            "small_network"
         ],
         help="Built-in demo graph to use when --graphml is omitted.",
     )
@@ -579,6 +586,10 @@ def main() -> None:
         ):
             if name in task:
                 setattr(args, name, task[name])
+        if "use_latent_expression_hat" in task:
+            args.no_latent_expression_hat = not _task_latent_expression_hat(
+                task["use_latent_expression_hat"]
+            )
         args.n_samples_list = str(task["n_samples"])
         args.missing_edge_rate = float(task["missing_edge_rate"])
         args.missing_data_rate = float(task["missing_data_rate"])
@@ -614,6 +625,8 @@ def main() -> None:
             graph.add_edges_from([("X", "Y"), ("Y", "X"), ("Y", "Z"), ("Z", "Y")])
         elif args.demo == "two_cycles_disconnected":
             graph.add_edges_from([("A", "B"), ("B", "A"), ("C", "D"), ("D", "C")])
+        elif args.demo == "small_network":
+            graph.add_edges_from([("TF1", "G1"), ("TF1", "G2"), ("G2", "G3"), ("G1", "TF2"), ("G3", "TF2"), ("TF2", "G4"), ("G3", "TF3"), ("TF3", "G2"), ("TF3", "TF1")])
         else:
             raise ValueError(f"Unknown demo {args.demo!r}")
 

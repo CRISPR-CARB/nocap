@@ -23,7 +23,8 @@ Run from the repository root with the project environment, for example::
         --n-samples-list 100,500,1000 \
         --missing-edge-rates 0.0,0.2,0.4 \
         --missing-data-rates 0.0,0.3 \
-        --mechanisms biological_error,instrument_error
+        --mechanisms biological_error,instrument_error \
+        --use-latent-expression-hat
 
 Intervention task generation::
 
@@ -132,6 +133,22 @@ def main() -> None:
     parser.add_argument("--intervention-graph-dir", default=None)
     parser.add_argument("--include-observational", action="store_true")
     parser.add_argument("--fixed-intervention-value", type=float, default=None)
+    latent_hat_group = parser.add_mutually_exclusive_group()
+    latent_hat_group.add_argument(
+        "--use-latent-expression-hat",
+        dest="use_latent_expression_hat",
+        action="store_true",
+        type=bool,
+        help="Use count-derived expression estimates as estimator input (default).",
+    )
+    latent_hat_group.add_argument(
+        "--no-latent-expression-hat",
+        dest="use_latent_expression_hat",
+        action="store_false",
+        type=bool,
+        help="Use true latent expression as estimator input.",
+    )
+    parser.set_defaults(use_latent_expression_hat=True)
     args = parser.parse_args()
 
     source_graph = None
@@ -228,6 +245,7 @@ def main() -> None:
                         "seed_scope": "scm_block"
                         if args.design_mode == "fixed_scm"
                         else ("parameter_cell" if args.design_mode == "full" else "replicate"),
+                        "use_latent_expression_hat": args.use_latent_expression_hat,
                         **condition,
                     }
                     if intervention:
