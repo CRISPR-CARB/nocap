@@ -138,14 +138,12 @@ def main() -> None:
         "--use-latent-expression-hat",
         dest="use_latent_expression_hat",
         action="store_true",
-        type=bool,
         help="Use count-derived expression estimates as estimator input (default).",
     )
     latent_hat_group.add_argument(
         "--no-latent-expression-hat",
         dest="use_latent_expression_hat",
         action="store_false",
-        type=bool,
         help="Use true latent expression as estimator input.",
     )
     parser.set_defaults(use_latent_expression_hat=True)
