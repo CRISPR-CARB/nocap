@@ -22,8 +22,8 @@ class SimulationConfig:
     dispersion: float | Sequence[float] = 0.1
     size_factor_log_sd: float = 0.4
     umi_pseudocount: float = 1.0
-    baseline_expression_log_mean: float = 0.0
-    baseline_expression_log_sd: float = 2.0
+    baseline_expression_mean: float = 1.0
+    baseline_expression_dispersion: float = 2.25
     missing_data_rate: float = 0.0
     missing_data_mechanism: str = "biological_error"
     self_mask_quantile: float = 0.25
@@ -237,8 +237,8 @@ def generate_paired_data_artifact(
     )
     baseline = sample_baseline_expression(
         len(scm.nodes),
-        log_mean=config.baseline_expression_log_mean,
-        log_sd=config.baseline_expression_log_sd,
+        mean=config.baseline_expression_mean,
+        dispersion=config.baseline_expression_dispersion,
         rng=observation_rng,
     )
     dispersions = normalize_dispersions(config.dispersion, len(scm.nodes))
@@ -335,19 +335,27 @@ def sample_size_factors(
 def sample_baseline_expression(
     n_genes: int,
     *,
-    log_mean: float = 0.0,
-    log_sd: float = 2.0,
+    mean: float = 1.0,
+    dispersion: float = 2.25,
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """Sample positive, unconstrained gene-specific q0 expression baselines."""
+    """Sample positive gene-specific q0 baselines from a negative binomial.
+
+    The negative-binomial mean is ``mean`` and its dispersion is ``dispersion``
+    in the variance parameterization ``var = mean + dispersion * mean**2``.
+    A unit pseudocount keeps the baseline strictly positive, which is required
+    by the count-to-expression transforms.
+    """
     if n_genes <= 0:
         raise ValueError("n_genes must be positive.")
-    if not np.isfinite(log_mean):
-        raise ValueError("baseline_expression_log_mean must be finite.")
-    if not np.isfinite(log_sd) or log_sd < 0:
-        raise ValueError("baseline_expression_log_sd must be finite and non-negative.")
+    if not np.isfinite(mean) or mean <= 0:
+        raise ValueError("baseline_expression_mean must be finite and positive.")
+    if not np.isfinite(dispersion) or dispersion <= 0:
+        raise ValueError("baseline_expression_dispersion must be finite and positive.")
 
-    return rng.lognormal(mean=log_mean, sigma=log_sd, size=n_genes)
+    n = 1.0 / dispersion
+    p = n / (n + mean)
+    return rng.negative_binomial(n=n, p=p, size=n_genes).astype(float) + 1.0
 
 
 def normalize_dispersions(
@@ -572,8 +580,8 @@ def _observe(state: SimulationState) -> SimulationState:
     )
     state.baseline_expression = sample_baseline_expression(
         len(state.scm.nodes),
-        log_mean=config.baseline_expression_log_mean,
-        log_sd=config.baseline_expression_log_sd,
+        mean=config.baseline_expression_mean,
+        dispersion=config.baseline_expression_dispersion,
         rng=state.rng,
     )
     state.dispersions = normalize_dispersions(config.dispersion, len(state.scm.nodes))

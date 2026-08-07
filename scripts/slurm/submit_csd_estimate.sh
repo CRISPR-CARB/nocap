@@ -115,8 +115,8 @@ BETA_P="${BETA_P:-0.5}"
 
 DISPERSION="${DISPERSION:-0.1}"
 SIZE_FACTOR_LOG_SD="${SIZE_FACTOR_LOG_SD:-0.4}"
-BASELINE_EXPRESSION_LOG_MEAN="${BASELINE_EXPRESSION_LOG_MEAN:-0.0}"
-BASELINE_EXPRESSION_LOG_SD="${BASELINE_EXPRESSION_LOG_SD:-2.0}"
+BASELINE_EXPRESSION_MEAN="${BASELINE_EXPRESSION_MEAN:-1.0}"
+BASELINE_EXPRESSION_DISPERSION="${BASELINE_EXPRESSION_DISPERSION:-2.25}"
 UMI_PSEUDOCOUNT="${UMI_PSEUDOCOUNT:-1.0}"
 USE_LATENT_EXPRESSION_HAT="${USE_LATENT_EXPRESSION_HAT:-1}"
 if [[ "${USE_LATENT_EXPRESSION_HAT}" == "0" ]]; then
@@ -150,7 +150,7 @@ run_one() {
   out_csv=\"\$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1]))[\"output_csv\"])' \"\$task_json\")\"
   [[ -s \"\$out_csv\" ]] && { echo \"[skip] \$out_csv\"; return; }
   mkdir -p \"\$(dirname \"\$out_csv\")\"
-   uv run python ${REPO_ROOT}/scripts/csd_estimate.py --task-json \"\$task_json\" --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --design-mode ${DESIGN_MODE} --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --dispersion ${DISPERSION} --size-factor-log-sd ${SIZE_FACTOR_LOG_SD} --baseline-expression-log-mean ${BASELINE_EXPRESSION_LOG_MEAN} --baseline-expression-log-sd ${BASELINE_EXPRESSION_LOG_SD} --umi-pseudocount ${UMI_PSEUDOCOUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA} ${LATENT_EXPRESSION_HAT_ARG}
+   uv run python ${REPO_ROOT}/scripts/csd_estimate.py --task-json \"\$task_json\" --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --design-mode ${DESIGN_MODE} --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --dispersion ${DISPERSION} --size-factor-log-sd ${SIZE_FACTOR_LOG_SD} --baseline-expression-mean ${BASELINE_EXPRESSION_MEAN} --baseline-expression-dispersion ${BASELINE_EXPRESSION_DISPERSION} --umi-pseudocount ${UMI_PSEUDOCOUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA} ${LATENT_EXPRESSION_HAT_ARG}
 }
 export -f run_one
 xargs -a ${batch_file} -P ${BATCH_SIZE} -I{} bash -c 'run_one "\$@"' _ {}

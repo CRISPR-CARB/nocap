@@ -543,16 +543,16 @@ def main() -> None:
         help="Use true latent expression as estimator input instead of count-derived expression.",
     )
     p.add_argument(
-        "--baseline-expression-log-mean",
+        "--baseline-expression-mean",
         type=float,
-        default=0.0,
-        help="Natural-log mean of the positive gene-specific q0 baselines.",
+        default=1.0,
+        help="Mean of the positive gene-specific q0 baselines.",
     )
     p.add_argument(
-        "--baseline-expression-log-sd",
+        "--baseline-expression-dispersion",
         type=float,
-        default=2.0,
-        help="Natural-log standard deviation of gene-specific q0 baselines.",
+        default=2.25,
+        help="Negative-binomial dispersion of gene-specific q0 baselines.",
     )
 
     # Regression/data cleaning.
@@ -723,8 +723,8 @@ def main() -> None:
                 dispersion=dispersion,
                 size_factor_log_sd=float(args.size_factor_log_sd),
                 umi_pseudocount=float(args.umi_pseudocount),
-                baseline_expression_log_mean=float(args.baseline_expression_log_mean),
-                baseline_expression_log_sd=float(args.baseline_expression_log_sd),
+                baseline_expression_mean=float(args.baseline_expression_mean),
+                baseline_expression_dispersion=float(args.baseline_expression_dispersion),
                 use_latent_expression_hat=not args.no_latent_expression_hat,
             )
             paired_artifacts = {}
@@ -759,8 +759,8 @@ def main() -> None:
                 dispersion=dispersion,
                 size_factor_log_sd=float(args.size_factor_log_sd),
                 umi_pseudocount=float(args.umi_pseudocount),
-                baseline_expression_log_mean=float(args.baseline_expression_log_mean),
-                baseline_expression_log_sd=float(args.baseline_expression_log_sd),
+                baseline_expression_mean=float(args.baseline_expression_mean),
+                baseline_expression_dispersion=float(args.baseline_expression_dispersion),
                 missing_data_rate=missing_data_rate,
                 missing_data_mechanism=args.missing_data_mechanism,
                 self_mask_quantile=float(args.self_mask_quantile),

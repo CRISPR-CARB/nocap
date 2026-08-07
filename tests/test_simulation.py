@@ -97,13 +97,25 @@ def test_size_factors_are_geometrically_centered():
 
 
 def test_baseline_expression_is_not_compositionally_normalized():
-    """Sample direct positive q0 baselines without forcing a unit sum."""
+    """Sample positive q0 baselines without forcing a unit sum."""
     values = sample_baseline_expression(
-        5, log_mean=0.0, log_sd=2.0, rng=np.random.default_rng(1)
+        5, mean=1.0, dispersion=2.25, rng=np.random.default_rng(1)
     )
 
     assert np.all(values > 0)
     assert not np.isclose(values.sum(), 1.0)
+
+
+def test_baseline_expression_uses_negative_binomial_sampling():
+    """Use the seeded negative-binomial baseline realization."""
+    values = sample_baseline_expression(
+        5, mean=1.0, dispersion=2.25, rng=np.random.default_rng(1)
+    )
+
+    expected = np.random.default_rng(1).negative_binomial(
+        n=1 / 2.25, p=(1 / 2.25) / ((1 / 2.25) + 1.0), size=5
+    ).astype(float) + 1.0
+    np.testing.assert_array_equal(values, expected)
 
 
 def test_dispersions_broadcast_and_copy_gene_vectors():
@@ -204,7 +216,7 @@ def test_observation_helpers_validate_shapes_and_parameters():
         sample_size_factors(2, -1.0, np.random.default_rng(1))
 
     with pytest.raises(ValueError, match="n_genes"):
-        sample_baseline_expression(0, log_sd=1.0, rng=np.random.default_rng(1))
+        sample_baseline_expression(0, dispersion=1.0, rng=np.random.default_rng(1))
 
     with pytest.raises(ValueError, match="shape"):
         sample_umi_counts(

@@ -158,22 +158,25 @@ not introduce an effective library-size relationship such as
 
 ### Baseline expression
 
-Gene-specific baselines are sampled directly:
+Gene-specific baselines are sampled directly from a positive, overdispersed
+negative-binomial distribution:
 
 ```text
-q0_g ~ LogNormal(baseline_expression_log_mean,
-                 baseline_expression_log_sd**2)
+q0_g ~ 1 + NB(mu=baseline_expression_mean,
+              alpha=baseline_expression_dispersion)
 ```
 
-The lognormal parameters are in natural-log units. The defaults are:
+The mean parameter is in natural-log units and the standard-deviation parameter
+controls negative-binomial overdispersion. The defaults are:
 
 ```text
-baseline_expression_log_mean = 0.0
-baseline_expression_log_sd   = 2.0
+baseline_expression_mean       = 1.0
+baseline_expression_dispersion = 2.25
 ```
 
-The geometric baseline is therefore one by default, but individual `q0_g`
-values can be much larger or smaller. Their sum is not constrained.
+The baseline mean is close to one by default, with substantial overdispersion,
+but individual `q0_g` values can be much larger or smaller. Their sum is not
+constrained.
 
 ### Negative-binomial counts
 
@@ -244,8 +247,8 @@ settings:
 | `dispersion` | Positive scalar or one value per gene | `0.1` |
 | `size_factor_log_sd` | Natural-log SD for raw size factors | `0.4` |
 | `umi_pseudocount` | Positive count pseudocount | `1.0` |
-| `baseline_expression_log_mean` | Natural-log mean of `q0` | `0.0` |
-| `baseline_expression_log_sd` | Natural-log SD of `q0` | `2.0` |
+| `baseline_expression_mean` | Mean of `q0` | `1.0` |
+| `baseline_expression_dispersion` | NB overdispersion parameter for `q0` | `2.25` |
 | `missing_data_rate` | Base missingness probability | `0.0` |
 | `missing_data_mechanism` | Biological, instrument, or both | `biological_error` |
 | `self_mask_quantile` | Instrument masking threshold quantile | `0.25` |
@@ -264,8 +267,8 @@ config = SimulationConfig(
     n_samples=500,
     dispersion=[0.05, 0.1, 0.2],
     size_factor_log_sd=0.4,
-    baseline_expression_log_mean=0.0,
-    baseline_expression_log_sd=2.0,
+    baseline_expression_mean=1.0,
+    baseline_expression_dispersion=2.25,
     missing_data_rate=0.1,
     missing_data_mechanism="biological_error+instrument_error",
 )
@@ -432,8 +435,8 @@ Other observation options include:
 
 ```text
 --size-factor-log-sd
---baseline-expression-log-mean
---baseline-expression-log-sd
+--baseline-expression-mean
+--baseline-expression-dispersion
 --umi-pseudocount
 ```
 
