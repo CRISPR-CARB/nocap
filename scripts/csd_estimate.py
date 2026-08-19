@@ -355,7 +355,8 @@ def main() -> None:
             "confounded_chain",
             "cycle",
             "two_cycles_disconnected",
-            "small_network"
+            "small_network",
+            "frontdoor_cycle"
         ],
         help="Built-in demo graph to use when --graphml is omitted.",
     )
@@ -627,6 +628,8 @@ def main() -> None:
             graph.add_edges_from([("A", "B"), ("B", "A"), ("C", "D"), ("D", "C")])
         elif args.demo == "small_network":
             graph.add_edges_from([("TF1", "G1"), ("TF1", "G2"), ("G2", "G3"), ("G1", "TF2"), ("G3", "TF2"), ("TF2", "G4"), ("G3", "TF3"), ("TF3", "G2"), ("TF3", "TF1")])
+        elif args.demo == "frontdoor_cycle":
+            graph.add_edges_from([("TF1", "G1"), ("G1", "TF2"), ("G1", "G2"), ("TF2", "G2"), ("TF2", "TF1"), ("TF1", "G2")])
         else:
             raise ValueError(f"Unknown demo {args.demo!r}")
 
