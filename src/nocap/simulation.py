@@ -184,7 +184,7 @@ def _apply_missingness_arrays(data, latent, uniforms, config):
             probabilities.append(np.clip(rate * raw / raw.mean(), 0, 1))
         # The mechanisms are independent causes of missingness.
         probability = 1.0 - np.prod([1.0 - p for p in probabilities], axis=0)
-        data.loc[uniforms[:, j] < probability, col] = 0.0
+        data.loc[uniforms[:, j] < probability, col] = -79.0  # log2(1e-24)
     return data
 
 
@@ -339,7 +339,7 @@ def sample_baseline_expression(
     dispersion: float = 2.25,
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """Sample positive gene-specific q0 baselines from a negative binomial.
+    """Sample positive gene-specific q0 baselines from a zero-inflated NB.
 
     The negative-binomial mean is ``mean`` and its dispersion is ``dispersion``
     in the variance parameterization ``var = mean + dispersion * mean**2``.
@@ -356,6 +356,32 @@ def sample_baseline_expression(
     n = 1.0 / dispersion
     p = n / (n + mean)
     return rng.negative_binomial(n=n, p=p, size=n_genes).astype(float) + 1.0
+
+
+def sample_zero_inflated_negative_binomial(
+    means: np.ndarray,
+    dispersions: np.ndarray,
+    rng: np.random.Generator,
+    zero_inflation: float = 0.1,
+) -> np.ndarray:
+    """Sample a zero-inflated negative-binomial array.
+
+    The NB uses ``var = mean + dispersion * mean**2``.  A single inflation
+    probability is intentionally kept here so this helper can be shared by
+    baseline and UMI generation without adding configuration parameters.
+    """
+    means = np.asarray(means, dtype=float)
+    dispersions = np.asarray(dispersions, dtype=float)
+    if means.shape != dispersions.shape or not np.all(np.isfinite(means)):
+        raise ValueError("means and dispersions must have matching finite shapes.")
+    if np.any(means <= 0) or not np.all(np.isfinite(dispersions)) or np.any(dispersions <= 0):
+        raise ValueError("means must be positive and dispersions must be finite and positive.")
+    if not 0 <= zero_inflation < 1:
+        raise ValueError("zero_inflation must be in [0, 1).")
+    n = 1.0 / dispersions
+    p = n / (n + means)
+    counts = rng.negative_binomial(n=n, p=p)
+    return np.where(rng.random(means.shape) < zero_inflation, 0, counts)
 
 
 def normalize_dispersions(
@@ -645,7 +671,7 @@ def _missing(state: SimulationState) -> SimulationState:
                 raise ValueError("self_mask_direction must be one of {low,high}.")
             probabilities.append(np.clip(rate * raw / raw.mean(), 0, 1))
         probability = 1.0 - np.prod([1.0 - p for p in probabilities], axis=0)
-        state.observed_data.loc[state.rng.random(config.n_samples) < probability, col] = 0.0
+        state.observed_data.loc[state.rng.random(config.n_samples) < probability, col] = -79.0  # log2(1e-24)
     return state
 
 
