@@ -630,12 +630,12 @@ def main() -> None:
             graph.add_edges_from([("TF1", "G1"), ("TF1", "G2"), ("G2", "G3"), ("G1", "TF2"), ("G3", "TF2"), ("TF2", "G4"), ("G3", "TF3"), ("TF3", "G2"), ("TF3", "TF1")])
         elif args.demo == "frontdoor_cycle":
             graph.add_edges_from([
+                ("TF1", "TF2", {"polarity": "+"}),
+                ("TF2", "TF3", {"polarity": "-"}),
+                ("TF3", "TF1", {"polarity": "+"}),
                 ("TF1", "G1", {"polarity": "+"}),
-                ("G1", "TF2", {"polarity": "-"}),
-                ("G1", "G2", {"polarity": "+"}),
-                ("TF2", "G2", {"polarity": "+"}),
-                ("TF2", "TF1", {"polarity": "+"}),
-                ("TF1", "G2", {"polarity": "+"})
+                ("TF2", "G1", {"polarity": "+"}),
+                ("TF3", "G1", {"polarity": "+"}),
             ])
         else:
             raise ValueError(f"Unknown demo {args.demo!r}")
