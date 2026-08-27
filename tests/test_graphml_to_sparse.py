@@ -10,6 +10,7 @@ from nocap.graphml_to_sparse import graphml_to_sparse
 
 
 def test_gene_order_is_authoritative_and_cycles_are_retained():
+    """Preserve caller gene order and both edges in a feedback cycle."""
     graph = nx.DiGraph()
     graph.add_edge("b", "a", polarity="activation")
     graph.add_edge("a", "b", polarity="repression")
@@ -26,6 +27,7 @@ def test_gene_order_is_authoritative_and_cycles_are_retained():
 
 
 def test_graph_only_genes_and_incident_edges_are_reported_and_dropped():
+    """Report graph-only genes while dropping their incident edges."""
     graph = nx.DiGraph()
     graph.add_edge("a", "b", polarity="+")
     graph.add_edge("external", "a", polarity="-")
@@ -41,6 +43,7 @@ def test_graph_only_genes_and_incident_edges_are_reported_and_dropped():
 
 
 def test_self_loops_are_dropped_but_feedback_cycles_are_not():
+    """Drop self-loops without removing multi-gene feedback cycles."""
     graph = nx.DiGraph()
     graph.add_edge("a", "a", polarity="+")
     graph.add_edge("a", "b", polarity="+")
@@ -54,6 +57,7 @@ def test_self_loops_are_dropped_but_feedback_cycles_are_not():
 
 
 def test_graphml_path_is_supported(tmp_path):
+    """Load and project a GraphML file from disk."""
     graph = nx.DiGraph()
     graph.add_edge("regulator", "target", polarity="negative")
     path = tmp_path / "network.graphml"
@@ -74,11 +78,13 @@ def test_graphml_path_is_supported(tmp_path):
     ],
 )
 def test_invalid_gene_order_is_rejected(gene_order, match):
+    """Reject empty, duplicate, and blank authoritative gene orders."""
     with pytest.raises(ValueError, match=match):
         graphml_to_sparse(nx.DiGraph(), gene_order)
 
 
 def test_undirected_and_parallel_edge_graphs_are_rejected():
+    """Reject graph structures unsupported by the sparse layer."""
     with pytest.raises(ValueError, match="directed"):
         graphml_to_sparse(nx.Graph(), ["a"])
     with pytest.raises(ValueError, match="parallel"):
@@ -86,6 +92,7 @@ def test_undirected_and_parallel_edge_graphs_are_rejected():
 
 
 def test_ambiguous_polarity_is_unconstrained():
+    """Encode unknown edge polarity as an unconstrained sign."""
     graph = nx.DiGraph()
     graph.add_edge("a", "b", polarity="unknown")
 

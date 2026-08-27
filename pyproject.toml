@@ -157,7 +157,7 @@ dependencies = [
     "sympy",
     "torch",
     "tqdm",
-    "y0 @ git+https://github.com/y0-causal-inference/y0.git@402-add-%CF%83-separation-single-door-criterion-for-linear-scm-coefficient-estimation-in-cyclic-directed-graphs",
+    "y0 @ git+https://github.com/y0-causal-inference/y0.git@a95377a9ee9f9683ccb83aba8ff740a72fbca631",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -192,6 +192,11 @@ tests = [
     "coverage",
     "hypothesis",
     "pytest",
+]
+verification = [
+    "specsaver @ git+https://github.com/scidonia/specsaver.git@4e317b0291875a015de76cdfea41640202acf089 ; python_version >= '3.12'",
+    "axiomander[testgen] @ git+https://github.com/scidonia/axiomander.git@7362ec77e853502ca1b5b4a0699bc6723bcd49ba",
+    "hypothesis>=6.155.6",
 ]
 docs = [
     "sphinx",

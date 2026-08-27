@@ -75,9 +75,7 @@ class SparseRegulatoryLayer(nn.Module):
             raise TypeError("edge_index must have dtype torch.long")
         if edge_index.ndim != 2 or edge_index.shape[0] != 2:
             raise ValueError("edge_index must have shape (2, num_edges)")
-        if edge_index.numel() and (
-            torch.any(edge_index < 0) or torch.any(edge_index >= num_genes)
-        ):
+        if edge_index.numel() and (torch.any(edge_index < 0) or torch.any(edge_index >= num_genes)):
             raise ValueError("edge_index endpoints must be valid gene indices")
 
         regulators, targets = edge_index
@@ -118,9 +116,7 @@ class SparseRegulatoryLayer(nn.Module):
             raise ValueError("edge_index and edge_signs must be on the same device")
 
     @staticmethod
-    def _validate_settings(
-        stability_bound: float, weight_mode: str, max_dense_genes: int
-    ) -> None:
+    def _validate_settings(stability_bound: float, weight_mode: str, max_dense_genes: int) -> None:
         if not isinstance(stability_bound, int | float) or isinstance(stability_bound, bool):
             raise TypeError("stability_bound must be a real number")
         if not 0 <= stability_bound < 1:
@@ -147,7 +143,9 @@ class SparseRegulatoryLayer(nn.Module):
         signed_weights = torch.where(
             signs > 0,
             torch.nn.functional.softplus(self.raw_weights),
-            torch.where(signs < 0, -torch.nn.functional.softplus(self.raw_weights), self.raw_weights),
+            torch.where(
+                signs < 0, -torch.nn.functional.softplus(self.raw_weights), self.raw_weights
+            ),
         )
         if self.weight_mode == "raw" or self.raw_weights.numel() == 0:
             return signed_weights
@@ -282,9 +280,9 @@ class SparseRegulatoryLayer(nn.Module):
 
     def _solve_linalg(self, drive: Tensor) -> Tensor:
         adjacency = self.dense_adjacency()
-        system = torch.eye(
-            self.num_genes, dtype=adjacency.dtype, device=adjacency.device
-        ) - adjacency
+        system = (
+            torch.eye(self.num_genes, dtype=adjacency.dtype, device=adjacency.device) - adjacency
+        )
         right_hand_side = drive.reshape(-1, self.num_genes).transpose(0, 1)
         try:
             solution = torch.linalg.solve(system, right_hand_side)

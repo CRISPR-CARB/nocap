@@ -1,5 +1,12 @@
 # Regulatory SCANVI Extension Implementation Plan for nocap
 
+> **Historical design input.** This plan predates the decision to build an
+> unlabeled regulatory VAE with YAML/H5AD ingestion and dual solver backends.
+> The normative source of truth is
+> [`../specifications/regulatory_vae.md`](../specifications/regulatory_vae.md),
+> with implementation status in
+> [`../specifications/regulatory_vae_traceability.md`](../specifications/regulatory_vae_traceability.md).
+
 ## Executive Summary
 
 Move the sparse regulatory SCANVI extension from pyro/examples into the nocap package, integrating causal cyclic coefficient estimation (σ-separation single-door criterion), sparse graph equilibrium solvers, and ChiRho multi-world counterfactual execution.

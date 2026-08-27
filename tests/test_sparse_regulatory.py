@@ -22,6 +22,7 @@ def _two_gene_layer(
 
 
 def test_sparse_matvec_uses_regulator_to_target_orientation():
+    """Apply each edge from its regulator value to its target output."""
     layer = _two_gene_layer()
     state = torch.tensor([[3.0, 5.0]], dtype=torch.double)
 
@@ -33,6 +34,7 @@ def test_sparse_matvec_uses_regulator_to_target_orientation():
 
 @pytest.mark.parametrize("num_steps", [0, 1, 2, 5])
 def test_fixed_message_matches_dense_recurrence(num_steps):
+    """Match the explicitly evaluated dense recurrence after each fixed step."""
     layer = _two_gene_layer()
     drive = torch.tensor([[1.0, 2.0], [-2.0, 0.5]], dtype=torch.double)
     adjacency = layer.dense_adjacency()
@@ -48,6 +50,7 @@ def test_fixed_message_matches_dense_recurrence(num_steps):
 
 
 def test_message_converges_to_linalg_on_stable_cycle():
+    """Converge to the exact dense solution on a stable signed cycle."""
     layer = _two_gene_layer()
     drive = torch.tensor([[1.0, 2.0]], dtype=torch.double)
 
@@ -60,6 +63,7 @@ def test_message_converges_to_linalg_on_stable_cycle():
 
 
 def test_normalization_bounds_each_target_row_and_preserves_signs():
+    """Bound incoming row norms without changing coefficient signs."""
     edge_index = torch.tensor([[0, 1, 2], [2, 2, 1]], dtype=torch.long)
     raw_weights = torch.tensor([0.8, -0.7, -0.2], dtype=torch.double)
     layer = SparseRegulatoryLayer(
@@ -79,6 +83,7 @@ def test_normalization_bounds_each_target_row_and_preserves_signs():
 
 
 def test_graph_polarity_hard_constrains_effective_weight_signs():
+    """Enforce graph polarity regardless of unconstrained parameter signs."""
     edge_index = torch.tensor([[0, 1, 2], [2, 2, 1]], dtype=torch.long)
     edge_signs = torch.tensor([1, -1, 0], dtype=torch.int8)
     layer = SparseRegulatoryLayer(
@@ -97,6 +102,7 @@ def test_graph_polarity_hard_constrains_effective_weight_signs():
 
 
 def test_tolerance_mode_reports_convergence():
+    """Stop tolerance iteration once the returned state meets its threshold."""
     layer = _two_gene_layer()
     drive = torch.tensor([1.0, 2.0], dtype=torch.double)
 
@@ -115,6 +121,7 @@ def test_tolerance_mode_reports_convergence():
 
 
 def test_tolerance_mode_rejects_unstable_raw_weights():
+    """Reject tolerance iteration when raw weights are not contractive."""
     layer = _two_gene_layer(weights=(2.0, 1.0))
     drive = torch.ones(2, dtype=torch.double)
 
@@ -123,6 +130,7 @@ def test_tolerance_mode_rejects_unstable_raw_weights():
 
 
 def test_linalg_can_solve_nonsingular_unstable_system_without_calling_it_stable():
+    """Distinguish algebraic solvability from dynamic stability."""
     layer = _two_gene_layer(weights=(2.0, 1.0))
     drive = torch.ones(2, dtype=torch.double)
 
@@ -133,7 +141,17 @@ def test_linalg_can_solve_nonsingular_unstable_system_without_calling_it_stable(
     assert not result.stable
 
 
+def test_linalg_translates_singular_system_failure():
+    """Raise the stable solver-domain error for a nonunique equilibrium."""
+    layer = _two_gene_layer(weights=(1.0, 1.0))
+    drive = torch.ones(2, dtype=torch.double)
+
+    with pytest.raises(ValueError, match="equilibrium is not unique"):
+        layer(drive, method="linalg")
+
+
 def test_linalg_dense_limit_is_checked_before_solve():
+    """Reject dense solving before allocating an oversized adjacency matrix."""
     edge_index = torch.empty((2, 0), dtype=torch.long)
     layer = SparseRegulatoryLayer(513, edge_index, max_dense_genes=512)
 
@@ -142,6 +160,7 @@ def test_linalg_dense_limit_is_checked_before_solve():
 
 
 def test_empty_graph_is_identity_for_arbitrary_leading_dimensions():
+    """Return the drive unchanged for an empty graph and any leading shape."""
     edge_index = torch.empty((2, 0), dtype=torch.long)
     layer = SparseRegulatoryLayer(4, edge_index)
     drive = torch.randn(2, 3, 4)
@@ -161,11 +180,13 @@ def test_empty_graph_is_identity_for_arbitrary_leading_dimensions():
     ],
 )
 def test_invalid_topology_is_rejected(edge_index, match):
+    """Reject self-loops, duplicate edges, and out-of-range endpoints."""
     with pytest.raises(ValueError, match=match):
         SparseRegulatoryLayer(2, edge_index)
 
 
 def test_message_and_linalg_gradients_agree():
+    """Match message and exact gradients after numerical convergence."""
     drive = torch.tensor([[1.0, 2.0]], dtype=torch.double, requires_grad=True)
     message_layer = _two_gene_layer()
     linalg_layer = _two_gene_layer()
@@ -181,6 +202,4 @@ def test_message_and_linalg_gradients_agree():
     )
 
     torch.testing.assert_close(message_drive_grad, linalg_drive_grad, atol=1e-11, rtol=1e-11)
-    torch.testing.assert_close(
-        message_weight_grad, linalg_weight_grad, atol=1e-10, rtol=1e-10
-    )
+    torch.testing.assert_close(message_weight_grad, linalg_weight_grad, atol=1e-10, rtol=1e-10)
