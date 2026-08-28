@@ -773,37 +773,38 @@ def plot_error_versus_samples_against_me_dr(metric: str):
     edge_rates = sorted(eval_df['missing_edge_rate'].unique())
 
     mechs = sorted(eval_df['missing_data_mechanism'].unique())
-    data_rates = sorted(eval_df['missing_data_rate'].unique())
+    # data_rates = sorted(eval_df['missing_data_rate'].unique())
+    data_rates = [0.0, 0.9, 0.95, 0.99]
 
     for mech in mechs:
-        for dr in data_rates:
-            sub = g[(g['missing_data_mechanism'] == mech) & (g['missing_data_rate'] == dr)].copy()
+        for er in edge_rates:
+            sub = g[(g['missing_data_mechanism'] == mech) & (g['missing_edge_rate'] == er)].copy()
             if len(sub) == 0:
                 continue
 
-            sub = sub.sort_values(['missing_edge_rate', 'n_samples'])
+            sub = sub.sort_values(['missing_data_rate', 'n_samples'])
             fig, axes = plt.subplots(
                 1,
-                len(edge_rates),
-                figsize=(4.0 * len(edge_rates), 3.8),
+                len(data_rates),
+                figsize=(4.0 * len(data_rates), 3.8),
                 sharey=True,
             )
-            if len(edge_rates) == 1:
+            if len(data_rates) == 1:
                 axes = [axes]
 
-            for ax, er in zip(axes, edge_rates):
-                s2 = sub[sub['missing_edge_rate'] == er]
+            for ax, dr in zip(axes, data_rates):
+                s2 = sub[sub['missing_data_rate'] == dr]
                 ax.plot(s2['n_samples'], s2[metric], marker='o', linewidth=2)
-                ax.set_title(f'missing_edge_rate={er}')
+                ax.set_title(f'missing_data_rate={dr}')
                 ax.set_xlabel('n_samples')
                 ax.set_xscale('log')
                 ax.grid(True, alpha=0.25)
 
             axes[0].set_ylabel(metric)
-            fig.suptitle(f'{metric} vs n_samples: {mech}, missing_data_rate={dr}')
+            fig.suptitle(f'{metric} vs n_samples: {mech}, missing_edge_rate: {er}')
             plt.tight_layout()
 
-            out = VIZ_DIR / f'csd_estimation_{metric}_lines_{mech}_data_rate{dr}.png'
+            out = VIZ_DIR / f'csd_estimation_{metric}_lines_{mech}_edge_rate{er}.png'
             plt.savefig(out, dpi=150, bbox_inches='tight')
             plt.close()
 
