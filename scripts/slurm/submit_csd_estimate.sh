@@ -71,9 +71,28 @@ MEM="${MEM:-0}"  # "0" lets slurm use partition default
 CPUS_PER_TASK="${CPUS_PER_TASK:-1}"
 BATCH_SIZE="${BATCH_SIZE:-64}"
 
+# An existing experiment is resumed using the batch size recorded when it was
+# created. This keeps reruns independent of newly supplied environment
+# variables. Older runs without metadata use the historical default.
+RUN_METADATA="${OUTDIR}/run_metadata.json"
+EXPERIMENT_MANIFEST="${OUTDIR}/experiment.json"
+if [[ -s "${EXPERIMENT_MANIFEST}" ]]; then
+    EXISTING_BATCH_SIZE="$(sed -n 's/.*"batch_size"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p' "${RUN_METADATA}" 2>/dev/null | head -n 1)"
+    if [[ -z "${EXISTING_BATCH_SIZE}" ]]; then
+        # Older runs predate batch_size in run_metadata.json. Their existing
+        # batch files are the source of truth for the original batch size.
+        for existing_batch in "${OUTDIR}/batches"/batch_*; do
+            [[ -f "${existing_batch}" ]] || continue
+            existing_batch_lines="$(wc -l < "${existing_batch}")"
+            ((existing_batch_lines > EXISTING_BATCH_SIZE)) && EXISTING_BATCH_SIZE="${existing_batch_lines}"
+        done
+    fi
+    BATCH_SIZE="${EXISTING_BATCH_SIZE:-64}"
+fi
+
 DRY_RUN="${DRY_RUN:-0}"
 DESIGN_MODE="${DESIGN_MODE:-paired_hierarchical}"
-EXPERIMENT_ID="${EXPERIMENT_ID:-csd-${TIMESTAMP}}"
+EXPERIMENT_ID="${EXPERIMENT_ID:-csd-${TIMESTAMP:-$(date +%Y%m%d_%H%M%S)}}"
 N_SCM_REPLICATES="${N_SCM_REPLICATES:-1}"
 N_DATA_REPLICATES_PER_SCM="${N_DATA_REPLICATES_PER_SCM:-1}"
 INCLUDE_OBSERVATIONAL="${INCLUDE_OBSERVATIONAL:-0}"
@@ -101,11 +120,13 @@ N_MISSING_EDGE_RATES_LIST="${MISSING_EDGE_RATES_LIST:-0.0,0.2,0.4}"
 N_MISSING_DATA_RATES_LIST="${MISSING_DATA_RATES_LIST:-0.0,0.3}"
 [[ -n "${N_SAMPLES_LIST}" && -n "${N_MISSING_EDGE_RATES_LIST}" && -n "${N_MISSING_DATA_RATES_LIST}" ]] || { echo "Parameter lists must be nonempty" >&2; exit 2; }
 
-printf '{"design_mode":"%s","experiment_id":"%s","seed_base":%s,"n_samples_list":"%s","missing_edge_rates":"%s","missing_data_rates":"%s","mechanisms":"%s"}\n' \
-    "${DESIGN_MODE}" "${EXPERIMENT_ID}" "${SEED_BASE}" \
-    "${N_SAMPLES_LIST}" "${N_MISSING_EDGE_RATES_LIST}" "${N_MISSING_DATA_RATES_LIST}" \
-    "$(IFS=,; echo "${MECHANISMS[*]}")" \
-    > "${OUTDIR}/run_metadata.json"
+if [[ ! -s "${EXPERIMENT_MANIFEST}" ]]; then
+    printf '{"design_mode":"%s","experiment_id":"%s","seed_base":%s,"batch_size":%s,"n_samples_list":"%s","missing_edge_rates":"%s","missing_data_rates":"%s","mechanisms":"%s"}\n' \
+        "${DESIGN_MODE}" "${EXPERIMENT_ID}" "${SEED_BASE}" \
+        "${BATCH_SIZE}" "${N_SAMPLES_LIST}" "${N_MISSING_EDGE_RATES_LIST}" "${N_MISSING_DATA_RATES_LIST}" \
+        "$(IFS=,; echo "${MECHANISMS[*]}")" \
+        > "${RUN_METADATA}"
+fi
 
 # If you need stronger confounding or different beta sampling, you can
 # override these env vars:
