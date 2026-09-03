@@ -9,7 +9,8 @@
 # measurement-error mechanism) and submits node-packed sbatch jobs.
 #
 # Idempotency: if the target output CSV already exists and is non-empty, the
-# corresponding job is skipped.
+# corresponding task is skipped. On resume, tasks belonging to batches with a
+# currently queued or running SLURM job are also left alone.
 #
 # Usage (from repo root):
 #   bash scripts/slurm/submit_csd_estimate.sh
@@ -249,19 +250,75 @@ function main {
         else
             echo "Using existing experiment manifest and tasks in ${OUTDIR}"
         fi
+
+        # Keep batch files for jobs that are still queued or running. Removing
+        # one while its job is starting can make xargs fail to read its task
+        # list, and resubmitting those tasks would create duplicate work.
+        shopt -s nullglob
+        active_jobs="$(squeue -h -u "${USER}" -o "%j" 2>/dev/null || true)"
+        declare -A active_job_names=()
+        while IFS= read -r job_name; do
+            [[ -n "${job_name}" ]] && active_job_names["${job_name}"]=1
+        done <<< "${active_jobs}"
+
+        declare -A active_batches=()
+        declare -A active_tasks=()
+        active_task_count=0
+        for batch_file in "${batch_dir}"/batch_*; do
+            [[ -f "${batch_file}" ]] || continue
+            batch_name="$(basename "${batch_file}")"
+            batch_name="${batch_name%.txt}"
+            job_name="csd_est_pack_${batch_name}"
+            if [[ -n "${active_job_names[${job_name}]+x}" ]]; then
+                active_batches["${batch_file}"]=1
+                while IFS= read -r task_json; do
+                    [[ -n "${task_json}" ]] || continue
+                    active_tasks["${task_json}"]=1
+                    active_task_count=$((active_task_count + 1))
+                done < "${batch_file}"
+                echo "Keeping active batch ${batch_name} ($(wc -l < "${batch_file}") tasks)"
+            fi
+        done
+
         : > "${pending_file}"
         for task_json in "${tasks_dir}"/*.json; do
             out_csv="$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1]))["output_csv"])' "${task_json}")"
-            [[ -s "${out_csv}" ]] || printf '%s\n' "${task_json}" >> "${pending_file}"
+            [[ -s "${out_csv}" ]] && continue
+            [[ -n "${active_tasks[${task_json}]+x}" ]] && continue
+            printf '%s\n' "${task_json}" >> "${pending_file}"
         done
-        rm -f "${batch_dir}"/batch_*.txt
+
+        # Batch files from completed jobs are only bookkeeping. They are
+        # replaced below with batches containing the tasks that still need
+        # outputs. Active batch files must remain untouched.
+        for batch_file in "${batch_dir}"/batch_*; do
+            [[ -f "${batch_file}" ]] || continue
+            [[ -n "${active_batches[${batch_file}]+x}" ]] || rm -f "${batch_file}"
+        done
+
         if [[ -s "${pending_file}" ]]; then
-            split -l "${BATCH_SIZE}" --numeric-suffixes=0 --suffix-length=3 "${pending_file}" "${batch_dir}/batch_"
-            for batch_file in "${batch_dir}"/batch_*; do
-                submit_batch "${batch_file}" "$(basename "${batch_file}")"
+            # Split through a temporary prefix so active batch_*.txt files are
+            # never overwritten. Assign the next available batch number to
+            # each newly created file.
+            new_batch_prefix="${batch_dir}/.new_batch_${$}_"
+            split -l "${BATCH_SIZE}" --numeric-suffixes=0 --suffix-length=3 "${pending_file}" "${new_batch_prefix}"
+            next_batch_number=0
+            for new_batch_file in "${batch_dir}"/.new_batch_${$}_*; do
+                while :; do
+                    batch_id="batch_$(printf '%03d' "${next_batch_number}")"
+                    batch_file="${batch_dir}/${batch_id}.txt"
+                    next_batch_number=$((next_batch_number + 1))
+                    [[ ! -e "${batch_file}" ]] && break
+                done
+                mv "${new_batch_file}" "${batch_file}"
+                submit_batch "${batch_file}" "${batch_id}"
             done
         else
-            echo "All CSD estimation outputs already exist. Nothing to submit."
+            if ((active_task_count > 0)); then
+                echo "No additional tasks to submit; ${active_task_count} tasks are in active batches."
+            else
+                echo "All CSD estimation outputs already exist. Nothing to submit."
+            fi
         fi
         echo "=== Done submitting CSD estimation jobs ==="
         return 0
