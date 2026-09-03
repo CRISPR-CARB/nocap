@@ -293,6 +293,7 @@ function main {
         declare -A active_batches=()
         declare -A active_tasks=()
         active_task_count=0
+        completed_task_count=0
         for batch_file in "${batch_dir}"/batch_*; do
             [[ -f "${batch_file}" ]] || continue
             batch_name="$(basename "${batch_file}")"
@@ -313,10 +314,17 @@ function main {
         for task_json in "${tasks_dir}"/*.json; do
             task_name="$(basename "${task_json}" .json)"
             out_csv="${OUTDIR}/csv/${task_name}.csv"
-            [[ -s "${out_csv}" ]] && continue
+            # A task is complete only when its CSV exists and is non-empty.
+            # This also takes precedence over stale batch bookkeeping.
+            if [[ -s "${out_csv}" ]]; then
+                completed_task_count=$((completed_task_count + 1))
+                continue
+            fi
             [[ -n "${active_tasks[${task_json}]+x}" ]] && continue
             printf '%s\n' "${task_json}" >> "${pending_file}"
         done
+
+        echo "Completed tasks with non-empty CSVs: ${completed_task_count}"
 
         # Batch files from completed jobs are only bookkeeping. They are
         # replaced below with batches containing the tasks that still need
