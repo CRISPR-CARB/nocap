@@ -88,6 +88,45 @@ def test_default_pipeline_is_reproducible_and_retains_state_fields():
     assert first.normalized_expression.shape == (12, 2)
 
 
+def test_pipeline_can_expose_raw_umi_counts_as_observed_data():
+    """Use integer UMI counts as the estimator-facing observed data when requested."""
+    result = generate_from_scm(
+        _one_edge_scm(),
+        SimulationConfig(n_samples=12, use_umi_counts_as_observed_data=True),
+        seed=7,
+    )
+
+    pd.testing.assert_frame_equal(
+        result.observed_data,
+        pd.DataFrame(result.umi_counts, columns=("A", "B")),
+    )
+    assert np.issubdtype(result.observed_data.to_numpy().dtype, np.integer)
+
+
+def test_count_observation_flag_uses_counts_in_paired_views():
+    """Apply the count-observation flag to paired artifact materialization."""
+    from nocap.simulation import generate_paired_data_artifact
+
+    artifact = generate_paired_data_artifact(
+        _one_edge_scm(),
+        SimulationConfig(n_samples=4),
+        max_samples=4,
+        scm_seed=1,
+        data_seed=2,
+    )
+    observed = artifact.view(
+        SimulationConfig(n_samples=4, use_umi_counts_as_observed_data=True)
+    )
+
+    pd.testing.assert_frame_equal(
+        observed,
+        pd.DataFrame(
+            artifact.umi_counts[artifact.sample_order],
+            columns=("A", "B"),
+        ),
+    )
+
+
 def test_size_factors_are_geometrically_centered():
     """Sample positive size factors whose geometric mean is one."""
     values = sample_size_factors(100, 0.4, np.random.default_rng(1))

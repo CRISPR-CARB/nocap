@@ -544,6 +544,11 @@ def main() -> None:
         help="Use true latent expression as estimator input instead of count-derived expression.",
     )
     p.add_argument(
+        "--use-umi-counts-as-observed-data",
+        action="store_true",
+        help="Pass raw simulated UMI counts as observed_data instead of X-hat.",
+    )
+    p.add_argument(
         "--baseline-expression-mean",
         type=float,
         default=1.0,
@@ -584,6 +589,7 @@ def main() -> None:
             "intervention_semantics",
             "forbidden_edges",
             "fixed_intervention_values",
+            "use_umi_counts_as_observed_data",
         ):
             if name in task:
                 setattr(args, name, task[name])
@@ -736,6 +742,7 @@ def main() -> None:
                 baseline_expression_mean=float(args.baseline_expression_mean),
                 baseline_expression_dispersion=float(args.baseline_expression_dispersion),
                 use_latent_expression_hat=not args.no_latent_expression_hat,
+                use_umi_counts_as_observed_data=args.use_umi_counts_as_observed_data,
             )
             paired_artifacts = {}
             artifact_key_prefix = getattr(args, "intervention_id", "observational")
@@ -779,6 +786,7 @@ def main() -> None:
                 scc_confounding_strength=float(args.scc_confounding_strength),
                 estimation_graph=graph,
                 use_latent_expression_hat=not args.no_latent_expression_hat,
+                use_umi_counts_as_observed_data=args.use_umi_counts_as_observed_data,
             )
 
             if paired_artifacts is not None:

@@ -147,6 +147,11 @@ def main() -> None:
         help="Use true latent expression as estimator input.",
     )
     parser.set_defaults(use_latent_expression_hat=True)
+    parser.add_argument(
+        "--use-umi-counts-as-observed-data",
+        action="store_true",
+        help="Pass raw simulated UMI counts to CSD estimation instead of X-hat.",
+    )
     args = parser.parse_args()
 
     source_graph = None
@@ -244,6 +249,7 @@ def main() -> None:
                         if args.design_mode == "fixed_scm"
                         else ("parameter_cell" if args.design_mode == "full" else "replicate"),
                         "use_latent_expression_hat": args.use_latent_expression_hat,
+                        "use_umi_counts_as_observed_data": args.use_umi_counts_as_observed_data,
                         **condition,
                     }
                     if intervention:

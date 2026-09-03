@@ -33,6 +33,7 @@ class SimulationConfig:
     estimation_graph: nx.DiGraph | None = None
     fixed_intervention_values: dict[str, float] = field(default_factory=dict)
     use_latent_expression_hat: bool = True
+    use_umi_counts_as_observed_data: bool = False
 
 
 @dataclass
@@ -133,7 +134,9 @@ def _view_observe(state: SimulationState) -> SimulationState:
             state.size_factors,
             pseudocount=state.config.umi_pseudocount,
         )
-    if state.config.use_latent_expression_hat:
+    if state.config.use_umi_counts_as_observed_data:
+        observed_expression = state.umi_counts.copy()
+    elif state.config.use_latent_expression_hat:
         observed_expression = counts_to_log_expression(
             state.umi_counts,
             state.size_factors,
@@ -184,7 +187,8 @@ def _apply_missingness_arrays(data, latent, uniforms, config):
             probabilities.append(np.clip(rate * raw / raw.mean(), 0, 1))
         # The mechanisms are independent causes of missingness.
         probability = 1.0 - np.prod([1.0 - p for p in probabilities], axis=0)
-        data.loc[uniforms[:, j] < probability, col] = -79.0  # log2(1e-24)
+        missing_value = 0.0
+        data.loc[uniforms[:, j] < probability, col] = missing_value
     return data
 
 
@@ -625,7 +629,9 @@ def _observe(state: SimulationState) -> SimulationState:
         state.size_factors,
         pseudocount=config.umi_pseudocount,
     )
-    if config.use_latent_expression_hat:
+    if config.use_umi_counts_as_observed_data:
+        observed_expression = state.umi_counts.copy()
+    elif config.use_latent_expression_hat:
         observed_expression = counts_to_log_expression(
             state.umi_counts,
             state.size_factors,
@@ -671,7 +677,10 @@ def _missing(state: SimulationState) -> SimulationState:
                 raise ValueError("self_mask_direction must be one of {low,high}.")
             probabilities.append(np.clip(rate * raw / raw.mean(), 0, 1))
         probability = 1.0 - np.prod([1.0 - p for p in probabilities], axis=0)
-        state.observed_data.loc[state.rng.random(config.n_samples) < probability, col] = -79.0  # log2(1e-24)
+        missing_value = 0.0
+        state.observed_data.loc[
+            state.rng.random(config.n_samples) < probability, col
+        ] = missing_value
     return state
 
 
