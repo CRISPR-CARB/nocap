@@ -282,7 +282,8 @@ function main {
 
         : > "${pending_file}"
         for task_json in "${tasks_dir}"/*.json; do
-            out_csv="$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1]))["output_csv"])' "${task_json}")"
+            task_name="$(basename "${task_json}" .json)"
+            out_csv="${OUTDIR}/csv/${task_name}.csv"
             [[ -s "${out_csv}" ]] && continue
             [[ -n "${active_tasks[${task_json}]+x}" ]] && continue
             printf '%s\n' "${task_json}" >> "${pending_file}"
