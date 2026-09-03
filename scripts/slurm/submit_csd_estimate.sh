@@ -22,6 +22,7 @@
 #   INTERVENTION_GRAPH_DIR=/path/to/intervention-graphs
 #   INCLUDE_OBSERVATIONAL=1
 #   USE_LATENT_EXPRESSION_HAT=0  # use true latent expression instead of count-derived estimates
+#   USE_UMI_COUNTS_AS_OBSERVED_DATA=1  # pass raw simulated UMI counts to the estimator
 #   DRY_RUN=1     # only print sbatch commands
 # Paired mode creates task JSON records with setup_csd_experiment.py and passes
 # each record directly to csd_estimate.py.
@@ -124,6 +125,13 @@ if [[ "${USE_LATENT_EXPRESSION_HAT}" == "0" ]]; then
 else
     LATENT_EXPRESSION_HAT_ARG=""
 fi
+USE_UMI_COUNTS_AS_OBSERVED_DATA="${USE_UMI_COUNTS_AS_OBSERVED_DATA:-0}"
+if [[ "${USE_UMI_COUNTS_AS_OBSERVED_DATA}" == "1" ]]; then
+    UMI_COUNTS_OBSERVED_DATA_ARG="--use-umi-counts-as-observed-data"
+else
+    UMI_COUNTS_OBSERVED_DATA_ARG=""
+fi
+LATENT_EXPRESSION_HAT_ARG="${LATENT_EXPRESSION_HAT_ARG} ${UMI_COUNTS_OBSERVED_DATA_ARG}"
 
 SELF_MASK_QUANTILE="${SELF_MASK_QUANTILE:-0.25}"
 SELF_MASK_K="${SELF_MASK_K:-8.0}"
@@ -202,6 +210,7 @@ function main {
         echo "  DRY_RUN: ${DRY_RUN}"
         echo "  Design mode: ${DESIGN_MODE}"
         echo "  Use latent expression hat: ${USE_LATENT_EXPRESSION_HAT}"
+        echo "  Use UMI counts as observed data: ${USE_UMI_COUNTS_AS_OBSERVED_DATA}"
         echo "  Intervention CSV: ${INTERVENTION_CSV:-none}"
         echo ""
 
@@ -226,6 +235,9 @@ function main {
             setup_args+=(--no-latent-expression-hat)
         else
             setup_args+=(--use-latent-expression-hat)
+        fi
+        if [[ "${USE_UMI_COUNTS_AS_OBSERVED_DATA}" == "1" ]]; then
+            setup_args+=(--use-umi-counts-as-observed-data)
         fi
         if [[ -n "${INTERVENTION_CSV}" ]]; then
             INTERVENTION_GRAPH_DIR="${INTERVENTION_GRAPH_DIR:-${OUTDIR}/intervention-graphs}"
