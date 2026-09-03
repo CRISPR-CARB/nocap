@@ -773,8 +773,7 @@ def plot_error_versus_samples_against_me_dr(metric: str):
     edge_rates = sorted(eval_df['missing_edge_rate'].unique())
 
     mechs = sorted(eval_df['missing_data_mechanism'].unique())
-    # data_rates = sorted(eval_df['missing_data_rate'].unique())
-    data_rates = [0.0, 0.9, 0.95, 0.99]
+    data_rates = sorted(eval_df['missing_data_rate'].unique())
 
     for mech in mechs:
         for er in edge_rates:
