@@ -97,6 +97,14 @@ N_SCM_REPLICATES="${N_SCM_REPLICATES:-1}"
 N_DATA_REPLICATES_PER_SCM="${N_DATA_REPLICATES_PER_SCM:-1}"
 INCLUDE_OBSERVATIONAL="${INCLUDE_OBSERVATIONAL:-0}"
 
+# Include the output directory in the job name so batches from different
+# experiments are distinguishable. The directory token is deterministic, so
+# resume calls can identify their own active jobs without relying on job IDs.
+OUTDIR_TOKEN="$(basename "${OUTDIR}")"
+OUTDIR_TOKEN="$(printf '%s' "${OUTDIR_TOKEN}" | tr -cs '[:alnum:]_' '-')"
+OUTDIR_TOKEN="${OUTDIR_TOKEN:0:40}"
+JOB_NAME_PREFIX="csd_est_pack_${OUTDIR_TOKEN}"
+
 # ---------------------------------------------------------------------------
 # Parameter grid
 # ---------------------------------------------------------------------------
@@ -164,7 +172,7 @@ MIN_ROWS_AFTER_DROPNA="${MIN_ROWS_AFTER_DROPNA:-30}"
 submit_batch() {
     local batch_file="$1"
     local batch_id="$2"
-    local job_name="csd_est_pack_${batch_id}"
+    local job_name="${JOB_NAME_PREFIX}_${batch_id}"
     local log_prefix="${LOG_DIR}/${job_name}_%j"
 
     local wrap_str="set -euo pipefail
@@ -289,7 +297,7 @@ function main {
             [[ -f "${batch_file}" ]] || continue
             batch_name="$(basename "${batch_file}")"
             batch_name="${batch_name%.txt}"
-            job_name="csd_est_pack_${batch_name}"
+            job_name="${JOB_NAME_PREFIX}_${batch_name}"
             if [[ -n "${active_job_names[${job_name}]+x}" ]]; then
                 active_batches["${batch_file}"]=1
                 while IFS= read -r task_json; do
