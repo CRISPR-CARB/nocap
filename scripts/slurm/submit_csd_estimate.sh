@@ -110,14 +110,13 @@ JOB_NAME_PREFIX="csd_est_pack_${OUTDIR_TOKEN}"
 # ---------------------------------------------------------------------------
 
 # Measurement-error/missing-data mechanisms supported by scripts/csd_estimate.py.
+# Set MECHANISMS to a comma-separated list to select a subset or custom ordering.
 # instrument_error: low expression is too low for the instrument to detect.
 # biological_error: a gene is not expressed at the time of measurement.
 # biological_error+instrument_error: both independent mechanisms are active.
-MECHANISMS=(
-    "instrument_error"
-    "biological_error"
-    "biological_error+instrument_error"
-)
+MECHANISMS_CSV="${MECHANISMS:-instrument_error,biological_error,biological_error+instrument_error}"
+IFS=',' read -r -a MECHANISMS <<< "${MECHANISMS_CSV}"
+[[ -n "${MECHANISMS_CSV}" ]] || { echo "MECHANISMS must be nonempty" >&2; exit 2; }
 
 # Synthetic regression parameters (linear-Gaussian SCM)
 SEED_BASE="${SEED_BASE:-0}"
