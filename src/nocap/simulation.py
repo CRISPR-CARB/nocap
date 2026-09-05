@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from typing import Protocol
 
@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from .experiment import StageSeeds
-from .scm_model import DirectedScm
+from .scm_model import DirectedScm, build_intervened_scm
 
 
 @dataclass(frozen=True)
@@ -34,6 +34,62 @@ class SimulationConfig:
     fixed_intervention_values: dict[str, float] = field(default_factory=dict)
     use_latent_expression_hat: bool = True
     use_umi_counts_as_observed_data: bool = False
+
+
+def simulate_intervention_levels(
+    scm: DirectedScm,
+    config: SimulationConfig,
+    treatment: str,
+    treatment_levels: Iterable[float],
+    *,
+    seed: int = 0,
+) -> dict[float, object]:
+    """Generate independent hard-intervention states for explicit levels."""
+    levels = tuple(float(level) for level in treatment_levels)
+    if treatment not in scm.nodes:
+        raise ValueError(f"unknown treatment node: {treatment}")
+    invalid = set(config.fixed_intervention_values) - {treatment}
+    if invalid:
+        raise ValueError(f"intervention config contains unlisted nodes: {sorted(invalid)}")
+    results = {}
+    for offset, level in enumerate(levels):
+        intervened = build_intervened_scm(scm, [treatment])
+        intervention_config = SimulationConfig(
+            **{
+                **config.__dict__,
+                "fixed_intervention_values": {treatment: level},
+                "use_latent_expression_hat": False,
+                "use_umi_counts_as_observed_data": False,
+            }
+        )
+        state = generate_from_scm(intervened, intervention_config, seed=seed + offset)
+        if state.observed_data is None or not np.all(state.observed_data[treatment] == level):
+            raise RuntimeError("intervention treatment column is not fixed at its requested level")
+        results[level] = state
+    return results
+
+
+def true_scm_ate(
+    scm: DirectedScm,
+    treatment: str,
+    outcome: str,
+    treatment_levels: tuple[float, float],
+    *,
+    n_samples: int = 100_000,
+    seed: int = 0,
+) -> float:
+    """Estimate a true linear-SCM ATE using common exogenous noise samples."""
+    if treatment not in scm.nodes or outcome not in scm.nodes:
+        raise ValueError("treatment and outcome must be SCM nodes")
+    if n_samples < 2:
+        raise ValueError("n_samples must be at least two")
+    noise = np.random.default_rng(seed).normal(size=(n_samples, len(scm.nodes)))
+    means = []
+    for level in treatment_levels:
+        intervened = build_intervened_scm(scm, [treatment])
+        values = numpy_linear_solver(intervened, noise, {treatment: float(level)})
+        means.append(float(values[:, intervened.nodes.index(outcome)].mean()))
+    return means[1] - means[0]
 
 
 @dataclass
