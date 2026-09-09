@@ -57,7 +57,7 @@ if break_csv.exists():
             raw = row.get("min_break_set", "[]")
             try:
                 genes = ast.literal_eval(raw)
-            except Exception:
+            except (SyntaxError, ValueError):
                 genes = []
             pool.update(genes)
     pool_size = len(pool)

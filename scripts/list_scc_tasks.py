@@ -53,7 +53,7 @@ for i, t in enumerate(tasks):
             status = "ok"
             if s.get("joint_identifiable") is False and len(s.get("per_gene", {})) == 0:
                 unident_no_pergene.append((i, tf))
-        except Exception as e:
+        except (OSError, ValueError, TypeError, json.JSONDecodeError) as e:
             status = f"ERROR:{e}"
             joint = "-"
             pg_n = "-"

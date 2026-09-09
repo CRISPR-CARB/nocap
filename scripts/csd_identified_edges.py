@@ -69,8 +69,7 @@ def _load_all_results(classified_dir: Path) -> list[dict]:
         try:
             with open(shard_file) as f:
                 data = json.load(f)
-            for r in data.get("results", []):
-                records.append(r)
+            records.extend(data.get("results", []))
         except (json.JSONDecodeError, KeyError):
             # Shard partially written or corrupt — skip silently
             pass

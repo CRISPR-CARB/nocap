@@ -2,7 +2,8 @@
 
 import json
 
-nb = json.load(open("notebooks/Ecoli_Analysis_Notebooks/SCC_Perturbation_Analysis.ipynb"))
+with open("notebooks/Ecoli_Analysis_Notebooks/SCC_Perturbation_Analysis.ipynb") as handle:
+    nb = json.load(handle)
 
 # 1. No stale do(t, B(t)) in any markdown cell
 stale = []

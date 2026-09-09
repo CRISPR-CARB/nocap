@@ -27,30 +27,42 @@ SECTION_HEADER_MD = {
         "---\n",
         "## 11. TF Recovery Bank — Multi-Experiment Perturbation Design\n",
         "\n",
-        "Sections 1–10 characterise identifiability for **50 TFs** in the CRISPR perturbation dataset "
-        "(18 SCC TFs, 32 DAG TFs).  This section answers the complementary question for the "
-        "**full E. coli TF complement** (~285 TFs):\n",
+        (
+            "Sections 1–10 characterise identifiability for **50 TFs** in the CRISPR perturbation dataset "
+            "(18 SCC TFs, 32 DAG TFs).  This section answers the complementary question for the "
+            "**full E. coli TF complement** (~285 TFs):\n"
+        ),
         "\n",
-        "> *Given a budget of **n** multiplex perturbation experiments, each knocking out **k** genes "
-        "simultaneously, which experiments should we run to maximise the number of currently "
-        "unidentifiable TFs that become identifiable?*\n",
+        (
+            "> *Given a budget of **n** multiplex perturbation experiments, each knocking out **k** genes "
+            "simultaneously, which experiments should we run to maximise the number of currently "
+            "unidentifiable TFs that become identifiable?*\n"
+        ),
         "\n",
-        "**Background.** The `scc_recovery_bank.py` script identifies, for each unidentifiable TF `t`, "
-        "the set of *candidate genes* — SCC min-cut members that, when perturbed, break all return "
-        "paths back to `t` in the regulatory graph — and runs a greedy set-cover optimizer to "
-        "select the most informative multiplex experiments.\n",
+        (
+            "**Background.** The `scc_recovery_bank.py` script identifies, for each unidentifiable TF `t`, "
+            "the set of *candidate genes* — SCC min-cut members that, when perturbed, break all return "
+            "paths back to `t` in the regulatory graph — and runs a greedy set-cover optimizer to "
+            "select the most informative multiplex experiments.\n"
+        ),
         "\n",
         "### Method\n",
         "\n",
         "1. **Enumerate TFs** (out-degree ≥ 1): 285 TFs total.\n",
-        "2. **Classify baseline identifiability**: a TF is *already identifiable* if it lies in a "
-        "singleton SCC (no feedback loops).\n",
-        "3. **Build candidate pool**: for each unidentifiable TF, compute the SCC min-cut genes "
-        "under the background intervention interpretation (same Interpretation A used throughout "
-        "this analysis). Only genes that break the TF's SCC membership are eligible.\n",
-        "4. **Greedy bank** (`_greedy_bank`): iteratively select the gene that maximally increases "
-        "coverage of currently-uncovered TFs, stop when all unidentifiable TFs are covered or the "
-        "budget is exhausted.\n",
+        (
+            "2. **Classify baseline identifiability**: a TF is *already identifiable* if it lies in a "
+            "singleton SCC (no feedback loops).\n"
+        ),
+        (
+            "3. **Build candidate pool**: for each unidentifiable TF, compute the SCC min-cut genes "
+            "under the background intervention interpretation (same Interpretation A used throughout "
+            "this analysis). Only genes that break the TF's SCC membership are eligible.\n"
+        ),
+        (
+            "4. **Greedy bank** (`_greedy_bank`): iteratively select the gene that maximally increases "
+            "coverage of currently-uncovered TFs, stop when all unidentifiable TFs are covered or the "
+            "budget is exhausted.\n"
+        ),
         "5. **Two budget designs** are evaluated:\n",
         "\n",
         "| Design | n experiments | k genes/exp | Newly recoverable TFs | % of unidentifiable |\n",
@@ -58,8 +70,10 @@ SECTION_HEADER_MD = {
         "| n=10, k=3 | 10 | 3 | 67 / 95 | 70.5% |\n",
         "| n=5,  k=6 |  5 | 6 | 67 / 95 | 70.5% |\n",
         "\n",
-        "Both designs recover the same 67 TFs; the first experiment alone accounts for 28 (n=10,k=3) "
-        "or 42 (n=5,k=6) recoveries.\n",
+        (
+            "Both designs recover the same 67 TFs; the first experiment alone accounts for 28 (n=10,k=3) "
+            "or 42 (n=5,k=6) recoveries.\n"
+        ),
         "\n",
         "To regenerate:\n",
         "```bash\n",
@@ -339,10 +353,12 @@ COMPARISON_MD = {
     "source": [
         "### 11.5 Comparison to CSD Edge-Level Recovery\n",
         "\n",
-        "The TF recovery bank above operates at the **TF level** — it asks which TFs "
-        "transition from unidentifiable to identifiable when a set of background genes is perturbed.  "
-        "The analogous analysis in `Cyclic_SingleDoor_Analysis.ipynb` (Section 7) operates at the "
-        "**edge level** — it asks which individual causal edges become identifiable.\n",
+        (
+            "The TF recovery bank above operates at the **TF level** — it asks which TFs "
+            "transition from unidentifiable to identifiable when a set of background genes is perturbed.  "
+            "The analogous analysis in `Cyclic_SingleDoor_Analysis.ipynb` (Section 7) operates at the "
+            "**edge level** — it asks which individual causal edges become identifiable.\n"
+        ),
         "\n",
         "| Dimension | CSD edge-level recovery | SCC-TF recovery bank (this section) |\n",
         "|---|---|---|\n",
@@ -353,16 +369,20 @@ COMPARISON_MD = {
         "| Ceiling | Hard: 28 unrescuable edges | Hard: 28 unrecoverable TFs |\n",
         "| Algorithm | Greedy set-cover over rescue-node lists | Greedy set-cover over SCC min-cut genes |\n",
         "\n",
-        "The **28 unrecoverable TFs** (those remaining unidentifiable even after all bank experiments) "
-        "correspond structurally to TFs in direct 2-cycles with in-SCC children for which no "
-        "intermediate cut target exists under Interpretation A.  These are the same cut-incomplete "
-        "cases identified in Phase A (§ 9.A): `tf_still_cyclic = True` even after all candidate "
-        "background interventions.\n",
+        (
+            "The **28 unrecoverable TFs** (those remaining unidentifiable even after all bank experiments) "
+            "correspond structurally to TFs in direct 2-cycles with in-SCC children for which no "
+            "intermediate cut target exists under Interpretation A.  These are the same cut-incomplete "
+            "cases identified in Phase A (§ 9.A): `tf_still_cyclic = True` even after all candidate "
+            "background interventions.\n"
+        ),
         "\n",
-        "**Implication for experimental design.**  The two budget configurations yield equivalent "
-        "coverage.  If a smaller number of larger experiments is operationally preferred, the "
-        "n=5, k=6 design achieves the same recovery with half the experimental runs, but each "
-        "experiment requires knocking out 6 genes simultaneously.",
+        (
+            "**Implication for experimental design.**  The two budget configurations yield equivalent "
+            "coverage.  If a smaller number of larger experiments is operationally preferred, the "
+            "n=5, k=6 design achieves the same recovery with half the experimental runs, but each "
+            "experiment requires knocking out 6 genes simultaneously."
+        ),
     ],
 }
 
@@ -383,15 +403,21 @@ SUMMARY_MD = {
         "| Identifiable after recovery | 257 / 285 (90.2%) |\n",
         "| Structurally unrecoverable (under Interpretation A) | 28 / 95 |\n",
         "\n",
-        "**First experiment dominates:** under n=10, k=3, perturbation set 1 "
-        "{fliZ, fur, rpoH} recovers 28 TFs alone; under n=5, k=6, set 1 "
-        "{fliZ, fur, gadW, hns, rpoD, rpoH} recovers 42 TFs.\n",
+        (
+            "**First experiment dominates:** under n=10, k=3, perturbation set 1 "
+            "{fliZ, fur, rpoH} recovers 28 TFs alone; under n=5, k=6, set 1 "
+            "{fliZ, fur, gadW, hns, rpoD, rpoH} recovers 42 TFs.\n"
+        ),
         "\n",
-        "**Diminishing returns are steep:** ≥ 70% of recoverable TFs are obtained "
-        "in the first 2 experiments of either design.\n",
+        (
+            "**Diminishing returns are steep:** ≥ 70% of recoverable TFs are obtained "
+            "in the first 2 experiments of either design.\n"
+        ),
         "\n",
-        "See `scripts/scc_recovery_bank.py`, `tests/test_scc_recovery_bank.py`, "
-        "and `scripts/smoke_scc_recovery.py` for implementation and tests.",
+        (
+            "See `scripts/scc_recovery_bank.py`, `tests/test_scc_recovery_bank.py`, "
+            "and `scripts/smoke_scc_recovery.py` for implementation and tests."
+        ),
     ],
 }
 

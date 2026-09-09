@@ -10,7 +10,7 @@ try:
     print("version:", dist.version)
     direct = dist.read_text("direct_url.json")
     print("direct_url.json:", direct)
-except Exception as e:
+except (OSError, ValueError) as e:
     print("meta error:", e)
 
 # Check whether the source dir is writable / in a repo
