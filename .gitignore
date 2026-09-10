@@ -908,7 +908,6 @@ PR_MESSAGE.md
 
 # AI assistance rules
 .clinerules
-docs/plans
 
 # Axiomander proof cache (local, machine-specific)
 .axiomander/
