@@ -20,6 +20,7 @@ global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store *.gpickle
 
 recursive-include workflow *.yaml
 recursive-include workflow Snakefile
+recursive-include notes *.md
 
 include README.md LICENSE DISCLAIMER SLIDES.md
 include *.lock

@@ -68,6 +68,7 @@ def test_build_synthetic_scm_is_reproducible():
 
 
 def test_build_synthetic_scm_uses_explicit_edge_signs():
+    """Use caller-provided signs when sampling synthetic edge coefficients."""
     graph = nx.DiGraph([("A", "B"), ("B", "A")])
     result = build_synthetic_scm(
         graph,

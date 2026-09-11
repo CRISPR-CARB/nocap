@@ -351,7 +351,8 @@ for k, v in overall.items():
     )
 )
 
-cells.append(md("""## Replicate designs and interval interpretation
+cells.append(
+    md("""## Replicate designs and interval interpretation
 
 The two modes repeat the simulation with independent random seeds, rather than
 resampling rows from one observed dataset:
@@ -378,9 +379,11 @@ without rerunning additional SCM seeds. Neither mode is a nonparametric
 row-bootstrap confidence interval, and neither resamples observations from one
 dataset. With few replicates, percentile endpoints are descriptive and can be
 unstable; cells with too few usable replicates are shown without bands.
-"""))
+""")
+)
 
-cells.append(code("""
+cells.append(
+    code("""
 plot_summary = ci_summary.copy()
 
 def plot_seed_bands(metric, lower, upper, ylabel, title, filename):
@@ -428,7 +431,8 @@ plot_seed_bands('mean_error', 'error_lower', 'error_upper', 'Mean error',
 plot_seed_bands('mean_MAE', 'MAE_lower', 'MAE_upper', 'Mean MAE',
                 f'Mean MAE with empirical 95% intervals ({design})',
                 f'csd_estimation_{design}_mae_ci_vs_n_samples.png')
-"""))
+""")
+)
 
 cells.append(md("## 1) Estimated signed beta vs ground-truth signed beta"))
 

@@ -246,9 +246,7 @@ def generate_paired_data_artifact(
         rng=observation_rng,
     )
     dispersions = normalize_dispersions(config.dispersion, len(scm.nodes))
-    counts = sample_umi_counts(
-        latent, size_factors, baseline, dispersions, observation_rng
-    )
+    counts = sample_umi_counts(latent, size_factors, baseline, dispersions, observation_rng)
     normalized_expression = counts_to_normalized_expression(
         counts,
         size_factors,
@@ -456,9 +454,7 @@ def sample_umi_counts(
         normalized_dispersions,
     )
 
-    mu = size_factors[:, None] * baseline_expression[None, :] * np.exp2(
-        latent_log_expression
-    )
+    mu = size_factors[:, None] * baseline_expression[None, :] * np.exp2(latent_log_expression)
     n = 1.0 / normalized_dispersions[None, :]
     p = n / (n + mu)
     return rng.negative_binomial(n=n, p=p)
@@ -474,10 +470,7 @@ def counts_to_log_expression(
     counts, size_factors, baseline_expression = _validate_count_inputs(
         counts, size_factors, baseline_expression, pseudocount
     )
-    return np.log2(
-        (counts + pseudocount)
-        / (size_factors[:, None] * baseline_expression[None, :])
-    )
+    return np.log2((counts + pseudocount) / (size_factors[:, None] * baseline_expression[None, :]))
 
 
 def counts_to_normalized_expression(
@@ -678,9 +671,9 @@ def _missing(state: SimulationState) -> SimulationState:
             probabilities.append(np.clip(rate * raw / raw.mean(), 0, 1))
         probability = 1.0 - np.prod([1.0 - p for p in probabilities], axis=0)
         missing_value = 0.0
-        state.observed_data.loc[
-            state.rng.random(config.n_samples) < probability, col
-        ] = missing_value
+        state.observed_data.loc[state.rng.random(config.n_samples) < probability, col] = (
+            missing_value
+        )
     return state
 
 
