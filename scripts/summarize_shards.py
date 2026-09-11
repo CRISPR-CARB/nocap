@@ -76,7 +76,8 @@ err_files = sorted(glob.glob(os.path.join(LOGS_DIR, "scc_worker_*.err")))
 cancelled = []
 clean = []
 for ef in err_files:
-    content = open(ef).read().strip()
+    with open(ef) as handle:
+        content = handle.read().strip()
     idx = os.path.basename(ef).replace(".err", "")
     if "CANCELLED" in content:
         cancelled.append(idx)

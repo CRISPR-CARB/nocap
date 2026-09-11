@@ -612,20 +612,22 @@ def test_gather_empty_input_exits_nonzero(tmp_path):
     out_csv = tmp_path / "out.csv"
     out_summary = tmp_path / "summary.json"
 
-    with patch(
-        "sys.argv",
-        [
-            "gather",
-            "--input-dir",
-            str(empty_dir),
-            "--output-csv",
-            str(out_csv),
-            "--output-summary",
-            str(out_summary),
-        ],
+    with (
+        patch(
+            "sys.argv",
+            [
+                "gather",
+                "--input-dir",
+                str(empty_dir),
+                "--output-csv",
+                str(out_csv),
+                "--output-summary",
+                str(out_summary),
+            ],
+        ),
+        pytest.raises(SystemExit) as exc_info,
     ):
-        with pytest.raises(SystemExit) as exc_info:
-            _gather.main()
+        _gather.main()
     assert exc_info.value.code != 0
 
 

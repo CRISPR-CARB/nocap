@@ -77,7 +77,7 @@ def main() -> None:
                 to_delete.append((i, tf, shard_path, "joint=False, per_gene={}"))
             else:
                 keep.append((i, tf, joint, len(per_gene)))
-        except Exception as e:
+        except (OSError, ValueError, TypeError, json.JSONDecodeError) as e:
             to_delete.append((i, tf, shard_path, f"read-error: {e}"))
 
     print(f"Shards to DELETE ({len(to_delete)}):")

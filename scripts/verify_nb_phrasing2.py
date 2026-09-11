@@ -2,7 +2,8 @@
 
 import json
 
-nb = json.load(open("notebooks/Ecoli_Analysis_Notebooks/SCC_Perturbation_Analysis.ipynb"))
+with open("notebooks/Ecoli_Analysis_Notebooks/SCC_Perturbation_Analysis.ipynb") as handle:
+    nb = json.load(handle)
 
 # ── Cell 0: check overview phrasing around 'background interventional' ──
 src0 = "".join(nb["cells"][0]["source"])
