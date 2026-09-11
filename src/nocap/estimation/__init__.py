@@ -2,6 +2,7 @@
 
 from .distribution import (
     DistributionEstimator,
+    EstimationProfiler,
     evaluate_probability_expression,
     normalize_expression,
 )
@@ -14,7 +15,7 @@ from .helpers import (
     estimated_scm_ate,
     identify_query_status,
 )
-from .kde import SciPyGaussianKDE, StatsmodelsKDE
+from .kde import KDEpyKDE, SciPyGaussianKDE, SklearnKDE, StatsmodelsKDE
 from .models import ContinuousBackend, DistributionEstimationError, JointKDE, MarginalKDE
 
 __all__ = [
@@ -22,10 +23,13 @@ __all__ = [
     "DistributionEstimationError",
     "DistributionEstimator",
     "EdgeEstimate",
+    "EstimationProfiler",
     "JointKDE",
+    "KDEpyKDE",
     "MarginalKDE",
     "QueryResult",
     "SciPyGaussianKDE",
+    "SklearnKDE",
     "StatsmodelsKDE",
     "build_estimated_scm",
     "estimate_ate",

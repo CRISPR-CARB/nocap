@@ -64,6 +64,7 @@ efficient total effect estimation via adjustment in causal linear models.
 
 from __future__ import annotations
 
+import itertools as it
 import signal
 from contextlib import contextmanager
 
@@ -134,12 +135,55 @@ def _timeout_context(seconds: int):
 # nx_digraph_to_y0
 # ---------------------------------------------------------------------------
 
+def convert_unobserved_to_bidirected(graph: NxMixedGraph, unobserved: set[str] | frozenset[str]):
+    """Remove unobserved nodes from the graph and replace with a bidirected edge.
 
-def nx_digraph_to_y0(graph: nx.DiGraph) -> NxMixedGraph:
+    Parameters
+    ----------
+    NxMixedGraph:
+        A y0 mixed graph with possibly bidirected edges.
+    unobserved:
+        A set or frozenset of variable names that represent unobserved
+        variables.
+
+    Returns
+    -------
+    NxMixedGraph
+        A y0 mixed graph with possibly bidirected edges.
+    """
+    edges_to_add = set()
+    for node in graph.nodes():
+        if node.name in unobserved:
+            # Get predecessors (in-edges) and successors (out-edges)
+            preds = list(graph.directed.predecessors(node))
+            succs = list(graph.directed.successors(node))
+            # For each triplet (pred -> unobs -> succ), (pred -> unobs <- pred), (succ <- unobs -> succ) mark direct edges for addition
+            for succ1, succ2 in it.product(succs, succs):
+                if succ1 != succ2:
+                    edges_to_add.add((succ1, succ2))
+            for pred1, pred2 in it.product(preds, preds):
+                if pred1 != pred2:
+                    edges_to_add.add((pred1, pred2))
+            for pred, succ in it.product(preds, succs):
+                edges_to_add.add((pred, succ))
+
+    # Replace tri edges with bidirected edges
+    for u, v in edges_to_add:
+        graph.add_undirected_edge(u, v)
+
+    # Remove unobserved nodes by passing Variable objects instead of strings
+    unobserved_vars = [var for var in graph.nodes() if var.name in unobserved]
+    graph.directed.remove_nodes_from(unobserved_vars)
+    graph.undirected.remove_nodes_from(unobserved_vars)
+
+    return graph
+
+
+def nx_digraph_to_y0(graph: nx.DiGraph, unobserved: set[str] | frozenset[str] | None = None) -> NxMixedGraph:
     """Convert a plain ``nx.DiGraph`` to a y0 ``NxMixedGraph``.
 
-    Each node name is wrapped in a :class:`~y0.dsl.Variable`.  No bidirected
-    edges are added — the σ-extension step adds those later.
+    Each node name is wrapped in a :class:`~y0.dsl.Variable`. Bidirected edges are added to
+    represent unobserved variables.
 
     Parameters
     ----------
@@ -150,12 +194,11 @@ def nx_digraph_to_y0(graph: nx.DiGraph) -> NxMixedGraph:
     Returns
     -------
     NxMixedGraph
-        A y0 mixed graph with the same directed edges and no bidirected edges.
+        A y0 mixed graph with possibly bidirected edges.
 
     axiomander:
         ensures:
-            result.directed.number_of_nodes() == graph.number_of_nodes()
-            result.directed.number_of_edges() == graph.number_of_edges()
+            graph.number_of_nodes() - result.directed.number_of_nodes() == len(unobserved or {})
         modifies:
             none
     """
@@ -166,20 +209,20 @@ def nx_digraph_to_y0(graph: nx.DiGraph) -> NxMixedGraph:
     directed_edges = [(node_map[u], node_map[v]) for u, v in graph.edges()]
     result = NxMixedGraph.from_edges(directed=directed_edges)
 
+    if unobserved is not None:
+        result = convert_unobserved_to_bidirected(result, unobserved)
+
     # NxMixedGraph.from_edges only adds nodes that appear in at least one edge.
     # Isolated nodes (e.g. after do-intervention removes all in-edges) must be
     # added explicitly so the node set is preserved.
     for var in node_map.values():
-        if var not in result.directed:
-            result.directed.add_node(var)
+        if var not in result.directed and var.name not in (unobserved or {}):
+                result.directed.add_node(var)
 
-    # --- POST ---
-    assert result.directed.number_of_nodes() == graph.number_of_nodes(), (
-        "POST: node count must be preserved"
+    assert graph.number_of_nodes() - result.directed.number_of_nodes() == len(unobserved or {}), (
+        "POST: node count must be preserved except for unobserved nodes"
     )
-    assert result.directed.number_of_edges() == graph.number_of_edges(), (
-        "POST: edge count must be preserved"
-    )
+
     return result
 
 

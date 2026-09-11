@@ -43,6 +43,7 @@ def identify_causal_query(
     graph: nx.DiGraph,
     interventions: set[str] | frozenset[str],
     outcomes: set[str] | frozenset[str],
+    unobserved: set[str] | frozenset[str] | None = None
 ) -> Expression:
     """Identify ``P(outcomes | do(interventions))`` in a directed graph.
 
@@ -82,7 +83,7 @@ def identify_causal_query(
     """
     _validate_query(graph, interventions, outcomes)
 
-    mixed_graph: NxMixedGraph = nx_digraph_to_y0(graph)
+    mixed_graph: NxMixedGraph = nx_digraph_to_y0(graph, unobserved)
     ordering = get_apt_order(mixed_graph)
     result = _y0_cyclic_id(
         graph=mixed_graph,

@@ -8,7 +8,10 @@ implementation and makes analytic projection explicit.
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
+from contextlib import nullcontext
 from dataclasses import dataclass
+from time import perf_counter
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -23,17 +26,22 @@ from y0.dsl import (
     Variable,
     Zero,
 )
+from y0.mutate import fraction_expand
 
-from .kde import SciPyGaussianKDE, StatsmodelsKDE
+from .kde import KDEpyKDE, SciPyGaussianKDE, SklearnKDE, StatsmodelsKDE
 from .models import ContinuousBackend, DistributionEstimationError, JointKDE, MarginalKDE
+from .profiler import EstimationProfiler
 
 __all__ = [
     "ContinuousBackend",
     "DistributionEstimationError",
     "DistributionEstimator",
+    "EstimationProfiler",
     "JointKDE",
+    "KDEpyKDE",
     "MarginalKDE",
     "SciPyGaussianKDE",
+    "SklearnKDE",
     "StatsmodelsKDE",
     "estimate_ate",
     "estimate_expectation",
@@ -42,13 +50,24 @@ __all__ = [
 ]
 
 
+def _measure(profiler: EstimationProfiler | None, name: str, **metadata: object):
+    """Return a no-op or profiling context for an estimation operation."""
+    return profiler.measure(name, **metadata) if profiler is not None else nullcontext()
+
+
 class _CallableDensity:
     """Callable wrapper that preserves deterministic density variable order."""
 
-    def __init__(self, variables: tuple[str, ...], function: Callable[[np.ndarray], np.ndarray]):
+    def __init__(
+        self,
+        variables: tuple[str, ...],
+        function: Callable[[np.ndarray], np.ndarray],
+        bandwidth: object = None,
+    ):
         """Initialize a density over ``variables`` backed by ``function``."""
         self.variables = variables
         self._function = function
+        self.bandwidth = bandwidth
 
     def __call__(self, values: object = None, **kwargs: float) -> float | np.ndarray:
         """Evaluate the density from positional values or variable keywords."""
@@ -90,23 +109,29 @@ def _density_ratio(numerator: np.ndarray, denominator: np.ndarray) -> np.ndarray
     """Divide densities while treating jointly underflowed tails as zero."""
     numerator = np.asarray(numerator, dtype=float)
     denominator = np.asarray(denominator, dtype=float)
-    tiny_denominator = np.abs(denominator) <= 1e-14
-    if np.any(tiny_denominator & (np.abs(numerator) > 1e-14)):
+    zero_denominator = denominator == 0
+    if np.any(zero_denominator & (np.abs(numerator) > 1e-14)):
         raise DistributionEstimationError("density fraction has a zero denominator")
     result = np.zeros(np.broadcast_shapes(numerator.shape, denominator.shape), dtype=float)
-    np.divide(numerator, denominator, out=result, where=~tiny_denominator)
+    np.divide(numerator, denominator, out=result, where=~zero_denominator)
     return result
 
 
-def _distribution_density(backend: ContinuousBackend, data: pd.DataFrame, distribution: Distribution):
+def _distribution_density(
+    backend: ContinuousBackend,
+    data: pd.DataFrame,
+    distribution: Distribution,
+    profiler: EstimationProfiler | None = None,
+):
     """Build a callable joint or conditional density for a y0 distribution."""
     children = _names(distribution.children)
     parents = _names(distribution.parents)
     all_names = children + tuple(name for name in parents if name not in children)
-    fitted = backend.fit(data, all_names)
+    with _measure(profiler, "continuous.fit", variables=all_names, rows=len(data)):
+        fitted = backend.fit(data, all_names)
     numerator = fitted.project(all_names)
     if not parents:
-        return _CallableDensity(all_names, numerator.evaluate)
+        return _CallableDensity(all_names, numerator.evaluate, getattr(fitted, "bandwidth", None))
     denominator = fitted.project(parents)
     free = children + tuple(name for name in parents if name not in children)
 
@@ -117,9 +142,11 @@ def _distribution_density(backend: ContinuousBackend, data: pd.DataFrame, distri
         try:
             return _density_ratio(num, den)
         except DistributionEstimationError as error:
-            raise DistributionEstimationError("conditional density has a zero denominator") from error
+            raise DistributionEstimationError(
+                "conditional density has a zero denominator"
+            ) from error
 
-    return _CallableDensity(free, conditional)
+    return _CallableDensity(free, conditional, getattr(fitted, "bandwidth", None))
 
 
 def _continuous_eval(
@@ -127,38 +154,58 @@ def _continuous_eval(
     data: pd.DataFrame,
     backend: ContinuousBackend,
     bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
+    profiler: EstimationProfiler | None = None,
+    marginalization: Literal["quadrature", "kde"] = "quadrature",
 ):
     """Recursively evaluate an expression using continuous density callables."""
     if isinstance(expression, Probability):
-        return _distribution_density(backend, data, expression.distribution)
+        with _measure(profiler, "continuous.distribution"):
+            return _distribution_density(backend, data, expression.distribution, profiler)
     if isinstance(expression, One):
         return _CallableDensity((), lambda points: np.ones(len(points)))
     if isinstance(expression, Zero):
         return _CallableDensity((), lambda points: np.zeros(len(points)))
     if isinstance(expression, Product):
         densities = [
-            _continuous_eval(item, data, backend, bounds) for item in expression.expressions
+            _continuous_eval(item, data, backend, bounds, profiler, marginalization)
+            for item in expression.expressions
         ]
-        variables = tuple(dict.fromkeys(name for density in densities for name in density.variables))
+        variables = tuple(
+            dict.fromkeys(name for density in densities for name in density.variables)
+        )
 
         def product(points: np.ndarray) -> np.ndarray:
             """Evaluate and multiply all factor densities on shared points."""
             result = np.ones(len(points))
             for density in densities:
                 indexes = [variables.index(name) for name in density.variables]
-                result *= np.asarray(density(points[:, indexes] if indexes else np.empty((len(points), 0))))
+                result *= np.asarray(
+                    density(points[:, indexes] if indexes else np.empty((len(points), 0)))
+                )
             return result
 
         return _CallableDensity(variables, product)
     if isinstance(expression, Fraction):
-        numerator = _continuous_eval(expression.numerator, data, backend, bounds)
-        denominator = _continuous_eval(expression.denominator, data, backend, bounds)
+        numerator = _continuous_eval(
+            expression.numerator, data, backend, bounds, profiler, marginalization
+        )
+        denominator = _continuous_eval(
+            expression.denominator, data, backend, bounds, profiler, marginalization
+        )
         variables = tuple(dict.fromkeys((*numerator.variables, *denominator.variables)))
 
         def fraction(points: np.ndarray) -> np.ndarray:
             """Evaluate a density ratio while rejecting tiny denominators."""
-            n = numerator(points[:, [variables.index(x) for x in numerator.variables]] if numerator.variables else np.empty((len(points), 0)))
-            d = denominator(points[:, [variables.index(x) for x in denominator.variables]] if denominator.variables else np.empty((len(points), 0)))
+            n = numerator(
+                points[:, [variables.index(x) for x in numerator.variables]]
+                if numerator.variables
+                else np.empty((len(points), 0))
+            )
+            d = denominator(
+                points[:, [variables.index(x) for x in denominator.variables]]
+                if denominator.variables
+                else np.empty((len(points), 0))
+            )
             return _density_ratio(n, d)
 
         return _CallableDensity(variables, fraction)
@@ -167,20 +214,25 @@ def _continuous_eval(
             inner_variables = _names(expression.expression.children)
             ranges = {variable.name for variable in expression.ranges}
             kept = tuple(name for name in inner_variables if name not in ranges)
-            fitted = backend.fit(data, inner_variables)
+            with _measure(profiler, "continuous.fit", variables=inner_variables, rows=len(data)):
+                fitted = backend.fit(data, inner_variables)
             projected = fitted.project(kept)
-            return _CallableDensity(kept, projected.evaluate)
-        inner = _continuous_eval(expression.expression, data, backend, bounds)
+            return _CallableDensity(kept, projected.evaluate, getattr(fitted, "bandwidth", None))
+        inner = _continuous_eval(
+            expression.expression, data, backend, bounds, profiler, marginalization
+        )
         ranges = {variable.name for variable in expression.ranges}
         if not ranges.issubset(inner.variables):
             return inner
         integrated = tuple(name for name in inner.variables if name not in ranges)
+        if not ranges:
+            return inner
+        if bounds is None:
+            raise DistributionEstimationError(
+                "integration bounds are required for summed variables"
+            )
         limits = {}
-        for name in ranges:
-            if bounds is None:
-                raise DistributionEstimationError(
-                    f"integration bounds are required for summed variable {name!r}"
-                )
+        for name in sorted(ranges):
             if isinstance(bounds, Mapping):
                 if name not in bounds:
                     raise DistributionEstimationError(
@@ -196,6 +248,40 @@ def _continuous_eval(
             lower, upper = float(lower), float(upper)
             limits[name] = (lower, upper)
 
+        if marginalization == "kde":
+            from numpy.polynomial.legendre import leggauss
+
+            integrated_names = tuple(sorted(ranges))
+            nodes, node_weights = leggauss(64)
+            axes = []
+            axis_weights = []
+            for name in integrated_names:
+                lower, upper = limits[name]
+                axes.append((lower + upper) / 2 + (upper - lower) / 2 * nodes)
+                axis_weights.append((upper - lower) / 2 * node_weights)
+            meshes = np.meshgrid(*axes, indexing="ij")
+            integration_points = np.column_stack([mesh.reshape(-1) for mesh in meshes])
+            weight_meshes = np.meshgrid(*axis_weights, indexing="ij")
+            integration_weights = np.prod(weight_meshes, axis=0).reshape(-1)
+
+            def fixed_grid_marginal(points: np.ndarray) -> np.ndarray:
+                """Integrate the evaluated inner density on a fixed quadrature grid."""
+                result = np.empty(len(points), dtype=float)
+                for row_index, point in enumerate(points):
+                    fixed = dict(zip(integrated, point, strict=True))
+                    values = np.empty((len(integration_points), len(inner.variables)))
+                    for column, name in enumerate(inner.variables):
+                        if name in fixed:
+                            values[:, column] = fixed[name]
+                        else:
+                            values[:, column] = integration_points[:, integrated_names.index(name)]
+                    result[row_index] = np.dot(
+                        integration_weights, np.asarray(inner(values), dtype=float)
+                    )
+                return result
+
+            return _CallableDensity(integrated, fixed_grid_marginal)
+
         from scipy.integrate import nquad
 
         def marginal(points: np.ndarray) -> np.ndarray:
@@ -203,29 +289,34 @@ def _continuous_eval(
             result = np.empty(len(points), dtype=float)
             integrated_names = tuple(sorted(ranges))
             integration_ranges = [limits[name] for name in integrated_names]
-            for row_index, point in enumerate(points):
-                fixed = dict(zip(integrated, point, strict=True))
+            with _measure(
+                profiler, "continuous.integration", rows=len(points), variables=integrated_names
+            ):
+                for row_index, point in enumerate(points):
+                    fixed = dict(zip(integrated, point, strict=True))
 
-                def integrand(*values: float) -> float:
-                    current = {**fixed, **dict(zip(integrated_names, values, strict=True))}
-                    ordered = np.asarray(
-                        [[current[name] for name in inner.variables]], dtype=float
-                    )
-                    value = float(np.asarray(inner(ordered)).reshape(-1)[0])
-                    if not np.isfinite(value) or value < 0:
-                        raise DistributionEstimationError(
-                            "density returned a non-finite or negative value during integration"
+                    def integrand(*values: float) -> float:
+                        current = {**fixed, **dict(zip(integrated_names, values, strict=True))}
+                        ordered = np.asarray(
+                            [[current[name] for name in inner.variables]], dtype=float
                         )
-                    return value
+                        value = float(np.asarray(inner(ordered)).reshape(-1)[0])
+                        if not np.isfinite(value) or value < 0:
+                            raise DistributionEstimationError(
+                                "density returned a non-finite or negative value during integration"
+                            )
+                        return value
 
-                result[row_index] = float(nquad(integrand, integration_ranges)[0])
+                    result[row_index] = float(nquad(integrand, integration_ranges)[0])
             return result
 
         return _CallableDensity(integrated, marginal)
     raise TypeError(f"unsupported y0 expression: {type(expression).__name__}")
 
 
-def normalize_expression(expression: Expression) -> Expression:
+def normalize_expression(
+    expression: Expression, *, profiler: EstimationProfiler | None = None
+) -> Expression:
     """Normalize a y0 expression using its available simplifier.
 
     axiomander:
@@ -236,15 +327,29 @@ def normalize_expression(expression: Expression) -> Expression:
     if not isinstance(expression, Expression):
         raise TypeError("expression must be a y0 Expression")
     previous = expression
+    started = perf_counter() if profiler is not None else None
     if isinstance(previous, Sum):
-        return Sum.safe(normalize_expression(previous.expression), previous.ranges)
+        result = Sum.safe(
+            normalize_expression(previous.expression, profiler=profiler), previous.ranges
+        )
+        if profiler is not None and started is not None:
+            profiler._record("normalize", perf_counter() - started, iterations=1)
+        return result
     if isinstance(previous, Probability):
-        return previous
+        result = fraction_expand(previous)
+
+        if profiler is not None and started is not None:
+            profiler._record("normalize", perf_counter() - started, iterations=0)
+
+        return result
     for _ in range(32):
         current = previous.simplify()
         if current == previous:
+            if profiler is not None and started is not None:
+                profiler._record("normalize", perf_counter() - started, iterations=_ + 1)
             return current
         previous = current
+
     raise DistributionEstimationError("expression normalization did not converge")
 
 
@@ -293,27 +398,35 @@ def _discrete_eval(expression: Expression, data: pd.DataFrame):
             else:
                 result["_join_key"] = 1
                 factor["_join_key"] = 1
-                result = result.merge(factor, on="_join_key", how="outer", suffixes=("_left", "_right")).drop(columns="_join_key")
+                result = result.merge(
+                    factor, on="_join_key", how="outer", suffixes=("_left", "_right")
+                ).drop(columns="_join_key")
             result["prob"] = result["prob_left"].fillna(0) * result["prob_right"].fillna(0)
             result = result.drop(columns=["prob_left", "prob_right"])
         return result
     if isinstance(expression, Fraction):
         numerator = _discrete_eval(expression.numerator, data)
         denominator = _discrete_eval(expression.denominator, data)
-        shared = [name for name in numerator.columns if name != "prob" and name in denominator.columns]
+        shared = [
+            name for name in numerator.columns if name != "prob" and name in denominator.columns
+        ]
         if shared:
             result = numerator.merge(denominator, on=shared, how="left", suffixes=("_n", "_d"))
         else:
             numerator["_join_key"] = 1
             denominator["_join_key"] = 1
-            result = numerator.merge(denominator, on="_join_key", how="left", suffixes=("_n", "_d")).drop(columns="_join_key")
+            result = numerator.merge(
+                denominator, on="_join_key", how="left", suffixes=("_n", "_d")
+            ).drop(columns="_join_key")
         if result["prob_d"].isna().any() or (result["prob_d"] <= 1e-14).any():
             raise DistributionEstimationError("probability fraction has a zero denominator")
         result["prob"] = result["prob_n"] / result["prob_d"]
         return result.drop(columns=["prob_n", "prob_d"])
     if isinstance(expression, Sum):
         result = _discrete_eval(expression.expression, data)
-        ranges = [variable.name for variable in expression.ranges if variable.name in result.columns]
+        ranges = [
+            variable.name for variable in expression.ranges if variable.name in result.columns
+        ]
         if ranges:
             remaining = [c for c in result.columns if c not in [*ranges, "prob"]]
             if remaining:
@@ -337,6 +450,8 @@ class DistributionEstimator:
     mode: str = "discrete"
     backend: ContinuousBackend | None = None
     bounds: Mapping[str, tuple[float, float]] | None = None
+    profiler: EstimationProfiler | None = None
+    marginalization: Literal["quadrature", "kde"] = "quadrature"
 
     def evaluate(self, expression: Expression):
         """Evaluate one expression using this estimator's configured mode.
@@ -353,6 +468,8 @@ class DistributionEstimator:
             mode=self.mode,
             backend=self.backend,
             bounds=self.bounds,
+            profiler=self.profiler,
+            marginalization=self.marginalization,
         )
 
 
@@ -363,6 +480,8 @@ def evaluate_probability_expression(
     mode: str = "discrete",
     backend: ContinuousBackend | None = None,
     bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
+    profiler: EstimationProfiler | None = None,
+    marginalization: Literal["quadrature", "kde"] = "quadrature",
 ):
     """Evaluate a normalized y0 expression as a table or density callable.
 
@@ -371,13 +490,17 @@ def evaluate_probability_expression(
         ensures: result is a pandas.DataFrame if mode == 'discrete' else callable(result)
         modifies: none
     """
-    expression = normalize_expression(expression)
+    expression = normalize_expression(expression, profiler=profiler)
     if mode == "discrete":
-        return _discrete_eval(expression, data)
+        with _measure(profiler, "discrete.evaluate", rows=len(data)):
+            return _discrete_eval(expression, data)
     if mode == "continuous":
+        if marginalization not in {"quadrature", "kde"}:
+            raise ValueError("marginalization must be 'quadrature' or 'kde'")
         if backend is None:
-            backend = SciPyGaussianKDE()
-        return _continuous_eval(expression, data, backend, bounds)
+            backend = KDEpyKDE()
+        with _measure(profiler, "continuous.evaluate", rows=len(data)):
+            return _continuous_eval(expression, data, backend, bounds, profiler, marginalization)
     raise ValueError("mode must be 'discrete' or 'continuous'")
 
 
@@ -404,6 +527,7 @@ def estimate_expectation(
     *,
     bounds: tuple[float, float] | None = None,
     evaluation_values: Mapping[str, float] | None = None,
+    profiler: EstimationProfiler | None = None,
 ) -> float:
     """Estimate an outcome expectation from an evaluated distribution.
 
@@ -416,7 +540,8 @@ def estimate_expectation(
     if isinstance(evaluated, pd.DataFrame):
         if bounds is not None:
             raise ValueError("bounds are only valid for continuous densities")
-        return _discrete_expectation(evaluated, outcome_name)
+        with _measure(profiler, "discrete.expectation", rows=len(evaluated)):
+            return _discrete_expectation(evaluated, outcome_name)
     if not callable(evaluated) or not hasattr(evaluated, "variables"):
         raise TypeError("evaluated must be a probability table or density callable")
     lower, upper = _validate_bounds(bounds)
@@ -425,6 +550,7 @@ def estimate_expectation(
         outcome_name,
         bounds=(lower, upper),
         evaluation_values=evaluation_values,
+        profiler=profiler,
     )
 
 
@@ -441,8 +567,9 @@ def _continuous_expectation(
     *,
     bounds: tuple[float, float],
     evaluation_values: Mapping[str, float] | None = None,
+    profiler: EstimationProfiler | None = None,
 ) -> float:
-    """Calculate an expectation from an already evaluated continuous density."""
+    """Calculate an expectation with vectorized Gauss-Legendre quadrature."""
     lower, upper = bounds
     variables = tuple(density.variables)
     if outcome_name not in variables:
@@ -452,38 +579,84 @@ def _continuous_expectation(
     if unexpected:
         raise ValueError(f"evaluation values contain unknown variables: {sorted(unexpected)}")
     remaining = set(variables) - {outcome_name}
-    if remaining != set(supplied):
-        raise ValueError(
-            "continuous outcome density must be one-dimensional or have explicit "
-            "evaluation values for every other free variable"
-        )
+    free_variables = remaining - set(supplied)
 
-    from scipy.integrate import quad
+    from numpy.polynomial.legendre import leggauss
 
-    def integrand(value: float) -> float:
-        point = {outcome_name: value, **supplied}
-        result = float(np.asarray(density(**point), dtype=float).reshape(-1)[0])
-        if not np.isfinite(result) or result < 0:
-            raise DistributionEstimationError("density returned a non-finite or negative value")
-        return value * result
-
-    def density_integrand(value: float) -> float:
-        point = {outcome_name: value, **supplied}
-        density_value = float(np.asarray(density(**point), dtype=float).reshape(-1)[0])
-        if not np.isfinite(density_value) or density_value < 0:
-            raise DistributionEstimationError("density returned a non-finite or negative value")
-        return density_value
-
-    mass, _ = quad(density_integrand, lower, upper)
-    result, _ = quad(integrand, lower, upper)
+    nodes, node_weights = leggauss(64)
+    if np.isfinite(lower) and np.isfinite(upper):
+        midpoint = (lower + upper) / 2.0
+        half_width = (upper - lower) / 2.0
+        values = midpoint + half_width * nodes
+        weights = half_width * node_weights
+    elif not np.isfinite(lower) and not np.isfinite(upper):
+        # Map (-1, 1) to the real line with x = tan(pi * u), u in (-1/2, 1/2).
+        u = nodes / 2.0
+        values = np.tan(np.pi * u)
+        weights = node_weights * (np.pi / 2.0) / np.cos(np.pi * u) ** 2
+    elif np.isfinite(lower):
+        # Map (-1, 1) to [lower, inf) with x = lower + u / (1 - u).
+        u = (nodes + 1.0) / 2.0
+        values = lower + u / (1.0 - u)
+        weights = node_weights / (2.0 * (1.0 - u) ** 2)
+    else:
+        # Map (-1, 1) to (-inf, upper] by reflecting the half-line mapping.
+        u = (nodes + 1.0) / 2.0
+        values = upper - (1.0 - u) / u
+        weights = node_weights / (2.0 * u**2)
+    with _measure(
+        profiler,
+        "continuous.expectation.quadrature",
+        bounds=bounds,
+        nodes=len(values),
+    ):
+        point = {outcome_name: values, **supplied}
+        for free_variable in free_variables:
+            point[free_variable] = values
+        try:
+            density_values = np.asarray(density(**point), dtype=float).reshape(-1)
+        except (TypeError, ValueError):
+            density_values = np.asarray(
+                [
+                    density(
+                        **{
+                            **supplied,
+                            outcome_name: value,
+                            **dict.fromkeys(free_variables, value),
+                        }
+                    )
+                    for value in values
+                ],
+                dtype=float,
+            )
+    if density_values.shape != values.shape:
+        raise DistributionEstimationError("density returned an unexpected number of values")
+    if not np.isfinite(density_values).all() or (density_values < 0).any():
+        raise DistributionEstimationError("density returned a non-finite or negative value")
+    mass = float(np.sum(weights * density_values))
+    result = float(np.sum(weights * values * density_values))
     if not np.isfinite(mass) or mass <= 0:
-        raise DistributionEstimationError("outcome density has no positive mass in the supplied bounds")
+        raise DistributionEstimationError(
+            "outcome density has no positive mass in the supplied bounds"
+        )
     if not np.isfinite(result):
         raise DistributionEstimationError("outcome expectation is not finite")
-    return float(result)
+    return float(result / mass)
 
 
-def estimate_ate(expression: Expression, data: pd.DataFrame, treatment: str | Variable, outcome: str | Variable, treatment_levels: tuple[object, object], *, mode: str = "discrete", backend: ContinuousBackend | None = None, outcome_bounds: tuple[float, float] | None = None) -> float:
+def estimate_ate(
+    expression: Expression,
+    data: pd.DataFrame,
+    treatment: str | Variable,
+    outcome: str | Variable,
+    treatment_levels: tuple[object, object],
+    *,
+    mode: str = "discrete",
+    backend: ContinuousBackend | None = None,
+    outcome_bounds: tuple[float, float] | None = None,
+    profiler: EstimationProfiler | None = None,
+    marginalization: Literal["quadrature", "kde"] = "quadrature",
+) -> float:
     """Estimate an ATE as the difference between two interventional expectations.
 
     axiomander:
@@ -506,21 +679,50 @@ def estimate_ate(expression: Expression, data: pd.DataFrame, treatment: str | Va
             values.append(
                 estimate_expectation(
                     evaluate_probability_expression(
-                        expression, subset, mode=mode, backend=backend
+                        expression,
+                        subset,
+                        mode=mode,
+                        backend=backend,
+                        profiler=profiler,
+                        marginalization=marginalization,
                     ),
                     outcome,
+                    profiler=profiler,
                 )
             )
         return float(values[1] - values[0])
     if mode == "continuous":
+        expression_bounds: Mapping[str, tuple[float, float]] = {
+            outcome_name: _validate_bounds(outcome_bounds),
+        }
+        for name in _names(expression.get_variables()):
+            if name == outcome_name:
+                continue
+            if name not in data:
+                raise ValueError(f"missing required columns: {[name]}")
+            values = data[name].to_numpy(dtype=float)
+            if not np.isfinite(values).all() or values.min() >= values.max():
+                raise ValueError(f"continuous variable {name!r} must have finite variation")
+            expression_bounds[name] = (float(values.min()), float(values.max()))
         evaluated = evaluate_probability_expression(
             expression,
             data,
             mode=mode,
             backend=backend,
-            bounds=outcome_bounds,
+            bounds=expression_bounds,
+            profiler=profiler,
+            marginalization=marginalization,
         )
         bounds = _validate_bounds(outcome_bounds)
+        extra_variables = tuple(
+            name for name in evaluated.variables if name not in {outcome_name, treatment_name}
+        )
+        if extra_variables:
+            raise ValueError(
+                "continuous ATE requires expression marginalization to be one-dimensional "
+                f"over {outcome_name!r} and {treatment_name!r}; "
+                f"found extra variables {extra_variables!r}"
+            )
         has_treatment = treatment_name in evaluated.variables
         values = []
         for level in treatment_levels:
@@ -529,9 +731,8 @@ def estimate_ate(expression: Expression, data: pd.DataFrame, treatment: str | Va
                     evaluated,
                     outcome,
                     bounds=bounds,
-                    evaluation_values=(
-                        {treatment_name: float(level)} if has_treatment else None
-                    ),
+                    evaluation_values=({treatment_name: float(level)} if has_treatment else None),
+                    profiler=profiler,
                 )
             )
         return float(values[1] - values[0])

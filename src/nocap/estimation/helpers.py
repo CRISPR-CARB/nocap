@@ -52,13 +52,16 @@ class EdgeEstimate:
 
 
 def identify_query_status(
-    graph: nx.DiGraph, treatment: str, outcome: str
+    graph: nx.DiGraph,
+    treatment: str,
+    outcome: str,
+    unobserved: set[str] | frozenset[str] | None = None,
 ) -> QueryResult:
     """Identify one ordered treatment/outcome query without raising y0 errors."""
     if treatment not in graph or outcome not in graph:
         raise ValueError("treatment and outcome must be graph nodes")
     try:
-        expression = identify_causal_query(graph, {treatment}, {outcome})
+        expression = identify_causal_query(graph, {treatment}, {outcome}, unobserved)
     except Unidentifiable as error:
         return QueryResult(False, None, str(error) or "unidentifiable")
     return QueryResult(True, expression)
@@ -109,19 +112,62 @@ def estimate_scm_edges(
         columns = [cause, effect, *(sorted(adjustment or ()))]
         complete = data.loc[:, columns].dropna()
         if adjustment is None:
-            estimates.append(EdgeEstimate(cause, effect, "unidentifiable", None, None, None, None, None, len(complete)))
+            estimates.append(
+                EdgeEstimate(
+                    cause, effect, "unidentifiable", None, None, None, None, None, len(complete)
+                )
+            )
             continue
         if len(complete) < min_rows:
-            estimates.append(EdgeEstimate(cause, effect, "insufficient_rows", adjustment, None, None, None, None, len(complete)))
+            estimates.append(
+                EdgeEstimate(
+                    cause,
+                    effect,
+                    "insufficient_rows",
+                    adjustment,
+                    None,
+                    None,
+                    None,
+                    None,
+                    len(complete),
+                )
+            )
             continue
         try:
-            result = estimate_path_coefficient_for_edge(graph, cause, effect, complete, adj_set=adjustment)
+            result = estimate_path_coefficient_for_edge(
+                graph, cause, effect, complete, adj_set=adjustment
+            )
         except (KeyError, ValueError, np.linalg.LinAlgError) as error:
-            estimates.append(EdgeEstimate(cause, effect, "failed", adjustment, None, None, None, None, len(complete), str(error)))
+            estimates.append(
+                EdgeEstimate(
+                    cause,
+                    effect,
+                    "failed",
+                    adjustment,
+                    None,
+                    None,
+                    None,
+                    None,
+                    len(complete),
+                    str(error),
+                )
+            )
             continue
         assert result is not None
         coefficient, stderr, residual, t_value = result
-        estimates.append(EdgeEstimate(cause, effect, "estimated", adjustment, coefficient, stderr, residual, t_value, len(complete)))
+        estimates.append(
+            EdgeEstimate(
+                cause,
+                effect,
+                "estimated",
+                adjustment,
+                coefficient,
+                stderr,
+                residual,
+                t_value,
+                len(complete),
+            )
+        )
     return estimates
 
 
@@ -130,7 +176,11 @@ def build_estimated_scm(
 ) -> DirectedScm:
     """Construct an SCM from CSD coefficients without hiding failed edges."""
     by_edge = {(item.cause, item.effect): item for item in estimates}
-    missing = [edge for edge in graph.edges() if by_edge.get(edge) is None or by_edge[edge].coefficient is None]
+    missing = [
+        edge
+        for edge in graph.edges()
+        if by_edge.get(edge) is None or by_edge[edge].coefficient is None
+    ]
     if missing and not allow_partial:
         raise ValueError(f"estimated SCM has incomplete coefficients: {sorted(missing)}")
     betas = {

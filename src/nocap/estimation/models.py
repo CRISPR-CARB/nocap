@@ -39,6 +39,12 @@ class MarginalKDE(JointKDE, Protocol):
 class ContinuousBackend(Protocol):
     """Protocol used by the continuous recursive evaluator."""
 
-    def fit(self, data: pd.DataFrame, variables: Sequence[str]) -> JointKDE:
-        """Fit and return a joint KDE for the requested columns."""
+    def fit(
+        self,
+        data: pd.DataFrame,
+        variables: Sequence[str],
+        *,
+        bandwidth=None,
+    ) -> JointKDE:
+        """Fit a KDE for the requested columns, optionally reusing a bandwidth."""
         ...
