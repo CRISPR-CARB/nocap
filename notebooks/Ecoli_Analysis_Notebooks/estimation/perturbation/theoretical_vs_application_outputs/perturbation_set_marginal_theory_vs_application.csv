@@ -1,0 +1,11 @@
+set_index,theoretical_marginal_edges,application_marginal_edges,marginal_gap_theory_minus_application,theoretical_cumulative_edges,application_cumulative_edges,set_label,proxy_recovered_new,exact_recovered_new
+1,6418,6167,251,6418,6167,"set 1: gade, gadx, rpod",6358,6418
+2,35,89,-54,6453,6256,"set 2: fliz, fur, rpoh",52,35
+3,24,8,16,6477,6264,"set 3: fis, nac, rpoe",31,24
+4,12,17,-5,6489,6281,"set 4: hns, mara, rpos",17,12
+5,8,0,8,6497,6281,"set 5: argr, dksa, fnr",11,8
+6,0,3,-3,6497,6284,"set 6: acca, bglj, cra",6,0
+7,0,9,-9,6497,6293,"set 7: dinj, exur, galr",6,0
+8,0,9,-9,6497,6302,"set 8: gutm, higa, hipa",6,0
+9,2,8,-6,6499,6310,"set 9: ihfa, maze, relb",6,2
+10,3,7,-4,6502,6317,"set 10: rhar, rpon, rpsf",6,3
