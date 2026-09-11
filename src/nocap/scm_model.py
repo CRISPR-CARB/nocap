@@ -251,9 +251,7 @@ def build_synthetic_scm(
     """
     nodes = tuple(str(node) for node in nodes)
     graph_signs = {
-        (str(u), str(v)): data.get(
-            "polarity", data.get("d0", data.get("sign"))
-        )
+        (str(u), str(v)): data.get("polarity", data.get("d0", data.get("sign")))
         for u, v, data in estimation_graph.edges(data=True)
     }
     normalized_signs = {
@@ -272,13 +270,7 @@ def build_synthetic_scm(
 
     for _ in range(100):
         betas = _sample_betas(
-            edges,
-            rng,
-            beta_med,
-            beta_log_sd,
-            beta_p,
-            beta_abs_max,
-            normalized_signs
+            edges, rng, beta_med, beta_log_sd, beta_p, beta_abs_max, normalized_signs
         )
 
         matrix = _beta_matrix_from_edges(nodes, betas)

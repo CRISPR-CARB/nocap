@@ -5,9 +5,9 @@ from __future__ import annotations
 import logging
 from contextlib import contextmanager
 from dataclasses import dataclass
-from time import perf_counter
 from os import PathLike
-from typing import TextIO
+from time import perf_counter
+from typing import Self, TextIO
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +82,8 @@ class EstimationProfiler:
         timing.last_metadata = metadata or None
         if self._log_stream is not None:
             self._log_stream.write(
-                "operation=%s calls=%d elapsed=%.6fs total=%.6fs metadata=%s\n"
-                % (name, timing.calls, elapsed, timing.total_seconds, metadata or {})
+                f"operation={name} calls={timing.calls} elapsed={elapsed:.6f}s "
+                f"total={timing.total_seconds:.6f}s metadata={metadata or {}}\n"
             )
             self._log_stream.flush()
 
@@ -95,7 +95,7 @@ class EstimationProfiler:
                 self._log_stream.close()
             self._log_stream = None
 
-    def __enter__(self) -> "EstimationProfiler":
+    def __enter__(self) -> Self:
         """Return the profiler for use as a context manager."""
         return self
 

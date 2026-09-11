@@ -114,9 +114,7 @@ def test_count_observation_flag_uses_counts_in_paired_views():
         scm_seed=1,
         data_seed=2,
     )
-    observed = artifact.view(
-        SimulationConfig(n_samples=4, use_umi_counts_as_observed_data=True)
-    )
+    observed = artifact.view(SimulationConfig(n_samples=4, use_umi_counts_as_observed_data=True))
 
     pd.testing.assert_frame_equal(
         observed,
@@ -137,9 +135,7 @@ def test_size_factors_are_geometrically_centered():
 
 def test_baseline_expression_is_not_compositionally_normalized():
     """Sample positive q0 baselines without forcing a unit sum."""
-    values = sample_baseline_expression(
-        5, mean=1.0, dispersion=2.25, rng=np.random.default_rng(1)
-    )
+    values = sample_baseline_expression(5, mean=1.0, dispersion=2.25, rng=np.random.default_rng(1))
 
     assert np.all(values > 0)
     assert not np.isclose(values.sum(), 1.0)
@@ -147,13 +143,14 @@ def test_baseline_expression_is_not_compositionally_normalized():
 
 def test_baseline_expression_uses_negative_binomial_sampling():
     """Use the seeded negative-binomial baseline realization."""
-    values = sample_baseline_expression(
-        5, mean=1.0, dispersion=2.25, rng=np.random.default_rng(1)
-    )
+    values = sample_baseline_expression(5, mean=1.0, dispersion=2.25, rng=np.random.default_rng(1))
 
-    expected = np.random.default_rng(1).negative_binomial(
-        n=1 / 2.25, p=(1 / 2.25) / ((1 / 2.25) + 1.0), size=5
-    ).astype(float) + 1.0
+    expected = (
+        np.random.default_rng(1)
+        .negative_binomial(n=1 / 2.25, p=(1 / 2.25) / ((1 / 2.25) + 1.0), size=5)
+        .astype(float)
+        + 1.0
+    )
     np.testing.assert_array_equal(values, expected)
 
 

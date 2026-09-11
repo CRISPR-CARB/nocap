@@ -43,7 +43,7 @@ def identify_causal_query(
     graph: nx.DiGraph,
     interventions: set[str] | frozenset[str],
     outcomes: set[str] | frozenset[str],
-    unobserved: set[str] | frozenset[str] | None = None
+    unobserved: set[str] | frozenset[str] | None = None,
 ) -> Expression:
     """Identify ``P(outcomes | do(interventions))`` in a directed graph.
 

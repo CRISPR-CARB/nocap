@@ -9,6 +9,7 @@ from nocap.cyclic_id import identify_causal_query, is_identifiable
 
 
 def test_identifies_acyclic_query() -> None:
+    """Identify a straightforward acyclic treatment-outcome query."""
     graph = nx.DiGraph([("X", "Y")])
 
     result = identify_causal_query(graph, {"X"}, {"Y"})
@@ -18,6 +19,7 @@ def test_identifies_acyclic_query() -> None:
 
 
 def test_identifies_query_downstream_of_cycle() -> None:
+    """Identify outcomes downstream of a cycle when the query permits it."""
     graph = nx.DiGraph(
         [
             ("TF1", "TF2"),
@@ -33,6 +35,7 @@ def test_identifies_query_downstream_of_cycle() -> None:
 
 
 def test_reports_unidentifiable_cyclic_query() -> None:
+    """Report a treatment effect that remains inside an unresolved cycle."""
     graph = nx.DiGraph([("X", "Y"), ("Y", "X")])
 
     assert is_identifiable(graph, {"X"}, {"Y"}) is False
@@ -49,9 +52,8 @@ def test_reports_unidentifiable_cyclic_query() -> None:
         ({1}, {"Y"}, "intervention nodes must be strings"),
     ],
 )
-def test_preconditions(
-    interventions: set, outcomes: set, message: str
-) -> None:
+def test_preconditions(interventions: set, outcomes: set, message: str) -> None:
+    """Reject malformed intervention and outcome arguments."""
     graph = nx.DiGraph([("X", "Y")])
 
     with pytest.raises(AssertionError, match=message):
@@ -59,5 +61,6 @@ def test_preconditions(
 
 
 def test_requires_nx_digraph() -> None:
-    with pytest.raises(AssertionError, match="graph must be an nx.DiGraph"):
+    """Require a directed NetworkX graph for causal identification."""
+    with pytest.raises(AssertionError, match=r"graph must be an nx\.DiGraph"):
         identify_causal_query(nx.Graph([("X", "Y")]), {"X"}, {"Y"})

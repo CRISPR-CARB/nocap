@@ -150,9 +150,7 @@ def _load_graph_from_graphml(graphml_path: str) -> nx.DiGraph:
     # Force node IDs to be strings for compatibility with y0 Variable(name).
     g2 = nx.DiGraph()
     g2.add_nodes_from([str(n) for n in g.nodes()])
-    g2.add_edges_from(
-        (str(u), str(v), dict(data)) for u, v, data in g.edges(data=True)
-    )
+    g2.add_edges_from((str(u), str(v), dict(data)) for u, v, data in g.edges(data=True))
     return g2
 
 
@@ -356,7 +354,7 @@ def main() -> None:
             "cycle",
             "two_cycles_disconnected",
             "small_network",
-            "frontdoor_cycle"
+            "frontdoor_cycle",
         ],
         help="Built-in demo graph to use when --graphml is omitted.",
     )
@@ -633,16 +631,30 @@ def main() -> None:
         elif args.demo == "two_cycles_disconnected":
             graph.add_edges_from([("A", "B"), ("B", "A"), ("C", "D"), ("D", "C")])
         elif args.demo == "small_network":
-            graph.add_edges_from([("TF1", "G1"), ("TF1", "G2"), ("G2", "G3"), ("G1", "TF2"), ("G3", "TF2"), ("TF2", "G4"), ("G3", "TF3"), ("TF3", "G2"), ("TF3", "TF1")])
+            graph.add_edges_from(
+                [
+                    ("TF1", "G1"),
+                    ("TF1", "G2"),
+                    ("G2", "G3"),
+                    ("G1", "TF2"),
+                    ("G3", "TF2"),
+                    ("TF2", "G4"),
+                    ("G3", "TF3"),
+                    ("TF3", "G2"),
+                    ("TF3", "TF1"),
+                ]
+            )
         elif args.demo == "frontdoor_cycle":
-            graph.add_edges_from([
-                ("TF1", "TF2", {"polarity": "+"}),
-                ("TF2", "TF3", {"polarity": "-"}),
-                ("TF3", "TF1", {"polarity": "+"}),
-                ("TF1", "G1", {"polarity": "+"}),
-                ("TF2", "G1", {"polarity": "+"}),
-                ("TF3", "G1", {"polarity": "+"}),
-            ])
+            graph.add_edges_from(
+                [
+                    ("TF1", "TF2", {"polarity": "+"}),
+                    ("TF2", "TF3", {"polarity": "-"}),
+                    ("TF3", "TF1", {"polarity": "+"}),
+                    ("TF1", "G1", {"polarity": "+"}),
+                    ("TF2", "G1", {"polarity": "+"}),
+                    ("TF3", "G1", {"polarity": "+"}),
+                ]
+            )
         else:
             raise ValueError(f"Unknown demo {args.demo!r}")
 
@@ -942,7 +954,7 @@ def main() -> None:
                         row["residual_variance"] = float(residual_var)
                         row["t_value"] = float(t_val)
                         row["status"] = "identifiable"
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     row["status"] = "estimation_error"
                     row["error"] = repr(exc)
 

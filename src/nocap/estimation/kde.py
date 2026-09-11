@@ -67,6 +67,7 @@ class KDEpyKDE:
 
 class _KDEpyFitted:
     def __init__(self, variables, values, bandwidth: float | str | None = "scott"):
+        """Initialize a KDEpy fit and defer grid construction until evaluation."""
         self.variables = variables
         self.values = values
         self.bandwidth = _set_bandwidth(
@@ -117,7 +118,7 @@ class _KDEpyFitted:
         indexes = [self.variables.index(name) for name in variables]
         if not indexes:
             return _ConstantFitted((), 1.0)
-        return _KDEpyFitted(tuple(variables), self.values[:, indexes], self.bandwidth)
+        return _KDEpyFitted(tuple(variables), self.values[:, indexes], self.bandwidth)  # type: ignore
 
 
 class SciPyGaussianKDE:
@@ -140,15 +141,18 @@ class SciPyGaussianKDE:
 
 class _SciPyFitted:
     def __init__(self, variables, kde, samples, bandwidth):
+        """Store a fitted SciPy KDE and its original sample coordinates."""
         self.variables, self.kde, self.samples, self.bandwidth = variables, kde, samples, bandwidth
 
     def evaluate(self, points):
+        """Evaluate the fitted SciPy density at point rows."""
         points = np.asarray(points, dtype=float)
         if len(self.variables) == 1:
             return np.asarray(self.kde(points[:, 0]))
         return np.asarray(self.kde(points.T))
 
     def project(self, variables):
+        """Project the Gaussian mixture onto a subset of variables."""
         indexes = [self.variables.index(name) for name in variables]
         if not indexes:
             return _ConstantFitted((), 1.0)
@@ -162,6 +166,7 @@ class _SciPyFitted:
 
 class _SciPyProjected:
     def __init__(self, variables, samples, weights, covariance):
+        """Initialize an analytically projected Gaussian mixture."""
         from scipy.stats import multivariate_normal
 
         self.variables, self.samples, self.weights, self.covariance = (
@@ -173,6 +178,7 @@ class _SciPyProjected:
         self._normal = multivariate_normal
 
     def evaluate(self, points):
+        """Evaluate the projected Gaussian mixture at point rows."""
         points = np.asarray(points, dtype=float)
         if len(self.variables) == 1:
             scale = float(np.sqrt(self.covariance[0, 0]))
@@ -191,6 +197,7 @@ class _SciPyProjected:
         )
 
     def project(self, variables):
+        """Project the Gaussian mixture again onto selected variables."""
         indexes = [self.variables.index(name) for name in variables]
         return _SciPyProjected(
             tuple(variables),
@@ -249,6 +256,7 @@ class SklearnKDE:
 
 class _SklearnFitted:
     def __init__(self, variables, values, estimator, kernel, kwargs, bandwidth):
+        """Store a fitted scikit-learn estimator and projection metadata."""
         self.variables = variables
         self.values = values
         self.estimator = estimator
@@ -262,6 +270,7 @@ class _SklearnFitted:
         return np.exp(self.estimator.score_samples(points))
 
     def project(self, variables):
+        """Refit a scikit-learn KDE using only the selected coordinates."""
         indexes = [self.variables.index(name) for name in variables]
         if not indexes:
             return _ConstantFitted((), 1.0)
@@ -278,12 +287,15 @@ class _SklearnFitted:
 
 class _ConstantFitted:
     def __init__(self, variables, value):
+        """Initialize a constant density used for zero-dimensional projections."""
         self.variables, self.value = variables, value
 
     def evaluate(self, points):
+        """Return the constant density value for every point row."""
         return np.full(len(points), self.value)
 
     def project(self, variables):
+        """Return the constant density unchanged for any projection."""
         return self
 
 
@@ -304,12 +316,15 @@ class StatsmodelsKDE:
 
 class _StatsmodelsFitted:
     def __init__(self, variables, values, kde, bandwidth):
+        """Store a fitted statsmodels KDE and its sample representation."""
         self.variables, self.values, self.kde, self.bandwidth = variables, values, kde, bandwidth
 
     def evaluate(self, points):
+        """Evaluate the fitted statsmodels density at point rows."""
         return np.asarray(self.kde.pdf(np.asarray(points)))
 
     def project(self, variables):
+        """Project the product-kernel density onto selected variables."""
         indexes = [self.variables.index(name) for name in variables]
         if not indexes:
             return _ConstantFitted((), 1.0)
@@ -320,9 +335,11 @@ class _StatsmodelsFitted:
 
 class _StatsmodelsProjected:
     def __init__(self, variables, values, bandwidth):
+        """Initialize a projected statsmodels product-kernel density."""
         self.variables, self.values, self.bandwidth = variables, values, bandwidth
 
     def evaluate(self, points):
+        """Evaluate the projected product-kernel density at point rows."""
         points = np.asarray(points)
         result = np.ones(len(points))
         for index, bandwidth in enumerate(self.bandwidth):
@@ -331,6 +348,7 @@ class _StatsmodelsProjected:
         return result
 
     def project(self, variables):
+        """Project the product-kernel density onto another variable subset."""
         indexes = [self.variables.index(name) for name in variables]
         return _StatsmodelsProjected(
             tuple(variables), self.values[:, indexes], self.bandwidth[indexes]

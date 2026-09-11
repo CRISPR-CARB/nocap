@@ -11,7 +11,7 @@ from collections.abc import Callable, Iterable, Mapping
 from contextlib import nullcontext
 from dataclasses import dataclass
 from time import perf_counter
-from typing import Literal
+from typing import Any, Literal, Protocol, cast
 
 import numpy as np
 import pandas as pd
@@ -98,6 +98,12 @@ class _CallableDensity:
             points = array
         result = np.asarray(self._function(points), dtype=float)
         return float(result[0]) if scalar and result.size else result
+
+
+class _DensityWithVariables(Protocol):
+    variables: tuple[str, ...]
+
+    def __call__(self, **kwargs: object) -> float | np.ndarray: ...
 
 
 def _names(variables: Iterable[Variable]) -> tuple[str, ...]:
@@ -296,6 +302,7 @@ def _continuous_eval(
                     fixed = dict(zip(integrated, point, strict=True))
 
                     def integrand(*values: float) -> float:
+                        """Evaluate the inner density at one integration point."""
                         current = {**fixed, **dict(zip(integrated_names, values, strict=True))}
                         ordered = np.asarray(
                             [[current[name] for name in inner.variables]], dtype=float
@@ -372,8 +379,6 @@ def _table(data: pd.DataFrame, variables: tuple[str, ...]) -> pd.DataFrame:
 
 def _discrete_eval(expression: Expression, data: pd.DataFrame):
     """Recursively evaluate an expression as a discrete probability table."""
-    variables = _names(expression.get_variables())
-    base = _table(data, variables)
     if isinstance(expression, Probability):
         children = _names(expression.children)
         parents = _names(expression.parents)
@@ -571,7 +576,7 @@ def _continuous_expectation(
 ) -> float:
     """Calculate an expectation with vectorized Gauss-Legendre quadrature."""
     lower, upper = bounds
-    variables = tuple(density.variables)
+    variables = tuple(cast(_DensityWithVariables, density).variables)
     if outcome_name not in variables:
         raise ValueError("identified expression does not contain the outcome")
     supplied = {} if evaluation_values is None else dict(evaluation_values)
@@ -692,7 +697,7 @@ def estimate_ate(
             )
         return float(values[1] - values[0])
     if mode == "continuous":
-        expression_bounds: Mapping[str, tuple[float, float]] = {
+        expression_bounds: dict[str, tuple[float, float]] = {
             outcome_name: _validate_bounds(outcome_bounds),
         }
         for name in _names(expression.get_variables()):
@@ -726,12 +731,13 @@ def estimate_ate(
         has_treatment = treatment_name in evaluated.variables
         values = []
         for level in treatment_levels:
+            level_float = float(cast(Any, level))
             values.append(
                 estimate_expectation(
                     evaluated,
                     outcome,
                     bounds=bounds,
-                    evaluation_values=({treatment_name: float(level)} if has_treatment else None),
+                    evaluation_values=({treatment_name: level_float} if has_treatment else None),
                     profiler=profiler,
                 )
             )

@@ -40,6 +40,8 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "src/nocap/version.py" = ["S603", "S607"]
+"src/nocap/estimation/distribution.py" = ["C901", "B023"]
+"src/nocap/estimation/profiler.py" = ["SIM115"]
 # scc_perturb.py and cyclic_single_door.py use assert-based axiomander contracts
 # (PRE/POST) and intentional en-dash separators in Returns dict documentation.
 "src/nocap/scc_perturb.py" = ["S101", "RUF002"]
@@ -108,6 +110,7 @@ ignore = [
     "D414",  # section has no content (note sections in module docstrings)
     "S603",  # subprocess call with untrusted input (intentional in CLI scripts)
     "S110",  # try-except-pass (intentional fallback patterns)
+    "BLE001",  # broad exception reporting is intentional in CLI scripts
 ]
 "notebooks/**/*.ipynb" = [
     "E701",  # multiple statements on one line (colon) — common in notebook one-liners
@@ -122,6 +125,10 @@ ignore = [
     "S101",  # assert in notebooks
     "D100",  # missing docstring in public module
     "D103",  # missing docstring in public function
+    "F401",  # optional exploratory imports
+    "BLE001",  # exploratory fallback handling
+    "FURB177",  # notebook repository discovery
+    "RUF005",  # exploratory groupby column lists
 ]
 
 [tool.ruff.lint.pydocstyle]

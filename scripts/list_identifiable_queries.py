@@ -21,8 +21,25 @@ def _demo(name: str) -> nx.DiGraph:
         "confounded_chain": [("Z", "X"), ("X", "Y"), ("Z", "Y")],
         "cycle": [("X", "Y"), ("Y", "X"), ("Y", "Z"), ("Z", "Y")],
         "two_cycles_disconnected": [("A", "B"), ("B", "A"), ("C", "D"), ("D", "C")],
-        "small_network": [("TF1", "G1"), ("TF1", "G2"), ("G2", "G3"), ("G1", "TF2"), ("G3", "TF2"), ("TF2", "G4"), ("G3", "TF3"), ("TF3", "G2"), ("TF3", "TF1")],
-        "frontdoor_cycle": [("TF1", "TF2"), ("TF2", "TF3"), ("TF3", "TF1"), ("TF1", "G1"), ("TF2", "G1"), ("TF3", "G1")],
+        "small_network": [
+            ("TF1", "G1"),
+            ("TF1", "G2"),
+            ("G2", "G3"),
+            ("G1", "TF2"),
+            ("G3", "TF2"),
+            ("TF2", "G4"),
+            ("G3", "TF3"),
+            ("TF3", "G2"),
+            ("TF3", "TF1"),
+        ],
+        "frontdoor_cycle": [
+            ("TF1", "TF2"),
+            ("TF2", "TF3"),
+            ("TF3", "TF1"),
+            ("TF1", "G1"),
+            ("TF2", "G1"),
+            ("TF3", "G1"),
+        ],
     }
     if name not in edges:
         raise ValueError(f"unknown demo graph: {name}")
@@ -64,10 +81,24 @@ def main() -> None:
             try:
                 identifiable = is_identifiable(graph, {treatment}, {outcome})
                 reason = "identifiable" if identifiable else "unidentifiable"
-                expression = str(identify_causal_query(graph, {treatment}, {outcome})) if identifiable else ""
-            except Exception as error:  # malformed y0 graph/query is reported per row  # noqa: BLE001
+                expression = (
+                    str(identify_causal_query(graph, {treatment}, {outcome}))
+                    if identifiable
+                    else ""
+                )
+            except Exception as error:  # malformed y0 graph/query is reported per row
                 identifiable, reason, expression = False, type(error).__name__, ""
-            rows.append({"treatment": treatment, "outcome": outcome, "reachable": reachable, "same_scc": same_scc(graph, treatment, outcome), "identifiable": identifiable, "status": reason, "expression": expression})
+            rows.append(
+                {
+                    "treatment": treatment,
+                    "outcome": outcome,
+                    "reachable": reachable,
+                    "same_scc": same_scc(graph, treatment, outcome),
+                    "identifiable": identifiable,
+                    "status": reason,
+                    "expression": expression,
+                }
+            )
     rows.sort(key=lambda row: (row["treatment"], row["outcome"]))
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -75,7 +106,9 @@ def main() -> None:
         output.write_text(json.dumps(rows, indent=2), encoding="utf-8")
     else:
         with output.open("w", newline="", encoding="utf-8") as handle:
-            writer = csv.DictWriter(handle, fieldnames=list(rows[0]) if rows else ["treatment", "outcome"])
+            writer = csv.DictWriter(
+                handle, fieldnames=list(rows[0]) if rows else ["treatment", "outcome"]
+            )
             writer.writeheader()
             writer.writerows(rows)
 

@@ -261,7 +261,9 @@ def main() -> None:
                                 "intervention_genes": intervention["genes"],
                                 "intervention_semantics": "hard_do",
                                 "fixed_intervention_values": (
-                                    dict.fromkeys(intervention["genes"], args.fixed_intervention_value)
+                                    dict.fromkeys(
+                                        intervention["genes"], args.fixed_intervention_value
+                                    )
                                     if args.fixed_intervention_value is not None
                                     else {}
                                 ),

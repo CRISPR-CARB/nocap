@@ -82,9 +82,7 @@ def _load_graph(graphml: str | None, demo: str) -> nx.DiGraph:
 
 def _parse_nodes(values: list[str], option: str) -> frozenset[str]:
     """Parse repeated and comma-separated node arguments."""
-    nodes = frozenset(
-        node.strip() for value in values for node in value.split(",") if node.strip()
-    )
+    nodes = frozenset(node.strip() for value in values for node in value.split(",") if node.strip())
     if not nodes:
         raise SystemExit(f"{option} must contain at least one node")
     return nodes

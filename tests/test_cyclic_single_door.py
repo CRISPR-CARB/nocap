@@ -348,6 +348,7 @@ def test_nx_digraph_to_y0_no_bidirected():
 
 
 def test_nx_digraph_to_y0_unobserved():
+    """Represent an unobserved common cause as a bidirected edge."""
     g = _dag_with_unobs_confounder()
     g_y0 = nx_digraph_to_y0(g, {"U"})
     assert g_y0.undirected.number_of_edges() == 1

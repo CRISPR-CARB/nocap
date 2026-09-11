@@ -11,6 +11,7 @@ from nocap.simulation import SimulationConfig, simulate_intervention_levels, tru
 
 
 def test_hard_intervention_preserves_outgoing_edges_and_original_scm() -> None:
+    """Preserve outgoing intervention edges without mutating the original SCM."""
     graph = nx.DiGraph([("T", "Y"), ("Y", "T")])
     scm = DirectedScm(("T", "Y"), graph, {("T", "Y"): 0.2, ("Y", "T"): 0.1})
     intervened = build_intervened_scm(scm, ["T"])
@@ -19,6 +20,7 @@ def test_hard_intervention_preserves_outgoing_edges_and_original_scm() -> None:
 
 
 def test_intervention_data_has_fixed_treatment_values() -> None:
+    """Generate intervention states whose treatment columns equal each level."""
     graph = nx.DiGraph([("T", "Y")])
     scm = DirectedScm(("T", "Y"), graph, {("T", "Y"): 0.5})
     config = SimulationConfig(n_samples=20, size_factor_log_sd=0.0, use_latent_expression_hat=False)
@@ -28,12 +30,14 @@ def test_intervention_data_has_fixed_treatment_values() -> None:
 
 
 def test_true_scm_ate_matches_linear_effect() -> None:
+    """Match the known linear effect when estimating the true SCM ATE."""
     graph = nx.DiGraph([("T", "Y")])
     scm = DirectedScm(("T", "Y"), graph, {("T", "Y"): 0.5})
     assert true_scm_ate(scm, "T", "Y", (-1.0, 1.0), n_samples=1000) == 1.0
 
 
 def test_estimated_scm_ate_uses_csd_coefficients() -> None:
+    """Use estimated cyclic single-door coefficients to calculate the ATE."""
     graph = nx.DiGraph([("T", "Y")])
     scm = DirectedScm(("T", "Y"), graph, {("T", "Y"): 0.5})
     noise = np.random.default_rng(3).normal(size=(500, 2))

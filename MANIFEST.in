@@ -3,6 +3,7 @@ graft tests
 prune scripts
 prune notebooks
 prune tests/.pytest_cache
+prune .ruff_cache
 
 prune docs/build
 prune docs/source/api
@@ -24,3 +25,4 @@ recursive-include workflow Snakefile
 include README.md LICENSE DISCLAIMER SLIDES.md
 include *.lock
 exclude tox.ini .bumpversion.cfg .readthedocs.yml .cruft.json CITATION.cff docker-compose.yml Dockerfile
+recursive-include notes *.md

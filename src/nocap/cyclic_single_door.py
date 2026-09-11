@@ -135,6 +135,7 @@ def _timeout_context(seconds: int):
 # nx_digraph_to_y0
 # ---------------------------------------------------------------------------
 
+
 def convert_unobserved_to_bidirected(graph: NxMixedGraph, unobserved: set[str] | frozenset[str]):
     """Remove unobserved nodes from the graph and replace with a bidirected edge.
 
@@ -179,7 +180,9 @@ def convert_unobserved_to_bidirected(graph: NxMixedGraph, unobserved: set[str] |
     return graph
 
 
-def nx_digraph_to_y0(graph: nx.DiGraph, unobserved: set[str] | frozenset[str] | None = None) -> NxMixedGraph:
+def nx_digraph_to_y0(
+    graph: nx.DiGraph, unobserved: set[str] | frozenset[str] | None = None
+) -> NxMixedGraph:
     """Convert a plain ``nx.DiGraph`` to a y0 ``NxMixedGraph``.
 
     Each node name is wrapped in a :class:`~y0.dsl.Variable`. Bidirected edges are added to
@@ -217,7 +220,7 @@ def nx_digraph_to_y0(graph: nx.DiGraph, unobserved: set[str] | frozenset[str] | 
     # added explicitly so the node set is preserved.
     for var in node_map.values():
         if var not in result.directed and var.name not in (unobserved or {}):
-                result.directed.add_node(var)
+            result.directed.add_node(var)
 
     assert graph.number_of_nodes() - result.directed.number_of_nodes() == len(unobserved or {}), (
         "POST: node count must be preserved except for unobserved nodes"
