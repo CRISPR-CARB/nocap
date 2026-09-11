@@ -515,11 +515,10 @@ class TestEvaluateAllEdgesTimeoutContracts:
         if not hasattr(signal, "SIGALRM"):
             pytest.skip("SIGALRM not available on this platform")
 
-        with pytest.raises(_EdgeTimeout):
-            with _timeout_context(1):
-                import time
+        with pytest.raises(_EdgeTimeout), _timeout_context(1):
+            import time
 
-                time.sleep(5)  # will be interrupted after 1 s
+            time.sleep(5)  # will be interrupted after 1 s
 
     def test_post_timeout_row_structure(self):
         """POST: rows with status=='timeout' have timed_out=True and adjustment_set=None.

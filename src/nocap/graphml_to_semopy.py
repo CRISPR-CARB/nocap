@@ -234,7 +234,7 @@ def graphml_to_semopy(  # noqa: C901
                     UserWarning,
                     stacklevel=2,
                 )
-        except Exception:  # noqa: S110
+        except Exception:  # noqa: BLE001, S110
             pass  # very large graphs may time out; skip cycle check
 
     # ------------------------------------------------------------------
@@ -358,7 +358,7 @@ def main(argv: list[str] | None = None) -> None:
             print("✓ semopy.Model parsed the description successfully.", file=sys.stderr)  # noqa: T201
         except ImportError:
             print("semopy not installed; skipping validation.", file=sys.stderr)  # noqa: T201
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             print(f"✗ semopy.Model raised an error: {exc}", file=sys.stderr)  # noqa: T201
 
     if args.output:

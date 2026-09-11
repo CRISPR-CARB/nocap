@@ -12,8 +12,9 @@ timeout_edges = []
 
 for f in classified:
     try:
-        d = json.load(open(f))
-    except Exception:
+        with open(f) as handle:
+            d = json.load(handle)
+    except (OSError, json.JSONDecodeError):
         continue
     results = d.get("results", [])
     total_edges += len(results)

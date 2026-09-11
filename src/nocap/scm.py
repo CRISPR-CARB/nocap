@@ -195,12 +195,11 @@ def plot_interactive_lscm_graph(lscm: dict[sy.Symbol, sy.Expr]):
     # Create graph from LSCM
     graph = nx.DiGraph()
 
-    for node_sym in lscm.keys():
+    for node_sym, expression in lscm.items():
         node_name = str(node_sym)
         graph.add_node(node_name)
 
         # Parse expression to identify relationships
-        expression = lscm[node_sym]
         for term in expression.as_ordered_terms():
             if term.has(sy.Symbol):
                 for sym in term.atoms(sy.Symbol):

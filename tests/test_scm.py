@@ -126,12 +126,9 @@ def test_dagitty_to_mixed_graph():
 
     def mixed_graphs_equal(graph1: NxMixedGraph, graph2: NxMixedGraph) -> bool:
         """Test if two mixed graphs are equal."""
-        if nx.utils.graphs_equal(graph1.undirected, graph2.undirected) and nx.utils.graphs_equal(
-            graph1.directed, graph2.directed
-        ):
-            return True
-        else:
-            return False
+        return nx.utils.graphs_equal(
+            graph1.undirected, graph2.undirected
+        ) and nx.utils.graphs_equal(graph1.directed, graph2.directed)
 
     graph_str = """dag {
                         bb="0,0,1,1"
@@ -179,8 +176,8 @@ def test_generate_lscm_from_dag():
         sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B") + sy.Symbol("epsilon_C"),
     }
     actual_equations = generate_lscm_from_dag(graph)
-    for node in expected_equations:  # symbolic equality
-        assert sy.simplify(actual_equations[node] - expected_equations[node]) == 0
+    for node, expected in expected_equations.items():  # symbolic equality
+        assert sy.simplify(actual_equations[node] - expected) == 0
 
 
 def test_generate_lscm_from_mixed_graph():
@@ -196,8 +193,8 @@ def test_generate_lscm_from_mixed_graph():
         sy.Symbol("C"): sy.Symbol("beta_B_->C") * sy.Symbol("B") + sy.Symbol("epsilon_C"),
     }
     actual_equations = generate_lscm_from_mixed_graph(graph)
-    for node in expected_equations:  # symbolic equality
-        assert sy.simplify(actual_equations[node] - expected_equations[node]) == 0
+    for node, expected in expected_equations.items():  # symbolic equality
+        assert sy.simplify(actual_equations[node] - expected) == 0
 
 
 def test_get_symbols_from_bi_edges():
@@ -266,8 +263,8 @@ def test_evaluate_lscm():
     actual_symbols = evaluate_lscm(lscm_dict, param_dict)
     # Use a numerical tolerance for comparison
     tolerance = 1e-9
-    for key in expected_symbols.keys():
-        assert abs(float(actual_symbols[key]) - float(expected_symbols[key])) < tolerance, (
+    for key, expected in expected_symbols.items():
+        assert abs(float(actual_symbols[key]) - float(expected)) < tolerance, (
             f"Values for {key} are not equal within tolerance."
         )
 
@@ -333,7 +330,7 @@ def test_create_lgbn_from_dag_cycle_raises():
     try:
         create_lgbn_from_dag(dag)
         assert False, "Should raise an exception for cyclic graph"
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass  # Expected
 
 
@@ -621,7 +618,7 @@ def test_create_lgbn_from_dag_invalid_input():
     try:
         create_lgbn_from_dag(g)
         assert False, "Should raise an exception for non-DiGraph input"
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
 
 
@@ -632,7 +629,7 @@ def test_create_lgbn_from_dag_cycle():
     try:
         create_lgbn_from_dag(dag)
         assert False, "Should raise an exception for cyclic graph"
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
 
 
@@ -723,7 +720,7 @@ def test_bootstrap_ATE_empty_data():
             n_iterations=10,
         )
         assert False, "Should raise error for empty data"
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
 
 

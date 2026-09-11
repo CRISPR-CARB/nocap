@@ -31,10 +31,8 @@ assert SUMMARY_JSON.exists(), f"PRE: {SUMMARY_JSON} must exist"
 
 
 def _load_results() -> list[dict]:
-    rows = []
     with open(RESULTS_CSV, newline="") as f:
-        for row in csv.DictReader(f):
-            rows.append(row)
+        rows = list(csv.DictReader(f))
     assert len(rows) > 0, "PRE: results CSV must be non-empty"
     return rows
 
