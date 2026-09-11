@@ -145,6 +145,7 @@ authors = [
 ]
 dependencies = [
     "click",
+    "KDEpy",
     "jupyter",
     "more_click",
     "more_itertools",
@@ -156,8 +157,11 @@ dependencies = [
     "pydot==2.0.0",
     "pytest>=9.0.3",
     "seaborn",
+    "scipy",
+    "scikit-learn",
     "semopy>=2.3.11",
     "sympy",
+    "statsmodels",
     "torch",
     "tox>=4.34.1",
     "tqdm",
