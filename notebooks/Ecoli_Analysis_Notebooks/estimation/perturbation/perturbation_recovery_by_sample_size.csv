@@ -1,0 +1,4 @@
+run,n_samples,baseline_edges,result_rows,recovered_rows,recovered_edges,recovery_rate
+csd_n10_k3_umi_paired,100,6676,266316,244764,6320,0.9466746554823248
+csd_n10_k3_umi_paired,1000,6676,266316,244764,6320,0.9466746554823248
+csd_n10_k3_umi_paired,10000,6676,226876,208849,6320,0.9466746554823248

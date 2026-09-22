@@ -1,0 +1,4 @@
+theoretical_source,theoretical_edges,application_recovered_edges,application_recovery_rate
+identifiable adjustment-set catalog,2446,2444,0.9991823385118561
+recovery-edge catalog,6502,6317,0.9715472162411566
+union,8948,8761,0.9791014751899866

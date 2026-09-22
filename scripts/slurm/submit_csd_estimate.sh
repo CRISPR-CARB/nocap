@@ -1,0 +1,369 @@
+#!/bin/bash
+# =============================================================================
+# submit_csd_estimate.sh
+# =============================================================================
+# Run the CSD estimation experiments (scripts/csd_estimate.py) on SLURM.
+#
+# This script builds a small parameter grid over synthetic observational
+# generation settings (sample size, missing-edge rate, missing-data rate,
+# measurement-error mechanism) and submits node-packed sbatch jobs.
+#
+# Idempotency: if the target output CSV already exists and is non-empty, the
+# corresponding task is skipped. On resume, tasks belonging to batches with a
+# currently queued or running SLURM job are also left alone.
+#
+# Usage (from repo root):
+#   bash scripts/slurm/submit_csd_estimate.sh
+#
+# Common environment overrides:
+#   GRAPHML=/path/to/graph.graphml
+#   OUTDIR=/path/to/output
+#   ADJUSTMENTS_CSV=/path/to/csd_identifiable_edges.csv
+#   INTERVENTION_CSV=/path/to/csd_recovery.csv
+#   INTERVENTION_GRAPH_DIR=/path/to/intervention-graphs
+#   INCLUDE_OBSERVATIONAL=1
+#   USE_LATENT_EXPRESSION_HAT=0  # use true latent expression instead of count-derived estimates
+#   USE_UMI_COUNTS_AS_OBSERVED_DATA=1  # pass raw simulated UMI counts to the estimator
+#   DRY_RUN=1     # only print sbatch commands
+# Paired mode creates task JSON records with setup_csd_experiment.py and passes
+# each record directly to csd_estimate.py.
+#
+# Seed contract:
+#   scm_seed controls structural betas and true missing edges.
+#   data_seed controls exogenous noise, size factors, q0, counts, and missingness.
+# Full mode assigns a deterministic unique seed pair to every parameter cell
+# and replicate. fixed_scm assigns one SCM seed per edge-rate condition and
+# varies data seeds across mechanisms, data rates, sample sizes, and replicates.
+# The legacy default remains one process per mechanism/rate cell with --seed.
+# For example:
+#   bash scripts/slurm/submit_csd_estimate.sh
+# Statistical bootstrap intervals are computed downstream from completed
+# replicate outputs, not by generating additional simulation tasks here.
+
+set -euo pipefail
+
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# ---------------------------------------------------------------------------
+# Paths / config
+# ---------------------------------------------------------------------------
+GRAPHML="${GRAPHML:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/ecoli_full_network_no_small_rna.graphml}"
+ADJUSTMENTS_CSV="${ADJUSTMENTS_CSV:-${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/csd_identifiable_edges.csv}"
+INTERVENTION_CSV="${INTERVENTION_CSV:-}"
+
+OUTDIR_WAS_SET="${OUTDIR+x}"
+if [[ -z "${OUTDIR_WAS_SET}" ]]; then
+    TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+    OUTDIR="${REPO_ROOT}/notebooks/Ecoli_Analysis_Notebooks/estimation/${TIMESTAMP}"
+fi
+
+LOG_DIR="${OUTDIR}/logs"
+mkdir -p "${OUTDIR}" "${LOG_DIR}"
+
+mkdir -p "${OUTDIR}/csv"
+
+ACCOUNT="${ACCOUNT:-crispr_carb}"
+PARTITION="${PARTITION:-slurm}"
+TIME="${TIME:-12:00:00}"
+MEM="${MEM:-0}"  # "0" lets slurm use partition default
+CPUS_PER_TASK="${CPUS_PER_TASK:-1}"
+BATCH_SIZE="${BATCH_SIZE:-64}"
+
+# An existing experiment is resumed using the batch size recorded when it was
+# created. This keeps reruns independent of newly supplied environment
+# variables. Older runs without metadata use the historical default.
+RUN_METADATA="${OUTDIR}/run_metadata.json"
+EXPERIMENT_MANIFEST="${OUTDIR}/experiment.json"
+if [[ -s "${EXPERIMENT_MANIFEST}" ]]; then
+    EXISTING_BATCH_SIZE="$(sed -n 's/.*"batch_size"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p' "${RUN_METADATA}" 2>/dev/null | head -n 1)"
+    if [[ -z "${EXISTING_BATCH_SIZE}" ]]; then
+        # Older runs predate batch_size in run_metadata.json. Their existing
+        # batch files are the source of truth for the original batch size.
+        for existing_batch in "${OUTDIR}/batches"/batch_*; do
+            [[ -f "${existing_batch}" ]] || continue
+            existing_batch_lines="$(wc -l < "${existing_batch}")"
+            ((existing_batch_lines > EXISTING_BATCH_SIZE)) && EXISTING_BATCH_SIZE="${existing_batch_lines}"
+        done
+    fi
+    BATCH_SIZE="${EXISTING_BATCH_SIZE:-64}"
+fi
+
+DRY_RUN="${DRY_RUN:-0}"
+DESIGN_MODE="${DESIGN_MODE:-paired_hierarchical}"
+EXPERIMENT_ID="${EXPERIMENT_ID:-csd-${TIMESTAMP:-$(date +%Y%m%d_%H%M%S)}}"
+N_SCM_REPLICATES="${N_SCM_REPLICATES:-1}"
+N_DATA_REPLICATES_PER_SCM="${N_DATA_REPLICATES_PER_SCM:-1}"
+INCLUDE_OBSERVATIONAL="${INCLUDE_OBSERVATIONAL:-0}"
+
+# Include the output directory in the job name so batches from different
+# experiments are distinguishable. The directory token is deterministic, so
+# resume calls can identify their own active jobs without relying on job IDs.
+OUTDIR_TOKEN="$(basename "${OUTDIR}")"
+OUTDIR_TOKEN="$(printf '%s' "${OUTDIR_TOKEN}" | tr -cs '[:alnum:]_' '-')"
+OUTDIR_TOKEN="${OUTDIR_TOKEN:0:40}"
+JOB_NAME_PREFIX="csd_est_pack_${OUTDIR_TOKEN}"
+
+# ---------------------------------------------------------------------------
+# Parameter grid
+# ---------------------------------------------------------------------------
+
+# Measurement-error/missing-data mechanisms supported by scripts/csd_estimate.py.
+# Set MECHANISMS to a comma-separated list to select a subset or custom ordering.
+# instrument_error: low expression is too low for the instrument to detect.
+# biological_error: a gene is not expressed at the time of measurement.
+# biological_error+instrument_error: both independent mechanisms are active.
+MECHANISMS_CSV="${MECHANISMS:-instrument_error,biological_error,biological_error+instrument_error}"
+IFS=',' read -r -a MECHANISMS <<< "${MECHANISMS_CSV}"
+[[ -n "${MECHANISMS_CSV}" ]] || { echo "MECHANISMS must be nonempty" >&2; exit 2; }
+
+# Synthetic regression parameters (linear-Gaussian SCM)
+SEED_BASE="${SEED_BASE:-0}"
+N_SAMPLES_LIST="${N_SAMPLES_LIST:-100,500,1000,2000,5000,10000}"
+N_SAMPLES_LIST_SANITIZED="$(echo "${N_SAMPLES_LIST}" | tr ',' '-')"
+
+N_MISSING_EDGE_RATES_LIST="${MISSING_EDGE_RATES_LIST:-0.0,0.2,0.4}"
+N_MISSING_DATA_RATES_LIST="${MISSING_DATA_RATES_LIST:-0.0,0.3}"
+[[ -n "${N_SAMPLES_LIST}" && -n "${N_MISSING_EDGE_RATES_LIST}" && -n "${N_MISSING_DATA_RATES_LIST}" ]] || { echo "Parameter lists must be nonempty" >&2; exit 2; }
+
+if [[ ! -s "${EXPERIMENT_MANIFEST}" ]]; then
+    printf '{"design_mode":"%s","experiment_id":"%s","seed_base":%s,"batch_size":%s,"n_samples_list":"%s","missing_edge_rates":"%s","missing_data_rates":"%s","mechanisms":"%s"}\n' \
+        "${DESIGN_MODE}" "${EXPERIMENT_ID}" "${SEED_BASE}" \
+        "${BATCH_SIZE}" "${N_SAMPLES_LIST}" "${N_MISSING_EDGE_RATES_LIST}" "${N_MISSING_DATA_RATES_LIST}" \
+        "$(IFS=,; echo "${MECHANISMS[*]}")" \
+        > "${RUN_METADATA}"
+fi
+
+# If you need stronger confounding or different beta sampling, you can
+# override these env vars:
+SCC_CONFOUNDING_STRENGTH="${SCC_CONFOUNDING_STRENGTH:-0.0}"
+BETA_MED="${BETA_MED:-0.5}"
+BETA_LOG_SD="${BETA_LOG_SD:-0.5}"
+BETA_ABS_MAX="${BETA_ABS_MAX:-5}"
+BETA_P="${BETA_P:-0.5}"
+
+DISPERSION="${DISPERSION:-0.1}"
+SIZE_FACTOR_LOG_SD="${SIZE_FACTOR_LOG_SD:-0.4}"
+BASELINE_EXPRESSION_MEAN="${BASELINE_EXPRESSION_MEAN:-1.0}"
+BASELINE_EXPRESSION_DISPERSION="${BASELINE_EXPRESSION_DISPERSION:-2.25}"
+UMI_PSEUDOCOUNT="${UMI_PSEUDOCOUNT:-1.0}"
+USE_LATENT_EXPRESSION_HAT="${USE_LATENT_EXPRESSION_HAT:-1}"
+if [[ "${USE_LATENT_EXPRESSION_HAT}" == "0" ]]; then
+    LATENT_EXPRESSION_HAT_ARG="--no-latent-expression-hat"
+else
+    LATENT_EXPRESSION_HAT_ARG=""
+fi
+USE_UMI_COUNTS_AS_OBSERVED_DATA="${USE_UMI_COUNTS_AS_OBSERVED_DATA:-0}"
+if [[ "${USE_UMI_COUNTS_AS_OBSERVED_DATA}" == "1" ]]; then
+    UMI_COUNTS_OBSERVED_DATA_ARG="--use-umi-counts-as-observed-data"
+else
+    UMI_COUNTS_OBSERVED_DATA_ARG=""
+fi
+LATENT_EXPRESSION_HAT_ARG="${LATENT_EXPRESSION_HAT_ARG} ${UMI_COUNTS_OBSERVED_DATA_ARG}"
+
+SELF_MASK_QUANTILE="${SELF_MASK_QUANTILE:-0.25}"
+SELF_MASK_K="${SELF_MASK_K:-8.0}"
+SELF_MASK_DIRECTION="${SELF_MASK_DIRECTION:-low}"
+
+MIN_ROWS_AFTER_DROPNA="${MIN_ROWS_AFTER_DROPNA:-30}"
+
+submit_batch() {
+    local batch_file="$1"
+    local batch_id="$2"
+    local job_name="${JOB_NAME_PREFIX}_${batch_id}"
+    local log_prefix="${LOG_DIR}/${job_name}_%j"
+
+    local wrap_str="set -euo pipefail
+ml python
+source /share/apps/python/miniconda25.5.1/etc/profile.d/conda.sh
+ml uv
+cd ${REPO_ROOT}
+export UV_CACHE_DIR=/tmp/\$USER/uv-cache-\$\$
+mkdir -p \"\$UV_CACHE_DIR\"
+uv sync --locked
+run_one() {
+  task_json=\"\$1\"
+  out_csv=\"\$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1]))[\"output_csv\"])' \"\$task_json\")\"
+  [[ -s \"\$out_csv\" ]] && { echo \"[skip] \$out_csv\"; return; }
+  mkdir -p \"\$(dirname \"\$out_csv\")\"
+   uv run python ${REPO_ROOT}/scripts/csd_estimate.py --task-json \"\$task_json\" --graphml ${GRAPHML} --output-csv \"\$out_csv\" --adjustments-csv ${ADJUSTMENTS_CSV} --assume-adjustments-csv-complete --design-mode ${DESIGN_MODE} --self-mask-quantile ${SELF_MASK_QUANTILE} --self-mask-k ${SELF_MASK_K} --self-mask-direction ${SELF_MASK_DIRECTION} --beta-med ${BETA_MED} --beta-log-sd ${BETA_LOG_SD} --beta-abs-max ${BETA_ABS_MAX} --beta-p ${BETA_P} --dispersion ${DISPERSION} --size-factor-log-sd ${SIZE_FACTOR_LOG_SD} --baseline-expression-mean ${BASELINE_EXPRESSION_MEAN} --baseline-expression-dispersion ${BASELINE_EXPRESSION_DISPERSION} --umi-pseudocount ${UMI_PSEUDOCOUNT} --scc-confounding-strength ${SCC_CONFOUNDING_STRENGTH} --min-rows-after-dropna ${MIN_ROWS_AFTER_DROPNA} ${LATENT_EXPRESSION_HAT_ARG}
+}
+export -f run_one
+xargs -a ${batch_file} -P ${BATCH_SIZE} -I{} bash -c 'run_one "\$@"' _ {}
+"
+
+    local sbatch_args=(
+        --parsable
+        --job-name="${job_name}"
+        --account="${ACCOUNT}"
+        --partition="${PARTITION}"
+        --time="${TIME}"
+        --mem="${MEM}"
+        --exclusive
+        --cpus-per-task="${CPUS_PER_TASK}"
+        --output="${log_prefix}.out"
+        --error="${log_prefix}.err"
+        --wrap="${wrap_str}"
+    )
+
+    echo "[submit] ${job_name} ($(wc -l < "${batch_file}") tasks)"
+    if [[ "${DRY_RUN}" == "1" ]]; then
+        echo "  DRY_RUN=1: not calling sbatch"
+        return 0
+    fi
+
+    sbatch "${sbatch_args[@]}" >/dev/null
+}
+
+# ---------------------------------------------------------------------------
+# Main: iterate the parameter grid
+# ---------------------------------------------------------------------------
+
+function main {
+    # If no argument is provided, run the full parameter grid.
+    # If an argument is provided, run a small smoke-test job.
+    if [[ "$#" -eq 0 ]]; then
+        IFS=',' read -r -a EDGE_RATES <<< "${N_MISSING_EDGE_RATES_LIST}"
+        IFS=',' read -r -a DATA_RATES <<< "${N_MISSING_DATA_RATES_LIST}"
+
+        echo "=== CSD Estimation Submit ==="
+        echo "  REPO_ROOT: ${REPO_ROOT}"
+        echo "  GRAPHML:   ${GRAPHML}"
+        echo "  OUTDIR:    ${OUTDIR}"
+        echo "  LOG_DIR:   ${LOG_DIR}"
+        echo "  Mechanisms: ${MECHANISMS[*]}"
+        echo "  Edge rates: ${EDGE_RATES[*]}"
+        echo "  Data rates: ${DATA_RATES[*]}"
+        echo "  n_samples_list: ${N_SAMPLES_LIST}"
+        echo "  DRY_RUN: ${DRY_RUN}"
+        echo "  Design mode: ${DESIGN_MODE}"
+        echo "  Use latent expression hat: ${USE_LATENT_EXPRESSION_HAT}"
+        echo "  Use UMI counts as observed data: ${USE_UMI_COUNTS_AS_OBSERVED_DATA}"
+        echo "  Intervention CSV: ${INTERVENTION_CSV:-none}"
+        echo ""
+
+        pending_file="${OUTDIR}/pending_tasks.txt"
+        batch_dir="${OUTDIR}/batches"
+        tasks_dir="${OUTDIR}/tasks"
+        mkdir -p "${tasks_dir}"
+        mkdir -p "${batch_dir}"
+        setup_args=(
+            --output "${OUTDIR}/experiment.json" --tasks-dir "${tasks_dir}"
+            --output-dir "${OUTDIR}/csv" --experiment-id "${EXPERIMENT_ID}"
+            --design-mode "${DESIGN_MODE}" --base-seed "${SEED_BASE}"
+            --scm-replicates "${N_SCM_REPLICATES}"
+            --data-replicates "${N_DATA_REPLICATES_PER_SCM}"
+            --n-samples-list "${N_SAMPLES_LIST}"
+            --missing-edge-rates "${N_MISSING_EDGE_RATES_LIST}"
+            --missing-data-rates "${N_MISSING_DATA_RATES_LIST}"
+            --mechanisms "$(IFS=,; echo "${MECHANISMS[*]}")"
+            --graphml "${GRAPHML}"
+        )
+        if [[ "${USE_LATENT_EXPRESSION_HAT}" == "0" ]]; then
+            setup_args+=(--no-latent-expression-hat)
+        else
+            setup_args+=(--use-latent-expression-hat)
+        fi
+        if [[ "${USE_UMI_COUNTS_AS_OBSERVED_DATA}" == "1" ]]; then
+            setup_args+=(--use-umi-counts-as-observed-data)
+        fi
+        if [[ -n "${INTERVENTION_CSV}" ]]; then
+            INTERVENTION_GRAPH_DIR="${INTERVENTION_GRAPH_DIR:-${OUTDIR}/intervention-graphs}"
+            setup_args+=(--intervention-csv "${INTERVENTION_CSV}" --intervention-graph-dir "${INTERVENTION_GRAPH_DIR}")
+            [[ "${INCLUDE_OBSERVATIONAL}" == "1" ]] && setup_args+=(--include-observational)
+        fi
+        if [[ -z "${OUTDIR_WAS_SET}" || ! -s "${OUTDIR}/experiment.json" || ! -d "${tasks_dir}" ]]; then
+            uv run python "${REPO_ROOT}/scripts/setup_csd_experiment.py" "${setup_args[@]}"
+        else
+            echo "Using existing experiment manifest and tasks in ${OUTDIR}"
+        fi
+
+        # Keep batch files for jobs that are still queued or running. Removing
+        # one while its job is starting can make xargs fail to read its task
+        # list, and resubmitting those tasks would create duplicate work.
+        shopt -s nullglob
+        active_jobs="$(squeue -h -u "${USER}" -o "%j" 2>/dev/null || true)"
+        declare -A active_job_names=()
+        while IFS= read -r job_name; do
+            [[ -n "${job_name}" ]] && active_job_names["${job_name}"]=1
+        done <<< "${active_jobs}"
+
+        declare -A active_batches=()
+        declare -A active_tasks=()
+        active_task_count=0
+        completed_task_count=0
+        for batch_file in "${batch_dir}"/batch_*; do
+            [[ -f "${batch_file}" ]] || continue
+            batch_name="$(basename "${batch_file}")"
+            batch_name="${batch_name%.txt}"
+            job_name="${JOB_NAME_PREFIX}_${batch_name}"
+            if [[ -n "${active_job_names[${job_name}]+x}" ]]; then
+                active_batches["${batch_file}"]=1
+                while IFS= read -r task_json; do
+                    [[ -n "${task_json}" ]] || continue
+                    active_tasks["${task_json}"]=1
+                    active_task_count=$((active_task_count + 1))
+                done < "${batch_file}"
+                echo "Keeping active batch ${batch_name} ($(wc -l < "${batch_file}") tasks)"
+            fi
+        done
+
+        : > "${pending_file}"
+        for task_json in "${tasks_dir}"/*.json; do
+            task_name="$(basename "${task_json}" .json)"
+            out_csv="${OUTDIR}/csv/${task_name}.csv"
+            # A task is complete only when its CSV exists and is non-empty.
+            # This also takes precedence over stale batch bookkeeping.
+            if [[ -s "${out_csv}" ]]; then
+                completed_task_count=$((completed_task_count + 1))
+                continue
+            fi
+            [[ -n "${active_tasks[${task_json}]+x}" ]] && continue
+            printf '%s\n' "${task_json}" >> "${pending_file}"
+        done
+
+        echo "Completed tasks with non-empty CSVs: ${completed_task_count}"
+
+        # Batch files from completed jobs are only bookkeeping. They are
+        # replaced below with batches containing the tasks that still need
+        # outputs. Active batch files must remain untouched.
+        for batch_file in "${batch_dir}"/batch_*; do
+            [[ -f "${batch_file}" ]] || continue
+            [[ -n "${active_batches[${batch_file}]+x}" ]] || rm -f "${batch_file}"
+        done
+
+        if [[ -s "${pending_file}" ]]; then
+            # Split through a temporary prefix so active batch_*.txt files are
+            # never overwritten. Assign the next available batch number to
+            # each newly created file.
+            new_batch_prefix="${batch_dir}/.new_batch_${$}_"
+            split -l "${BATCH_SIZE}" --numeric-suffixes=0 --suffix-length=3 "${pending_file}" "${new_batch_prefix}"
+            next_batch_number=0
+            for new_batch_file in "${batch_dir}"/.new_batch_${$}_*; do
+                while :; do
+                    batch_id="batch_$(printf '%03d' "${next_batch_number}")"
+                    batch_file="${batch_dir}/${batch_id}.txt"
+                    next_batch_number=$((next_batch_number + 1))
+                    [[ ! -e "${batch_file}" ]] && break
+                done
+                mv "${new_batch_file}" "${batch_file}"
+                submit_batch "${batch_file}" "${batch_id}"
+            done
+        else
+            if ((active_task_count > 0)); then
+                echo "No additional tasks to submit; ${active_task_count} tasks are in active batches."
+            else
+                echo "All CSD estimation outputs already exist. Nothing to submit."
+            fi
+        fi
+        echo "=== Done submitting CSD estimation jobs ==="
+        return 0
+    else
+        echo "Smoke-test mode is not supported by node packing; narrow the grid with environment variables."
+        exit 2
+    fi
+}
+
+# Invoke main when executed as a script.
+main "$@"

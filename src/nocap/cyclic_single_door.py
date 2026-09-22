@@ -68,6 +68,8 @@ import signal
 from contextlib import contextmanager
 
 import networkx as nx
+import pandas as pd
+import statsmodels.formula.api as smf
 from y0.algorithm.separation.sigma_extension import sigma_extension
 from y0.algorithm.separation.sigma_single_door import find_sigma_single_door_set
 from y0.dsl import Variable
@@ -77,6 +79,7 @@ from nocap.scc_perturb import build_intervened_graph, compute_min_cut_b, find_in
 
 __all__ = [
     "classify_edge",
+    "estimate_path_coefficient_for_edge",
     "evaluate_all_edges",
     "maximize_identifiable_edges",
     "nx_digraph_to_y0",
@@ -577,4 +580,82 @@ def maximize_identifiable_edges(
         "POST: final must match curve[-1]"
     )
     assert len(result["chosen_nodes"]) <= k, "POST: chosen_nodes must not exceed budget k"
+    return result
+
+
+def estimate_path_coefficient_for_edge(
+    graph: nx.DiGraph,
+    cause: str,
+    effect: str,
+    data: pd.DataFrame,
+    adj_set: frozenset[str] | None = None,
+    precomputed_extension: NxMixedGraph | None = None,
+    precomputed_y0: NxMixedGraph | None = None,
+) -> tuple[float, float, float, float] | None:
+    """Estimate the path coefficient (total effect) for a directed edge using OLS regression.
+
+    If an adjustment set is not provided, it is automatically computed using the
+    σ-separation single-door criterion. If no valid adjustment set exists, the
+    edge is unidentifiable, and None is returned.
+
+    Parameters
+    ----------
+    graph:
+        The directed graph (``nx.DiGraph``).
+    cause:
+        Source node name of the edge.
+    effect:
+        Target node name of the edge.
+    data:
+        A pandas DataFrame containing the observational data.
+    adj_set:
+        An optional pre-computed adjustment set. If None, it will be computed.
+    precomputed_extension:
+        Pre-built σ-extension of the y0 representation of *graph*.
+    precomputed_y0:
+        Pre-built y0 ``NxMixedGraph`` of *graph*.
+
+    Returns
+    -------
+    tuple[float, float, float, float] | None
+        A tuple of (path_coefficient, stderr, residual_variance, t_value) if identifiable,
+        otherwise None.
+
+    axiomander:
+        ensures:
+            implies(result is not None, isinstance(result, tuple) and len(result) == 4)
+        modifies:
+            none
+    """
+    # --- PRE ---
+    assert isinstance(graph, nx.DiGraph), "PRE: graph must be an nx.DiGraph"
+    assert isinstance(cause, str), "PRE: cause must be a str"
+    assert isinstance(effect, str), "PRE: effect must be a str"
+    assert isinstance(data, pd.DataFrame), "PRE: data must be a pd.DataFrame"
+
+    if adj_set is None:
+        adj_set = classify_edge(
+            graph=graph,
+            cause=cause,
+            effect=effect,
+            precomputed_extension=precomputed_extension,
+            precomputed_y0=precomputed_y0,
+        )["adjustment_set"]
+        if adj_set is None:
+            return None
+
+    covs = " + ".join(adj_set)
+    model = smf.ols(f"{effect} ~ {cause}" + (f" + {covs}" if covs else ""), data=data)
+    res = model.fit()
+
+    result = (
+        float(res.params[cause]),
+        float(res.bse[cause]),
+        float(res.scale),
+        float(res.tvalues[cause]),
+    )
+
+    # --- POST ---
+    assert result is not None, "POST: result cannot be None here"
+    assert isinstance(result, tuple) and len(result) == 4, "POST: result must be a 4-tuple"
     return result
