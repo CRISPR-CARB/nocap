@@ -152,28 +152,28 @@ def convert_unobserved_to_bidirected(graph: NxMixedGraph, unobserved: set[str] |
     NxMixedGraph
         A y0 mixed graph with possibly bidirected edges.
     """
+    # A path through several unobserved nodes must be projected just like a
+    # one-node latent path.  Work on the underlying undirected graph: each
+    # connected component of unobserved nodes exposes all observed endpoints
+    # that can be joined by a path whose internal nodes are unobserved.
+    unobserved_vars = {var for var in graph.nodes() if var.name in unobserved}
+    latent_graph = graph.directed.to_undirected()
+    latent_graph.remove_nodes_from(set(latent_graph) - unobserved_vars)
     edges_to_add = set()
-    for node in graph.nodes():
-        if node.name in unobserved:
-            # Get predecessors (in-edges) and successors (out-edges)
-            preds = list(graph.directed.predecessors(node))
-            succs = list(graph.directed.successors(node))
-            # For each triplet (pred -> unobs -> succ), (pred -> unobs <- pred), (succ <- unobs -> succ) mark direct edges for addition
-            for succ1, succ2 in it.product(succs, succs):
-                if succ1 != succ2:
-                    edges_to_add.add((succ1, succ2))
-            for pred1, pred2 in it.product(preds, preds):
-                if pred1 != pred2:
-                    edges_to_add.add((pred1, pred2))
-            for pred, succ in it.product(preds, succs):
-                edges_to_add.add((pred, succ))
+    for component in nx.connected_components(latent_graph):
+        boundary = set()
+        for latent in component:
+            boundary.update(graph.directed.successors(latent))
+            boundary.update(graph.directed.predecessors(latent))
+        boundary.difference_update(unobserved_vars)
+        for u, v in it.combinations(boundary, 2):
+            edges_to_add.add((u, v))
 
     # Replace tri edges with bidirected edges
     for u, v in edges_to_add:
         graph.add_undirected_edge(u, v)
 
     # Remove unobserved nodes by passing Variable objects instead of strings
-    unobserved_vars = [var for var in graph.nodes() if var.name in unobserved]
     graph.directed.remove_nodes_from(unobserved_vars)
     graph.undirected.remove_nodes_from(unobserved_vars)
 

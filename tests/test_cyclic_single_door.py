@@ -354,6 +354,16 @@ def test_nx_digraph_to_y0_unobserved():
     assert g_y0.undirected.number_of_edges() == 1
 
 
+def test_nx_digraph_to_y0_unobserved_path():
+    """Project a path with multiple unobserved internal nodes."""
+    g = nx.DiGraph([("X", "U1"), ("U1", "U2"), ("Y", "U2")])
+    g_y0 = nx_digraph_to_y0(g, {"U1", "U2"})
+    assert {frozenset((u.name, v.name)) for u, v in g_y0.undirected.edges()} == {
+        frozenset(("X", "Y"))
+    }
+    assert g_y0.directed.number_of_nodes() == 2
+
+
 # ---------------------------------------------------------------------------
 # 7. same_scc
 # ---------------------------------------------------------------------------
