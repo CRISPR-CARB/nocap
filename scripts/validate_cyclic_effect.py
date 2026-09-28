@@ -116,11 +116,12 @@ def main() -> None:
     bounds = tuple(float(value) for value in args.outcome_bounds.split(","))
     if len(bounds) != 2:
         raise ValueError("Bounds must be two values")
+    unobserved_nodes = frozenset(node for node in graph.nodes if "U" in node or "u_" in node or "U_" in node)
     query = identify_query_status(
         graph,
         args.treatment,
         args.outcome,
-        frozenset(node for node in graph.nodes if "U" in node or "u_" in node or "U_" in node),
+        unobserved=unobserved_nodes,
     )
     print(query)
     if not query.identifiable or query.expression is None:
@@ -224,6 +225,7 @@ def main() -> None:
             args.treatment,
             args.outcome,
             (levels[0], levels[1]),
+            unobserved=unobserved_nodes,
             min_rows=args.min_rows_after_dropna,
             n_samples=args.n_samples,
             seed=args.seed + 4,

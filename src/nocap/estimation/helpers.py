@@ -15,6 +15,7 @@ from ..cyclic_id import identify_causal_query
 from ..cyclic_single_door import classify_edge, estimate_path_coefficient_for_edge
 from ..scm_model import DirectedScm
 from ..simulation import true_scm_ate
+from ..cyclic_single_door import nx_digraph_to_y0
 
 __all__ = [
     "EdgeEstimate",
@@ -55,6 +56,7 @@ def identify_query_status(
     graph: nx.DiGraph,
     treatment: str,
     outcome: str,
+    *,
     unobserved: set[str] | frozenset[str] | None = None,
 ) -> QueryResult:
     """Identify one ordered treatment/outcome query without raising y0 errors."""
@@ -74,6 +76,7 @@ def estimated_scm_ate(
     outcome: str,
     treatment_levels: tuple[float, float],
     *,
+    unobserved: set[str] | frozenset[str] | None = None,
     min_rows: int = 30,
     n_samples: int = 100_000,
     seed: int = 0,
@@ -85,7 +88,7 @@ def estimated_scm_ate(
     row counts. Failed or unidentifiable edges raise through
     :func:`build_estimated_scm` unless ``allow_partial`` is explicitly enabled.
     """
-    estimates = estimate_scm_edges(graph, data, min_rows=min_rows)
+    estimates = estimate_scm_edges(graph, data, min_rows=min_rows, unobserved=unobserved)
     estimated = build_estimated_scm(graph, estimates, allow_partial=allow_partial)
     ate = true_scm_ate(
         estimated,
@@ -103,11 +106,13 @@ def estimate_scm_edges(
     data: pd.DataFrame,
     *,
     min_rows: int = 30,
+    unobserved: set[str] | frozenset[str] | None = None
 ) -> list[EdgeEstimate]:
     """Estimate every graph edge using CSD and complete-case rows."""
     estimates = []
+    precomputed_y0 = nx_digraph_to_y0(graph, unobserved)
     for cause, effect in sorted(graph.edges()):
-        classification = classify_edge(graph, cause, effect)
+        classification = classify_edge(graph, cause, effect, precomputed_y0=precomputed_y0)
         adjustment = classification["adjustment_set"]
         columns = [cause, effect, *(sorted(adjustment or ()))]
         complete = data.loc[:, columns].dropna()
