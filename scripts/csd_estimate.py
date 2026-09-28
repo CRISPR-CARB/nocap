@@ -355,6 +355,7 @@ def main() -> None:
             "two_cycles_disconnected",
             "small_network",
             "frontdoor_cycle",
+            "counterexample"
         ],
         help="Built-in demo graph to use when --graphml is omitted.",
     )
@@ -653,6 +654,14 @@ def main() -> None:
                     ("TF1", "G1", {"polarity": "+"}),
                     ("TF2", "G1", {"polarity": "+"}),
                     ("TF3", "G1", {"polarity": "+"}),
+                ]
+            )
+        elif args.demo == "counterexample":
+            graph.add_edges_from(
+                [
+                    ("X", "Y"),
+                    ("W", "Y"),
+                    ("Y", "W")
                 ]
             )
         else:
