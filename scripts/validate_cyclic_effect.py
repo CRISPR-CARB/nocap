@@ -116,7 +116,9 @@ def main() -> None:
     bounds = tuple(float(value) for value in args.outcome_bounds.split(","))
     if len(bounds) != 2:
         raise ValueError("Bounds must be two values")
-    unobserved_nodes = frozenset(node for node in graph.nodes if "U" in node or "u_" in node or "U_" in node)
+    unobserved_nodes = frozenset(
+        node for node in graph.nodes if "U" in node or "u_" in node or "U_" in node
+    )
     query = identify_query_status(
         graph,
         args.treatment,
@@ -268,21 +270,21 @@ def main() -> None:
         ),
         encoding="utf-8",
     )
-    # output.with_suffix(".distribution.json").write_text(
-    #     json.dumps(
-    #         {
-    #             "expression": str(query.expression),
-    #             "variables": list(density.variables),
-    #             "outcome": args.outcome,
-    #             "outcome_grid": outcome_grid.tolist(),
-    #             "evaluations": density_values,
-    #         },
-    #         indent=2,
-    #     ),
-    #     encoding="utf-8",
-    # )
+    output.with_suffix(".distribution.json").write_text(
+        json.dumps(
+            {
+                "expression": str(query.expression),
+                "variables": list(density.variables),
+                "outcome": args.outcome,
+                "outcome_grid": outcome_grid.tolist(),
+                "evaluations": density_values,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     output.write_text(json.dumps(result, indent=2), encoding="utf-8")
-    # print(json.dumps({"summary": result, "distribution_file": str(output.with_suffix('.distribution.json'))}, indent=2))
+    print(json.dumps({"summary": result, "distribution_file": str(output.with_suffix('.distribution.json'))}, indent=2))
 
 
 if __name__ == "__main__":

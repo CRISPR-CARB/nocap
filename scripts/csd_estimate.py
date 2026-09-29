@@ -355,7 +355,7 @@ def main() -> None:
             "two_cycles_disconnected",
             "small_network",
             "frontdoor_cycle",
-            "counterexample"
+            "counterexample",
         ],
         help="Built-in demo graph to use when --graphml is omitted.",
     )
@@ -657,13 +657,7 @@ def main() -> None:
                 ]
             )
         elif args.demo == "counterexample":
-            graph.add_edges_from(
-                [
-                    ("X", "Y"),
-                    ("W", "Y"),
-                    ("Y", "W")
-                ]
-            )
+            graph.add_edges_from([("X", "Y"), ("W", "Y"), ("Y", "W")])
         else:
             raise ValueError(f"Unknown demo {args.demo!r}")
 
