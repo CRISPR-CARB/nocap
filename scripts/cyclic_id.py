@@ -74,6 +74,17 @@ def _load_graph(graphml: str | None, demo: str) -> nx.DiGraph:
             ("TF3", "G2"),
             ("TF3", "TF1"),
         ],
+        "measurement_network": [  # nothing is identifiable, no frontdoor criterion holds
+            ("U_X", "U_Y"),
+            ("U_X", "V"),
+            ("U_Y", "W"),
+            ("V", "W"),
+            ("V", "Z"),
+            ("Z", "W"),
+            ("U_M", "Z"),
+            ("U_X", "U_M"),
+            ("U_M", "U_Y"),
+        ],
     }
     if demo not in demos:
         raise ValueError(f"Unknown demo {demo!r}")
@@ -108,6 +119,7 @@ def main() -> None:
             "tf_gene_cycle",
             "small_network",
             "frontdoor_cycle",
+            "measurement_network",
         ],
         default="cycle",
         help="Built-in demo used when --graphml is omitted.",
@@ -142,7 +154,12 @@ def main() -> None:
     print(f"Query: P({_format_nodes(outcomes)} | do({_format_nodes(interventions)}))")
 
     try:
-        expression = identify_causal_query(graph, interventions, outcomes)
+        expression = identify_causal_query(
+            graph,
+            interventions,
+            outcomes,
+            frozenset(node for node in graph.nodes if "U" in node or "u_" in node or "U_" in node),
+        )
     except Unidentifiable:
         print("Identifiable: false")
         return
