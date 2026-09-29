@@ -50,7 +50,15 @@ class EstimationProfiler:
 
     @contextmanager
     def measure(self, name: str, **metadata: object):
-        """Measure one named operation and retain its latest metadata."""
+        """Measure one named operation and retain its latest metadata.
+
+        Args:
+            name: Operation label used in summaries.
+            metadata: Context stored with the latest completed call.
+
+        Yields:
+            Control to the operation being measured.
+        """
         started = perf_counter()
         try:
             yield
@@ -58,7 +66,12 @@ class EstimationProfiler:
             self._record(name, perf_counter() - started, **metadata)
 
     def summary(self) -> list[dict[str, object]]:
-        """Return timing rows ordered from most to least total time."""
+        """Return timing rows ordered from most to least total time.
+
+        Returns:
+            Dictionaries containing call counts, elapsed-time aggregates, and
+            the latest metadata for each operation.
+        """
         return [
             {
                 "operation": name,
@@ -104,7 +117,11 @@ class EstimationProfiler:
         self.close()
 
     def log_summary(self) -> None:
-        """Log the collected timing rows at INFO level."""
+        """Log the collected timing rows at INFO level.
+
+        Returns:
+            ``None``. The rows are emitted through this module's logger.
+        """
         for row in self.summary():
             logger.info(
                 "estimation timing operation=%s calls=%d total=%.6fs mean=%.6fs max=%.6fs metadata=%s",

@@ -51,7 +51,7 @@ __all__ = [
 
 
 def _measure(profiler: EstimationProfiler | None, name: str, **metadata: object):
-    """Return a no-op or profiling context for an estimation operation."""
+    """Return a profiling context, or a no-op context when profiling is disabled."""
     return profiler.measure(name, **metadata) if profiler is not None else nullcontext()
 
 
@@ -111,6 +111,22 @@ def _names(variables: Iterable[Variable]) -> tuple[str, ...]:
     return tuple(sorted({variable.name for variable in variables}))
 
 
+def _select_points(points: np.ndarray, variables: tuple[str, ...], selected: tuple[str, ...]):
+    """Select density inputs in the requested variable order.
+
+    Args:
+        points: Point rows arranged according to ``variables``.
+        variables: Names represented by the columns in ``points``.
+        selected: Names required by a child density.
+
+    Returns:
+        A point matrix containing only ``selected`` columns.
+    """
+    if not selected:
+        return np.empty((len(points), 0))
+    return points[:, [variables.index(name) for name in selected]]
+
+
 def _density_ratio(numerator: np.ndarray, denominator: np.ndarray) -> np.ndarray:
     """Divide densities while treating jointly underflowed tails as zero."""
     numerator = np.asarray(numerator, dtype=float)
@@ -129,7 +145,17 @@ def _distribution_density(
     distribution: Distribution,
     profiler: EstimationProfiler | None = None,
 ):
-    """Build a callable joint or conditional density for a y0 distribution."""
+    """Fit and return a joint or conditional density for a y0 distribution.
+
+    Args:
+        backend: Continuous density backend used for fitting.
+        data: Observations used to fit the density.
+        distribution: y0 distribution whose children and parents are modeled.
+        profiler: Optional timing collector.
+
+    Returns:
+        A callable density exposing its required variable order.
+    """
     children = _names(distribution.children)
     parents = _names(distribution.parents)
     all_names = children + tuple(name for name in parents if name not in children)
@@ -163,7 +189,19 @@ def _continuous_eval(
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["quadrature", "kde"] = "quadrature",
 ):
-    """Recursively evaluate an expression using continuous density callables."""
+    """Recursively evaluate an expression using continuous density callables.
+
+    Args:
+        expression: y0 expression to evaluate.
+        data: Observations used by probability leaves.
+        backend: Continuous density backend.
+        bounds: Bounds used when summing variables.
+        profiler: Optional timing collector.
+        marginalization: Integration strategy for summed variables.
+
+    Returns:
+        A callable density with a ``variables`` tuple.
+    """
     if isinstance(expression, Probability):
         with _measure(profiler, "continuous.distribution"):
             return _distribution_density(backend, data, expression.distribution, profiler)
@@ -184,10 +222,7 @@ def _continuous_eval(
             """Evaluate and multiply all factor densities on shared points."""
             result = np.ones(len(points))
             for density in densities:
-                indexes = [variables.index(name) for name in density.variables]
-                result *= np.asarray(
-                    density(points[:, indexes] if indexes else np.empty((len(points), 0)))
-                )
+                result *= np.asarray(density(_select_points(points, variables, density.variables)))
             return result
 
         return _CallableDensity(variables, product)
@@ -202,16 +237,8 @@ def _continuous_eval(
 
         def fraction(points: np.ndarray) -> np.ndarray:
             """Evaluate a density ratio while rejecting tiny denominators."""
-            n = numerator(
-                points[:, [variables.index(x) for x in numerator.variables]]
-                if numerator.variables
-                else np.empty((len(points), 0))
-            )
-            d = denominator(
-                points[:, [variables.index(x) for x in denominator.variables]]
-                if denominator.variables
-                else np.empty((len(points), 0))
-            )
+            n = numerator(_select_points(points, variables, numerator.variables))
+            d = denominator(_select_points(points, variables, denominator.variables))
             return _density_ratio(n, d)
 
         return _CallableDensity(variables, fraction)
@@ -287,37 +314,40 @@ def _continuous_eval(
                 return result
 
             return _CallableDensity(integrated, fixed_grid_marginal)
+        elif marginalization == "quadrature":
+            from scipy.integrate import nquad
 
-        from scipy.integrate import nquad
+            def marginal(points: np.ndarray) -> np.ndarray:
+                """Integrate composed densities over y0 summation variables."""
+                result = np.empty(len(points), dtype=float)
+                integrated_names = tuple(sorted(ranges))
+                integration_ranges = [limits[name] for name in integrated_names]
+                with _measure(
+                    profiler, "continuous.integration", rows=len(points), variables=integrated_names
+                ):
+                    for row_index, point in enumerate(points):
+                        fixed = dict(zip(integrated, point, strict=True))
 
-        def marginal(points: np.ndarray) -> np.ndarray:
-            """Integrate composed densities over y0 summation variables."""
-            result = np.empty(len(points), dtype=float)
-            integrated_names = tuple(sorted(ranges))
-            integration_ranges = [limits[name] for name in integrated_names]
-            with _measure(
-                profiler, "continuous.integration", rows=len(points), variables=integrated_names
-            ):
-                for row_index, point in enumerate(points):
-                    fixed = dict(zip(integrated, point, strict=True))
-
-                    def integrand(*values: float) -> float:
-                        """Evaluate the inner density at one integration point."""
-                        current = {**fixed, **dict(zip(integrated_names, values, strict=True))}
-                        ordered = np.asarray(
-                            [[current[name] for name in inner.variables]], dtype=float
-                        )
-                        value = float(np.asarray(inner(ordered)).reshape(-1)[0])
-                        if not np.isfinite(value) or value < 0:
-                            raise DistributionEstimationError(
-                                "density returned a non-finite or negative value during integration"
+                        def integrand(*values: float) -> float:
+                            """Evaluate the inner density at one integration point."""
+                            current = {**fixed, **dict(zip(integrated_names, values, strict=True))}
+                            ordered = np.asarray(
+                                [[current[name] for name in inner.variables]], dtype=float
                             )
-                        return value
+                            value = float(np.asarray(inner(ordered)).reshape(-1)[0])
+                            if not np.isfinite(value) or value < 0:
+                                raise DistributionEstimationError(
+                                    "density returned a non-finite or negative value during integration"
+                                )
+                            return value
 
-                    result[row_index] = float(nquad(integrand, integration_ranges)[0])
-            return result
+                        result[row_index] = float(nquad(integrand, integration_ranges)[0])
+                return result
 
-        return _CallableDensity(integrated, marginal)
+            return _CallableDensity(integrated, marginal)
+        else:
+            raise ValueError(f"Unsupported marginalization type: {marginalization}")
+
     raise TypeError(f"unsupported y0 expression: {type(expression).__name__}")
 
 
@@ -325,6 +355,13 @@ def normalize_expression(
     expression: Expression, *, profiler: EstimationProfiler | None = None
 ) -> Expression:
     """Normalize a y0 expression using its available simplifier.
+
+    Args:
+        expression: Expression to simplify.
+        profiler: Optional timing collector.
+
+    Returns:
+        An equivalent normalized y0 expression.
 
     axiomander:
         requires: isinstance(expression, Expression)
@@ -361,7 +398,15 @@ def normalize_expression(
 
 
 def _table(data: pd.DataFrame, variables: tuple[str, ...]) -> pd.DataFrame:
-    """Prepare normalized empirical or explicitly weighted probability rows."""
+    """Prepare normalized empirical or explicitly weighted probability rows.
+
+    Args:
+        data: Raw observations or a table containing a ``prob`` column.
+        variables: Columns required in the resulting probability table.
+
+    Returns:
+        A grouped table with normalized probabilities.
+    """
     missing = set(variables) - set(data.columns)
     if missing:
         raise ValueError(f"missing required columns: {sorted(missing)}")
@@ -370,7 +415,7 @@ def _table(data: pd.DataFrame, variables: tuple[str, ...]) -> pd.DataFrame:
             raise ValueError("prob must be finite, nonnegative, and have positive mass")
         result = data.loc[:, [*variables, "prob"]].copy()
         result["prob"] = result["prob"] / result["prob"].sum()
-        return result.groupby(list(variables), dropna=False, as_index=False)["prob"].sum()
+        return result.groupby(list(variables), dropna=False, as_index=False)["prob"].sum() # pyright: ignore[reportReturnType]
     if data.empty:
         raise ValueError("observed data must not be empty")
     result = data.loc[:, list(variables)].copy()
@@ -378,7 +423,15 @@ def _table(data: pd.DataFrame, variables: tuple[str, ...]) -> pd.DataFrame:
 
 
 def _discrete_eval(expression: Expression, data: pd.DataFrame):
-    """Recursively evaluate an expression as a discrete probability table."""
+    """Recursively evaluate an expression as a discrete probability table.
+
+    Args:
+        expression: y0 expression to evaluate.
+        data: Raw observations or weighted probability rows.
+
+    Returns:
+        A DataFrame containing expression variables and a ``prob`` column.
+    """
     if isinstance(expression, Probability):
         children = _names(expression.children)
         parents = _names(expression.parents)
@@ -461,12 +514,17 @@ class DistributionEstimator:
     def evaluate(self, expression: Expression):
         """Evaluate one expression using this estimator's configured mode.
 
+        Args:
+            expression: y0 expression to evaluate.
+
+        Returns:
+            A discrete probability table or continuous callable density.
+
         axiomander:
             requires: isinstance(expression, Expression)
             ensures: result is a pandas.DataFrame if self.mode == 'discrete' else callable(result)
             modifies: none
         """
-        """Evaluate one expression using this estimator's configured mode."""
         return evaluate_probability_expression(
             expression,
             self.data,
@@ -489,6 +547,18 @@ def evaluate_probability_expression(
     marginalization: Literal["quadrature", "kde"] = "quadrature",
 ):
     """Evaluate a normalized y0 expression as a table or density callable.
+
+    Args:
+        expression: y0 expression to evaluate.
+        data: Observations or weighted probability rows.
+        mode: ``"discrete"`` for a table or ``"continuous"`` for a density.
+        backend: Optional continuous density backend.
+        bounds: Integration bounds for continuous summation.
+        profiler: Optional timing collector.
+        marginalization: Integration strategy for continuous sums.
+
+    Returns:
+        A probability DataFrame in discrete mode, otherwise a callable density.
 
     axiomander:
         requires: isinstance(expression, Expression); isinstance(data, pd.DataFrame); mode in {'discrete', 'continuous'}
@@ -536,6 +606,16 @@ def estimate_expectation(
 ) -> float:
     """Estimate an outcome expectation from an evaluated distribution.
 
+    Args:
+        evaluated: Probability table or callable density.
+        outcome: Outcome column or variable.
+        bounds: Continuous integration bounds.
+        evaluation_values: Values for any remaining density variables.
+        profiler: Optional timing collector.
+
+    Returns:
+        The normalized expected value of ``outcome``.
+
     ``evaluated`` must be a probability table or callable density returned by
     :func:`evaluate_probability_expression`. Continuous expectations use bounded
     numerical quadrature. Any free density variables other than ``outcome`` must
@@ -560,7 +640,15 @@ def estimate_expectation(
 
 
 def _discrete_expectation(table: pd.DataFrame, outcome_name: str) -> float:
-    """Calculate an expectation from an already evaluated probability table."""
+    """Calculate an expectation from a probability table.
+
+    Args:
+        table: Table containing the outcome and ``prob`` columns.
+        outcome_name: Name of the outcome column.
+
+    Returns:
+        The probability-weighted outcome mean.
+    """
     if outcome_name not in table:
         raise ValueError("identified expression does not contain the outcome")
     return float((table[outcome_name] * table["prob"]).sum())
@@ -574,7 +662,18 @@ def _continuous_expectation(
     evaluation_values: Mapping[str, float] | None = None,
     profiler: EstimationProfiler | None = None,
 ) -> float:
-    """Calculate an expectation with vectorized Gauss-Legendre quadrature."""
+    """Calculate an expectation with vectorized Gauss-Legendre quadrature.
+
+    Args:
+        density: Callable density with a ``variables`` tuple.
+        outcome_name: Name of the integrated outcome variable.
+        bounds: Finite or infinite integration bounds.
+        evaluation_values: Fixed values for non-outcome variables.
+        profiler: Optional timing collector.
+
+    Returns:
+        The density-normalized expected outcome.
+    """
     lower, upper = bounds
     variables = tuple(cast(_DensityWithVariables, density).variables)
     if outcome_name not in variables:
@@ -663,6 +762,21 @@ def estimate_ate(
     marginalization: Literal["quadrature", "kde"] = "quadrature",
 ) -> float:
     """Estimate an ATE as the difference between two interventional expectations.
+
+    Args:
+        expression: Interventional y0 expression for the outcome distribution.
+        data: Observed data used for estimation.
+        treatment: Treatment column or variable.
+        outcome: Outcome column or variable.
+        treatment_levels: Control and treatment values, in that order.
+        mode: Discrete table or continuous density estimation mode.
+        backend: Optional continuous density backend.
+        outcome_bounds: Bounds for continuous outcome integration.
+        profiler: Optional timing collector.
+        marginalization: Integration strategy for continuous sums.
+
+    Returns:
+        The expectation at the second treatment level minus the first.
 
     axiomander:
         requires: isinstance(expression, Expression); isinstance(data, pd.DataFrame); len(treatment_levels) == 2

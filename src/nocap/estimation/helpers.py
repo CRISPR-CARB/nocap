@@ -12,10 +12,13 @@ from y0.algorithm.identify.utils import Unidentifiable
 from y0.dsl import Expression
 
 from ..cyclic_id import identify_causal_query
-from ..cyclic_single_door import classify_edge, estimate_path_coefficient_for_edge
+from ..cyclic_single_door import (
+    classify_edge,
+    estimate_path_coefficient_for_edge,
+    nx_digraph_to_y0,
+)
 from ..scm_model import DirectedScm
 from ..simulation import true_scm_ate
-from ..cyclic_single_door import nx_digraph_to_y0
 
 __all__ = [
     "EdgeEstimate",
@@ -52,6 +55,31 @@ class EdgeEstimate:
     error: str | None = None
 
 
+def _edge_status(
+    cause: str,
+    effect: str,
+    status: str,
+    adjustment: frozenset[str] | None,
+    n_rows: int,
+    result: tuple[float, float, float, float] | None = None,
+    error: str | None = None,
+) -> EdgeEstimate:
+    """Build an edge result while keeping status-only and fitted rows consistent."""
+    coefficient, stderr, residual, t_value = result or (None, None, None, None)
+    return EdgeEstimate(
+        cause,
+        effect,
+        status,
+        adjustment,
+        coefficient,
+        stderr,
+        residual,
+        t_value,
+        n_rows,
+        error,
+    )
+
+
 def identify_query_status(
     graph: nx.DiGraph,
     treatment: str,
@@ -59,7 +87,17 @@ def identify_query_status(
     *,
     unobserved: set[str] | frozenset[str] | None = None,
 ) -> QueryResult:
-    """Identify one ordered treatment/outcome query without raising y0 errors."""
+    """Identify a treatment/outcome query without raising y0 errors.
+
+    Args:
+        graph: Causal directed graph.
+        treatment: Treatment node name.
+        outcome: Outcome node name.
+        unobserved: Optional unobserved node names.
+
+    Returns:
+        A result containing the identifying expression or the failure reason.
+    """
     if treatment not in graph or outcome not in graph:
         raise ValueError("treatment and outcome must be graph nodes")
     try:
@@ -84,6 +122,21 @@ def estimated_scm_ate(
 ) -> tuple[float, list[EdgeEstimate], DirectedScm]:
     """Estimate an SCM with cyclic single-door coefficients and compute its ATE.
 
+    Args:
+        graph: Causal graph whose edge coefficients are estimated.
+        data: Observed node data.
+        treatment: Treatment node name.
+        outcome: Outcome node name.
+        treatment_levels: Control and treatment values.
+        unobserved: Optional unobserved node names.
+        min_rows: Minimum complete-case rows per edge.
+        n_samples: Number of samples used for the simulated ATE.
+        seed: Random seed for the simulation.
+        allow_partial: Whether to construct an SCM with failed edges omitted.
+
+    Returns:
+        Simulated ATE, per-edge estimates, and the estimated SCM.
+
     The returned coefficient table preserves CSD status, adjustment sets, and
     row counts. Failed or unidentifiable edges raise through
     :func:`build_estimated_scm` unless ``allow_partial`` is explicitly enabled.
@@ -106,9 +159,19 @@ def estimate_scm_edges(
     data: pd.DataFrame,
     *,
     min_rows: int = 30,
-    unobserved: set[str] | frozenset[str] | None = None
+    unobserved: set[str] | frozenset[str] | None = None,
 ) -> list[EdgeEstimate]:
-    """Estimate every graph edge using CSD and complete-case rows."""
+    """Estimate every graph edge using CSD and complete-case rows.
+
+    Args:
+        graph: Causal graph whose edges are estimated.
+        data: Observed node data.
+        min_rows: Minimum complete-case rows required for estimation.
+        unobserved: Optional unobserved node names.
+
+    Returns:
+        One status-rich estimate for each graph edge.
+    """
     estimates = []
     precomputed_y0 = nx_digraph_to_y0(graph, unobserved)
     for cause, effect in sorted(graph.edges()):
@@ -117,25 +180,11 @@ def estimate_scm_edges(
         columns = [cause, effect, *(sorted(adjustment or ()))]
         complete = data.loc[:, columns].dropna()
         if adjustment is None:
-            estimates.append(
-                EdgeEstimate(
-                    cause, effect, "unidentifiable", None, None, None, None, None, len(complete)
-                )
-            )
+            estimates.append(_edge_status(cause, effect, "unidentifiable", None, len(complete)))
             continue
         if len(complete) < min_rows:
             estimates.append(
-                EdgeEstimate(
-                    cause,
-                    effect,
-                    "insufficient_rows",
-                    adjustment,
-                    None,
-                    None,
-                    None,
-                    None,
-                    len(complete),
-                )
+                _edge_status(cause, effect, "insufficient_rows", adjustment, len(complete))
             )
             continue
         try:
@@ -144,34 +193,12 @@ def estimate_scm_edges(
             )
         except (KeyError, ValueError, np.linalg.LinAlgError) as error:
             estimates.append(
-                EdgeEstimate(
-                    cause,
-                    effect,
-                    "failed",
-                    adjustment,
-                    None,
-                    None,
-                    None,
-                    None,
-                    len(complete),
-                    str(error),
-                )
+                _edge_status(cause, effect, "failed", adjustment, len(complete), error=str(error))
             )
             continue
         assert result is not None
-        coefficient, stderr, residual, t_value = result
         estimates.append(
-            EdgeEstimate(
-                cause,
-                effect,
-                "estimated",
-                adjustment,
-                coefficient,
-                stderr,
-                residual,
-                t_value,
-                len(complete),
-            )
+            _edge_status(cause, effect, "estimated", adjustment, len(complete), result=result)
         )
     return estimates
 
@@ -179,7 +206,16 @@ def estimate_scm_edges(
 def build_estimated_scm(
     graph: nx.DiGraph, estimates: Iterable[EdgeEstimate], *, allow_partial: bool = False
 ) -> DirectedScm:
-    """Construct an SCM from CSD coefficients without hiding failed edges."""
+    """Construct an SCM from CSD coefficients without hiding failed edges.
+
+    Args:
+        graph: Original graph defining the node and edge set.
+        estimates: Edge estimates to convert into coefficients.
+        allow_partial: Whether missing coefficients may be omitted.
+
+    Returns:
+        A directed SCM containing the available edge coefficients.
+    """
     by_edge = {(item.cause, item.effect): item for item in estimates}
     missing = [
         edge

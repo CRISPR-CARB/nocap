@@ -16,7 +16,17 @@ __all__ = ["KDEpyKDE", "SciPyGaussianKDE", "SklearnKDE", "StatsmodelsKDE"]
 def _set_bandwidth(
     bw: float | str | None, n: int | None = None, d: int | None = None, sigma: float = 1
 ) -> float | None:
+    """Resolve a numeric, Scott, or Silverman bandwidth specification.
 
+    Args:
+        bw: Numeric bandwidth or named rule.
+        n: Number of observations, required by named rules.
+        d: Number of dimensions, required by named rules.
+        sigma: Scale estimate used by named rules.
+
+    Returns:
+        The resolved numeric bandwidth, or ``None`` when unspecified.
+    """
     match bw:
         case "scott":
             if n is None or d is None:
@@ -46,7 +56,16 @@ class KDEpyKDE:
         *,
         bandwidth: float | str | None = "scott",
     ) -> JointKDE:
-        """Fit PDF using KDE to data."""
+        """Fit a KDEpy density to selected continuous columns.
+
+        Args:
+            data: Observations used for fitting.
+            variables: Columns included in the joint density.
+            bandwidth: Numeric bandwidth or Scott/Silverman rule.
+
+        Returns:
+            A fitted density supporting point evaluation and projection.
+        """
         bandwidth = _set_bandwidth(
             bandwidth,
             data.shape[0],
@@ -57,7 +76,6 @@ class KDEpyKDE:
             ),
         )
 
-        """Fit a KDEpy FFTKDE for continuous columns."""
         values = data.loc[:, list(variables)].to_numpy(dtype=float)
         if len(values) < 2 or not np.isfinite(values).all():
             raise ValueError("continuous KDE data must be finite and contain at least two rows")
@@ -83,6 +101,7 @@ class _KDEpyFitted:
         self._grid = None
 
     def _interpolator(self):
+        """Build and cache a one- or multi-dimensional grid interpolator."""
         if self._grid is None:
             from KDEpy import TreeKDE
 
@@ -109,9 +128,9 @@ class _KDEpyFitted:
         points = np.asarray(points, dtype=float)
         interpolator = self._interpolator()
         if len(self.variables) == 1:
-            grid, density = interpolator
+            grid, density = interpolator  # type: ignore
             return np.interp(points[:, 0], grid, density, left=0.0, right=0.0)
-        return np.asarray(interpolator(points))
+        return np.asarray(interpolator(points))  # type: ignore
 
     def project(self, variables):
         """Return a marginal by refitting FFTKDE on the selected coordinates."""
@@ -125,7 +144,16 @@ class SciPyGaussianKDE:
     """SciPy Gaussian KDE backend with exact Gaussian-mixture projection."""
 
     def fit(self, data: pd.DataFrame, variables: Sequence[str], *, bandwidth=None) -> JointKDE:
-        """Fit a SciPy Gaussian KDE while retaining its original coordinates."""
+        """Fit a SciPy Gaussian KDE while retaining its original coordinates.
+
+        Args:
+            data: Observations used for fitting.
+            variables: Columns included in the joint density.
+            bandwidth: Optional SciPy bandwidth method or scalar.
+
+        Returns:
+            A fitted Gaussian mixture density with analytic projections.
+        """
         from scipy.stats import gaussian_kde
 
         values = data.loc[:, list(variables)].to_numpy(dtype=float)
@@ -220,8 +248,10 @@ class SklearnKDE:
         **kwargs,
     ) -> None:
         """Configure a scikit-learn ``KernelDensity`` estimator."""
-        self.bandwidth = bandwidth
-        self.kernel = kernel
+        self.bandwidth: float | Literal["scott", "silverman"] = bandwidth
+        self.kernel: Literal[
+            "gaussian", "tophat", "epanechnikov", "exponential", "linear", "cosine"
+        ]  = kernel
         self.kwargs = kwargs
 
     def fit(
@@ -231,7 +261,16 @@ class SklearnKDE:
         *,
         bandwidth: float | Literal["scott", "silverman"] | None = None,
     ) -> JointKDE:
-        """Fit ``KernelDensity`` to the selected continuous columns."""
+        """Fit ``KernelDensity`` to selected continuous columns.
+
+        Args:
+            data: Observations used for fitting.
+            variables: Columns included in the joint density.
+            bandwidth: Optional per-fit bandwidth override.
+
+        Returns:
+            A fitted scikit-learn density supporting refit projections.
+        """
         from sklearn.neighbors import KernelDensity
 
         values = data.loc[:, list(variables)].to_numpy(dtype=float)
@@ -303,7 +342,16 @@ class StatsmodelsKDE:
     """Statsmodels product-kernel KDE backend with analytic projection."""
 
     def fit(self, data: pd.DataFrame, variables: Sequence[str], *, bandwidth=None) -> JointKDE:
-        """Fit a statsmodels product-kernel KDE for continuous columns."""
+        """Fit a statsmodels product-kernel KDE for continuous columns.
+
+        Args:
+            data: Observations used for fitting.
+            variables: Columns included in the joint density.
+            bandwidth: Optional statsmodels bandwidth specification.
+
+        Returns:
+            A fitted product-kernel density supporting projections.
+        """
         from statsmodels.nonparametric.kernel_density import KDEMultivariate
 
         values = data.loc[:, list(variables)].to_numpy(dtype=float)
