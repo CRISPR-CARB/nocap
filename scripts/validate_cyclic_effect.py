@@ -90,6 +90,12 @@ def main() -> None:
         help="lower,upper integration bounds; use -inf or inf for unbounded tails",
     )
     parser.add_argument("--n-samples", type=int, default=2000)
+    parser.add_argument(
+        "--legendre-degree",
+        type=int,
+        default=16,
+        help="number of Legendre nodes per integrated variable",
+    )
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--beta-med", type=float, default=0.5)
     parser.add_argument("--beta-log-sd", type=float, default=1)
@@ -168,6 +174,7 @@ def main() -> None:
         outcome_bounds=bounds,
         profiler=profiler,
         marginalization="kde",
+        legendre_degree=args.legendre_degree,
     )
     density_bounds = {
         column.name: (
@@ -186,6 +193,7 @@ def main() -> None:
         bounds=density_bounds,
         profiler=profiler,
         marginalization="kde",
+        legendre_degree=args.legendre_degree,
     )
     if args.outcome not in density.variables:
         raise ValueError("identified expression does not contain the requested outcome")
@@ -199,24 +207,24 @@ def main() -> None:
         raise ValueError("outcome bounds must span a non-empty density grid")
     outcome_grid = np.linspace(grid_lower, grid_upper, 201)
     density_values = []
-    with (
-        profiler.measure("script.density_grid", levels=len(levels), points=len(outcome_grid))
-        if profiler
-        else nullcontext()
-    ):
-        for level in levels:
-            values = {args.outcome: outcome_grid}
-            if args.treatment in density.variables:
-                values[args.treatment] = float(level)
-            missing = set(density.variables) - set(values)
-            if missing:
-                raise ValueError(
-                    "cannot save density evaluation; provide values for free variables: "
-                    f"{sorted(missing)}"
-                )
-            density_values.append(
-                {"treatment_level": level, "density": np.asarray(density(**values)).tolist()}
-            )
+    # with (
+    #     profiler.measure("script.density_grid", levels=len(levels), points=len(outcome_grid))
+    #     if profiler
+    #     else nullcontext()
+    # ):
+    #     for level in levels:
+    #         values = {args.outcome: outcome_grid}
+    #         if args.treatment in density.variables:
+    #             values[args.treatment] = float(level)
+    #         missing = set(density.variables) - set(values)
+    #         if missing:
+    #             raise ValueError(
+    #                 "cannot save density evaluation; provide values for free variables: "
+    #                 f"{sorted(missing)}"
+    #             )
+    #         density_values.append(
+    #             {"treatment_level": level, "density": np.asarray(density(**values)).tolist()}
+    #         )
     true_ate = true_scm_ate(
         build.scm, args.treatment, args.outcome, (levels[0], levels[1]), seed=args.seed + 3
     )

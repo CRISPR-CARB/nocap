@@ -106,6 +106,13 @@ class _DensityWithVariables(Protocol):
     def __call__(self, **kwargs: object) -> float | np.ndarray: ...
 
 
+def _validate_legendre_degree(degree: int) -> int:
+    """Validate and normalize the Legendre quadrature degree."""
+    if isinstance(degree, bool) or not isinstance(degree, (int, np.integer)) or degree < 1:
+        raise ValueError("legendre_degree must be a positive integer")
+    return int(degree)
+
+
 def _names(variables: Iterable[Variable]) -> tuple[str, ...]:
     """Return unique y0 variable names in deterministic order."""
     return tuple(sorted({variable.name for variable in variables}))
@@ -188,6 +195,7 @@ def _continuous_eval(
     bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["quadrature", "kde"] = "quadrature",
+    legendre_degree: int = 16,
 ):
     """Recursively evaluate an expression using continuous density callables.
 
@@ -198,6 +206,7 @@ def _continuous_eval(
         bounds: Bounds used when summing variables.
         profiler: Optional timing collector.
         marginalization: Integration strategy for summed variables.
+        legendre_degree: Number of Legendre nodes per integrated variable.
 
     Returns:
         A callable density with a ``variables`` tuple.
@@ -211,7 +220,9 @@ def _continuous_eval(
         return _CallableDensity((), lambda points: np.zeros(len(points)))
     if isinstance(expression, Product):
         densities = [
-            _continuous_eval(item, data, backend, bounds, profiler, marginalization)
+            _continuous_eval(
+                item, data, backend, bounds, profiler, marginalization, legendre_degree
+            )
             for item in expression.expressions
         ]
         variables = tuple(
@@ -228,10 +239,22 @@ def _continuous_eval(
         return _CallableDensity(variables, product)
     if isinstance(expression, Fraction):
         numerator = _continuous_eval(
-            expression.numerator, data, backend, bounds, profiler, marginalization
+            expression.numerator,
+            data,
+            backend,
+            bounds,
+            profiler,
+            marginalization,
+            legendre_degree,
         )
         denominator = _continuous_eval(
-            expression.denominator, data, backend, bounds, profiler, marginalization
+            expression.denominator,
+            data,
+            backend,
+            bounds,
+            profiler,
+            marginalization,
+            legendre_degree,
         )
         variables = tuple(dict.fromkeys((*numerator.variables, *denominator.variables)))
 
@@ -252,7 +275,13 @@ def _continuous_eval(
             projected = fitted.project(kept)
             return _CallableDensity(kept, projected.evaluate, getattr(fitted, "bandwidth", None))
         inner = _continuous_eval(
-            expression.expression, data, backend, bounds, profiler, marginalization
+            expression.expression,
+            data,
+            backend,
+            bounds,
+            profiler,
+            marginalization,
+            legendre_degree,
         )
         ranges = {variable.name for variable in expression.ranges}
         if not ranges.issubset(inner.variables):
@@ -285,7 +314,7 @@ def _continuous_eval(
             from numpy.polynomial.legendre import leggauss
 
             integrated_names = tuple(sorted(ranges))
-            nodes, node_weights = leggauss(64)
+            nodes, node_weights = leggauss(_validate_legendre_degree(legendre_degree))
             axes = []
             axis_weights = []
             for name in integrated_names:
@@ -510,6 +539,7 @@ class DistributionEstimator:
     bounds: Mapping[str, tuple[float, float]] | None = None
     profiler: EstimationProfiler | None = None
     marginalization: Literal["quadrature", "kde"] = "quadrature"
+    legendre_degree: int = 16
 
     def evaluate(self, expression: Expression):
         """Evaluate one expression using this estimator's configured mode.
@@ -533,6 +563,7 @@ class DistributionEstimator:
             bounds=self.bounds,
             profiler=self.profiler,
             marginalization=self.marginalization,
+            legendre_degree=self.legendre_degree,
         )
 
 
@@ -545,6 +576,7 @@ def evaluate_probability_expression(
     bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["quadrature", "kde"] = "quadrature",
+    legendre_degree: int = 16,
 ):
     """Evaluate a normalized y0 expression as a table or density callable.
 
@@ -556,6 +588,7 @@ def evaluate_probability_expression(
         bounds: Integration bounds for continuous summation.
         profiler: Optional timing collector.
         marginalization: Integration strategy for continuous sums.
+        legendre_degree: Number of Legendre nodes per integrated variable.
 
     Returns:
         A probability DataFrame in discrete mode, otherwise a callable density.
@@ -572,10 +605,19 @@ def evaluate_probability_expression(
     if mode == "continuous":
         if marginalization not in {"quadrature", "kde"}:
             raise ValueError("marginalization must be 'quadrature' or 'kde'")
+        legendre_degree = _validate_legendre_degree(legendre_degree)
         if backend is None:
             backend = KDEpyKDE()
         with _measure(profiler, "continuous.evaluate", rows=len(data)):
-            return _continuous_eval(expression, data, backend, bounds, profiler, marginalization)
+            return _continuous_eval(
+                expression,
+                data,
+                backend,
+                bounds,
+                profiler,
+                marginalization,
+                legendre_degree,
+            )
     raise ValueError("mode must be 'discrete' or 'continuous'")
 
 
@@ -603,6 +645,7 @@ def estimate_expectation(
     bounds: tuple[float, float] | None = None,
     evaluation_values: Mapping[str, float] | None = None,
     profiler: EstimationProfiler | None = None,
+    legendre_degree: int = 64,
 ) -> float:
     """Estimate an outcome expectation from an evaluated distribution.
 
@@ -612,6 +655,7 @@ def estimate_expectation(
         bounds: Continuous integration bounds.
         evaluation_values: Values for any remaining density variables.
         profiler: Optional timing collector.
+        legendre_degree: Number of Legendre nodes used for quadrature.
 
     Returns:
         The normalized expected value of ``outcome``.
@@ -636,6 +680,7 @@ def estimate_expectation(
         bounds=(lower, upper),
         evaluation_values=evaluation_values,
         profiler=profiler,
+        legendre_degree=legendre_degree,
     )
 
 
@@ -661,6 +706,7 @@ def _continuous_expectation(
     bounds: tuple[float, float],
     evaluation_values: Mapping[str, float] | None = None,
     profiler: EstimationProfiler | None = None,
+    legendre_degree: int = 64,
 ) -> float:
     """Calculate an expectation with vectorized Gauss-Legendre quadrature.
 
@@ -687,7 +733,7 @@ def _continuous_expectation(
 
     from numpy.polynomial.legendre import leggauss
 
-    nodes, node_weights = leggauss(64)
+    nodes, node_weights = leggauss(_validate_legendre_degree(legendre_degree))
     if np.isfinite(lower) and np.isfinite(upper):
         midpoint = (lower + upper) / 2.0
         half_width = (upper - lower) / 2.0
@@ -760,6 +806,7 @@ def estimate_ate(
     outcome_bounds: tuple[float, float] | None = None,
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["quadrature", "kde"] = "quadrature",
+    legendre_degree: int = 16,
 ) -> float:
     """Estimate an ATE as the difference between two interventional expectations.
 
@@ -774,6 +821,7 @@ def estimate_ate(
         outcome_bounds: Bounds for continuous outcome integration.
         profiler: Optional timing collector.
         marginalization: Integration strategy for continuous sums.
+        legendre_degree: Number of Legendre nodes used for both integrations.
 
     Returns:
         The expectation at the second treatment level minus the first.
@@ -804,6 +852,7 @@ def estimate_ate(
                         backend=backend,
                         profiler=profiler,
                         marginalization=marginalization,
+                        legendre_degree=legendre_degree,
                     ),
                     outcome,
                     profiler=profiler,
@@ -831,6 +880,7 @@ def estimate_ate(
             bounds=expression_bounds,
             profiler=profiler,
             marginalization=marginalization,
+            legendre_degree=legendre_degree,
         )
         bounds = _validate_bounds(outcome_bounds)
         extra_variables = tuple(
@@ -853,6 +903,7 @@ def estimate_ate(
                     bounds=bounds,
                     evaluation_values=({treatment_name: level_float} if has_treatment else None),
                     profiler=profiler,
+                    legendre_degree=legendre_degree,
                 )
             )
         return float(values[1] - values[0])

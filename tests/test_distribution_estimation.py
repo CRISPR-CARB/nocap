@@ -152,6 +152,34 @@ def test_continuous_sum_kde_evaluates_inner_density_on_grid() -> None:
     assert backend.calls == [(("X", "Y"), None)]
 
 
+def test_continuous_sum_kde_accepts_legendre_degree() -> None:
+    """Use the requested number of nodes for KDE marginalization."""
+    density = evaluate_probability_expression(
+        Sum.safe(P("X", "Y"), "X"),
+        pd.DataFrame({"X": [0.0, 1.0], "Y": [1.0, 2.0]}),
+        mode="continuous",
+        backend=_FakeBackend(),
+        bounds={"X": (0.0, 1.0)},
+        marginalization="kde",
+        legendre_degree=3,
+    )
+    assert density(np.array([2.0])) == pytest.approx(1.0)
+
+
+def test_legendre_degree_rejects_nonpositive_values() -> None:
+    """Reject invalid quadrature degrees before constructing a grid."""
+    with pytest.raises(ValueError, match="legendre_degree"):
+        evaluate_probability_expression(
+            Sum.safe(P("X", "Y"), "X"),
+            pd.DataFrame({"X": [0.0, 1.0], "Y": [1.0, 2.0]}),
+            mode="continuous",
+            backend=_FakeBackend(),
+            bounds={"X": (0.0, 1.0)},
+            marginalization="kde",
+            legendre_degree=0,
+        )
+
+
 def test_kdepy_backend_evaluates_and_projects() -> None:
     """Evaluate and project a KDEpy fitted density."""
     data = pd.DataFrame(
