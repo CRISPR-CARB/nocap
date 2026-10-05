@@ -34,7 +34,7 @@ def scc_size_histogram(G: nx.DiGraph, plot=True, ax=None):
     sccs = list(nx.strongly_connected_components(G))
     max_scc = max(sccs, key=lambda x: len(x))
     print(max_scc, len(max_scc))
-    scc_sizes = [len(scc) for scc in sccs if len(scc) != 1]
+    scc_sizes = [len(scc) for scc in sccs]
     hist = dict(Counter(scc_sizes))
 
     if plot:
@@ -45,8 +45,9 @@ def scc_size_histogram(G: nx.DiGraph, plot=True, ax=None):
         counts = [hist[size] for size in sizes]
 
         ax.bar(sizes, counts, width=0.8, edgecolor="black")
+        ax.set_yscale("log")
         ax.set_xlabel("SCC size")
-        ax.set_ylabel("Number of SCCs")
+        ax.set_ylabel("Number of SCCs (log-scale)")
         ax.set_title("Histogram of SCC Sizes")
 
         plt.savefig("scc_hist.png")
