@@ -101,36 +101,21 @@ class _KDEpyFitted:
         self._grid = None
 
     def _interpolator(self):
-        """Build and cache a one- or multi-dimensional grid interpolator."""
+        """Build and cache the KDEpy estimator for native point evaluation."""
         if self._grid is None:
             from KDEpy import TreeKDE
 
             estimator = TreeKDE() if self.bandwidth is None else TreeKDE(bw=self.bandwidth)  # type: ignore
-            grid, density = estimator.fit(self.values).evaluate()
+            estimator.fit(self.values)
             self.bandwidth = estimator.bw  # type: ignore
-            dimensions = len(self.variables)
-            if dimensions == 1:
-                self._grid = (grid[:, 0] if grid.ndim == 2 else grid, density)
-            else:
-                axes = tuple(np.unique(grid[:, index]) for index in range(dimensions))
-                from scipy.interpolate import RegularGridInterpolator
-
-                self._grid = RegularGridInterpolator(
-                    axes,
-                    density.reshape(tuple(len(axis) for axis in axes)),
-                    bounds_error=False,
-                    fill_value=0.0,
-                )
+            self._grid = estimator
         return self._grid
 
     def evaluate(self, points):
         """Evaluate the FFTKDE density at arbitrary point rows."""
         points = np.asarray(points, dtype=float)
-        interpolator = self._interpolator()
-        if len(self.variables) == 1:
-            grid, density = interpolator  # type: ignore
-            return np.interp(points[:, 0], grid, density, left=0.0, right=0.0)
-        return np.asarray(interpolator(points))  # type: ignore
+        estimator = self._interpolator()
+        return np.asarray(estimator.evaluate(points))  # type: ignore
 
     def project(self, variables):
         """Return a marginal by refitting FFTKDE on the selected coordinates."""
