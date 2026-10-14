@@ -1,0 +1,1 @@
+{"design_mode":"paired_hierarchical","experiment_id":"csd_normal_umi_paired","seed_base":0,"n_samples_list":"100,500,1000,2000,5000,10000","missing_edge_rates":"0.0,0.2,0.4","missing_data_rates":"0.0,0.3","mechanisms":"instrument_error,biological_error,biological_error+instrument_error"}
