@@ -113,6 +113,11 @@ def main() -> None:
         "--profile-log",
         help="append per-operation timing records and flush them immediately to this file",
     )
+    parser.add_argument(
+        "--output-density-grid",
+        action="store_true",
+        help="evaluate and write the identified outcome density grid",
+    )
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     output = Path(args.output)
@@ -176,55 +181,57 @@ def main() -> None:
         marginalization="kde",
         legendre_degree=args.legendre_degree,
     )
-    density_bounds = {
-        column.name: (
-            float(observational_data[column.name].min()),
-            float(observational_data[column.name].max()),
+    density_file = output.with_suffix(".distribution.json")
+    if args.output_density_grid:
+        density_bounds = {
+            column.name: (
+                float(observational_data[column.name].min()),
+                float(observational_data[column.name].max()),
+            )
+            for column in query.expression.get_variables()
+            if column.name in observational_data
+        }
+        density_bounds[args.outcome] = bounds
+        density = evaluate_probability_expression(
+            query.expression,
+            observational_data,
+            mode="continuous",
+            backend=KDEpyKDE(),
+            bounds=density_bounds,
+            profiler=profiler,
+            marginalization="kde",
+            legendre_degree=args.legendre_degree,
         )
-        for column in query.expression.get_variables()
-        if column.name in observational_data
-    }
-    density_bounds[args.outcome] = bounds
-    density = evaluate_probability_expression(
-        query.expression,
-        observational_data,
-        mode="continuous",
-        backend=KDEpyKDE(),
-        bounds=density_bounds,
-        profiler=profiler,
-        marginalization="kde",
-        legendre_degree=args.legendre_degree,
-    )
-    if args.outcome not in density.variables:
-        raise ValueError("identified expression does not contain the requested outcome")
-    grid_lower = (
-        bounds[0] if np.isfinite(bounds[0]) else float(observational_data[args.outcome].min())
-    )
-    grid_upper = (
-        bounds[1] if np.isfinite(bounds[1]) else float(observational_data[args.outcome].max())
-    )
-    if not grid_lower < grid_upper:
-        raise ValueError("outcome bounds must span a non-empty density grid")
-    outcome_grid = np.linspace(grid_lower, grid_upper, 201)
-    density_values = []
-    # with (
-    #     profiler.measure("script.density_grid", levels=len(levels), points=len(outcome_grid))
-    #     if profiler
-    #     else nullcontext()
-    # ):
-    #     for level in levels:
-    #         values = {args.outcome: outcome_grid}
-    #         if args.treatment in density.variables:
-    #             values[args.treatment] = float(level)
-    #         missing = set(density.variables) - set(values)
-    #         if missing:
-    #             raise ValueError(
-    #                 "cannot save density evaluation; provide values for free variables: "
-    #                 f"{sorted(missing)}"
-    #             )
-    #         density_values.append(
-    #             {"treatment_level": level, "density": np.asarray(density(**values)).tolist()}
-    #         )
+        if args.outcome not in density.variables:
+            raise ValueError("identified expression does not contain the requested outcome")
+        grid_lower = (
+            bounds[0] if np.isfinite(bounds[0]) else float(observational_data[args.outcome].min())
+        )
+        grid_upper = (
+            bounds[1] if np.isfinite(bounds[1]) else float(observational_data[args.outcome].max())
+        )
+        if not grid_lower < grid_upper:
+            raise ValueError("outcome bounds must span a non-empty density grid")
+        outcome_grid = np.linspace(grid_lower, grid_upper, 201)
+        density_values = []
+        with (
+            profiler.measure("script.density_grid", levels=len(levels), points=len(outcome_grid))
+            if profiler
+            else nullcontext()
+        ):
+            for level in levels:
+                values = {args.outcome: outcome_grid}
+                if args.treatment in density.variables:
+                    values[args.treatment] = float(level)
+                missing = set(density.variables) - set(values)
+                if missing:
+                    raise ValueError(
+                        "cannot save density evaluation; provide values for free variables: "
+                        f"{sorted(missing)}"
+                    )
+                density_values.append(
+                    {"treatment_level": level, "density": np.asarray(density(**values)).tolist()}
+                )
     true_ate = true_scm_ate(
         build.scm, args.treatment, args.outcome, (levels[0], levels[1]), seed=args.seed + 3
     )
@@ -278,21 +285,25 @@ def main() -> None:
         ),
         encoding="utf-8",
     )
-    output.with_suffix(".distribution.json").write_text(
-        json.dumps(
-            {
-                "expression": str(query.expression),
-                "variables": list(density.variables),
-                "outcome": args.outcome,
-                "outcome_grid": outcome_grid.tolist(),
-                "evaluations": density_values,
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+    if args.output_density_grid:
+        density_file.write_text(
+            json.dumps(
+                {
+                    "expression": str(query.expression),
+                    "variables": list(density.variables),
+                    "outcome": args.outcome,
+                    "outcome_grid": outcome_grid.tolist(),
+                    "evaluations": density_values,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
     output.write_text(json.dumps(result, indent=2), encoding="utf-8")
-    print(json.dumps({"summary": result, "distribution_file": str(output.with_suffix('.distribution.json'))}, indent=2))
+    summary = {"summary": result}
+    if args.output_density_grid:
+        summary["distribution_file"] = str(density_file)
+    print(json.dumps(summary, indent=2))
 
 
 if __name__ == "__main__":
