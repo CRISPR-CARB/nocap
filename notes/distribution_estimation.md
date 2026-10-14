@@ -19,7 +19,7 @@ Given a symbolic probability distribution output by an identification algorithm,
   * Can use joint-KDE ratio, marginalize out variables of the joint and use conditional prob rule.
     * Can be problematic
 * Continuous variables marginalization
-  * Need to use integration, use SciPy quadrature or nquad
+  * Uses either adaptive SciPy `nquad` integration or fixed tensor-product Gauss-Legendre quadrature
 
 ## [Building Efficient Estimators](https://alejandroschuler.github.io/mci/4-building-efficient-estimators.html)
 * Different efficient estimators may behave the same asymptotically, but might wildly vary with smaller sample sizes and when assumptions are not met

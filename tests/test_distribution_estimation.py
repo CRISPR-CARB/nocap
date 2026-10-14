@@ -103,8 +103,8 @@ def test_continuous_sum_projects_without_refitting() -> None:
     assert density([2.0]) == pytest.approx(1.0)
 
 
-def test_continuous_sum_kde_evaluates_inner_density_on_grid() -> None:
-    """Evaluate KDE marginalization on a fixed quadrature grid."""
+def test_continuous_sum_fixed_quadrature_evaluates_inner_density_on_grid() -> None:
+    """Evaluate fixed Gauss-Legendre quadrature on a tensor-product grid."""
 
     class BandwidthKDE:
         """Fake fitted density used to inspect quadrature bandwidth behavior."""
@@ -146,21 +146,21 @@ def test_continuous_sum_kde_evaluates_inner_density_on_grid() -> None:
         pd.DataFrame({"X": [0.0, 1.0], "Y": [1.0, 2.0]}),
         mode="continuous",
         backend=backend,
-        marginalization="kde",
+        marginalization="fixed_quadrature",
     )
     assert density.variables == ("Y",)
     assert backend.calls == [(("X", "Y"), None)]
 
 
-def test_continuous_sum_kde_accepts_legendre_degree() -> None:
-    """Use the requested number of nodes for KDE marginalization."""
+def test_continuous_sum_fixed_quadrature_accepts_legendre_degree() -> None:
+    """Use the requested number of nodes for fixed quadrature."""
     density = evaluate_probability_expression(
         Sum.safe(P("X", "Y"), "X"),
         pd.DataFrame({"X": [0.0, 1.0], "Y": [1.0, 2.0]}),
         mode="continuous",
         backend=_FakeBackend(),
         bounds={"X": (0.0, 1.0)},
-        marginalization="kde",
+        marginalization="fixed_quadrature",
         legendre_degree=3,
     )
     assert density(np.array([2.0])) == pytest.approx(1.0)
@@ -175,7 +175,7 @@ def test_legendre_degree_rejects_nonpositive_values() -> None:
             mode="continuous",
             backend=_FakeBackend(),
             bounds={"X": (0.0, 1.0)},
-            marginalization="kde",
+            marginalization="fixed_quadrature",
             legendre_degree=0,
         )
 
@@ -198,9 +198,7 @@ def test_kdepy_backend_evaluates_and_projects() -> None:
 
 def test_kdepy_backend_native_evaluation_preserves_high_dimensional_variation() -> None:
     """Evaluate high-dimensional KDE points without flattening a grid incorrectly."""
-    data = pd.DataFrame(
-        np.random.default_rng(4).normal(size=(128, 3)), columns=["X", "Y", "Z"]
-    )
+    data = pd.DataFrame(np.random.default_rng(4).normal(size=(128, 3)), columns=["X", "Y", "Z"])
     fitted = KDEpyKDE().fit(data, ("X", "Y", "Z"))
     values = fitted.evaluate(np.array([[0.0, 0.0, 0.0], [2.0, 2.0, 2.0]]))
     assert values.shape == (2,)

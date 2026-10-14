@@ -178,7 +178,7 @@ def main() -> None:
         backend=KDEpyKDE(),
         outcome_bounds=bounds,
         profiler=profiler,
-        marginalization="kde",
+        marginalization="fixed_quadrature",
         legendre_degree=args.legendre_degree,
     )
     density_file = output.with_suffix(".distribution.json")
@@ -199,7 +199,7 @@ def main() -> None:
             backend=KDEpyKDE(),
             bounds=density_bounds,
             profiler=profiler,
-            marginalization="kde",
+            marginalization="fixed_quadrature",
             legendre_degree=args.legendre_degree,
         )
         if args.outcome not in density.variables:

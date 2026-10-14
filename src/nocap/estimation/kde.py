@@ -236,7 +236,7 @@ class SklearnKDE:
         self.bandwidth: float | Literal["scott", "silverman"] = bandwidth
         self.kernel: Literal[
             "gaussian", "tophat", "epanechnikov", "exponential", "linear", "cosine"
-        ]  = kernel
+        ] = kernel
         self.kwargs = kwargs
 
     def fit(

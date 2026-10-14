@@ -194,7 +194,7 @@ def _continuous_eval(
     backend: ContinuousBackend,
     bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
     profiler: EstimationProfiler | None = None,
-    marginalization: Literal["quadrature", "kde"] = "quadrature",
+    marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
     legendre_degree: int = 16,
 ):
     """Recursively evaluate an expression using continuous density callables.
@@ -205,7 +205,9 @@ def _continuous_eval(
         backend: Continuous density backend.
         bounds: Bounds used when summing variables.
         profiler: Optional timing collector.
-        marginalization: Integration strategy for summed variables.
+        marginalization: Integration strategy for summed variables. ``"adaptive_quadrature"``
+            uses SciPy's adaptive ``nquad`` integration; ``"fixed_quadrature"`` uses a
+            tensor-product Gauss-Legendre grid.
         legendre_degree: Number of Legendre nodes per integrated variable.
 
     Returns:
@@ -311,7 +313,7 @@ def _continuous_eval(
             lower, upper = float(lower), float(upper)
             limits[name] = (lower, upper)
 
-        if marginalization == "kde":
+        if marginalization == "fixed_quadrature":
             from numpy.polynomial.legendre import leggauss
 
             integrated_names = tuple(sorted(ranges))
@@ -344,7 +346,7 @@ def _continuous_eval(
                 return result
 
             return _CallableDensity(integrated, fixed_grid_marginal)
-        elif marginalization == "quadrature":
+        elif marginalization == "adaptive_quadrature":
             from scipy.integrate import nquad
 
             def marginal(points: np.ndarray) -> np.ndarray:
@@ -445,7 +447,7 @@ def _table(data: pd.DataFrame, variables: tuple[str, ...]) -> pd.DataFrame:
             raise ValueError("prob must be finite, nonnegative, and have positive mass")
         result = data.loc[:, [*variables, "prob"]].copy()
         result["prob"] = result["prob"] / result["prob"].sum()
-        return result.groupby(list(variables), dropna=False, as_index=False)["prob"].sum() # pyright: ignore[reportReturnType]
+        return result.groupby(list(variables), dropna=False, as_index=False)["prob"].sum()  # pyright: ignore[reportReturnType]
     if data.empty:
         raise ValueError("observed data must not be empty")
     result = data.loc[:, list(variables)].copy()
@@ -539,7 +541,7 @@ class DistributionEstimator:
     backend: ContinuousBackend | None = None
     bounds: Mapping[str, tuple[float, float]] | None = None
     profiler: EstimationProfiler | None = None
-    marginalization: Literal["quadrature", "kde"] = "quadrature"
+    marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature"
     legendre_degree: int = 16
 
     def evaluate(self, expression: Expression):
@@ -576,7 +578,7 @@ def evaluate_probability_expression(
     backend: ContinuousBackend | None = None,
     bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
     profiler: EstimationProfiler | None = None,
-    marginalization: Literal["quadrature", "kde"] = "quadrature",
+    marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
     legendre_degree: int = 16,
 ):
     """Evaluate a normalized y0 expression as a table or density callable.
@@ -588,7 +590,9 @@ def evaluate_probability_expression(
         backend: Optional continuous density backend.
         bounds: Integration bounds for continuous summation.
         profiler: Optional timing collector.
-        marginalization: Integration strategy for continuous sums.
+        marginalization: Integration strategy for continuous sums. ``"adaptive_quadrature"``
+            uses SciPy's adaptive ``nquad`` integration; ``"fixed_quadrature"`` uses a
+            tensor-product Gauss-Legendre grid.
         legendre_degree: Number of Legendre nodes per integrated variable.
 
     Returns:
@@ -604,8 +608,8 @@ def evaluate_probability_expression(
         with _measure(profiler, "discrete.evaluate", rows=len(data)):
             return _discrete_eval(expression, data)
     if mode == "continuous":
-        if marginalization not in {"quadrature", "kde"}:
-            raise ValueError("marginalization must be 'quadrature' or 'kde'")
+        if marginalization not in {"adaptive_quadrature", "fixed_quadrature"}:
+            raise ValueError("marginalization must be 'adaptive_quadrature' or 'fixed_quadrature'")
         legendre_degree = _validate_legendre_degree(legendre_degree)
         if backend is None:
             backend = KDEpyKDE()
@@ -823,7 +827,7 @@ def estimate_ate(
     backend: ContinuousBackend | None = None,
     outcome_bounds: tuple[float, float] | None = None,
     profiler: EstimationProfiler | None = None,
-    marginalization: Literal["quadrature", "kde"] = "quadrature",
+    marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
     legendre_degree: int = 16,
 ) -> float:
     """Estimate an ATE as the difference between two interventional expectations.
@@ -838,7 +842,9 @@ def estimate_ate(
         backend: Optional continuous density backend.
         outcome_bounds: Bounds for continuous outcome integration.
         profiler: Optional timing collector.
-        marginalization: Integration strategy for continuous sums.
+        marginalization: Integration strategy for continuous sums. ``"adaptive_quadrature"``
+            uses SciPy's adaptive ``nquad`` integration; ``"fixed_quadrature"`` uses a
+            tensor-product Gauss-Legendre grid.
         legendre_degree: Number of Legendre nodes used for both integrations.
 
     Returns:
