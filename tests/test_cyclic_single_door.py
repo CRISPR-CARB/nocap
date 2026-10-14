@@ -55,6 +55,13 @@ def _two_cycle() -> nx.DiGraph:
     return g
 
 
+def _dag_with_unobs_confounder() -> nx.DiGraph:
+    """U->X, U->Y, X->Y"""
+    g = nx.DiGraph()
+    g.add_edges_from([("U", "X"), ("U", "Y"), ("X", "Y")])
+    return g
+
+
 def _three_cycle_with_dag_edge() -> nx.DiGraph:
     """Build a 3-cycle A->B->C->A (SCC) plus a DAG edge D->A into the SCC.
 
@@ -338,6 +345,23 @@ def test_nx_digraph_to_y0_no_bidirected():
     g = _two_cycle()
     g_y0 = nx_digraph_to_y0(g)
     assert g_y0.undirected.number_of_edges() == 0
+
+
+def test_nx_digraph_to_y0_unobserved():
+    """Represent an unobserved common cause as a bidirected edge."""
+    g = _dag_with_unobs_confounder()
+    g_y0 = nx_digraph_to_y0(g, {"U"})
+    assert g_y0.undirected.number_of_edges() == 1
+
+
+def test_nx_digraph_to_y0_unobserved_path():
+    """Project a path with multiple unobserved internal nodes."""
+    g = nx.DiGraph([("X", "U1"), ("U1", "U2"), ("Y", "U2")])
+    g_y0 = nx_digraph_to_y0(g, {"U1", "U2"})
+    assert {frozenset((u.name, v.name)) for u, v in g_y0.undirected.edges()} == {
+        frozenset(("X", "Y"))
+    }
+    assert g_y0.directed.number_of_nodes() == 2
 
 
 # ---------------------------------------------------------------------------

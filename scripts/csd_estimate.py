@@ -355,6 +355,7 @@ def main() -> None:
             "two_cycles_disconnected",
             "small_network",
             "frontdoor_cycle",
+            "counterexample",
         ],
         help="Built-in demo graph to use when --graphml is omitted.",
     )
@@ -655,6 +656,8 @@ def main() -> None:
                     ("TF3", "G1", {"polarity": "+"}),
                 ]
             )
+        elif args.demo == "counterexample":
+            graph.add_edges_from([("X", "Y"), ("W", "Y"), ("Y", "W")])
         else:
             raise ValueError(f"Unknown demo {args.demo!r}")
 
@@ -954,7 +957,7 @@ def main() -> None:
                         row["residual_variance"] = float(residual_var)
                         row["t_value"] = float(t_val)
                         row["status"] = "identifiable"
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     row["status"] = "estimation_error"
                     row["error"] = repr(exc)
 

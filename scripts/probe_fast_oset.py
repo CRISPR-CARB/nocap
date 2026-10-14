@@ -40,7 +40,7 @@ def get_remote_tip() -> str | None:
         if not lines:
             return None
         return lines[0].split()[0]
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"  WARNING: could not fetch remote tip: {exc}", file=sys.stderr)
         return None
 
@@ -86,7 +86,7 @@ def check_no_all_simple_paths() -> bool:
 
         src = inspect.getsource(find_sigma_single_door_set)
         return "all_simple_paths" not in src
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"  ERROR importing find_sigma_single_door_set: {exc}", file=sys.stderr)
         return False
 

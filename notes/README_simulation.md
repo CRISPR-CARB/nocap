@@ -119,6 +119,21 @@ spectral radius is below the target stability threshold. The builder also
 rejects poorly conditioned linear systems. This keeps the equilibrium solve
 numerically usable while preserving the graph and signed-effect semantics.
 
+### Treatment and hard interventions
+
+Treatment and outcome variables remain continuous latent log2-expression values.
+An intervention `do(T=t)` removes every incoming structural edge to `T`, fixes
+`T` to the explicit value `t` for every generated sample, and preserves `T` and
+all of its outgoing edges. The remaining equilibrium system is then solved with
+the supplied exogenous noise. Intervention values are not treatment-level
+filters applied to observational rows.
+
+Continuous ATE validation evaluates the identified interventional density at two
+explicit treatment levels and integrates the outcome over declared bounds,
+which may use `-inf` or `inf` for unbounded tails. Latent SCM comparisons use
+the latent expression scale; count-derived
+`X-hat` comparisons additionally include negative-binomial observation error.
+
 ## Observation Model
 
 The latent expression is converted to positive, unconstrained expression using
