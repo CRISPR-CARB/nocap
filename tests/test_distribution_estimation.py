@@ -196,6 +196,17 @@ def test_kdepy_backend_evaluates_and_projects() -> None:
     assert projected.evaluate(np.array([[0.5], [0.75]])).shape == (2,)
 
 
+def test_kdepy_backend_native_evaluation_preserves_high_dimensional_variation() -> None:
+    """Evaluate high-dimensional KDE points without flattening a grid incorrectly."""
+    data = pd.DataFrame(
+        np.random.default_rng(4).normal(size=(128, 3)), columns=["X", "Y", "Z"]
+    )
+    fitted = KDEpyKDE().fit(data, ("X", "Y", "Z"))
+    values = fitted.evaluate(np.array([[0.0, 0.0, 0.0], [2.0, 2.0, 2.0]]))
+    assert values.shape == (2,)
+    assert values[0] > values[1]
+
+
 def test_sklearn_backend_evaluates_and_projects() -> None:
     """Evaluate and project a scikit-learn fitted density."""
     data = pd.DataFrame(
@@ -314,6 +325,28 @@ def test_continuous_expectation_uses_explicit_bounds() -> None:
         bounds=(0.0, 1.0),
     )
     assert result == pytest.approx(0.5)
+
+
+def test_continuous_ate_resolves_infinite_outcome_bounds_to_kde_support() -> None:
+    """Infinite script bounds must not send grid KDE quadrature into zero tails."""
+    data = pd.DataFrame(
+        {
+            "X": np.repeat([0.0, 1.0], 32),
+            "Y": np.concatenate([np.linspace(-1.0, 1.0, 32), np.linspace(1.0, 3.0, 32)]),
+        }
+    )
+    result = estimate_ate(
+        P("X", "Y"),
+        data,
+        "X",
+        "Y",
+        (0.0, 1.0),
+        mode="continuous",
+        backend=KDEpyKDE(),
+        outcome_bounds=(-np.inf, np.inf),
+        legendre_degree=16,
+    )
+    assert result > 1.0
 
 
 def test_continuous_expectation_vectorizes_density_evaluation() -> None:

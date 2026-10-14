@@ -303,6 +303,7 @@ def _continuous_eval(
                 lower, upper = bounds[name]
             else:
                 lower, upper = bounds
+            lower, upper = _resolve_data_bounds((float(lower), float(upper)), data, name)
             if np.any(np.isnan((lower, upper))) or not float(lower) < float(upper):
                 raise DistributionEstimationError(
                     f"integration bounds for {name!r} must be increasing and non-NaN"
@@ -638,6 +639,23 @@ def _validate_bounds(bounds: tuple[float, float] | None) -> tuple[float, float]:
     return lower, upper
 
 
+def _resolve_data_bounds(
+    bounds: tuple[float, float], data: pd.DataFrame, variable: str
+) -> tuple[float, float]:
+    """Resolve infinite KDE endpoints to the observed finite data support."""
+    lower, upper = bounds
+    values = data[variable].to_numpy(dtype=float)
+    if not np.isfinite(values).all() or values.size == 0:
+        raise ValueError(f"continuous variable {variable!r} must contain finite values")
+    if lower == -np.inf:
+        lower = float(values.min())
+    if upper == np.inf:
+        upper = float(values.max())
+    if not lower < upper:
+        raise ValueError(f"continuous bounds for {variable!r} must span a non-empty range")
+    return float(lower), float(upper)
+
+
 def estimate_expectation(
     evaluated: pd.DataFrame | Callable[..., float | np.ndarray],
     outcome: str | Variable,
@@ -861,7 +879,9 @@ def estimate_ate(
         return float(values[1] - values[0])
     if mode == "continuous":
         expression_bounds: dict[str, tuple[float, float]] = {
-            outcome_name: _validate_bounds(outcome_bounds),
+            outcome_name: _resolve_data_bounds(
+                _validate_bounds(outcome_bounds), data, outcome_name
+            ),
         }
         for name in _names(expression.get_variables()):
             if name == outcome_name:
@@ -882,7 +902,7 @@ def estimate_ate(
             marginalization=marginalization,
             legendre_degree=legendre_degree,
         )
-        bounds = _validate_bounds(outcome_bounds)
+        bounds = expression_bounds[outcome_name]
         extra_variables = tuple(
             name for name in evaluated.variables if name not in {outcome_name, treatment_name}
         )
