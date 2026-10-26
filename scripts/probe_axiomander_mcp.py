@@ -122,6 +122,6 @@ except subprocess.TimeoutExpired as e:
     print("stderr so far:")
     print(e.stderr.decode(errors="replace") if e.stderr else "(empty)")
     sys.exit(1)
-except Exception as exc:  # noqa: BLE001
+except Exception as exc:
     print(f"ERROR: {exc}")
     sys.exit(1)

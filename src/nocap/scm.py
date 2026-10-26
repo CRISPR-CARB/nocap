@@ -71,7 +71,7 @@ def dagitty_to_mixed_graph(dagitty_input: str, str_var_name: bool = False) -> Nx
         mixed_graph = NxMixedGraph.from_str_edges(
             directed=[(u, v) for u, v, d in nx_graph.edges]
         )  # convert from str to variable
-    assert isinstance(mixed_graph, NxMixedGraph)  # noqa: S101
+    assert isinstance(mixed_graph, NxMixedGraph)
     return mixed_graph
 
 
@@ -87,13 +87,13 @@ def dagitty_to_digraph(dagitty_input: str) -> nx.DiGraph:
     dot_graph_string = dagitty_to_dot(dagitty_graph_str)
     dot_graph = pydot.graph_from_dot_data(dot_graph_string)[0]
     nx_graph = from_pydot(dot_graph)
-    assert isinstance(nx_graph, nx.DiGraph)  # noqa: S101
+    assert isinstance(nx_graph, nx.DiGraph)
     return nx_graph
 
 
 def generate_lscm_from_dag(graph: nx.DiGraph) -> dict[sy.Symbol, sy.Expr]:
     """Generate a linear structural causal model from a directed acycle graph (networkx DAG)."""
-    assert nx.is_directed_acyclic_graph(graph), "Not a DAG"  # noqa: S101 # check input DAG
+    assert nx.is_directed_acyclic_graph(graph), "Not a DAG"  # check input DAG
     equations = {}
     sorted_nodes = list(nx.topological_sort(graph))
     for node in sorted_nodes:
@@ -113,7 +113,7 @@ def generate_lscm_from_dag(graph: nx.DiGraph) -> dict[sy.Symbol, sy.Expr]:
 
 def generate_lscm_from_mixed_graph(graph: NxMixedGraph) -> dict[sy.Symbol, sy.Expr]:
     """Generate a linear structural causal model from a mixed directed and bidirected graph (y0 NxMixedGraph)."""
-    assert nx.is_directed_acyclic_graph(graph.directed), "Not a DAG"  # noqa: S101 # check input DAG
+    assert nx.is_directed_acyclic_graph(graph.directed), "Not a DAG"  # check input DAG
     equations = {}
     sorted_nodes = list(nx.topological_sort(graph.directed))
     for node in sorted_nodes:
@@ -329,9 +329,9 @@ def simulate_data_with_outliers(
 
     np.random.seed(seed)
     if backend == "pgmpy":
-        assert isinstance(  # noqa: S101
-            nocap_model, LinearGaussianBayesianNetwork
-        ), "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
+        assert isinstance(nocap_model, LinearGaussianBayesianNetwork), (
+            "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
+        )
         lgbn_model = nocap_model
         simulated_data = lgbn_model.simulate(n_samples=num_samples, seed=seed)
 
@@ -357,9 +357,9 @@ def fit_model(
 ):
     """Fit a model to the data using the specified backend."""
     if backend == "pgmpy":
-        assert isinstance(  # noqa: S101
-            nocap_model, LinearGaussianBayesianNetwork
-        ), "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
+        assert isinstance(nocap_model, LinearGaussianBayesianNetwork), (
+            "Model must be a Linear Gaussian Bayesian Network for pgmpy backend"
+        )
         lgbn_model = deepcopy(nocap_model)
         lgbn_model.fit(data)
         return lgbn_model
@@ -407,7 +407,7 @@ def bootstrap_ATE(  # noqa: N802
         requires:
             n_iterations > 0
     """
-    assert n_iterations > 0, "n_iterations must be positive"  # noqa: S101
+    assert n_iterations > 0, "n_iterations must be positive"
     # Extract the relevant outcome data
     control_outcome = data_control[outcome_variable].values
     intervened_outcome = data_intervention[outcome_variable].values

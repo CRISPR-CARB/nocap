@@ -72,6 +72,7 @@ import pandas as pd
 import statsmodels.formula.api as smf
 from y0.algorithm.separation.sigma_extension import sigma_extension
 from y0.algorithm.separation.sigma_single_door import find_sigma_single_door_set
+from y0.algorithm.simplify_latent import evans_simplify
 from y0.dsl import Variable
 from y0.graph import NxMixedGraph
 
@@ -135,11 +136,13 @@ def _timeout_context(seconds: int):
 # ---------------------------------------------------------------------------
 
 
-def nx_digraph_to_y0(graph: nx.DiGraph) -> NxMixedGraph:
+def nx_digraph_to_y0(
+    graph: nx.DiGraph, unobserved: set[str] | frozenset[str] | None = None
+) -> NxMixedGraph:
     """Convert a plain ``nx.DiGraph`` to a y0 ``NxMixedGraph``.
 
-    Each node name is wrapped in a :class:`~y0.dsl.Variable`.  No bidirected
-    edges are added — the σ-extension step adds those later.
+    Each node name is wrapped in a :class:`~y0.dsl.Variable`. Bidirected edges are added to
+    represent unobserved variables.
 
     Parameters
     ----------
@@ -150,12 +153,11 @@ def nx_digraph_to_y0(graph: nx.DiGraph) -> NxMixedGraph:
     Returns
     -------
     NxMixedGraph
-        A y0 mixed graph with the same directed edges and no bidirected edges.
+        A y0 mixed graph with possibly bidirected edges.
 
     axiomander:
         ensures:
-            result.directed.number_of_nodes() == graph.number_of_nodes()
-            result.directed.number_of_edges() == graph.number_of_edges()
+            graph.number_of_nodes() - result.directed.number_of_nodes() == len(unobserved or {})
         modifies:
             none
     """
@@ -166,20 +168,23 @@ def nx_digraph_to_y0(graph: nx.DiGraph) -> NxMixedGraph:
     directed_edges = [(node_map[u], node_map[v]) for u, v in graph.edges()]
     result = NxMixedGraph.from_edges(directed=directed_edges)
 
+    if unobserved is not None:
+        latents = {variable for variable in result.nodes() if variable.name in unobserved}
+
+        # Apply Evan's rules to simplify latent DAG
+        result = evans_simplify(result, latents=latents)
+
     # NxMixedGraph.from_edges only adds nodes that appear in at least one edge.
     # Isolated nodes (e.g. after do-intervention removes all in-edges) must be
     # added explicitly so the node set is preserved.
     for var in node_map.values():
-        if var not in result.directed:
+        if var not in result.directed and var.name not in (unobserved or {}):
             result.directed.add_node(var)
 
-    # --- POST ---
-    assert result.directed.number_of_nodes() == graph.number_of_nodes(), (
-        "POST: node count must be preserved"
+    assert graph.number_of_nodes() - result.directed.number_of_nodes() == len(unobserved or {}), (
+        "POST: node count must be preserved except for unobserved nodes"
     )
-    assert result.directed.number_of_edges() == graph.number_of_edges(), (
-        "POST: edge count must be preserved"
-    )
+
     return result
 
 
