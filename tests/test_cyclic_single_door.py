@@ -354,14 +354,40 @@ def test_nx_digraph_to_y0_unobserved():
     assert g_y0.undirected.number_of_edges() == 1
 
 
-def test_nx_digraph_to_y0_unobserved_path():
-    """Project a path with multiple unobserved internal nodes."""
+def test_nx_digraph_to_y0_unobserved_path_collider():
+    """Project a path with multiple unobserved internal nodes where the path
+    contains a collider.
+
+    Convert the graph X --> U1 --> U2 <-- Y to X Y.
+    """
     g = nx.DiGraph([("X", "U1"), ("U1", "U2"), ("Y", "U2")])
+    g_y0 = nx_digraph_to_y0(g, {"U1", "U2"})
+    assert {frozenset((u.name, v.name)) for u, v in g_y0.undirected.edges()} == set()
+    assert g_y0.directed.number_of_nodes() == 2
+
+
+def test_nx_digraph_to_y0_unobserved_path_chain():
+    """Project a directed path through multiple unobserved variables.
+
+    Convert the graph X -> U1 -> U2 -> Y to X -> Y.
+    """
+    g = nx.DiGraph([("X", "U1"), ("U1", "U2"), ("U2", "Y")])
+    g_y0 = nx_digraph_to_y0(g, {"U1", "U2"})
+    assert {(u.name, v.name) for u, v in g_y0.directed.edges()} == {("X", "Y")}
+    assert g_y0.undirected.number_of_edges() == 0
+
+
+def test_nx_digraph_to_y0_unobserved_path_fork():
+    """Project a fork through multiple unobserved variables.
+
+    Convert the graph U1 -> U2 -> Y and U1 -> X to X <-> Y.
+    """
+    g = nx.DiGraph([("U1", "X"), ("U1", "U2"), ("U2", "Y")])
     g_y0 = nx_digraph_to_y0(g, {"U1", "U2"})
     assert {frozenset((u.name, v.name)) for u, v in g_y0.undirected.edges()} == {
         frozenset(("X", "Y"))
     }
-    assert g_y0.directed.number_of_nodes() == 2
+    assert g_y0.directed.number_of_edges() == 0
 
 
 # ---------------------------------------------------------------------------

@@ -64,7 +64,6 @@ efficient total effect estimation via adjustment in causal linear models.
 
 from __future__ import annotations
 
-import itertools as it
 import signal
 from contextlib import contextmanager
 
@@ -73,6 +72,7 @@ import pandas as pd
 import statsmodels.formula.api as smf
 from y0.algorithm.separation.sigma_extension import sigma_extension
 from y0.algorithm.separation.sigma_single_door import find_sigma_single_door_set
+from y0.algorithm.simplify_latent import evans_simplify
 from y0.dsl import Variable
 from y0.graph import NxMixedGraph
 
@@ -136,50 +136,6 @@ def _timeout_context(seconds: int):
 # ---------------------------------------------------------------------------
 
 
-def convert_unobserved_to_bidirected(graph: NxMixedGraph, unobserved: set[str] | frozenset[str]):
-    """Remove unobserved nodes from the graph and replace with a bidirected edge.
-
-    Parameters
-    ----------
-    NxMixedGraph:
-        A y0 mixed graph with possibly bidirected edges.
-    unobserved:
-        A set or frozenset of variable names that represent unobserved
-        variables.
-
-    Returns
-    -------
-    NxMixedGraph
-        A y0 mixed graph with possibly bidirected edges.
-    """
-    # A path through several unobserved nodes must be projected just like a
-    # one-node latent path.  Work on the underlying undirected graph: each
-    # connected component of unobserved nodes exposes all observed endpoints
-    # that can be joined by a path whose internal nodes are unobserved.
-    unobserved_vars = {var for var in graph.nodes() if var.name in unobserved}
-    latent_graph = graph.directed.to_undirected()
-    latent_graph.remove_nodes_from(set(latent_graph) - unobserved_vars)
-    edges_to_add = set()
-    for component in nx.connected_components(latent_graph):
-        boundary = set()
-        for latent in component:
-            boundary.update(graph.directed.successors(latent))
-            boundary.update(graph.directed.predecessors(latent))
-        boundary.difference_update(unobserved_vars)
-        for u, v in it.combinations(boundary, 2):
-            edges_to_add.add((u, v))
-
-    # Replace tri edges with bidirected edges
-    for u, v in edges_to_add:
-        graph.add_undirected_edge(u, v)
-
-    # Remove unobserved nodes by passing Variable objects instead of strings
-    graph.directed.remove_nodes_from(unobserved_vars)
-    graph.undirected.remove_nodes_from(unobserved_vars)
-
-    return graph
-
-
 def nx_digraph_to_y0(
     graph: nx.DiGraph, unobserved: set[str] | frozenset[str] | None = None
 ) -> NxMixedGraph:
@@ -213,7 +169,10 @@ def nx_digraph_to_y0(
     result = NxMixedGraph.from_edges(directed=directed_edges)
 
     if unobserved is not None:
-        result = convert_unobserved_to_bidirected(result, unobserved)
+        latents = {variable for variable in result.nodes() if variable.name in unobserved}
+
+        # Apply Evan's rules to simplify latent DAG
+        result = evans_simplify(result, latents=latents)
 
     # NxMixedGraph.from_edges only adds nodes that appear in at least one edge.
     # Isolated nodes (e.g. after do-intervention removes all in-edges) must be
