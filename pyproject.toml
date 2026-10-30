@@ -203,6 +203,13 @@ Source = "https://github.com/crispr-carb/nocap"
 Documentation = "https://nocap.readthedocs.io"
 
 [project.optional-dependencies]
+boolean = [
+    "boolmore @ git+https://github.com/kyuhyongpark/boolmore.git@1d86e883b284fe0098b9043821209676d52fed1e",
+    "scboolseq==2.3.4",
+    "biobalm==0.4.3",
+    "anndata==0.12.6",
+    "PyYAML==6.0.3",
+]
 tests = [
     "coverage",
     "hypothesis",
