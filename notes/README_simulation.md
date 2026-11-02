@@ -456,10 +456,12 @@ artifact to also store the boolean ground truth in
 sample prefix and sample order with:
 
 ```python
-truth = artifact.latent_expression_state_view(SimulationConfig(
-    n_samples=250,
-    use_binary_expression_state=True,
-))
+truth = artifact.latent_expression_state_view(
+    SimulationConfig(
+        n_samples=250,
+        use_binary_expression_state=True,
+    )
+)
 ```
 
 Enable the state on the artifact-generation config as well:
