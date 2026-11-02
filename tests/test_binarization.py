@@ -19,9 +19,7 @@ class _FakeBinarizer:
         return self
 
     def binarize(self, frame):
-        return pd.DataFrame(
-            [[0.0, np.nan], [1.0, 0.0]], index=self.index, columns=self.columns
-        )
+        return pd.DataFrame([[0.0, np.nan], [1.0, 0.0]], index=self.index, columns=self.columns)
 
 
 def _install_fake_scboolseq(monkeypatch):
@@ -39,9 +37,10 @@ def test_binarize_expression_preserves_labels_and_unknowns(monkeypatch):
     assert result.index.equals(expression.index)
     assert result.columns.equals(expression.columns)
     assert np.isnan(result.loc["cell-a", "gene-y"])
-    pd.testing.assert_frame_equal(expression, pd.DataFrame(
-        [[1, 2], [3, 4]], index=["cell-a", "cell-b"], columns=["gene-x", "gene-y"]
-    ))
+    pd.testing.assert_frame_equal(
+        expression,
+        pd.DataFrame([[1, 2], [3, 4]], index=["cell-a", "cell-b"], columns=["gene-x", "gene-y"]),
+    )
 
 
 def test_binarize_expression_can_return_result_and_fitted_binarizer(monkeypatch):
@@ -57,9 +56,7 @@ def test_binarize_expression_can_return_result_and_fitted_binarizer(monkeypatch)
     assert binarizer.columns.equals(pd.Index([0, 1]))
 
 
-@pytest.mark.parametrize(
-    ("unknown", "expected"), [("off", 0.0), ("on", 1.0)]
-)
+@pytest.mark.parametrize(("unknown", "expected"), [("off", 0.0), ("on", 1.0)])
 def test_binarize_expression_maps_unknowns(monkeypatch, unknown, expected):
     _install_fake_scboolseq(monkeypatch)
     result = binarize_expression(np.ones((2, 2)), unknown=unknown)
@@ -75,9 +72,7 @@ def test_binarize_expression_can_reject_unknowns(monkeypatch):
         binarize_expression(np.ones((2, 2)), unknown="error")
 
 
-@pytest.mark.parametrize(
-    "expression", [np.ones(3), np.array([[1.0, np.inf]])]
-)
+@pytest.mark.parametrize("expression", [np.ones(3), np.array([[1.0, np.inf]])])
 def test_binarize_expression_rejects_invalid_input(expression):
     with pytest.raises(ValueError):
         binarize_expression(expression)
@@ -136,12 +131,12 @@ def test_binarize_h5ad_returns_binarizer_and_writes_result(monkeypatch, tmp_path
     monkeypatch.setattr(binarization, "read_h5ad", lambda path: source)
 
     binarizer = object()
-    monkeypatch.setattr(binarization, "binarize_anndata", lambda adata, **kwargs: (adata, binarizer))
+    monkeypatch.setattr(
+        binarization, "binarize_anndata", lambda adata, **kwargs: (adata, binarizer)
+    )
 
     output_path = tmp_path / "binary.h5ad"
-    result, returned_binarizer = binarize_h5ad(
-        "input.h5ad", output_path, return_binarizer=True
-    )
+    result, returned_binarizer = binarize_h5ad("input.h5ad", output_path, return_binarizer=True)
 
     assert result is source
     assert returned_binarizer is binarizer

@@ -155,9 +155,7 @@ def binarize_anndata(
     matrix = adata.X if layer is None else adata.layers[layer]
     if isinstance(matrix, csr_matrix):  # if sparse matrix
         matrix = matrix.toarray()
-    expression = pd.DataFrame(
-        np.asarray(matrix), index=adata.obs_names, columns=adata.var_names
-    )
+    expression = pd.DataFrame(np.asarray(matrix), index=adata.obs_names, columns=adata.var_names)
     binary_result = binarize_expression(
         expression,
         unknown=unknown,
@@ -212,7 +210,7 @@ def binarize_h5ad(
     if isinstance(result, AnnData):
         if output_path is not None:
             result.write_h5ad(output_path)
-        if return_binarizer and binarizer :
+        if return_binarizer and binarizer:
             return result, binarizer
     else:
         raise TypeError(f"Result has been unpacked into type: {type(result)}, expected {AnnData}")
