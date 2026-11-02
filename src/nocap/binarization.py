@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from os import PathLike
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 import numpy as np
 import pandas as pd
@@ -14,8 +14,8 @@ from scboolseq import scBoolSeq
 from scipy.sparse import csr_matrix
 
 UnknownState = Literal["keep", "off", "on", "error"]
-ExpressionMatrix = pd.DataFrame | ArrayLike
-BinaryMatrix = pd.DataFrame | NDArray[np.float64]
+ExpressionMatrix: TypeAlias = pd.DataFrame | ArrayLike
+BinaryMatrix: TypeAlias = pd.DataFrame | NDArray[np.float64]
 
 
 def _expression_frame(expression: ExpressionMatrix) -> tuple[pd.DataFrame, bool]:
@@ -155,9 +155,7 @@ def binarize_anndata(
     matrix = adata.X if layer is None else adata.layers[layer]
     if isinstance(matrix, csr_matrix):  # if sparse matrix
         matrix = matrix.toarray()
-    expression = pd.DataFrame(
-        np.asarray(matrix), index=adata.obs_names, columns=adata.var_names
-    )
+    expression = pd.DataFrame(np.asarray(matrix), index=adata.obs_names, columns=adata.var_names)
     binary_result = binarize_expression(
         expression,
         unknown=unknown,
@@ -212,7 +210,7 @@ def binarize_h5ad(
     if isinstance(result, AnnData):
         if output_path is not None:
             result.write_h5ad(output_path)
-        if return_binarizer and binarizer :
+        if return_binarizer and binarizer:
             return result, binarizer
     else:
         raise TypeError(f"Result has been unpacked into type: {type(result)}, expected {AnnData}")
