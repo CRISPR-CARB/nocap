@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from os import PathLike
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 import numpy as np
 import pandas as pd
@@ -14,8 +14,8 @@ from scboolseq import scBoolSeq
 from scipy.sparse import csr_matrix
 
 UnknownState = Literal["keep", "off", "on", "error"]
-ExpressionMatrix = pd.DataFrame | ArrayLike
-BinaryMatrix = pd.DataFrame | NDArray[np.float64]
+ExpressionMatrix: TypeAlias = pd.DataFrame | ArrayLike
+BinaryMatrix: TypeAlias = pd.DataFrame | NDArray[np.float64]
 
 
 def _expression_frame(expression: ExpressionMatrix) -> tuple[pd.DataFrame, bool]:
