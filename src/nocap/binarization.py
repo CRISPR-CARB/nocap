@@ -8,7 +8,9 @@ from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
+from anndata import AnnData, read_h5ad
 from numpy.typing import ArrayLike, NDArray
+from scboolseq import scBoolSeq
 from scipy.sparse import csr_matrix
 
 UnknownState = Literal["keep", "off", "on", "error"]
@@ -64,12 +66,15 @@ def binarize_expression(
     *,
     unknown: UnknownState = "keep",
     binarizer_kwargs: dict[str, Any] | None = None,
-) -> BinaryMatrix:
+    return_binarizer: bool = False,
+) -> BinaryMatrix | tuple[BinaryMatrix, scBoolSeq]:
     """Binarize cell-by-gene expression data with scBoolSeq.
 
     DataFrame row and column labels are preserved. Array-like input returns a
     floating-point NumPy array. scBoolSeq's undetermined values are retained
     as NaN by default; ``unknown`` can instead map them to OFF/ON or raise.
+    Set ``return_binarizer=True`` to return a tuple containing the binary
+    matrix and fitted scBoolSeq instance.
 
     ``binarizer_kwargs`` is passed directly to ``scBoolSeq``. Supported
     constructor options (with scBoolSeq defaults) are:
@@ -98,13 +103,6 @@ def binarize_expression(
     _validate_unknown_policy(unknown)
     frame, is_frame = _expression_frame(expression)
 
-    try:
-        from scboolseq import scBoolSeq
-    except ImportError as error:
-        raise ImportError(
-            "Binarization requires scBoolSeq; install it with `pip install 'nocap[boolean]'`."
-        ) from error
-
     binarizer = scBoolSeq(**(binarizer_kwargs or {}))
     binarizer.fit(frame, simulation=False)
     result = binarizer.binarize(frame)
@@ -120,33 +118,33 @@ def binarize_expression(
     result = _handle_unknown_states(result, unknown)
 
     if is_frame:
-        return result
-    return result.to_numpy()
+        binary: BinaryMatrix = result
+    else:
+        binary = result.to_numpy()
+    if return_binarizer:
+        return binary, binarizer
+    return binary
 
 
 def binarize_anndata(
-    adata,
+    adata: AnnData,
     *,
     layer: str | None = None,
     output_layer: str = "binarized",
     unknown: UnknownState = "keep",
     binarizer_kwargs: dict[str, object] | None = None,
+    return_binarizer: bool = False,
     copy: bool = True,
-):
+) -> AnnData | tuple[AnnData, scBoolSeq]:
     """Add scBoolSeq binarized expression to an AnnData layer.
 
     By default, binarization uses ``adata.X``, stores the result in the
     ``binarized`` layer of a copy, and leaves the source object unchanged.
     Set ``layer`` to binarize an existing layer or ``copy=False`` to modify
     the input object. ``binarizer_kwargs`` is forwarded to the scBoolSeq
-    constructor; see :func:`binarize_expression` for supported options.
+    constructor; see :func:`binarize_expression` for supported options. Set
+    ``return_binarizer=True`` to return ``(updated_adata, binarizer)``.
     """
-    try:
-        from anndata import AnnData
-    except ImportError as error:
-        raise ImportError(
-            "AnnData support requires anndata; install it with `pip install 'nocap[boolean]'`."
-        ) from error
     if not isinstance(adata, AnnData):
         raise TypeError("adata must be an anndata.AnnData instance")
     if not output_layer:
@@ -160,9 +158,17 @@ def binarize_anndata(
     expression = pd.DataFrame(
         np.asarray(matrix), index=adata.obs_names, columns=adata.var_names
     )
-    binary = binarize_expression(
-        expression, unknown=unknown, binarizer_kwargs=binarizer_kwargs
+    binary_result = binarize_expression(
+        expression,
+        unknown=unknown,
+        binarizer_kwargs=binarizer_kwargs,
+        return_binarizer=return_binarizer,
     )
+    binarizer = None
+    if return_binarizer and isinstance(binary_result, tuple):
+        binary, binarizer = binary_result
+    else:
+        binary = binary_result
     result = adata.copy() if copy else adata
     if isinstance(binary, pd.DataFrame):
         result.layers[output_layer] = binary.to_numpy(dtype=float)
@@ -170,6 +176,8 @@ def binarize_anndata(
         result.layers[output_layer] = binary
     else:
         raise TypeError(f"Binary data is in unsupported format: {type(binary)}")
+    if return_binarizer and binarizer:
+        return result, binarizer
     return result
 
 
@@ -181,27 +189,31 @@ def binarize_h5ad(
     output_layer: str = "binarized",
     unknown: UnknownState = "keep",
     binarizer_kwargs: dict[str, object] | None = None,
-):
+    return_binarizer: bool = False,
+) -> AnnData | tuple[AnnData, scBoolSeq]:
     """Binarize an H5AD file and optionally write the updated AnnData object.
 
     ``binarizer_kwargs`` is forwarded to the scBoolSeq constructor; see
-    :func:`binarize_expression` for supported options.
+    :func:`binarize_expression` for supported options. Set
+    ``return_binarizer=True`` to return ``(updated_adata, binarizer)``.
     """
-    try:
-        import anndata
-    except ImportError as error:
-        raise ImportError(
-            "H5AD support requires anndata; install it with `pip install 'nocap[boolean]'`."
-        ) from error
-
     result = binarize_anndata(
-        anndata.read_h5ad(Path(input_path)),
+        read_h5ad(Path(input_path)),
         layer=layer,
         output_layer=output_layer,
         unknown=unknown,
         binarizer_kwargs=binarizer_kwargs,
+        return_binarizer=return_binarizer,
         copy=False,
     )
-    if output_path is not None:
-        result.write_h5ad(output_path)
+    binarizer = None
+    if return_binarizer and isinstance(result, tuple):
+        result, binarizer = result
+    if isinstance(result, AnnData):
+        if output_path is not None:
+            result.write_h5ad(output_path)
+        if return_binarizer and binarizer :
+            return result, binarizer
+    else:
+        raise TypeError(f"Result has been unpacked into type: {type(result)}, expected {AnnData}")
     return result

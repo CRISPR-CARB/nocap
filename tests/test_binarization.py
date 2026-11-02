@@ -1,13 +1,11 @@
 """Tests for scBoolSeq-based expression binarization."""
 
-import sys
-from types import ModuleType
-
 import numpy as np
 import pandas as pd
 import pytest
 
-from nocap.binarization import binarize_anndata, binarize_expression
+from nocap import binarization
+from nocap.binarization import binarize_anndata, binarize_expression, binarize_h5ad
 
 
 class _FakeBinarizer:
@@ -27,9 +25,7 @@ class _FakeBinarizer:
 
 
 def _install_fake_scboolseq(monkeypatch):
-    module = ModuleType("scboolseq")
-    module.scBoolSeq = _FakeBinarizer
-    monkeypatch.setitem(sys.modules, "scboolseq", module)
+    monkeypatch.setattr(binarization, "scBoolSeq", _FakeBinarizer)
 
 
 def test_binarize_expression_preserves_labels_and_unknowns(monkeypatch):
@@ -46,6 +42,19 @@ def test_binarize_expression_preserves_labels_and_unknowns(monkeypatch):
     pd.testing.assert_frame_equal(expression, pd.DataFrame(
         [[1, 2], [3, 4]], index=["cell-a", "cell-b"], columns=["gene-x", "gene-y"]
     ))
+
+
+def test_binarize_expression_can_return_result_and_fitted_binarizer(monkeypatch):
+    _install_fake_scboolseq(monkeypatch)
+
+    result, binarizer = binarize_expression(
+        np.ones((2, 2)), binarizer_kwargs={"confidence": 0.9}, return_binarizer=True
+    )
+
+    assert isinstance(result, np.ndarray)
+    assert isinstance(binarizer, _FakeBinarizer)
+    assert binarizer.kwargs == {"confidence": 0.9}
+    assert binarizer.columns.equals(pd.Index([0, 1]))
 
 
 @pytest.mark.parametrize(
@@ -85,14 +94,6 @@ def test_binarize_expression_allows_duplicate_cell_names(monkeypatch):
     assert result.index.equals(expression.index)
 
 
-def test_binarize_expression_reports_missing_optional_dependency(monkeypatch):
-    monkeypatch.delitem(sys.modules, "scboolseq", raising=False)
-    monkeypatch.setitem(sys.modules, "scboolseq", None)
-
-    with pytest.raises(ImportError, match=r"nocap\[boolean\]"):
-        binarize_expression(np.ones((2, 2)))
-
-
 def test_binarize_anndata_uses_obs_and_var_names(monkeypatch):
     _install_fake_scboolseq(monkeypatch)
 
@@ -109,13 +110,39 @@ def test_binarize_anndata_uses_obs_and_var_names(monkeypatch):
             duplicate.layers = self.layers.copy()
             return duplicate
 
-    module = ModuleType("anndata")
-    module.AnnData = FakeAnnData
-    monkeypatch.setitem(sys.modules, "anndata", module)
+    monkeypatch.setattr(binarization, "AnnData", FakeAnnData)
     source = FakeAnnData()
 
-    result = binarize_anndata(source)
+    default_result = binarize_anndata(source)
+    result, binarizer = binarize_anndata(source, return_binarizer=True)
 
     assert "binarized" not in source.layers
+    assert default_result.layers["binarized"].shape == (2, 2)
     assert result.layers["binarized"].shape == (2, 2)
     assert np.isnan(result.layers["binarized"][0, 1])
+    assert isinstance(binarizer, _FakeBinarizer)
+
+
+def test_binarize_h5ad_returns_binarizer_and_writes_result(monkeypatch, tmp_path):
+    class FakeAnnData:
+        def __init__(self):
+            self.written_path = None
+
+        def write_h5ad(self, path):
+            self.written_path = path
+
+    monkeypatch.setattr(binarization, "AnnData", FakeAnnData)
+    source = FakeAnnData()
+    monkeypatch.setattr(binarization, "read_h5ad", lambda path: source)
+
+    binarizer = object()
+    monkeypatch.setattr(binarization, "binarize_anndata", lambda adata, **kwargs: (adata, binarizer))
+
+    output_path = tmp_path / "binary.h5ad"
+    result, returned_binarizer = binarize_h5ad(
+        "input.h5ad", output_path, return_binarizer=True
+    )
+
+    assert result is source
+    assert returned_binarizer is binarizer
+    assert source.written_path == output_path
