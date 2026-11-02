@@ -80,7 +80,7 @@ def _write_outputs(metrics: pd.DataFrame, prefix: Path) -> tuple[Path, Path]:
         metrics["true_on_fraction"].dropna(),
         metrics["recovered_on_fraction"].dropna(),
     ]
-    axis.boxplot(values, tick_labels=["Latent X > 0", "scBoolSeq known entries"])
+    axis.boxplot(values, tick_labels=["Latent gene expressed", "scBoolSeq known entries"])
     axis.set_ylabel("Across-gene ON fraction")
     axis.set_title("Latent threshold diagnostic vs. recovered expression")
     axis.set_ylim(0, 1)
