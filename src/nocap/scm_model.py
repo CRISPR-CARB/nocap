@@ -222,7 +222,9 @@ def _sample_betas(
         accepted = proposed < beta_abs_max
         magnitudes[remaining[accepted]] = proposed[accepted]
         remaining = remaining[~accepted]
-    sampled_signs = np.where(rng.random(len(edges)) < beta_p, 1.0, -1.0)
+    sampled_signs: list[float] = [
+        1.0 if activating else -1.0 for activating in rng.random(len(edges)) < beta_p
+    ]
     signs = {} if signs is None else signs
     return {
         edge: float(signs.get(edge, sampled_signs[i]) * magnitude)
@@ -254,10 +256,11 @@ def build_synthetic_scm(
         (str(u), str(v)): data.get("polarity", data.get("d0", data.get("sign")))
         for u, v, data in estimation_graph.edges(data=True)
     }
+    sign_values = {"+": 1.0, "-": -1.0, "1": 1.0, "-1": -1.0, 1: 1.0, -1: -1.0}
     normalized_signs = {
-        (str(u), str(v)): float(np.sign(sign))
+        (str(u), str(v)): sign_values[sign]
         for (u, v), sign in (graph_signs if signs is None else signs).items()
-        if sign in ("+", "-", "1", "-1", 1, -1, 1.0, -1.0)
+        if sign in sign_values
     }
 
     edges, added_edges = _select_true_edges(
