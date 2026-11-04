@@ -188,6 +188,7 @@ maximum-size realization containing:
 - Exogenous noise.
 - Latent expression.
 - Counts from the negative-binomial observation model.
+- Optional boolean expressed/off ground truth and logistic activation settings.
 - Geometrically centered size factors.
 - Positive, unconstrained q0 baseline expression.
 - Gene-specific negative-binomial dispersions.
@@ -210,6 +211,30 @@ paired_view_stages()  # (_view_observe, _view_missing)
 
 Custom stage sequences can be supplied to add or replace view transformations
 without mutating the shared artifact.
+
+For optional binary expression generation, pass `binarize=True` to
+`generate_paired_data_artifact()` and configure `unknown` and
+`binarizer_kwargs` there. scBoolSeq is fitted once on the maximum-size raw count
+matrix, and the result is stored directly on the artifact. Each view selects
+rows from that matrix using the shared sample ordering. Condition-specific
+missingness is applied when materializing a view;
+entries hidden for a view become unknown (`NaN`) in the binary matrix while the
+existing continuous view continues to encode missing observations as `0.0`.
+The two matrices are separate: `view()` still returns the estimator-facing
+DataFrame, while `binarized_view()` returns a labeled binary expression matrix.
+
+This inferred binary matrix is distinct from optional simulated biological
+ground truth. To generate known expressed/off labels, set
+`use_binary_expression_state=True` on the config passed to
+`generate_paired_data_artifact()`. For each sample and gene, the simulator draws
+`Z ~ Bernoulli(sigmoid(intercept + slope * latent_X))`; `Z=False` forces a
+structural zero count, while `Z=True` uses the negative-binomial observation
+model and can still yield sampling zeros. The active/off labels are stored as
+`artifact.latent_expression_state` and can be retrieved in paired sample order
+with `artifact.latent_expression_state_view(config)`. Missingness remains a
+separate later observation process and does not change these labels. Use the
+latent-state view as truth to evaluate `binarized_view()` output; do not use
+zero UMI counts as equivalent ground truth.
 
 ## Missing-Edge Rates
 

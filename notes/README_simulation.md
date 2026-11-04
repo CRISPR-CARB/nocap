@@ -7,12 +7,13 @@ data, paired artifacts, and the `csd_estimate.py` command-line workflow.
 
 ## Overview
 
-The simulation has two layers:
+The generation process has three steps:
 
 1. A latent linear SCM generates log2-expression values `X` from exogenous
    noise and a directed graph.
-2. An observation model converts latent expression into sample-specific counts,
-   then estimates normalized expression for downstream causal estimation.
+2. Optionally, a Bernoulli expressed/off state is sampled from latent `X`.
+3. An observation model converts expression into sample-specific counts, then
+   estimates normalized expression for downstream causal estimation.
 
 The standard generation pipeline is:
 
@@ -21,6 +22,9 @@ exogenous noise
       |
       v
 latent SCM solve
+      |
+      v
+optional expressed/off state
       |
       v
 negative-binomial counts
@@ -220,6 +224,37 @@ p_ig = n_g / (n_g + mu_ig)
 
 The default scalar dispersion is `0.1`.
 
+### Optional expressed/off state
+
+The default model has no intrinsic binary expressed/off truth: every finite
+`X_ig` yields a positive expected count, although negative-binomial sampling can
+still produce zero UMIs. To simulate known biological activity labels, enable
+the optional hurdle state:
+
+```text
+Z_ig ~ Bernoulli(pi_ig)
+pi_ig = sigmoid(expression_state_intercept
+                + expression_state_slope * X_ig)
+Y_ig = 0                         when Z_ig = 0
+Y_ig ~ NB(mu_ig, alpha_g)        when Z_ig = 1
+```
+
+`Z_ig` is the ground-truth expressed/off label. The active state gates counts
+but does not replace continuous `X`: active genes retain the existing expression
+level-dependent NB mean and can still have sampling zeros. Thus a zero count
+does not uniquely identify an off state. This hurdle mechanism is distinct from
+`missing_data_rate`, which modifies observations after count generation and
+does not change `Z`.
+
+Enable it with `use_binary_expression_state=True`. The defaults
+`expression_state_intercept=0` and `expression_state_slope=1` give
+`pi_ig=sigmoid(X_ig)`; `X=0` maps to 0.5, `X=1` to about 0.73, and `X=-1` to
+about 0.27. Since SCM values are generally centered near zero, activation
+probabilities will often be near 0.5, but vary by sample and gene with `X`.
+Adjust the intercept to shift prevalence and the slope to control how sharply
+probability changes with `X`. The feature is disabled by default, preserving the
+existing NB model and generated data behavior.
+
 ## q-hat and X-hat
 
 The pipeline exposes two different count transformations.
@@ -272,6 +307,9 @@ settings:
 | `scc_confounding_strength` | Shared noise-factor strength in nontrivial SCCs | `0.0` |
 | `estimation_graph` | Graph used for SCC confounding structure | `None` |
 | `fixed_intervention_values` | Hard-intervention values by node | `{}` |
+| `use_binary_expression_state` | Add a latent active/off state that gates counts | `False` |
+| `expression_state_intercept` | Intercept in the logistic active-state model | `0.0` |
+| `expression_state_slope` | Slope multiplying latent `X` in that model | `1.0` |
 
 Example:
 
@@ -286,6 +324,9 @@ config = SimulationConfig(
     baseline_expression_dispersion=2.25,
     missing_data_rate=0.1,
     missing_data_mechanism="biological_error+instrument_error",
+    use_binary_expression_state=True,
+    expression_state_intercept=-0.5,
+    expression_state_slope=1.5,
 )
 ```
 
@@ -299,6 +340,7 @@ The default stages are returned by `default_simulation_stages()`:
 (
     _noise,
     _solve,
+    _expression_state,
     _observe,
     _missing,
 )
@@ -316,17 +358,28 @@ exogenous noise within that SCC.
 `_solve` applies the configured hard interventions and solves the linear SCM.
 The result is stored as `latent_log_expression`.
 
-### 3. Observe
+### 3. Expression state
+
+`_expression_state` is a no-op by default. When enabled, it samples the
+Bernoulli active/off labels from latent `X` and stores them in
+`state.latent_expression_state`.
+
+### 4. Observe
 
 `_observe` samples size factors and `q0`, normalizes the dispersion input,
 generates integer counts, computes q-hat, computes X-hat, and builds the
 estimator-facing DataFrame.
+
+When `use_binary_expression_state=True`, `_observe` passes the state labels to
+the count sampler, which forces off-state counts to zero. When the option is
+disabled, the state remains `None` and counts follow the legacy NB model.
 
 The main state fields after observation are:
 
 ```python
 state.exogenous_noise
 state.latent_log_expression
+state.latent_expression_state  # boolean matrix when enabled, otherwise None
 state.size_factors
 state.baseline_expression
 state.dispersions
@@ -335,7 +388,7 @@ state.normalized_expression
 state.observed_data
 ```
 
-### 4. Missingness
+### 5. Missingness
 
 Missingness is applied after X-hat is materialized. Missing entries are written
 as `0.0` in `observed_data`, preserving the existing estimator workflow.
@@ -396,6 +449,78 @@ large = artifact.view(SimulationConfig(n_samples=1000))
 The observation quantities are drawn once per artifact rather than regenerated
 for each view. Paired views therefore share counts, q0, size factors, and
 dispersions, while missingness settings can vary by condition.
+
+Set `use_binary_expression_state=True` on the config used to generate the
+artifact to also store the boolean ground truth in
+`artifact.latent_expression_state`. Retrieve labels aligned to a condition's
+sample prefix and sample order with:
+
+```python
+truth = artifact.latent_expression_state_view(
+    SimulationConfig(
+        n_samples=250,
+        use_binary_expression_state=True,
+    )
+)
+```
+
+Enable the state on the artifact-generation config as well:
+
+```python
+generation_config = SimulationConfig(
+    n_samples=250,
+    use_binary_expression_state=True,
+    expression_state_intercept=-0.5,
+    expression_state_slope=1.5,
+)
+artifact = generate_paired_data_artifact(
+    scm,
+    generation_config,
+    max_samples=1000,
+    scm_seed=101,
+    data_seed=202,
+)
+```
+
+The returned DataFrame contains `True` for expressed and `False` for off. It is
+ground truth, not a binarizer result, and is not masked by condition-specific
+missingness. Compare binarizer output against this matrix when evaluating
+classification performance. The existing `binarize=True` / `binarized_view()`
+path remains a separate operation that runs scBoolSeq on observed UMI counts.
+
+Binary expression generation is opt-in and kept separate from estimator-facing
+observations:
+
+```python
+artifact = generate_paired_data_artifact(
+    scm,
+    SimulationConfig(n_samples=250),
+    max_samples=1000,
+    scm_seed=101,
+    data_seed=202,
+    binarize=True,
+    unknown="keep",
+)
+binary = artifact.binarized_view(SimulationConfig(n_samples=250))
+```
+
+When `binarize=True`, generation fits scBoolSeq once on the complete raw UMI
+count matrix and stores the resulting binary expression matrix directly on the
+artifact. The optional `boolean` dependency is imported only for this option.
+The matrix is aligned to each view's deterministic sample prefix, so nested
+sample sizes use identical values. Binary missingness is applied after slicing,
+using the same condition-specific mask as
+the continuous observation; hidden binary expression entries become `NaN`,
+regardless of the selected scBoolSeq unknown policy. `view()` remains
+continuous and returns the same DataFrame as before. Custom stages passed to
+`binarized_view()` can transform `state.binarized_data`.
+
+`scripts/compare_binarization_distributions.py` compares binary expression with the
+true latent binary expression. Classification metrics use known entries only and report
+unknown-entry fractions separately. The CLI maps zero UMI counts to OFF by
+default (`--zero-count-state off`), since scBoolSeq's default zero-inflated
+classifier maps them to unknown. Use `--zero-count-state unknown` to retain that
+library default, or `on` to map zeros to ON.
 
 ## Reproducibility
 
@@ -472,6 +597,7 @@ from nocap.simulation import (
     generate_from_scm,
     normalize_dispersions,
     sample_baseline_expression,
+    sample_expression_state,
     sample_size_factors,
     sample_umi_counts,
 )
