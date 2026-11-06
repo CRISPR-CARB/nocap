@@ -74,6 +74,7 @@ def test_acyclification_expands_incoming_bidirected_edge_to_scc():
         (nodes["B"], nodes["A"]),
     }
 
+
 def test_acyclification_rejects_unknown_type():
     """Only documented acyclification constructions are accepted."""
     graph = NxMixedGraph.from_str_edges(nodes=["A"], directed=[])
@@ -189,7 +190,10 @@ def test_sigma_separation_agrees_with_sigma_open_paths_on_mixed_graph(acyclifica
                 )
                 separated = bool(are_sigma_separated(graph, left, right, conditions=conditions))
                 assert separated == (not has_open_path)
-                assert bool(are_d_separated(acyclified, left, right, conditions=conditions)) == separated
+                assert (
+                    bool(are_d_separated(acyclified, left, right, conditions=conditions))
+                    == separated
+                )
 
 
 @pytest.mark.parametrize("acyclification_type", ["bidirected", "dag"])
@@ -213,7 +217,10 @@ def test_sigma_separation_agrees_with_sigma_open_paths(acyclification_type):
                 )
                 separated = bool(are_sigma_separated(graph, left, right, conditions=conditions))
                 assert separated == (not has_open_path)
-                assert bool(are_d_separated(acyclified, left, right, conditions=conditions)) == separated
+                assert (
+                    bool(are_d_separated(acyclified, left, right, conditions=conditions))
+                    == separated
+                )
 
 
 def test_dag_validates_additional_bidirected_edges():

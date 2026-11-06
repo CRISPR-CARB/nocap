@@ -53,7 +53,6 @@ def acyclification(
         to the input graph.
     """
     match acyclification_type:
-
         case "bidirected":
             return _bidirected(graph)
 
@@ -62,7 +61,6 @@ def acyclification(
 
         case _:
             raise ValueError(f"Unsupported acyclification_type: {acyclification_type!r}")
-
 
 
 def _bidirected(graph: NxMixedGraph) -> NxMixedGraph:
