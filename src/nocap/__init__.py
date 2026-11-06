@@ -1,6 +1,7 @@
 """Network Optimization and Causal Analysis of Perturb-seq."""
 
 from .api import *  # noqa
+from .acyclification import acyclification
 from .scm import (
     bootstrap_ATE,
     compile_lgbn_from_lscm,
@@ -47,6 +48,7 @@ __all__ = [
     "SimulationState",
     "StageSeeds",
     "SyntheticScmBuild",
+    "acyclification",
     "bootstrap_ATE",
     "build_synthetic_scm",
     "canonical_condition_id",
