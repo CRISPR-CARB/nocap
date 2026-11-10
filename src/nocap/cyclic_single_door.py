@@ -167,8 +167,7 @@ def nx_digraph_to_y0(
     node_map: dict = {n: Variable(str(n)) for n in graph.nodes()}
     directed_edges = [(node_map[u], node_map[v]) for u, v in graph.edges()]
     result = NxMixedGraph.from_edges(directed=directed_edges)
-
-    if unobserved is not None:
+    if unobserved is not None and len(unobserved) > 0:
         latents = {variable for variable in result.nodes() if variable.name in unobserved}
 
         # Apply Evan's rules to simplify latent DAG
