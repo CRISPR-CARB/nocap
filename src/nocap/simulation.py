@@ -342,9 +342,10 @@ def generate_paired_data_artifact(
 ) -> PairedDataArtifact:
     """Generate one maximum-size paired realization, optionally binarizing counts.
 
-    When ``binarize`` is true, scBoolSeq is fitted once on the complete raw
-    UMI-count matrix and the resulting binary expression is stored directly on
-    the artifact. Its optional dependency is imported only for this path.
+    When ``binarize`` is true, scBoolSeq is fitted once on the complete
+    size-factor-normalized, log-transformed UMI-count matrix and the resulting
+    binary expression is stored directly on the artifact. Its optional
+    dependency is imported only for this path.
     """
     if max_samples < config.n_samples:
         raise ValueError("max_samples must be at least config.n_samples")
@@ -391,7 +392,9 @@ def generate_paired_data_artifact(
     if binarize:
         from .binarization import binarize_expression
 
-        expression = pd.DataFrame(counts.copy(), columns=scm.nodes)
+        expression = pd.DataFrame(
+            np.log1p(counts / size_factors[:, None]), columns=scm.nodes
+        )
         binary_result = binarize_expression(
             expression,
             unknown=unknown,

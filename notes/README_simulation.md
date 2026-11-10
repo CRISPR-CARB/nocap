@@ -504,9 +504,11 @@ artifact = generate_paired_data_artifact(
 binary = artifact.binarized_view(SimulationConfig(n_samples=250))
 ```
 
-When `binarize=True`, generation fits scBoolSeq once on the complete raw UMI
-count matrix and stores the resulting binary expression matrix directly on the
-artifact. The optional `boolean` dependency is imported only for this option.
+When `binarize=True`, generation first divides each cell's counts by its size
+factor and applies `log(normalized_count + 1)`. It fits scBoolSeq once on this
+complete normalized, log-transformed matrix and stores the resulting binary
+expression matrix directly on the artifact. The optional `boolean` dependency
+is imported only for this option.
 The matrix is aligned to each view's deterministic sample prefix, so nested
 sample sizes use identical values. Binary missingness is applied after slicing,
 using the same condition-specific mask as

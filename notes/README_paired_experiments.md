@@ -214,9 +214,10 @@ without mutating the shared artifact.
 
 For optional binary expression generation, pass `binarize=True` to
 `generate_paired_data_artifact()` and configure `unknown` and
-`binarizer_kwargs` there. scBoolSeq is fitted once on the maximum-size raw count
-matrix, and the result is stored directly on the artifact. Each view selects
-rows from that matrix using the shared sample ordering. Condition-specific
+`binarizer_kwargs` there. Counts are first divided by their cell size factors
+and transformed as `log(normalized_count + 1)`. scBoolSeq is fitted once on the
+maximum-size transformed matrix, and the result is stored directly on the
+artifact. Each view selects rows from that matrix using the shared sample ordering. Condition-specific
 missingness is applied when materializing a view;
 entries hidden for a view become unknown (`NaN`) in the binary matrix while the
 existing continuous view continues to encode missing observations as `0.0`.

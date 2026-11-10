@@ -202,7 +202,7 @@ def test_count_observation_flag_uses_counts_in_paired_views():
 
 
 def test_paired_binarization_is_generated_once_and_aligned(monkeypatch):
-    """Generate binary expression once on raw counts and align nested views."""
+    """Normalize and log counts before binarizing, then align nested views."""
     from nocap import binarization
     from nocap.simulation import generate_paired_data_artifact
 
@@ -240,6 +240,7 @@ def test_paired_binarization_is_generated_once_and_aligned(monkeypatch):
         binarizer_kwargs={"confidence": 0.9},
     )
     counts_before = artifact.umi_counts.copy()
+    expected_expression = np.log1p(counts_before / artifact.size_factors[:, None])
     small_config = SimulationConfig(n_samples=3)
     large_config = SimulationConfig(n_samples=6)
 
@@ -248,7 +249,7 @@ def test_paired_binarization_is_generated_once_and_aligned(monkeypatch):
 
     assert len(fitted) == 1
     assert artifact.binarized_expression is not None
-    np.testing.assert_array_equal(fitted[0].to_numpy(), counts_before)
+    np.testing.assert_allclose(fitted[0].to_numpy(), expected_expression)
     assert fitted[0].columns.tolist() == ["A", "B"]
     expected_rows = artifact.sample_order[:3]
     np.testing.assert_array_equal(small.to_numpy(), artifact.binarized_expression[expected_rows])
