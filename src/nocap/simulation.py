@@ -392,9 +392,7 @@ def generate_paired_data_artifact(
     if binarize:
         from .binarization import binarize_expression
 
-        expression = pd.DataFrame(
-            np.log1p(counts / size_factors[:, None]), columns=scm.nodes
-        )
+        expression = pd.DataFrame(np.log1p(counts / size_factors[:, None]), columns=scm.nodes)
         binary_result = binarize_expression(
             expression,
             unknown=unknown,

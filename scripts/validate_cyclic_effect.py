@@ -127,9 +127,7 @@ def main() -> None:
     bounds = tuple(float(value) for value in args.outcome_bounds.split(","))
     if len(bounds) != 2:
         raise ValueError("Bounds must be two values")
-    unobserved_nodes = frozenset(
-        node for node in graph.nodes if "u_" in node or "U_" in node
-    )
+    unobserved_nodes = frozenset(node for node in graph.nodes if "u_" in node or "U_" in node)
     query = identify_query_status(
         graph,
         args.treatment,
