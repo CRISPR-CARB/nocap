@@ -58,7 +58,7 @@ def _graph(args: argparse.Namespace) -> nx.DiGraph:
             ("TF2", "G1"),
             ("TF3", "G1"),
         ],
-        "frontdoor": [("X", "Z"), ("Z", "Y"), ("U", "X"), ("U", "Y")],
+        "frontdoor": [("X", "Z"), ("Z", "Y"), ("U__", "X"), ("U__", "Y")],
         "backdoor": [("X", "Y"), ("Z", "X"), ("Z", "Y")],
     }
     return nx.DiGraph(demos[args.demo])
@@ -128,7 +128,7 @@ def main() -> None:
     if len(bounds) != 2:
         raise ValueError("Bounds must be two values")
     unobserved_nodes = frozenset(
-        node for node in graph.nodes if "U" in node or "u_" in node or "U_" in node
+        node for node in graph.nodes if "u_" in node or "U_" in node
     )
     query = identify_query_status(
         graph,
