@@ -443,10 +443,17 @@ def _table(data: pd.DataFrame, variables: tuple[str, ...]) -> pd.DataFrame:
     if missing:
         raise ValueError(f"missing required columns: {sorted(missing)}")
     if "prob" in data.columns:
-        if data["prob"].isna().any() or (data["prob"] < 0).any() or data["prob"].sum() <= 0:
+        probabilities = data["prob"].to_numpy(dtype=float)
+        total = float(probabilities.sum())
+        if (
+            not np.isfinite(probabilities).all()
+            or (probabilities < 0).any()
+            or not np.isfinite(total)
+            or total <= 0
+        ):
             raise ValueError("prob must be finite, nonnegative, and have positive mass")
         result = data.loc[:, [*variables, "prob"]].copy()
-        result["prob"] = result["prob"] / result["prob"].sum()
+        result["prob"] = probabilities / total
         return result.groupby(list(variables), dropna=False, as_index=False)["prob"].sum()  # pyright: ignore[reportReturnType]
     if data.empty:
         raise ValueError("observed data must not be empty")
@@ -525,6 +532,75 @@ def _discrete_eval(expression: Expression, data: pd.DataFrame):
                 result = pd.DataFrame({"prob": [result["prob"].sum()]})
         return result
     raise TypeError(f"unsupported y0 expression: {type(expression).__name__}")
+
+
+def _probabilities(expression: Expression) -> Iterable[Probability]:
+    """Yield probability leaves nested in a y0 expression."""
+    if isinstance(expression, Probability):
+        yield expression
+    elif isinstance(expression, Product):
+        for item in expression.expressions:
+            yield from _probabilities(item)
+    elif isinstance(expression, Fraction):
+        yield from _probabilities(expression.numerator)
+        yield from _probabilities(expression.denominator)
+    elif isinstance(expression, Sum):
+        yield from _probabilities(expression.expression)
+
+
+def _validate_discrete_treatment_positivity(
+    expression: Expression,
+    data: pd.DataFrame,
+    treatment: str,
+    outcome: str,
+    treatment_levels: tuple[object, object],
+) -> None:
+    """Reject unsupported treatment levels within strata conditioned on by denominators."""
+    strata_to_check: set[tuple[str, ...]] = set()
+
+    def visit(current: Expression) -> None:
+        if isinstance(current, Fraction):
+            for probability in _probabilities(current.denominator):
+                children = _names(probability.children)
+                if treatment in children:
+                    probability_variables = dict.fromkeys(
+                        (*children, *_names(probability.parents))
+                    )
+                    if treatment not in probability_variables:
+                        continue
+                    strata = tuple(
+                        name
+                        for name in probability_variables
+                        if name not in {treatment, outcome}
+                    )
+                    strata_to_check.add(strata)
+            visit(current.numerator)
+            visit(current.denominator)
+        elif isinstance(current, Product):
+            for item in current.expressions:
+                visit(item)
+        elif isinstance(current, Sum):
+            visit(current.expression)
+
+    visit(expression)
+    supported_data = data
+    if "prob" in data.columns:
+        supported_data = data.loc[data["prob"] > 0]
+    for strata in strata_to_check:
+        missing = set(strata) - set(data.columns)
+        if missing:
+            raise ValueError(f"missing required columns: {sorted(missing)}")
+        groups = [((), supported_data)] if not strata else supported_data.groupby(
+            list(strata), dropna=False, sort=False
+        )
+        for stratum, group in groups:
+            observed = set(group[treatment].dropna().unique())
+            absent = [level for level in treatment_levels if level not in observed]
+            if absent:
+                raise DistributionEstimationError(
+                    "positivity violation: treatment levels "
+                    f"{absent!r} are absent in stratum {stratum!r} of {strata!r}"
+                )
 
 
 @dataclass
@@ -692,7 +768,27 @@ def estimate_expectation(
         if bounds is not None:
             raise ValueError("bounds are only valid for continuous densities")
         with _measure(profiler, "discrete.expectation", rows=len(evaluated)):
-            return _discrete_expectation(evaluated, outcome_name)
+            table = evaluated
+            if evaluation_values:
+                unknown = set(evaluation_values) - (set(table.columns) - {"prob"})
+                if unknown:
+                    raise ValueError(
+                        f"evaluation values contain unknown variables: {sorted(unknown)}"
+                    )
+                for name, value in evaluation_values.items():
+                    table = table[table[name] == value]
+                if table.empty:
+                    raise DistributionEstimationError(
+                        "probability table has no mass at the requested evaluation values"
+                    )
+                mass = float(table["prob"].sum())
+                if not np.isfinite(mass) or mass <= 0:
+                    raise DistributionEstimationError(
+                        "probability table has no positive mass at the requested evaluation values"
+                    )
+                table = table.copy()
+                table["prob"] /= mass
+            return _discrete_expectation(table, outcome_name)
     if not callable(evaluated) or not hasattr(evaluated, "variables"):
         raise TypeError("evaluated must be a probability table or density callable")
     lower, upper = _validate_bounds(bounds)
@@ -862,26 +958,37 @@ def estimate_ate(
     if treatment_name not in data or outcome_name not in data:
         raise ValueError("treatment and outcome must be data columns")
     if mode == "discrete":
+        evaluated = evaluate_probability_expression(
+            expression,
+            data,
+            mode=mode,
+            backend=backend,
+            profiler=profiler,
+            marginalization=marginalization,
+            legendre_degree=legendre_degree,
+        )
+        if not isinstance(evaluated, pd.DataFrame):
+            raise TypeError(
+                f"Output of discrete probability evaluation should be dataframe not {type(evaluated)}."
+            )
+        _validate_discrete_treatment_positivity(
+            expression, data, treatment_name, outcome_name, treatment_levels
+        )
         values = []
         for level in treatment_levels:
-            subset = data[data[treatment_name] == level]
-            if subset.empty:
-                raise ValueError(f"no observations at treatment level {level!r}")
-            values.append(
-                estimate_expectation(
-                    evaluate_probability_expression(
-                        expression,
-                        subset,
-                        mode=mode,
-                        backend=backend,
-                        profiler=profiler,
-                        marginalization=marginalization,
-                        legendre_degree=legendre_degree,
-                    ),
-                    outcome,
-                    profiler=profiler,
-                )
-            )
+            if treatment_name in evaluated:
+                subset = evaluated[evaluated[treatment_name] == level].copy()
+                if subset.empty:
+                    raise ValueError(f"no observations at treatment level {level!r}")
+                mass = float(subset["prob"].sum())
+                if not np.isfinite(mass) or mass <= 0:
+                    raise DistributionEstimationError(
+                        f"identified distribution has no positive mass at treatment level {level!r}"
+                    )
+                subset["prob"] /= mass
+            else:
+                subset = evaluated
+            values.append(estimate_expectation(subset, outcome, profiler=profiler))
         return float(values[1] - values[0])
     if mode == "continuous":
         expression_bounds: dict[str, tuple[float, float]] = {

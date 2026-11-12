@@ -56,6 +56,29 @@ def test_raw_samples_and_probability_table_are_equivalent() -> None:
     pd.testing.assert_frame_equal(left, right)
 
 
+def test_discrete_ate_evaluates_backdoor_expression_on_full_data() -> None:
+    """Keep the population covariate distribution shared across treatment levels."""
+    rows = []
+    for z, x_zero, x_one in ((0, 90, 10), (1, 10, 90)):
+        for x, count in ((0, x_zero), (1, x_one)):
+            rows.extend((float(x), float(x + 10 * z), float(z)) for _ in range(count))
+    data = pd.DataFrame(rows, columns=("X", "Y", "Z"))
+    expression = Sum.safe(P("X", "Y", "Z") * P("Z") / P("X", "Z"), "Z")
+
+    result = estimate_ate(expression, data, "X", "Y", (0.0, 1.0), mode="discrete")
+
+    assert result == pytest.approx(1.0)
+
+
+def test_discrete_ate_rejects_backdoor_positivity_violations() -> None:
+    """Reject a backdoor adjustment when a stratum lacks a treatment arm."""
+    data = pd.DataFrame({"X": [0, 1], "Y": [0, 1], "Z": [0, 1]})
+    expression = Sum.safe(P("X", "Y", "Z") * P("Z") / P("X", "Z"), "Z")
+
+    with pytest.raises(DistributionEstimationError, match="positivity violation"):
+        estimate_ate(expression, data, "X", "Y", (0, 1), mode="discrete")
+
+
 def test_expression_normalization_uses_y0_simplifier() -> None:
     """Use y0 simplification when normalizing an expression."""
     expression = (P("X") / P("Y")) * P("Y")
@@ -277,6 +300,35 @@ def test_validation_and_estimator_contract() -> None:
     assert DistributionEstimator(_data()).evaluate(P(Variable("X")))["prob"].sum() == pytest.approx(
         1
     )
+
+
+def test_discrete_probability_table_rejects_infinite_weights() -> None:
+    """Reject non-finite weighted probability input instead of normalizing it."""
+    with pytest.raises(ValueError, match="finite, nonnegative, and have positive mass"):
+        evaluate_probability_expression(
+            P("X"), pd.DataFrame({"X": [0, 1], "prob": [np.inf, 1.0]})
+        )
+
+
+def test_discrete_expectation_conditions_on_evaluation_values() -> None:
+    """Condition a discrete expectation on requested table variables."""
+    table = evaluate_probability_expression(
+        P(Variable("Y") | Variable("X")),
+        pd.DataFrame({"X": [0, 0, 1, 1], "Y": [0, 1, 0, 1]}),
+    )
+
+    result = estimate_expectation(table, "Y", evaluation_values={"X": 0})
+
+    assert result == pytest.approx(0.5)
+
+
+def test_discrete_expectation_rejects_unknown_or_unsupported_values() -> None:
+    """Reject invalid discrete conditioning variables and empty strata."""
+    table = evaluate_probability_expression(P(Variable("Y") | Variable("X")), _data())
+    with pytest.raises(ValueError, match="unknown variables"):
+        estimate_expectation(table, "Y", evaluation_values={"Z": 0})
+    with pytest.raises(DistributionEstimationError, match="no mass"):
+        estimate_expectation(table, "Y", evaluation_values={"X": 4})
 
 
 def test_profiler_collects_discrete_estimation_statistics() -> None:
