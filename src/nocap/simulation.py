@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Literal, Protocol
 
 import networkx as nx
 import numpy as np
@@ -12,6 +12,8 @@ import pandas as pd
 
 from .experiment import StageSeeds
 from .scm_model import DirectedScm, build_intervened_scm
+
+PairedUnknownState = Literal["keep", "off", "on", "error"]
 
 
 @dataclass(frozen=True)
@@ -34,6 +36,10 @@ class SimulationConfig:
     fixed_intervention_values: dict[str, float] = field(default_factory=dict)
     use_latent_expression_hat: bool = True
     use_umi_counts_as_observed_data: bool = False
+    use_binary_expression_state: bool = False
+    # Active-state probability is sigmoid(intercept + slope * latent X).
+    expression_state_intercept: float = 0.0
+    expression_state_slope: float = 1.0
 
 
 def simulate_intervention_levels(
@@ -101,12 +107,14 @@ class SimulationState:
     rng: np.random.Generator
     exogenous_noise: np.ndarray | None = None
     latent_log_expression: np.ndarray | None = None
+    latent_expression_state: np.ndarray | None = None
     umi_counts: np.ndarray | None = None
     size_factors: np.ndarray | None = None
     baseline_expression: np.ndarray | None = None
     dispersions: np.ndarray | None = None
     normalized_expression: np.ndarray | None = None
     observed_data: pd.DataFrame | None = None
+    binarized_data: pd.DataFrame | None = None
     metadata: dict[str, object] = field(default_factory=dict)
 
 
@@ -125,6 +133,8 @@ class PairedDataArtifact:
     sample_order: np.ndarray
     missingness_uniforms: np.ndarray
     stage_seeds: StageSeeds
+    binarized_expression: np.ndarray | None = field(default=None, repr=False, compare=False)
+    latent_expression_state: np.ndarray | None = None
 
     def view(
         self,
@@ -140,6 +150,44 @@ class PairedDataArtifact:
         Stages receive a normal :class:`SimulationState`; the artifact fields are
         also available in ``state.metadata`` for custom stages.
         """
+        ordered = paired_view_stages() if stages is None else stages
+        state = self._materialize(config, ordered)
+        if state.observed_data is None:
+            raise ValueError("Paired view stages must produce observed_data")
+        state.observed_data.attrs.update(state.metadata)
+        return state.observed_data
+
+    def binarized_view(
+        self,
+        config: SimulationConfig,
+        *,
+        stages: Sequence[SimulationStage] | None = None,
+    ) -> pd.DataFrame:
+        """Return the artifact's binary expression matrix for a paired sample view.
+
+        Generate the artifact with ``binarize=True`` to populate its binary
+        expression matrix. Custom stages may replace or further transform it.
+        """
+        ordered = paired_view_stages() if stages is None else stages
+        state = self._materialize(config, ordered)
+        if state.binarized_data is None:
+            raise ValueError("Generate the paired artifact with binarize=True first")
+        state.binarized_data.attrs.update(state.metadata)
+        return state.binarized_data
+
+    def latent_expression_state_view(self, config: SimulationConfig) -> pd.DataFrame:
+        """Return ground-truth active/off labels aligned to a paired sample view."""
+        if self.latent_expression_state is None:
+            raise ValueError("Generate the artifact with use_binary_expression_state=True first")
+        if config.n_samples > len(self.sample_order):
+            raise ValueError("Condition n_samples exceeds artifact maximum size")
+        indices = self.sample_order[: config.n_samples]
+        return pd.DataFrame(self.latent_expression_state[indices].copy(), columns=self.scm.nodes)
+
+    def _materialize(
+        self, config: SimulationConfig, stages: Sequence[SimulationStage]
+    ) -> SimulationState:
+        """Build a view state and run the requested paired stages."""
         if config.n_samples > len(self.sample_order):
             raise ValueError("Condition n_samples exceeds artifact maximum size")
         indices = self.sample_order[: config.n_samples]
@@ -149,6 +197,11 @@ class PairedDataArtifact:
             rng=np.random.default_rng(0),
             exogenous_noise=self.exogenous_noise[indices],
             latent_log_expression=self.latent_log_expression[indices],
+            latent_expression_state=(
+                self.latent_expression_state[indices]
+                if self.latent_expression_state is not None
+                else None
+            ),
             umi_counts=self.umi_counts[indices],
             size_factors=self.size_factors[indices],
             baseline_expression=self.baseline_expression,
@@ -160,18 +213,19 @@ class PairedDataArtifact:
                 "sample_selection_rule": "prefix",
                 "pairing_scope": "shared_complete_observation_shared_scores",
             },
+            binarized_data=(
+                pd.DataFrame(self.binarized_expression[indices].copy(), columns=self.scm.nodes)
+                if self.binarized_expression is not None
+                else None
+            ),
         )
-        ordered = paired_view_stages() if stages is None else stages
-        for stage in ordered:
+        for stage in stages:
             state = stage(state)
-        if state.observed_data is None:
-            raise ValueError("Paired view stages must produce observed_data")
-        state.observed_data.attrs.update(state.metadata)
-        return state.observed_data
+        return state
 
 
 def paired_view_stages() -> tuple[SimulationStage, ...]:
-    """Return the default stages used to materialize a paired artifact view."""
+    """Return the default paired-view observation and missingness stages."""
     return (_view_observe, _view_missing)
 
 
@@ -215,23 +269,33 @@ def _view_missing(state: SimulationState) -> SimulationState:
     if uniforms is None:
         raise ValueError("Paired view requires persisted missingness uniforms")
     if state.config.missing_data_rate > 0:
-        state.observed_data = _apply_missingness_arrays(
-            state.observed_data,
-            state.latent_log_expression,
-            uniforms,
-            state.config,
+        mask = _missingness_mask(
+            state.latent_log_expression, uniforms, state.config, len(state.observed_data)
         )
+        state.observed_data = state.observed_data.mask(mask, 0.0)
+        if state.binarized_data is not None:
+            state.binarized_data = state.binarized_data.mask(mask, np.nan)
     return state
 
 
-def _apply_missingness_arrays(data, latent, uniforms, config):
+def _missingness_mask(latent, uniforms, config, n_samples: int) -> np.ndarray:
+    """Compute the shared condition-specific missingness mask."""
+    if uniforms is None:
+        raise ValueError("Paired view requires persisted missingness uniforms")
+    if latent is None and "instrument_error" in _missing_data_mechanisms(
+        config.missing_data_mechanism
+    ):
+        raise ValueError("Latent expression must exist before instrument missingness")
     mechanisms = _missing_data_mechanisms(config.missing_data_mechanism)
-    for j, col in enumerate(data.columns):
+    mask = np.zeros(uniforms.shape, dtype=bool)
+    for j in range(uniforms.shape[1]):
         rate = np.clip(float(config.missing_data_rate), 0, 1)
         probabilities = []
         if "biological_error" in mechanisms:
-            probabilities.append(np.full(len(data), rate))
+            probabilities.append(np.full(n_samples, rate))
         if "instrument_error" in mechanisms:
+            if latent is None:
+                raise ValueError("Latent expression must exist before instrument missingness")
             x = latent[:, j]
             threshold = np.quantile(x, config.self_mask_quantile)
             direction = config.self_mask_direction.lower()
@@ -243,9 +307,8 @@ def _apply_missingness_arrays(data, latent, uniforms, config):
             probabilities.append(np.clip(rate * raw / raw.mean(), 0, 1))
         # The mechanisms are independent causes of missingness.
         probability = 1.0 - np.prod([1.0 - p for p in probabilities], axis=0)
-        missing_value = 0.0
-        data.loc[uniforms[:, j] < probability, col] = missing_value
-    return data
+        mask[:, j] = uniforms[:, j] < probability
+    return mask
 
 
 def _missing_data_mechanisms(value: str) -> set[str]:
@@ -273,8 +336,17 @@ def generate_paired_data_artifact(
     scm_seed: int,
     data_seed: int,
     fixed_intervention_values: dict[str, float] | None = None,
+    binarize: bool = False,
+    unknown: PairedUnknownState = "keep",
+    binarizer_kwargs: dict[str, object] | None = None,
 ) -> PairedDataArtifact:
-    """Generate one immutable maximum-size realization for paired conditions."""
+    """Generate one maximum-size paired realization, optionally binarizing counts.
+
+    When ``binarize`` is true, scBoolSeq is fitted once on the complete
+    size-factor-normalized, log-transformed UMI-count matrix and the resulting
+    binary expression is stored directly on the artifact. Its optional
+    dependency is imported only for this path.
+    """
     if max_samples < config.n_samples:
         raise ValueError("max_samples must be at least config.n_samples")
     seeds = StageSeeds.from_roots(scm_seed, data_seed)
@@ -302,12 +374,33 @@ def generate_paired_data_artifact(
         rng=observation_rng,
     )
     dispersions = normalize_dispersions(config.dispersion, len(scm.nodes))
-    counts = sample_umi_counts(latent, size_factors, baseline, dispersions, observation_rng)
+    expression_state = (
+        sample_expression_state(latent, config, observation_rng)
+        if config.use_binary_expression_state
+        else None
+    )
+    counts = sample_umi_counts(
+        latent, size_factors, baseline, dispersions, observation_rng, expression_state
+    )
     normalized_expression = counts_to_normalized_expression(
         counts,
         size_factors,
         pseudocount=config.umi_pseudocount,
     )
+
+    binary_expression: np.ndarray | None = None
+    if binarize:
+        from .binarization import binarize_expression
+
+        expression = pd.DataFrame(np.log1p(counts / size_factors[:, None]), columns=scm.nodes)
+        binary_result = binarize_expression(
+            expression,
+            unknown=unknown,
+            binarizer_kwargs=binarizer_kwargs,
+        )
+        if not isinstance(binary_result, pd.DataFrame):
+            raise TypeError("DataFrame binarization must return a labeled DataFrame")
+        binary_expression = binary_result.to_numpy(copy=True)
 
     return PairedDataArtifact(
         scm=scm,
@@ -321,6 +414,8 @@ def generate_paired_data_artifact(
         sample_order=order_rng.permutation(max_samples),
         missingness_uniforms=missing_rng.random((max_samples, len(scm.nodes))),
         stage_seeds=seeds,
+        binarized_expression=binary_expression,
+        latent_expression_state=expression_state,
     )
 
 
@@ -351,9 +446,21 @@ def default_simulation_stages() -> tuple[SimulationStage, ...]:
     The returned tuple can be converted to a list and extended with custom
     stages while retaining the default behavior:
 
-    ``noise -> solve -> UMI observation -> missingness``.
+    ``noise -> solve -> expression state -> UMI observation -> missingness``.
     """
-    return (_noise, _solve, _observe, _missing)
+    return (_noise, _solve, _expression_state, _observe, _missing)
+
+
+def _expression_state(state: SimulationState) -> SimulationState:
+    """Sample known active/off states when the hurdle model is enabled."""
+    if not state.config.use_binary_expression_state:
+        return state
+    if state.latent_log_expression is None:
+        raise ValueError("Latent expression must be generated before expression states.")
+    state.latent_expression_state = sample_expression_state(
+        state.latent_log_expression, state.config, state.rng
+    )
+    return state
 
 
 def _noise(state):
@@ -442,6 +549,26 @@ def sample_zero_inflated_negative_binomial(
     return np.where(rng.random(means.shape) < zero_inflation, 0, counts)
 
 
+def sample_expression_state(
+    latent_log_expression: np.ndarray,
+    config: SimulationConfig,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Sample biological on/off state using a logistic latent-expression link."""
+    latent_log_expression = np.asarray(latent_log_expression, dtype=float)
+    if latent_log_expression.ndim != 2 or not np.all(np.isfinite(latent_log_expression)):
+        raise ValueError("latent_log_expression must be a finite 2D array.")
+    if not np.isfinite(config.expression_state_intercept) or not np.isfinite(
+        config.expression_state_slope
+    ):
+        raise ValueError("expression-state intercept and slope must be finite.")
+    logits = (
+        config.expression_state_intercept + config.expression_state_slope * latent_log_expression
+    )
+    probabilities = 1.0 / (1.0 + np.exp(-np.clip(logits, -709, 709)))
+    return (rng.random(latent_log_expression.shape) < probabilities).astype(bool)
+
+
 def normalize_dispersions(
     dispersions: float | Sequence[float] | np.ndarray, n_genes: int
 ) -> np.ndarray:
@@ -493,11 +620,14 @@ def sample_umi_counts(
     baseline_expression: np.ndarray,
     dispersions: float | Sequence[float] | np.ndarray,
     rng: np.random.Generator,
+    expression_state: np.ndarray | None = None,
 ) -> np.ndarray:
     """Generate counts from the latent expression and NB observation model.
 
     The model is ``mu_ig = s_i * q0_g * 2**X_ig`` and
     ``Y_ig ~ NB(mu_ig, alpha_g)`` with variance ``mu + alpha_g * mu**2``.
+    If ``expression_state`` is provided, inactive genes have structural zero
+    counts while active genes retain ordinary NB sampling zeros.
     """
     if latent_log_expression.ndim != 2:
         raise ValueError("latent_log_expression must have shape (n_samples, n_genes).")
@@ -513,7 +643,15 @@ def sample_umi_counts(
     mu = size_factors[:, None] * baseline_expression[None, :] * np.exp2(latent_log_expression)
     n = 1.0 / normalized_dispersions[None, :]
     p = n / (n + mu)
-    return rng.negative_binomial(n=n, p=p)
+    counts = rng.negative_binomial(n=n, p=p)
+    if expression_state is not None:
+        expression_state = np.asarray(expression_state)
+        if expression_state.shape != latent_log_expression.shape:
+            raise ValueError("expression_state must have the same shape as latent expression.")
+        if not np.all(np.isin(expression_state, [False, True, 0, 1])):
+            raise ValueError("expression_state must contain only boolean values.")
+        counts = np.where(expression_state, counts, 0)
+    return counts
 
 
 def counts_to_log_expression(
@@ -665,12 +803,18 @@ def _observe(state: SimulationState) -> SimulationState:
     )
     state.dispersions = normalize_dispersions(config.dispersion, len(state.scm.nodes))
 
+    if config.use_binary_expression_state and state.latent_expression_state is None:
+        state.latent_expression_state = sample_expression_state(
+            state.latent_log_expression, config, state.rng
+        )
+
     state.umi_counts = sample_umi_counts(
         state.latent_log_expression,
         state.size_factors,
         state.baseline_expression,
         state.dispersions,
         rng=state.rng,
+        expression_state=state.latent_expression_state,
     )
 
     state.normalized_expression = counts_to_normalized_expression(
