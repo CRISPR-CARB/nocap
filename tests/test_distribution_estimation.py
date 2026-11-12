@@ -305,9 +305,7 @@ def test_validation_and_estimator_contract() -> None:
 def test_discrete_probability_table_rejects_infinite_weights() -> None:
     """Reject non-finite weighted probability input instead of normalizing it."""
     with pytest.raises(ValueError, match="finite, nonnegative, and have positive mass"):
-        evaluate_probability_expression(
-            P("X"), pd.DataFrame({"X": [0, 1], "prob": [np.inf, 1.0]})
-        )
+        evaluate_probability_expression(P("X"), pd.DataFrame({"X": [0, 1], "prob": [np.inf, 1.0]}))
 
 
 def test_discrete_expectation_conditions_on_evaluation_values() -> None:

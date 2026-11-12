@@ -555,23 +555,20 @@ def _validate_discrete_treatment_positivity(
     outcome: str,
     treatment_levels: tuple[object, object],
 ) -> None:
-    """Reject unsupported treatment levels within strata conditioned on by denominators."""
+    """Reject unsupported treatment levels within strata (variables conditioning treatment probabilities) conditioned on by denominators."""
     strata_to_check: set[tuple[str, ...]] = set()
 
     def visit(current: Expression) -> None:
+        """Inspect expressions and collect strata."""
         if isinstance(current, Fraction):
             for probability in _probabilities(current.denominator):
                 children = _names(probability.children)
                 if treatment in children:
-                    probability_variables = dict.fromkeys(
-                        (*children, *_names(probability.parents))
-                    )
+                    probability_variables = dict.fromkeys((*children, *_names(probability.parents)))
                     if treatment not in probability_variables:
                         continue
                     strata = tuple(
-                        name
-                        for name in probability_variables
-                        if name not in {treatment, outcome}
+                        name for name in probability_variables if name not in {treatment, outcome}
                     )
                     strata_to_check.add(strata)
             visit(current.numerator)
@@ -590,8 +587,10 @@ def _validate_discrete_treatment_positivity(
         missing = set(strata) - set(data.columns)
         if missing:
             raise ValueError(f"missing required columns: {sorted(missing)}")
-        groups = [((), supported_data)] if not strata else supported_data.groupby(
-            list(strata), dropna=False, sort=False
+        groups = (
+            [((), supported_data)]
+            if not strata
+            else supported_data.groupby(list(strata), dropna=False, sort=False)
         )
         for stratum, group in groups:
             observed = set(group[treatment].dropna().unique())
