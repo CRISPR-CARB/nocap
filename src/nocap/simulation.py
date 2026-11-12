@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from typing import Literal, Protocol
@@ -34,6 +35,10 @@ class SimulationConfig:
     scc_confounding_strength: float = 0.0
     estimation_graph: nx.DiGraph | None = None
     fixed_intervention_values: dict[str, float] = field(default_factory=dict)
+    fixed_expression_state_values: dict[str, bool] = field(default_factory=dict)
+    activation_fold_change: float = 2.0
+    interference_fold_change: float = 0.1
+    knockout_log_expression: float = -20.0
     use_latent_expression_hat: bool = True
     use_umi_counts_as_observed_data: bool = False
     use_binary_expression_state: bool = False
@@ -50,7 +55,18 @@ def simulate_intervention_levels(
     *,
     seed: int = 0,
 ) -> dict[float, SimulationState]:
-    """Generate independent hard-intervention states for explicit levels."""
+    """Generate numeric hard-intervention states for explicit levels.
+
+    Deprecated: use :func:`simulate_expression_treatment` for binary-state
+    biological treatments. This generic numeric helper does not clamp the
+    binary expression state and is retained temporarily for compatibility.
+    """
+    warnings.warn(
+        "simulate_intervention_levels is deprecated; use simulate_expression_treatment "
+        "for binary-state biological treatments",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     levels = tuple(float(level) for level in treatment_levels)
     if treatment not in scm.nodes:
         raise ValueError(f"unknown treatment node: {treatment}")
@@ -73,6 +89,112 @@ def simulate_intervention_levels(
             raise RuntimeError("intervention treatment column is not fixed at its requested level")
         results[level] = state
     return results
+
+
+def simulate_expression_treatment(
+    scm: DirectedScm,
+    config: SimulationConfig,
+    target: str,
+    treatment: Literal["A", "I", "K"],
+    *,
+    seed: int = 0,
+) -> SimulationState:
+    """Simulate one activation, interference, or knockout intervention.
+
+    Activation and interference fix latent log2-expression to the configured
+    fold change and clamp the target ON. Knockout fixes the configured latent
+    expression floor and clamps the target OFF.
+    """
+    if target not in scm.nodes:
+        raise ValueError(f"unknown treatment node: {target}")
+    if treatment not in ("A", "I", "K"):
+        raise ValueError("treatment must be one of {'A', 'I', 'K'}")
+    if not config.use_binary_expression_state:
+        raise ValueError("expression treatments require use_binary_expression_state=True")
+
+    latent_value, state_value, fold_change = _expression_treatment_values(config, treatment)
+    _validate_expression_treatment_config(config, target, latent_value, state_value)
+
+    intervention_config = SimulationConfig(
+        **{
+            **config.__dict__,
+            "fixed_intervention_values": {target: latent_value},
+            "fixed_expression_state_values": {target: state_value},
+        }
+    )
+    state = generate_from_scm(build_intervened_scm(scm, [target]), intervention_config, seed=seed)
+    target_index = scm.nodes.index(target)
+    if state.latent_log_expression is None or not np.all(
+        state.latent_log_expression[:, target_index] == latent_value
+    ):
+        raise RuntimeError("expression treatment latent value is not fixed as requested")
+    if state.latent_expression_state is None or not np.all(
+        state.latent_expression_state[:, target_index] == state_value
+    ):
+        raise RuntimeError("expression treatment state is not fixed as requested")
+
+    if (
+        state.umi_counts is not None
+        and not state_value
+        and np.any(state.umi_counts[:, target_index] != 0)
+    ):
+        raise RuntimeError("expression treatment OFF counts are not structurally zero")
+
+    state.metadata.update(
+        {
+            "expression_treatment": treatment,
+            "expression_treatment_target": target,
+            "expression_treatment_latent_value": latent_value,
+            "expression_treatment_state": state_value,
+        }
+    )
+    if fold_change is not None:
+        state.metadata["expression_treatment_fold_change"] = fold_change
+    return state
+
+
+def _expression_treatment_values(
+    config: SimulationConfig, treatment: Literal["A", "I", "K"]
+) -> tuple[float, bool, float | None]:
+    """Resolve the configured latent value, state, and optional fold change."""
+    if treatment == "A":
+        fold_change = config.activation_fold_change
+        if not np.isfinite(fold_change) or fold_change <= 0:
+            raise ValueError("activation_fold_change must be finite and positive")
+        return float(np.log2(fold_change)), True, float(fold_change)
+    if treatment == "I":
+        fold_change = config.interference_fold_change
+        if not np.isfinite(fold_change) or not 0 < fold_change < 1:
+            raise ValueError("interference_fold_change must be finite and between zero and one")
+        return float(np.log2(fold_change)), True, float(fold_change)
+    latent_value = config.knockout_log_expression
+    if not np.isfinite(latent_value):
+        raise ValueError("knockout_log_expression must be finite")
+    return float(latent_value), False, None
+
+
+def _validate_expression_treatment_config(
+    config: SimulationConfig,
+    target: str,
+    latent_value: float,
+    state_value: bool,
+) -> None:
+    """Reject configured interventions incompatible with a treatment request."""
+    fixed_latent = config.fixed_intervention_values
+    fixed_state = config.fixed_expression_state_values
+    other_nodes = (set(fixed_latent) | set(fixed_state)) - {target}
+    if other_nodes:
+        raise ValueError(
+            f"expression treatment config intervenes on other nodes: {sorted(other_nodes)}"
+        )
+    if target in fixed_latent and fixed_latent[target] != latent_value:
+        raise ValueError(
+            "expression treatment conflicts with the configured latent intervention value"
+        )
+    if target in fixed_state and fixed_state[target] != state_value:
+        raise ValueError(
+            "expression treatment conflicts with the configured expression-state value"
+        )
 
 
 def true_scm_ate(
@@ -454,12 +576,25 @@ def default_simulation_stages() -> tuple[SimulationStage, ...]:
 def _expression_state(state: SimulationState) -> SimulationState:
     """Sample known active/off states when the hurdle model is enabled."""
     if not state.config.use_binary_expression_state:
+        if state.config.fixed_expression_state_values:
+            raise ValueError(
+                "expression-state interventions require use_binary_expression_state=True"
+            )
         return state
     if state.latent_log_expression is None:
         raise ValueError("Latent expression must be generated before expression states.")
     state.latent_expression_state = sample_expression_state(
         state.latent_log_expression, state.config, state.rng
     )
+    if state.config.fixed_expression_state_values:
+        indices = {node: i for i, node in enumerate(state.scm.nodes)}
+        invalid = set(state.config.fixed_expression_state_values) - set(indices)
+        if invalid:
+            raise ValueError(f"unknown expression-state intervention nodes: {sorted(invalid)}")
+        for node, value in state.config.fixed_expression_state_values.items():
+            if not isinstance(value, (bool, np.bool_)):
+                raise TypeError("fixed expression-state intervention values must be boolean")
+            state.latent_expression_state[:, indices[node]] = value
     return state
 
 

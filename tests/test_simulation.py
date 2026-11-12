@@ -19,6 +19,7 @@ from nocap.simulation import (
     sample_baseline_expression,
     sample_size_factors,
     sample_umi_counts,
+    simulate_expression_treatment,
 )
 
 
@@ -136,6 +137,112 @@ def test_binary_expression_state_is_truth_separate_from_biological_missingness()
     assert np.any(result.umi_counts[result.latent_expression_state] > 0)
     assert np.any(result.umi_counts[result.latent_expression_state] == 0)
     assert np.any(result.observed_data.to_numpy() == 0)
+
+
+@pytest.mark.parametrize(
+    ("treatment", "expected_latent", "expected_state", "expected_fold_change"),
+    [
+        ("A", 1.0, True, 2.0),
+        ("I", np.log2(0.1), True, 0.1),
+        ("K", -20.0, False, None),
+    ],
+)
+def test_expression_treatment_fixes_latent_state_and_preserves_descendant_effects(
+    treatment, expected_latent, expected_state, expected_fold_change
+):
+    """Map biological treatment kinds to deterministic latent/state interventions."""
+    scm = DirectedScm(
+        nodes=("A", "B", "C"),
+        graph=nx.DiGraph([("A", "B"), ("B", "C")]),
+        betas={("A", "B"): 2.0, ("B", "C"): 0.5},
+    )
+    config = SimulationConfig(n_samples=32, use_binary_expression_state=True)
+
+    result = simulate_expression_treatment(scm, config, "B", treatment, seed=31)
+
+    assert result.latent_log_expression is not None
+    assert result.latent_expression_state is not None
+    assert result.umi_counts is not None
+    np.testing.assert_array_equal(result.latent_log_expression[:, 1], expected_latent)
+    np.testing.assert_array_equal(result.latent_expression_state[:, 1], expected_state)
+    np.testing.assert_allclose(
+        result.latent_log_expression[:, 2],
+        result.exogenous_noise[:, 2] + 0.5 * expected_latent,
+    )
+    if not expected_state:
+        np.testing.assert_array_equal(result.umi_counts[:, 1], 0)
+    assert result.metadata["expression_treatment"] == treatment
+    assert result.metadata["expression_treatment_latent_value"] == pytest.approx(expected_latent)
+    assert result.metadata["expression_treatment_state"] is expected_state
+    if expected_fold_change is not None:
+        assert result.metadata["expression_treatment_fold_change"] == expected_fold_change
+    assert list(scm.graph.edges()) == [("A", "B"), ("B", "C")]
+    assert list(result.scm.graph.edges()) == [("B", "C")]
+
+
+def test_expression_treatment_validates_opt_in_target_kind_and_configuration():
+    """Reject unsupported, conflicting, or invalid biological treatments."""
+    scm = _one_edge_scm()
+    binary_config = SimulationConfig(n_samples=8, use_binary_expression_state=True)
+    with pytest.raises(ValueError, match="use_binary_expression_state=True"):
+        simulate_expression_treatment(scm, SimulationConfig(n_samples=8), "A", "A")
+    with pytest.raises(ValueError, match="unknown treatment node"):
+        simulate_expression_treatment(scm, binary_config, "missing", "A")
+    with pytest.raises(ValueError, match="treatment must be"):
+        simulate_expression_treatment(scm, binary_config, "A", "B")
+    with pytest.raises(ValueError, match="other nodes"):
+        simulate_expression_treatment(
+            scm,
+            SimulationConfig(
+                n_samples=8,
+                use_binary_expression_state=True,
+                fixed_intervention_values={"B": 1.0},
+            ),
+            "A",
+            "A",
+        )
+    with pytest.raises(ValueError, match="conflicts"):
+        simulate_expression_treatment(
+            scm,
+            SimulationConfig(
+                n_samples=8,
+                use_binary_expression_state=True,
+                fixed_expression_state_values={"A": False},
+            ),
+            "A",
+            "A",
+        )
+    for config, treatment, message in (
+        (
+            SimulationConfig(
+                n_samples=8,
+                use_binary_expression_state=True,
+                activation_fold_change=0,
+            ),
+            "A",
+            "activation_fold_change",
+        ),
+        (
+            SimulationConfig(
+                n_samples=8,
+                use_binary_expression_state=True,
+                interference_fold_change=1,
+            ),
+            "I",
+            "interference_fold_change",
+        ),
+        (
+            SimulationConfig(
+                n_samples=8,
+                use_binary_expression_state=True,
+                knockout_log_expression=np.inf,
+            ),
+            "K",
+            "knockout_log_expression",
+        ),
+    ):
+        with pytest.raises(ValueError, match=message):
+            simulate_expression_treatment(scm, config, "A", treatment)
 
 
 def test_expression_state_can_be_read_from_paired_artifact_in_sample_order():

@@ -20,11 +20,12 @@ def test_hard_intervention_preserves_outgoing_edges_and_original_scm() -> None:
 
 
 def test_intervention_data_has_fixed_treatment_values() -> None:
-    """Generate intervention states whose treatment columns equal each level."""
+    """Retain deprecated numeric interventions while warning their callers."""
     graph = nx.DiGraph([("T", "Y")])
     scm = DirectedScm(("T", "Y"), graph, {("T", "Y"): 0.5})
     config = SimulationConfig(n_samples=20, size_factor_log_sd=0.0, use_latent_expression_hat=False)
-    states = simulate_intervention_levels(scm, config, "T", (-1.0, 1.0), seed=4)
+    with pytest.warns(DeprecationWarning, match="simulate_intervention_levels is deprecated"):
+        states = simulate_intervention_levels(scm, config, "T", (-1.0, 1.0), seed=4)
     assert np.all(states[-1.0].latent_log_expression[:, 0] == -1.0)
     assert np.all(states[1.0].latent_log_expression[:, 0] == 1.0)
 

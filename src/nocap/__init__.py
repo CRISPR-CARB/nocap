@@ -41,6 +41,7 @@ from .simulation import (
     sample_expression_state,
     sample_size_factors,
     sample_umi_counts,
+    simulate_expression_treatment,
     simulate_intervention_levels,
     true_scm_ate,
 )
@@ -128,6 +129,7 @@ __all__ = [
     "sample_size_factors",
     "sample_umi_counts",
     "simulate_data_with_outliers",
+    "simulate_expression_treatment",
     "simulate_intervention_levels",
     "true_scm_ate",
 ]
