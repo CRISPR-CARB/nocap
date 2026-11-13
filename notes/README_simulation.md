@@ -140,11 +140,13 @@ the latent expression scale; count-derived
 
 For binary-state simulations, `simulate_expression_treatment()` provides
 biological activation (`"A"`), interference (`"I"`), and knockout (`"K"`)
-treatments. Activation and interference clamp the target ON and set its latent
-log2-expression to `log2(fold_change)`, relative to baseline expression.
-Defaults are a 2x activation and a 0.1x interference. Knockout clamps the target
-OFF and sets latent log2-expression to `-20.0`. These configurable deterministic
-values control the expected count scale through `2**X`; OFF counts are
+treatments. Activation sets its target ON, while interference leaves the
+expression state sampled. Both set latent log2-expression to
+`log2(fold_change)`, relative to baseline expression. Defaults are a 2x
+activation and a 0.1x interference. Knockout clamps the target OFF and applies
+the configurable `knockout_fold_change` latent down-regulation, defaulting to
+0.01x (`log2(0.01)`). This preserves a finite latent value for downstream
+effects, while the OFF state sets the target's NB mean to zero. OFF counts are
 structural zeros, while ON counts retain ordinary negative-binomial sampling
 zeros. The helper requires `use_binary_expression_state=True`, removes incoming
 edges to the target, and preserves outgoing edges. It is additive to
@@ -154,7 +156,7 @@ for expression treatments.
 `simulate_intervention_levels()` is deprecated and should not be used in new
 code. It applies generic numeric latent interventions without clamping the
 binary expression state. Use `simulate_expression_treatment()` for A/I/K
-interventions, which fixes both the latent expression and ON/OFF state. For
+interventions, which applies treatment-specific latent and state effects. For
 other numeric interventions, set `fixed_intervention_values` on
 `SimulationConfig` and call `generate_from_scm()` with an SCM returned by
 `build_intervened_scm()`.
@@ -330,7 +332,7 @@ settings:
 | `fixed_intervention_values` | Hard-intervention values by node | `{}` |
 | `activation_fold_change` | A-treatment fold-change multiplier | `2.0` |
 | `interference_fold_change` | I-treatment fold-change multiplier, between zero and one | `0.1` |
-| `knockout_log_expression` | K-treatment fixed latent log2-expression | `-20.0` |
+| `knockout_fold_change` | K-treatment fold-change multiplier, between zero and one | `0.01` |
 | `use_binary_expression_state` | Add a latent active/off state that gates counts | `False` |
 | `expression_state_intercept` | Intercept in the logistic active-state model | `0.0` |
 | `expression_state_slope` | Slope multiplying latent `X` in that model | `1.0` |
