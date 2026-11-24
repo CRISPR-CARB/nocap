@@ -171,3 +171,14 @@ stability and report the fraction stable; optionally penalize/reject unstable dr
   fits well.
 - How to enforce/check stability during inference.
 - Plot styling.
+
+## Visualization requirements (user, at approval)
+
+- **Regulatory network figure** with gene labels, edge polarity (+ / − / unknown, e.g. color +
+  dashed for unknown), the feedback loop visible, and guide targets marked.
+- **Probabilistic model figure**: a rendered graphical model of the Pyro/ChiRho model (e.g.
+  `pyro.render_model` with plates and distributions shown), plus a short plain-language legend.
+- **Results plots**: ELBO loss curve; posterior edge weights vs truth (with intervals, sign of the
+  unknown edge highlighted); knockdown strengths vs truth incl. learned guide population; held-out
+  knockdown predicted vs true effects (both views); soft vs hard knockdown contrast; sensitivity
+  (strength fixed at full knockout) edge-bias plot; a posterior predictive check of counts.
