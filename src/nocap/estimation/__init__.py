@@ -1,6 +1,8 @@
 """Causal distribution, expectation, and cyclic estimation APIs."""
 
+from .discrete import PgmpyDiscreteBackend, PluginDiscreteBackend
 from .distribution import (
+    DiscreteBackend,
     DistributionEstimator,
     EstimationProfiler,
     evaluate_probability_expression,
@@ -20,6 +22,7 @@ from .models import ContinuousBackend, DistributionEstimationError, JointKDE, Ma
 
 __all__ = [
     "ContinuousBackend",
+    "DiscreteBackend",
     "DistributionEstimationError",
     "DistributionEstimator",
     "EdgeEstimate",
@@ -27,6 +30,8 @@ __all__ = [
     "JointKDE",
     "KDEpyKDE",
     "MarginalKDE",
+    "PgmpyDiscreteBackend",
+    "PluginDiscreteBackend",
     "QueryResult",
     "SciPyGaussianKDE",
     "SklearnKDE",
