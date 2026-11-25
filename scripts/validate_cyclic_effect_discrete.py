@@ -10,6 +10,11 @@ Choose another built-in demo graph:
     uv run python scripts/validate_cyclic_effect_discrete.py --demo fork
     uv run python scripts/validate_cyclic_effect_discrete.py --demo diamond
 
+Select the pgmpy backend (EM is needed when acyclification adds latents):
+
+    uv run python scripts/validate_cyclic_effect_discrete.py --discrete-backend pgmpy \
+        --pgmpy-method EM
+
 Or provide a directed GraphML graph and choose its treatment and outcome:
 
     uv run python scripts/validate_cyclic_effect_discrete.py --graphml network.graphml \
@@ -32,6 +37,7 @@ import pandas as pd
 from nocap.cyclic_id import identify_causal_query
 from nocap.estimation import (
     DistributionEstimationError,
+    PgmpyDiscreteBackend,
     estimate_ate,
     evaluate_probability_expression,
 )
@@ -41,6 +47,8 @@ from nocap.simulation import (
     generate_paired_data_artifact,
     simulate_expression_treatment,
 )
+from y0.dsl import Variable
+from y0.graph import NxMixedGraph
 
 
 def _demo_graph(name: str) -> tuple[nx.DiGraph, str, str]:
@@ -131,6 +139,24 @@ def _parser() -> argparse.ArgumentParser:
         "--treatment-samples", type=int, default=20_000, help="Samples per A/K intervention"
     )
     parser.add_argument("--seed", type=int, default=42, help="Root random seed")
+    parser.add_argument(
+        "--discrete-backend",
+        choices=["plugin", "pgmpy"],
+        default="plugin",
+        help="Discrete estimation backend (default: plugin)",
+    )
+    parser.add_argument(
+        "--pgmpy-method",
+        choices=["MLE", "Bayesian", "EM"],
+        default="MLE",
+        help="Parameter estimation method when --discrete-backend=pgmpy (default: MLE)",
+    )
+    parser.add_argument(
+        "--pgmpy-inference-backend",
+        choices=["variable_elimination", "belief_propagation"],
+        default="variable_elimination",
+        help="Inference algorithm when --discrete-backend=pgmpy (default: variable_elimination)",
+    )
     parser.add_argument("--beta-med", type=float, default=0.5, help="Median edge strength")
     parser.add_argument("--beta-log-sd", type=float, default=1.0, help="Log-SD of edge strengths")
     parser.add_argument("--beta-p", type=float, default=0.5, help="Probability an edge activates")
@@ -271,6 +297,17 @@ def main(argv: list[str] | None = None) -> None:
 
     expression = identify_causal_query(graph, interventions={treatment}, outcomes={outcome})
     print(f"CyclicID Expression: {expression}")
+    backend = None
+    if args.discrete_backend == "pgmpy":
+        mixed_graph = NxMixedGraph.from_edges(
+            nodes=[Variable(node) for node in nodes],
+            directed=[(Variable(source), Variable(target)) for source, target in graph.edges],
+        )
+        backend = PgmpyDiscreteBackend(
+            mixed_graph,
+            method=args.pgmpy_method,
+            inference_backend=args.pgmpy_inference_backend,
+        )
     try:
         binary_ate = estimate_ate(
             expression,
@@ -278,6 +315,7 @@ def main(argv: list[str] | None = None) -> None:
             treatment=treatment,
             outcome=outcome,
             treatment_levels=(0, 1),
+            backend=backend,
         )
         latent_binary_ate = estimate_ate(
             expression,
@@ -285,6 +323,7 @@ def main(argv: list[str] | None = None) -> None:
             treatment=treatment,
             outcome=outcome,
             treatment_levels=(0, 1),
+            backend=backend,
         )
     except DistributionEstimationError as error:
         raise SystemExit(
@@ -321,8 +360,10 @@ def main(argv: list[str] | None = None) -> None:
     latent_distribution_csv = output_stem.with_name(f"{output_stem.name}.latent_distribution.csv")
     treated_comparison.to_csv(treatment_csv, index_label="condition")
     observational_comparison.to_csv(ate_csv, index_label="estimate")
-    binary_distribution = evaluate_probability_expression(expression, binary_data)
-    latent_distribution = evaluate_probability_expression(expression, true_binary_state)
+    binary_distribution = evaluate_probability_expression(expression, binary_data, backend=backend)
+    latent_distribution = evaluate_probability_expression(
+        expression, true_binary_state, backend=backend
+    )
     assert isinstance(binary_distribution, pd.DataFrame) and isinstance(
         latent_distribution, pd.DataFrame
     )
@@ -337,6 +378,11 @@ def main(argv: list[str] | None = None) -> None:
             "edges": [[str(source), str(target)] for source, target in graph.edges],
         },
         "query": {"treatment": treatment, "outcome": outcome},
+        "discrete_backend": args.discrete_backend,
+        "pgmpy_method": args.pgmpy_method if args.discrete_backend == "pgmpy" else None,
+        "pgmpy_inference_backend": (
+            args.pgmpy_inference_backend if args.discrete_backend == "pgmpy" else None
+        ),
         "seed": args.seed,
         "n_samples": args.n_samples,
         "treatment_samples": args.treatment_samples,

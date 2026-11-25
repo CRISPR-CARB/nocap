@@ -11,7 +11,7 @@ from collections.abc import Callable, Iterable, Mapping
 from contextlib import nullcontext
 from dataclasses import dataclass
 from time import perf_counter
-from typing import Any, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, overload
 
 import numpy as np
 import pandas as pd
@@ -28,12 +28,23 @@ from y0.dsl import (
 )
 from y0.mutate import fraction_expand
 
+from .discrete import PgmpyDiscreteBackend, PluginDiscreteBackend
 from .kde import KDEpyKDE, SciPyGaussianKDE, SklearnKDE, StatsmodelsKDE
-from .models import ContinuousBackend, DistributionEstimationError, JointKDE, MarginalKDE
+from .models import (
+    ContinuousBackend,
+    DiscreteBackend,
+    DistributionEstimationError,
+    JointKDE,
+    MarginalKDE,
+)
 from .profiler import EstimationProfiler
+
+if TYPE_CHECKING:
+    from pgmpy.factors.discrete import DiscreteFactor
 
 __all__ = [
     "ContinuousBackend",
+    "DiscreteBackend",
     "DistributionEstimationError",
     "DistributionEstimator",
     "EstimationProfiler",
@@ -429,40 +440,116 @@ def normalize_expression(
     raise DistributionEstimationError("expression normalization did not converge")
 
 
-def _table(data: pd.DataFrame, variables: tuple[str, ...]) -> pd.DataFrame:
-    """Prepare normalized empirical or explicitly weighted probability rows.
-
-    Args:
-        data: Raw observations or a table containing a ``prob`` column.
-        variables: Columns required in the resulting probability table.
-
-    Returns:
-        A grouped table with normalized probabilities.
-    """
-    missing = set(variables) - set(data.columns)
-    if missing:
-        raise ValueError(f"missing required columns: {sorted(missing)}")
-    if "prob" in data.columns:
-        probabilities = data["prob"].to_numpy(dtype=float)
-        total = float(probabilities.sum())
-        if (
-            not np.isfinite(probabilities).all()
-            or (probabilities < 0).any()
-            or not np.isfinite(total)
-            or total <= 0
-        ):
-            raise ValueError("prob must be finite, nonnegative, and have positive mass")
-        result = data.loc[:, [*variables, "prob"]].copy()
-        result["prob"] = probabilities / total
-        return result.groupby(list(variables), dropna=False, as_index=False)["prob"].sum()  # pyright: ignore[reportReturnType]
-    if data.empty:
-        raise ValueError("observed data must not be empty")
-    result = data.loc[:, list(variables)].copy()
-    return result.value_counts(dropna=False, normalize=True).rename("prob").reset_index()
+def _factor_to_table(
+    factor: DiscreteFactor, variables: tuple[str, ...] | None = None
+) -> pd.DataFrame:
+    """Convert a pgmpy factor to a deterministic probability-table layout."""
+    names = tuple(factor.variables) if variables is None else tuple(variables)
+    factor_names = tuple(factor.variables)
+    values = np.asarray(factor.values, dtype=float)
+    if names != factor_names and set(names) != set(factor_names):
+        raise DistributionEstimationError("factor variables do not match the requested output")
+    if names != factor_names and names:
+        values = np.transpose(values, [factor_names.index(name) for name in names])
+    if not names:
+        probability = float(values.reshape(-1)[0])
+        return pd.DataFrame({"prob": [probability]})
+    rows = []
+    states = [list(factor.state_names[name]) for name in names]
+    for indices in np.ndindex(values.shape):
+        rows.append(
+            [*(states[index][state] for index, state in enumerate(indices)), float(values[indices])]
+        )
+    return pd.DataFrame(rows, columns=[*names, "prob"])
 
 
-def _discrete_eval(expression: Expression, data: pd.DataFrame):
-    """Recursively evaluate an expression as a discrete probability table.
+def _factor_variables(factor: DiscreteFactor) -> tuple[str, ...]:
+    """Return factor variable names in deterministic order."""
+    return tuple(sorted(factor.variables))
+
+
+def _divide_factors(
+    numerator: DiscreteFactor, denominator: DiscreteFactor
+) -> DiscreteFactor:
+    """Use pgmpy's scope-aware division and reject infinity result."""
+    extra_variables = set(denominator.variables) - set(numerator.variables)
+    if extra_variables:
+        variables = [name for name in denominator.variables if name in extra_variables]
+        neutral = type(denominator)(
+            variables=variables,
+            cardinality=[
+                denominator.cardinality[denominator.variables.index(name)] for name in variables
+            ],
+            values=np.ones(
+                [
+                    denominator.cardinality[denominator.variables.index(name)]
+                    for name in variables
+                ]
+            ),
+            state_names={name: denominator.state_names[name] for name in variables},
+        )
+        numerator.product(neutral, inplace=True)
+    numerator.divide(denominator, inplace=True)
+    if np.isinf(np.asarray(numerator.values)).any():
+        raise DistributionEstimationError("probability fraction has a zero denominator")
+    return numerator
+
+
+def _scalar_factor(value: float) -> DiscreteFactor:
+    """Create a scalar factor for the expression identities."""
+    from pgmpy.factors.discrete import DiscreteFactor
+
+    return DiscreteFactor([], [], np.asarray(float(value)))
+
+
+def _factor_eval(
+    expression: Expression, data: pd.DataFrame, backend: DiscreteBackend
+) -> DiscreteFactor:
+    """Recursively evaluate an expression using discrete factors."""
+    if isinstance(expression, Probability):
+        children = _names(expression.children)
+        parents = _names(expression.parents)
+        variables = tuple(sorted(set(children) | set(parents)))
+        factor = backend.fit(data, variables)
+        if not parents:
+            return factor
+        parent_marginal = factor.copy()
+        parent_marginal.marginalize(
+            [name for name in variables if name not in parents], inplace=True
+        )
+        if np.any(np.asarray(parent_marginal.values) <= 0):
+            raise DistributionEstimationError("conditional probability has a zero parent mass")
+        factor.divide(parent_marginal, inplace=True)
+        return factor
+    if isinstance(expression, One):
+        return _scalar_factor(1.0)
+    if isinstance(expression, Zero):
+        return _scalar_factor(0.0)
+    if isinstance(expression, Product):
+        result = _scalar_factor(1.0)
+        for item in expression.expressions:
+            result.product(_factor_eval(item, data, backend), inplace=True)
+        return result
+    if isinstance(expression, Fraction):
+        numerator = _factor_eval(expression.numerator, data, backend)
+        denominator = _factor_eval(expression.denominator, data, backend)
+        result = _divide_factors(numerator, denominator)
+        return result
+    if isinstance(expression, Sum):
+        factor = _factor_eval(expression.expression, data, backend)
+        ranges = [
+            variable.name for variable in expression.ranges if variable.name in factor.variables
+        ]
+        if ranges:
+            factor.marginalize(ranges, inplace=True)
+        return factor
+    raise TypeError(f"unsupported y0 expression: {type(expression).__name__}")
+
+
+def _discrete_eval(
+    expression: Expression, data: pd.DataFrame, backend: DiscreteBackend | None = None
+):
+    """Recursively evaluate an expression and return its probability table.
 
     Args:
         expression: y0 expression to evaluate.
@@ -471,67 +558,9 @@ def _discrete_eval(expression: Expression, data: pd.DataFrame):
     Returns:
         A DataFrame containing expression variables and a ``prob`` column.
     """
-    if isinstance(expression, Probability):
-        children = _names(expression.children)
-        parents = _names(expression.parents)
-        keep = [*children, *parents]
-        result = _table(data, tuple(keep))
-        if not parents:
-            return result
-        parent_mass = result.groupby(list(parents), dropna=False)["prob"].transform("sum")
-        result["prob"] = result["prob"] / parent_mass
-        return result
-    if isinstance(expression, One):
-        return pd.DataFrame({"prob": [1.0]})
-    if isinstance(expression, Zero):
-        return pd.DataFrame({"prob": [0.0]})
-    if isinstance(expression, Product):
-        result = pd.DataFrame({"prob": [1.0]})
-        for item in expression.expressions:
-            factor = _discrete_eval(item, data)
-            shared = [name for name in result.columns if name != "prob" and name in factor.columns]
-            if shared:
-                result = result.merge(factor, on=shared, how="outer", suffixes=("_left", "_right"))
-            else:
-                result["_join_key"] = 1
-                factor["_join_key"] = 1
-                result = result.merge(
-                    factor, on="_join_key", how="outer", suffixes=("_left", "_right")
-                ).drop(columns="_join_key")
-            result["prob"] = result["prob_left"].fillna(0) * result["prob_right"].fillna(0)
-            result = result.drop(columns=["prob_left", "prob_right"])
-        return result
-    if isinstance(expression, Fraction):
-        numerator = _discrete_eval(expression.numerator, data)
-        denominator = _discrete_eval(expression.denominator, data)
-        shared = [
-            name for name in numerator.columns if name != "prob" and name in denominator.columns
-        ]
-        if shared:
-            result = numerator.merge(denominator, on=shared, how="left", suffixes=("_n", "_d"))
-        else:
-            numerator["_join_key"] = 1
-            denominator["_join_key"] = 1
-            result = numerator.merge(
-                denominator, on="_join_key", how="left", suffixes=("_n", "_d")
-            ).drop(columns="_join_key")
-        if result["prob_d"].isna().any() or (result["prob_d"] <= 1e-14).any():
-            raise DistributionEstimationError("probability fraction has a zero denominator")
-        result["prob"] = result["prob_n"] / result["prob_d"]
-        return result.drop(columns=["prob_n", "prob_d"])
-    if isinstance(expression, Sum):
-        result = _discrete_eval(expression.expression, data)
-        ranges = [
-            variable.name for variable in expression.ranges if variable.name in result.columns
-        ]
-        if ranges:
-            remaining = [c for c in result.columns if c not in [*ranges, "prob"]]
-            if remaining:
-                result = result.groupby(remaining, dropna=False, as_index=False)["prob"].sum()
-            else:
-                result = pd.DataFrame({"prob": [result["prob"].sum()]})
-        return result
-    raise TypeError(f"unsupported y0 expression: {type(expression).__name__}")
+    backend = PluginDiscreteBackend() if backend is None else backend
+    factor = _factor_eval(expression, data, backend)
+    return _factor_to_table(factor, _factor_variables(factor))
 
 
 def _probabilities(expression: Expression) -> Iterable[Probability]:
@@ -612,8 +641,8 @@ class DistributionEstimator:
     """
 
     data: pd.DataFrame
-    mode: str = "discrete"
-    backend: ContinuousBackend | None = None
+    mode: Literal["continuous", "discrete"] = "discrete"
+    backend: ContinuousBackend | DiscreteBackend | None = None
     bounds: Mapping[str, tuple[float, float]] | None = None
     profiler: EstimationProfiler | None = None
     marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature"
@@ -645,12 +674,54 @@ class DistributionEstimator:
         )
 
 
+@overload
 def evaluate_probability_expression(
     expression: Expression,
     data: pd.DataFrame,
     *,
-    mode: str = "discrete",
+    mode: Literal["discrete"] = "discrete",
+    backend: DiscreteBackend | None = None,
+    bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
+    profiler: EstimationProfiler | None = None,
+    marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
+    legendre_degree: int = 16,
+) -> pd.DataFrame: ...
+
+
+@overload
+def evaluate_probability_expression(
+    expression: Expression,
+    data: pd.DataFrame,
+    *,
+    mode: Literal["continuous"],
     backend: ContinuousBackend | None = None,
+    bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
+    profiler: EstimationProfiler | None = None,
+    marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
+    legendre_degree: int = 16,
+) -> _CallableDensity: ...
+
+
+@overload
+def evaluate_probability_expression(
+    expression: Expression,
+    data: pd.DataFrame,
+    *,
+    mode: Literal["continuous", "discrete"],
+    backend: ContinuousBackend | DiscreteBackend | None = None,
+    bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
+    profiler: EstimationProfiler | None = None,
+    marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
+    legendre_degree: int = 16,
+) -> pd.DataFrame | _CallableDensity: ...
+
+
+def evaluate_probability_expression(
+    expression: Expression,
+    data: pd.DataFrame,
+    *,
+    mode: Literal["continuous", "discrete"] = "discrete",
+    backend: ContinuousBackend | DiscreteBackend | None = None,
     bounds: Mapping[str, tuple[float, float]] | tuple[float, float] | None = None,
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
@@ -667,8 +738,9 @@ def evaluate_probability_expression(
         profiler: Optional timing collector.
         marginalization: Integration strategy for continuous sums. ``"adaptive_quadrature"``
             uses SciPy's adaptive ``nquad`` integration; ``"fixed_quadrature"`` uses a
-            tensor-product Gauss-Legendre grid.
-        legendre_degree: Number of Legendre nodes per integrated variable.
+            tensor-product Gauss-Legendre grid. Only used for continuous density mode.
+        legendre_degree: Number of Legendre nodes per integrated variable. Only used for continuous
+            density mode.
 
     Returns:
         A probability DataFrame in discrete mode, otherwise a callable density.
@@ -680,19 +752,30 @@ def evaluate_probability_expression(
     """
     expression = normalize_expression(expression, profiler=profiler)
     if mode == "discrete":
+        if isinstance(backend, (KDEpyKDE, SciPyGaussianKDE, SklearnKDE, StatsmodelsKDE)):
+            raise TypeError("a continuous backend cannot be used in discrete mode")
+        if backend is None:
+            backend = PluginDiscreteBackend()
+        discrete_backend = cast(DiscreteBackend, backend)
         with _measure(profiler, "discrete.evaluate", rows=len(data)):
-            return _discrete_eval(expression, data)
+            if callable(getattr(backend, "fit_network", None)):
+                with _measure(profiler, "discrete.fit_network", rows=len(data)):
+                    cast(Any, backend).fit_network(data)
+            return _discrete_eval(expression, data, discrete_backend)
     if mode == "continuous":
         if marginalization not in {"adaptive_quadrature", "fixed_quadrature"}:
             raise ValueError("marginalization must be 'adaptive_quadrature' or 'fixed_quadrature'")
         legendre_degree = _validate_legendre_degree(legendre_degree)
+        if isinstance(backend, (PluginDiscreteBackend, PgmpyDiscreteBackend)):
+            raise TypeError("a discrete backend cannot be used in continuous mode")
         if backend is None:
             backend = KDEpyKDE()
+        continuous_backend = cast(ContinuousBackend, backend)
         with _measure(profiler, "continuous.evaluate", rows=len(data)):
             return _continuous_eval(
                 expression,
                 data,
-                backend,
+                continuous_backend,
                 bounds,
                 profiler,
                 marginalization,
@@ -767,7 +850,7 @@ def estimate_expectation(
         if bounds is not None:
             raise ValueError("bounds are only valid for continuous densities")
         with _measure(profiler, "discrete.expectation", rows=len(evaluated)):
-            table = evaluated
+            table: pd.DataFrame = evaluated
             if evaluation_values:
                 unknown = set(evaluation_values) - (set(table.columns) - {"prob"})
                 if unknown:
@@ -775,19 +858,19 @@ def estimate_expectation(
                         f"evaluation values contain unknown variables: {sorted(unknown)}"
                     )
                 for name, value in evaluation_values.items():
-                    table = table[table[name] == value]
+                    table = cast(pd.DataFrame, table[table[name] == value])
                 if table.empty:
                     raise DistributionEstimationError(
                         "probability table has no mass at the requested evaluation values"
                     )
-                mass = float(table["prob"].sum())
+                mass = float(cast(Any, table["prob"].sum()))
                 if not np.isfinite(mass) or mass <= 0:
                     raise DistributionEstimationError(
                         "probability table has no positive mass at the requested evaluation values"
                     )
                 table = table.copy()
                 table["prob"] /= mass
-            return _discrete_expectation(table, outcome_name)
+            return _discrete_expectation(cast(pd.DataFrame, table), outcome_name)
     if not callable(evaluated) or not hasattr(evaluated, "variables"):
         raise TypeError("evaluated must be a probability table or density callable")
     lower, upper = _validate_bounds(bounds)
@@ -918,8 +1001,8 @@ def estimate_ate(
     outcome: str | Variable,
     treatment_levels: tuple[object, object],
     *,
-    mode: str = "discrete",
-    backend: ContinuousBackend | None = None,
+    mode: Literal["continuous", "discrete"] = "discrete",
+    backend: ContinuousBackend | DiscreteBackend | None = None,
     outcome_bounds: tuple[float, float] | None = None,
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
@@ -973,13 +1056,13 @@ def estimate_ate(
         _validate_discrete_treatment_positivity(
             expression, data, treatment_name, outcome_name, treatment_levels
         )
-        values = []
+        estimates: list[float] = []
         for level in treatment_levels:
             if treatment_name in evaluated:
                 subset = evaluated[evaluated[treatment_name] == level].copy()
                 if subset.empty:
                     raise ValueError(f"no observations at treatment level {level!r}")
-                mass = float(subset["prob"].sum())
+                mass = float(cast(Any, subset["prob"].sum()))
                 if not np.isfinite(mass) or mass <= 0:
                     raise DistributionEstimationError(
                         f"identified distribution has no positive mass at treatment level {level!r}"
@@ -987,8 +1070,10 @@ def estimate_ate(
                 subset["prob"] /= mass
             else:
                 subset = evaluated
-            values.append(estimate_expectation(subset, outcome, profiler=profiler))
-        return float(values[1] - values[0])
+            estimates.append(
+                estimate_expectation(cast(pd.DataFrame, subset), outcome, profiler=profiler)
+            )
+        return float(estimates[1] - estimates[0])
     if mode == "continuous":
         expression_bounds: dict[str, tuple[float, float]] = {
             outcome_name: _resolve_data_bounds(
@@ -1000,10 +1085,10 @@ def estimate_ate(
                 continue
             if name not in data:
                 raise ValueError(f"missing required columns: {[name]}")
-            values = data[name].to_numpy(dtype=float)
-            if not np.isfinite(values).all() or values.min() >= values.max():
+            variable_values = data[name].to_numpy(dtype=float)
+            if not np.isfinite(variable_values).all() or variable_values.min() >= variable_values.max():
                 raise ValueError(f"continuous variable {name!r} must have finite variation")
-            expression_bounds[name] = (float(values.min()), float(values.max()))
+            expression_bounds[name] = (float(variable_values.min()), float(variable_values.max()))
         evaluated = evaluate_probability_expression(
             expression,
             data,

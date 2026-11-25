@@ -262,8 +262,10 @@ class SklearnKDE:
         if len(values) < 2 or not np.isfinite(values).all():
             raise ValueError("continuous KDE data must be finite and contain at least two rows")
         selected_bandwidth = self.bandwidth if bandwidth is None else bandwidth
+        if not isinstance(selected_bandwidth, (int, float)):
+            raise TypeError("scikit-learn KDE requires a numeric bandwidth")
         estimator = KernelDensity(
-            bandwidth=selected_bandwidth,
+            bandwidth=float(selected_bandwidth),
             kernel=self.kernel,
             **self.kwargs,
         ).fit(values)
