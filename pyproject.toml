@@ -196,6 +196,12 @@ tests = [
     "hypothesis",
     "pytest",
 ]
+# ChiRho/Pyro causal modeling (notebooks/chirho_grn_prior_poc.ipynb)
+chirho = [
+    "pyro-ppl",
+    "chirho",
+    "graphviz",
+]
 docs = [
     "sphinx",
     "sphinx-click",
