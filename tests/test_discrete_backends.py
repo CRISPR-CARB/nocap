@@ -2,11 +2,11 @@
 
 import sys
 import types
+from typing import cast
 
 import numpy as np
 import pandas as pd
 import pytest
-from typing import cast
 from y0.dsl import P, Product, Variable
 from y0.graph import NxMixedGraph
 
@@ -40,7 +40,7 @@ def test_plugin_backend_keeps_weighted_probability_semantics() -> None:
 def test_pgmpy_backend_fits_once_and_queries_expression(monkeypatch: pytest.MonkeyPatch) -> None:
     """Fit a DAG once for an expression with multiple probability leaves."""
     module = types.ModuleType("nocap.acyclification")
-    setattr(module, "acyclification", lambda graph, acyclification_type="dag": graph)
+    module.acyclification = lambda graph, acyclification_type="dag": graph
     monkeypatch.setitem(sys.modules, "nocap.acyclification", module)
     x, y, z = Variable("X"), Variable("Y"), Variable("Z")
     graph = NxMixedGraph.from_edges(nodes=[x, y, z], directed=[(x, y)])
@@ -49,6 +49,7 @@ def test_pgmpy_backend_fits_once_and_queries_expression(monkeypatch: pytest.Monk
     fit_network = backend.fit_network
 
     def counted_fit(data: pd.DataFrame) -> None:
+        """Count network fits while invoking the original fitter."""
         nonlocal fit_calls
         fit_calls += 1
         fit_network(data)
@@ -72,7 +73,7 @@ def test_pgmpy_backend_fits_once_and_queries_expression(monkeypatch: pytest.Monk
 def test_pgmpy_backend_supports_belief_propagation(monkeypatch: pytest.MonkeyPatch) -> None:
     """Use pgmpy's belief-propagation inference with the common query contract."""
     module = types.ModuleType("nocap.acyclification")
-    setattr(module, "acyclification", lambda graph, acyclification_type="dag": graph)
+    module.acyclification = lambda graph, acyclification_type="dag": graph
     monkeypatch.setitem(sys.modules, "nocap.acyclification", module)
     x, y = Variable("X"), Variable("Y")
     graph = NxMixedGraph.from_edges(nodes=[x, y], directed=[(x, y)])
@@ -103,7 +104,7 @@ def test_pgmpy_backend_rejects_unknown_inference_backend() -> None:
 def test_pgmpy_backend_accepts_numpy_boolean_states(monkeypatch: pytest.MonkeyPatch) -> None:
     """Accept NumPy boolean states from latent binary simulation data."""
     module = types.ModuleType("nocap.acyclification")
-    setattr(module, "acyclification", lambda graph, acyclification_type="dag": graph)
+    module.acyclification = lambda graph, acyclification_type="dag": graph
     monkeypatch.setitem(sys.modules, "nocap.acyclification", module)
     x, y = Variable("X"), Variable("Y")
     graph = NxMixedGraph.from_edges(nodes=[x, y], directed=[(x, y)])
@@ -120,7 +121,7 @@ def test_pgmpy_backend_rejects_weighted_data_and_non_em_latents(
 ) -> None:
     """Reject inputs and estimator choices incompatible with full-network fitting."""
     module = types.ModuleType("nocap.acyclification")
-    setattr(module, "acyclification", lambda graph, acyclification_type="dag": graph)
+    module.acyclification = lambda graph, acyclification_type="dag": graph
     monkeypatch.setitem(sys.modules, "nocap.acyclification", module)
     x, y = Variable("X"), Variable("Y")
     graph = NxMixedGraph.from_edges(nodes=[x, y], undirected=[(x, y)])
@@ -137,7 +138,7 @@ def test_pgmpy_backend_fits_bidirected_latent_parents_with_em(
 ) -> None:
     """Expand a bidirected edge to a latent parent and fit it using EM."""
     module = types.ModuleType("nocap.acyclification")
-    setattr(module, "acyclification", lambda graph, acyclification_type="dag": graph)
+    module.acyclification = lambda graph, acyclification_type="dag": graph
     monkeypatch.setitem(sys.modules, "nocap.acyclification", module)
     x, y = Variable("X"), Variable("Y")
     graph = NxMixedGraph.from_edges(nodes=[x, y], undirected=[(x, y)])

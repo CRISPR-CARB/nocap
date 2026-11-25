@@ -33,6 +33,8 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 import pandas as pd
+from y0.dsl import Variable
+from y0.graph import NxMixedGraph
 
 from nocap.cyclic_id import identify_causal_query
 from nocap.estimation import (
@@ -47,8 +49,6 @@ from nocap.simulation import (
     generate_paired_data_artifact,
     simulate_expression_treatment,
 )
-from y0.dsl import Variable
-from y0.graph import NxMixedGraph
 
 
 def _demo_graph(name: str) -> tuple[nx.DiGraph, str, str]:

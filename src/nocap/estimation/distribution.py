@@ -685,7 +685,9 @@ def evaluate_probability_expression(
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
     legendre_degree: int = 16,
-) -> pd.DataFrame: ...
+) -> pd.DataFrame:
+    """Return the discrete probability table for an expression."""
+    ...
 
 
 @overload
@@ -699,7 +701,9 @@ def evaluate_probability_expression(
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
     legendre_degree: int = 16,
-) -> _CallableDensity: ...
+) -> _CallableDensity:
+    """Return a callable continuous density for an expression."""
+    ...
 
 
 @overload
@@ -713,7 +717,9 @@ def evaluate_probability_expression(
     profiler: EstimationProfiler | None = None,
     marginalization: Literal["adaptive_quadrature", "fixed_quadrature"] = "adaptive_quadrature",
     legendre_degree: int = 16,
-) -> pd.DataFrame | _CallableDensity: ...
+) -> pd.DataFrame | _CallableDensity:
+    """Return the table or density selected by the requested mode."""
+    ...
 
 
 def evaluate_probability_expression(
