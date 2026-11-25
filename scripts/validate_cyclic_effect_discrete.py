@@ -157,9 +157,7 @@ def main(argv: list[str] | None = None) -> None:
     if treatment is None or outcome is None:
         parser.error("--treatment and --outcome are required with --graphml")
     if treatment not in graph or outcome not in graph:
-        parser.error(
-            f"treatment {treatment!r} and outcome {outcome!r} must both be graph nodes"
-        )
+        parser.error(f"treatment {treatment!r} and outcome {outcome!r} must both be graph nodes")
     if treatment == outcome:
         parser.error("treatment and outcome must be different nodes")
     try:
@@ -202,9 +200,7 @@ def main(argv: list[str] | None = None) -> None:
     binary_data = artifact.binarized_view(config)
     true_binary_state = artifact.latent_expression_state_view(config)
     outcome_index = scm.nodes.index(outcome)
-    treatment_config = SimulationConfig(
-        **{**config.__dict__, "n_samples": args.treatment_samples}
-    )
+    treatment_config = SimulationConfig(**{**config.__dict__, "n_samples": args.treatment_samples})
     treatment_states = {
         treatment_type: simulate_expression_treatment(
             scm,
@@ -238,9 +234,7 @@ def main(argv: list[str] | None = None) -> None:
         treated_binarized_fractions[treatment_type] = float(binarized[:, outcome_index].mean())
         agreement_by_gene[treatment_type] = (binarized == latent).mean(axis=0)
 
-    pooled_log_expression = pd.concat(
-        treated_log_expression, names=["treatment", "sample"]
-    )
+    pooled_log_expression = pd.concat(treated_log_expression, names=["treatment", "sample"])
     pooled_binary = _binarize(pooled_log_expression)
     for treatment_type, state in treatment_states.items():
         if state.latent_expression_state is None:
@@ -311,9 +305,7 @@ def main(argv: list[str] | None = None) -> None:
         observational_comparison["ATE"] - latent_ate
     ).abs()
     observational_comparison["Relative error vs latent observational estimate"] = [
-        (binary_ate - latent_binary_ate) / latent_binary_ate
-        if latent_binary_ate != 0
-        else np.nan,
+        (binary_ate - latent_binary_ate) / latent_binary_ate if latent_binary_ate != 0 else np.nan,
         np.nan,
         np.nan,
     ]
@@ -326,14 +318,14 @@ def main(argv: list[str] | None = None) -> None:
     binary_distribution_csv = output_stem.with_name(
         f"{output_stem.name}.binarized_distribution.csv"
     )
-    latent_distribution_csv = output_stem.with_name(
-        f"{output_stem.name}.latent_distribution.csv"
-    )
+    latent_distribution_csv = output_stem.with_name(f"{output_stem.name}.latent_distribution.csv")
     treated_comparison.to_csv(treatment_csv, index_label="condition")
     observational_comparison.to_csv(ate_csv, index_label="estimate")
     binary_distribution = evaluate_probability_expression(expression, binary_data)
     latent_distribution = evaluate_probability_expression(expression, true_binary_state)
-    assert isinstance(binary_distribution, pd.DataFrame) and isinstance(latent_distribution, pd.DataFrame)
+    assert isinstance(binary_distribution, pd.DataFrame) and isinstance(
+        latent_distribution, pd.DataFrame
+    )
     binary_distribution.to_csv(binary_distribution_csv, index=False)
     latent_distribution.to_csv(latent_distribution_csv, index=False)
 
